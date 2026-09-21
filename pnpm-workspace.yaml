@@ -10,6 +10,7 @@ packages:
 # означали бы две несовпадающие проверки одного и того же сообщения.
 catalog:
   zod: "^4.6.5"
+  dotenv: "^18.0.1"
 
 # Именованные наборы: версии, которые обязаны двигаться вместе.
 # Пакет пишет "catalog:<имя>".
@@ -26,6 +27,7 @@ catalogs:
     reflect-metadata: "^0.2.2"
     rxjs: "^7.8.2"
   tooling:
+    "@types/node": "^26.6.2"
     typescript: "7.0.2"
     vitest: "^5.0.1"
 
@@ -33,5 +35,15 @@ catalogs:
 # исполняет. Пополняется по мере появления зависимостей.
 allowBuilds:
   "@nestjs/core": true
+  "@prisma/engines": true
   esbuild: true
+  msgpackr-extract: true
   nx: true
+  prisma: true
+  workerd: true
+
+minimumReleaseAgeExclude:
+  - "@nestjs/common@12.0.4"
+  - "@nestjs/core@12.0.4"
+  - "@nestjs/microservices@12.0.4"
+  - "@nestjs/platform-express@12.0.4"
