@@ -65,7 +65,7 @@ Intentra — multitenant SaaS для продуктовых и инженерн�
 | Термин | Определение |
 | --- | --- |
 | Organization | Изолированный tenant компании или команды-аккаунта. |
-| Workspace | Логическая область работы внутри Organization; опциональна для группировки команд/портфелей. |
+| Workspace | Логическая область работы внутри Organization для группировки связанных проектов. |
 | Project | Продукт или инициативa с собственными артефактами, участниками, интеграциями и агентами. |
 | Artifact | Версионируемый объект знаний: интервью, PRD, ADR, spec, story, тестовый сценарий и т. п. |
 | Source / Evidence | Источник утверждения: интервью, документ, интеграция, пользовательская ссылка или агентный вывод. |
@@ -373,7 +373,7 @@ Intentra начинается как **modular monolith** с изолирова�
 | --- | --- | --- |
 | **Identity & Account Management** | User, Identity, login method, session, MFA factor, password recovery, consent | Organization, membership, роли и права пользователя в tenant |
 | **Organization & Access Control** | Organization, Membership, Team, Role, Permission, Invitation, access policy, tenant boundary | Учётные данные пользователя, бизнес-артефакты, тарифы |
-| **Project & Portfolio Management** | Workspace, Portfolio, Project, Project Template, Project Membership, stakeholder assignment, project lifecycle | Содержимое требований, доменную модель, delivery backlog |
+| **Project Management** | Workspace, Project, Project Template, Project Membership, stakeholder assignment, project lifecycle | Содержимое требований, доменную модель, delivery backlog |
 | **Knowledge Intake & Evidence** | Source, Import, Document snapshot, Evidence, Extract, source freshness, provenance, data classification | Требование, решение или спецификацию как итоговую истину |
 | **System Intelligence** | Repository snapshot, code/document observation, system component, API surface, `SystemDependency`, operational signal, as-is system model and system baseline | Будущее продуктовое требование, план delivery или архитектурное решение как утверждённый выбор |
 | **Product Definition** | Discovery Session, Claim, Assumption, Open Question, Requirement, PRD, Glossary, Business Rule, Domain Model, ADR, architectural constraint, NFR, Specification, Acceptance Criteria | Delivery status, внешние задачи, исполнение agent tools |
@@ -421,7 +421,7 @@ Subdomain и bounded context не являются строгой иерархи
 
 Ни один контекст не следует «склеивать ради MVP», но разработку стоит вести вертикальными срезами в таком порядке:
 
-1. **Identity & Account Management**, **Organization & Access Control**, **Project & Portfolio Management**, **Governance & Compliance** — tenancy, authorization, audit и project boundary до первого бизнес-артефакта.
+1. **Identity & Account Management**, **Organization & Access Control**, **Project Management**, **Governance & Compliance** — tenancy, authorization, audit и project boundary до первого бизнес-артефакта.
 2. **Knowledge Intake & Evidence** и **System Intelligence** — два входа: greenfield получает evidence/interview context, brownfield получает воспроизводимый as-is system baseline.
 3. **Product Definition** — первый законченный путь: источник или as-is baseline → интервью → claims → requirements → DDD/ADR → specification.
 4. **Traceability & Change Intelligence** — создаётся вместе с Product Definition и System Intelligence, чтобы links и versioned baselines не пришлось восстанавливать задним числом.
@@ -432,7 +432,7 @@ Subdomain и bounded context не являются строгой иерархи
 
 ## 10. Данные и доменная модель верхнего уровня
 
-Основные сущности: `User`, `Identity`, `Organization`, `Membership`, `Workspace`, `Portfolio`, `Project`, `ProjectTemplate`, `Source`, `Evidence`, `RepositorySnapshot`, `CodeObservation`, `SystemComponent`, `ApiSurface`, `SystemDependency`, `SystemModelBaseline`, `Claim`, `Requirement`, `Decision`, `Assumption`, `OpenQuestion`, `Risk`, `GlossaryTerm`, `DomainElement`, `Specification`, `TraceLink`, `Baseline`, `ImpactAssessment`, `Comment`, `Approval`, `BacklogItem`, `WorkDependency`, `Release`, `HandoffPackage`, `VerificationEvidence`, `OutcomeHypothesis`, `MetricDefinition`, `IntegrationConnection`, `ExternalObjectLink`, `WebhookSubscription`, `McpClientGrant`, `McpAccessEvent`, `AgentProfile`, `AgentRun`, `ToolGrant`, `SecretReference`, `AuditEvent`, `Entitlement`, `UsageMeter`.
+Основные сущности: `User`, `Identity`, `Organization`, `Membership`, `Workspace`, `Project`, `ProjectTemplate`, `Source`, `Evidence`, `RepositorySnapshot`, `CodeObservation`, `SystemComponent`, `ApiSurface`, `SystemDependency`, `SystemModelBaseline`, `Claim`, `Requirement`, `Decision`, `Assumption`, `OpenQuestion`, `Risk`, `GlossaryTerm`, `DomainElement`, `Specification`, `TraceLink`, `Baseline`, `ImpactAssessment`, `Comment`, `Approval`, `BacklogItem`, `WorkDependency`, `Release`, `HandoffPackage`, `VerificationEvidence`, `OutcomeHypothesis`, `MetricDefinition`, `IntegrationConnection`, `ExternalObjectLink`, `WebhookSubscription`, `McpClientGrant`, `McpAccessEvent`, `AgentProfile`, `AgentRun`, `ToolGrant`, `SecretReference`, `AuditEvent`, `Entitlement`, `UsageMeter`.
 
 Инварианты:
 

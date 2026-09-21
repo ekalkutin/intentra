@@ -44,7 +44,7 @@ MVP одновременно обслуживает две цели:
 | Knowledge Intake | Загрузка документов/ссылок/текста как `Source` → `Evidence` с provenance |
 | Discovery | Один playbook (greenfield), claims, assumptions, open questions, readiness |
 | Product Definition | PRD, Glossary, Domain model, ADR, Specification |
-| Агенты | Три роли — Discovery, Spec Writer, Architect — как конфигурации одного рантайма |
+| Агенты | Mastra AI как execution engine; три встроенные роли — Discovery, Spec Writer и Architect — и custom agents с созданием, редактированием и удалением профилей |
 | Traceability | TraceLink, граф в обе стороны, impact analysis при изменении, review queue, baselines |
 | Handoff | Handoff Package из slice'а спецификации, Markdown/JSON, version-pinned |
 | MCP Server | Чтение контекста/версий/handoff/traceability/impact + поиск + write-предложения |
@@ -64,7 +64,7 @@ MVP одновременно обслуживает две цели:
 | Outbound/inbound webhooks, Public API | Нет потребителя до пилота | Низкий (P4) |
 | OAuth-подключение MCP-клиентов | Токенов достаточно для того же эффекта | Низкий (P4) |
 | MCP write как полноправное авторство | Требует RBAC для non-human principals | Средний (P5) |
-| Custom agents, tools/skills, credentials vault, budgets | Не проверено, какая автономность приемлема (PRD §17 п.7) | Средний (P5) |
+| Продвинутая agent platform: произвольные tools/skills, credentials vault, budgets и расширенные guardrails | Требует проверки границ автономности и security-модели (PRD §17 п.7) | Средний (P5) |
 | Учёт стоимости и токенов LLM | Сознательно принят риск неконтролируемого расхода на MVP | Средний (P5) |
 | Coverage gaps, release-readiness gates | Считать не на чем без story/test-слоя | Вместе с P1 |
 | Voice-интервью, real-time collaborative editing | Отложено самим PRD §13.2 | Низкий |
@@ -106,7 +106,7 @@ Audit-события пишутся с первого дня — их допис
 
 **Показываем:** создание организации, workspace и проекта, приглашение отсутствует —
 участники заводятся администратором организации.
-**Контексты:** Organization & Access Control, Project & Portfolio Management,
+**Контексты:** Organization & Access Control, Project Management,
 Governance & Compliance (минимально).
 
 > Это тот «старт работы в Intentra», который назван обязательным для MVP.
@@ -144,9 +144,11 @@ superseded/archived`, immutable-версия при утверждении, ис
 
 ### S4 — Discovery-интервью · L
 
-Минимальный Agent Runtime: `AgentProfile`, `AgentRun`, состояния
-`queued → running → awaiting_approval → completed/failed/cancelled`, execution log
-со ссылками на версии контекста. Поверх него — роль Discovery: план интервью,
+Минимальный Agent Runtime на базе **Mastra AI** как внутреннего execution engine:
+`AgentProfile`, `AgentRun`, состояния `queued → running → awaiting_approval →
+completed/failed/cancelled`, execution log со ссылками на версии контекста.
+Intentra остаётся владельцем профилей, прав, approval и audit; Mastra не становится
+source of truth доменной модели. Поверх него — роль Discovery: план интервью,
 чат, извлечение `Claim` с ссылкой на evidence, `Assumption`, `Open Question`,
 простой детект противоречий, readiness score.
 
@@ -158,9 +160,11 @@ superseded/archived`, immutable-версия при утверждении, ис
 
 ### S5 — PRD, доменная модель и ADR · L
 
-Роли Spec Writer и Architect как конфигурации того же рантайма. Генерация черновиков:
-PRD, Glossary, Domain model, ADR proposals, Specification. Редактирование и утверждение
-через механику S2. ADR предлагается только при реальном trade-off.
+Роли Spec Writer и Architect как конфигурации того же рантайма. Здесь же появляется
+страница «Агенты»: пользователь создаёт, редактирует и удаляет custom agent profiles;
+в описании агента сочетаются естественно-языковая цель и явная конфигурация. Генерация
+черновиков: PRD, Glossary, Domain model, ADR proposals, Specification. Редактирование
+и утверждение через механику S2. ADR предлагается только при реальном trade-off.
 
 **Показываем:** от реестра знаний до утверждённого PRD, глоссария, доменной модели,
 минимум одной ADR и спецификаций.
@@ -259,13 +263,17 @@ project-scoped токены, policy-проверка до выполнения �
    проходиться целиком без оговорок.
 2. **Только greenfield.** Brownfield сохраняет высокий приоритет, но вне MVP.
 3. **Цепочка обрывается на спецификации.** Handoff собирается от спецификации, не от story.
-4. **Один playbook, три агентные роли** как конфигурации одного рантайма.
-5. **Impact analysis — в MVP.** Без него продукт читается как вики.
-6. **MCP пишет, но только предложения.** Полноправное авторство агента — цель,
+4. **Mastra AI — execution engine Agent Runtime.** Intentra сохраняет ownership над
+   agent profiles, runs, permissions, approvals, audit и domain data.
+5. **Три встроенные роли (Discovery, Spec Writer и Architect) и custom agents —
+   конфигурации одного рантайма.** Custom profile создаётся и управляется через UI MVP;
+   расширенная agent platform остаётся после MVP.
+6. **Impact analysis — в MVP.** Без него продукт читается как вики.
+7. **MCP пишет, но только предложения.** Полноправное авторство агента — цель,
    поэтому принципал и permissions с первого дня едины для человека и агента.
-7. **Границы контекстов из PRD §9 не склеиваются ради MVP.** Глубина каждого
+8. **Границы контекстов из PRD §9 не склеиваются ради MVP.** Глубина каждого
    контекста ограничивается, ownership — нет.
-8. **Всё, что касается доверия к данным** (версии, audit, baselines, provenance),
+9. **Всё, что касается доверия к данным** (версии, audit, baselines, provenance),
    входит в MVP, потому что достраивается только переписыванием. Всё, что касается
    удобства и масштаба, выносится наружу.
 
