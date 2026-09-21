@@ -20,6 +20,11 @@ export function LandingFooter() {
         <div className='flex flex-col gap-12 border-b border-white/10 py-16 sm:py-20 lg:flex-row lg:gap-20'>
           <div className='lg:w-[340px] lg:shrink-0'>
             <a href='#top' className='flex items-center gap-3'>
+              <img
+                src='/brand/multica-logo-dark.svg'
+                alt=''
+                className='size-9 shrink-0 object-contain'
+              />
               <span className='landing-serif text-display-sm leading-none tracking-[-0.01em] lowercase'>
                 intentra
               </span>

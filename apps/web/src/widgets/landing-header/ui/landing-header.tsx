@@ -52,7 +52,16 @@ export function LandingHeader({
     >
       <div className='mx-auto flex h-[76px] max-w-[1320px] items-center justify-between px-4 sm:px-6 lg:px-8'>
         <div className='flex min-w-0 items-center gap-6 lg:gap-8'>
-          <a href='#top' className='flex shrink-0 items-center gap-3'>
+          <a href='#top' className='flex shrink-0 items-center gap-2.5'>
+            <img
+              src={
+                variant === 'dark'
+                  ? '/brand/multica-logo-dark.svg'
+                  : '/brand/multica-logo-light.svg'
+              }
+              alt=''
+              className='size-8 shrink-0 object-contain'
+            />
             <Wordmark variant={variant} />
           </a>
 
