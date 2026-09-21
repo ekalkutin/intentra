@@ -1,9 +1,12 @@
 import {
+  BookOpenIcon,
+  BotIcon,
   ChevronDownIcon,
   CircleHelpIcon,
   FileTextIcon,
   FolderKanbanIcon,
   LayoutDashboardIcon,
+  MessageSquareIcon,
   PlusIcon,
   Settings2Icon,
   SparklesIcon,
@@ -33,31 +36,46 @@ import {
   SidebarTrigger,
 } from '@/shared/ui/primitives/sidebar';
 
-const navigation = [
+const workspaceNavigation = [
   { label: 'Overview', href: '/dashboard', icon: LayoutDashboardIcon },
   { label: 'Evidence', href: '/dashboard/evidence', icon: FileTextIcon },
-  { label: 'Projects', href: '/dashboard/projects', icon: FolderKanbanIcon },
   { label: 'People', href: '/dashboard/people', icon: UsersIcon },
+  { label: 'Chat', href: '/dashboard/chat', icon: MessageSquareIcon },
 ];
+
+const workNavigation = [
+  { label: 'Projects', href: '/dashboard/projects', icon: FolderKanbanIcon },
+];
+
+const aiNavigation = [
+  { label: 'Agents', href: '/dashboard/agents', icon: BotIcon },
+  { label: 'Skills', href: '/dashboard/skills', icon: BookOpenIcon },
+];
+
+// Mirrors Multica's navigation treatment: quiet at rest, a softer hover, and
+// a deliberately stronger selected state. The shared SidebarMenuButton stays
+// unmodified so shadcn updates remain safe.
+const navItemClassName =
+  'text-muted-foreground hover:not-data-active:bg-sidebar-accent/70 data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground';
 
 export function AppSidebar() {
   const { pathname } = useLocation();
 
   return (
     <Sidebar variant='inset' collapsible='icon'>
-      <SidebarHeader className='gap-1.5 px-2 py-2'>
+      <SidebarHeader className='gap-2 py-3'>
         <div className='flex items-center gap-1 group-data-[collapsible=icon]:justify-center'>
           <SidebarMenu className='min-w-0 flex-1 group-data-[collapsible=icon]:hidden'>
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger render={<SidebarMenuButton />}>
-                  <span className='flex size-5 shrink-0 items-center justify-center rounded-md bg-brand text-[10px] font-semibold tracking-[-0.06em] text-brand-foreground'>
+                  <span className='inline-flex size-5 shrink-0 items-center justify-center rounded-full border bg-muted text-caption font-semibold text-muted-foreground'>
                     I
                   </span>
                   <span className='min-w-0 flex-1 truncate font-medium'>
                     Intentra
                   </span>
-                  <ChevronDownIcon className='text-muted-foreground' />
+                  <ChevronDownIcon className='size-3 text-muted-foreground' />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className='w-56' align='start'>
                   <DropdownMenuGroup>
@@ -69,7 +87,7 @@ export function AppSidebar() {
               </DropdownMenu>
             </SidebarMenuItem>
           </SidebarMenu>
-          <SidebarTrigger className='shrink-0' />
+          <SidebarTrigger size='icon' className='shrink-0' />
         </div>
         <SidebarMenu className='gap-0.5 group-data-[collapsible=icon]:hidden'>
           <SidebarMenuItem>
@@ -82,16 +100,59 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup className='pt-2'>
+        <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className='gap-0.5'>
-              {navigation.map(item => (
+              {workspaceNavigation.map(item => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     render={<Link to={item.href} />}
                     isActive={pathname === item.href}
                     tooltip={item.label}
+                    className={navItemClassName}
+                  >
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Work</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className='gap-0.5'>
+              {workNavigation.map(item => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    render={<Link to={item.href} />}
+                    isActive={pathname === item.href}
+                    tooltip={item.label}
+                    className={navItemClassName}
+                  >
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>AI</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className='gap-0.5'>
+              {aiNavigation.map(item => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    render={<Link to={item.href} />}
+                    isActive={pathname === item.href}
+                    tooltip={item.label}
+                    className={navItemClassName}
                   >
                     <item.icon />
                     <span>{item.label}</span>
@@ -106,19 +167,25 @@ export function AppSidebar() {
       <SidebarFooter className='p-2'>
         <SidebarMenu className='gap-0.5'>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip='Ask Intentra'>
+            <SidebarMenuButton
+              tooltip='Ask Intentra'
+              className={navItemClassName}
+            >
               <SparklesIcon />
               <span>Ask Intentra</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip='Settings'>
+            <SidebarMenuButton tooltip='Settings' className={navItemClassName}>
               <Settings2Icon />
               <span>Settings</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip='Help center'>
+            <SidebarMenuButton
+              tooltip='Help center'
+              className={navItemClassName}
+            >
               <CircleHelpIcon />
               <span>Help center</span>
             </SidebarMenuButton>

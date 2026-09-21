@@ -32,8 +32,7 @@ export const en = {
     continue: 'Sign in',
     unavailable:
       'Password sign-in is not configured in this environment, so your credentials were not submitted.',
-    invitation:
-      'Not in a workspace yet? Your organization owner can invite you.',
+    invitation: 'Not in a workspace yet? Your workspace owner can invite you.',
   },
 
   hero: {

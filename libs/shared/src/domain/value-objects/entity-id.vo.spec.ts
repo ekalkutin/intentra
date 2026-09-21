@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { OrganizationId } from './organization-id.vo.js';
 import { ProjectId } from './project-id.vo.js';
+import { WorkspaceId } from './workspace-id.vo.js';
 
 describe('EntityId', () => {
   it('генерирует значение, когда его не передали', () => {
-    expect(new OrganizationId().value).toHaveLength(36);
+    expect(new WorkspaceId().value).toHaveLength(36);
   });
 
   it('сохраняет переданное значение', () => {
-    const id = new OrganizationId('11111111-1111-1111-1111-111111111111');
+    const id = new WorkspaceId('11111111-1111-1111-1111-111111111111');
 
     expect(id.value).toBe('11111111-1111-1111-1111-111111111111');
   });

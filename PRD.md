@@ -64,8 +64,7 @@ Intentra — multitenant SaaS для продуктовых и инженерн�
 
 | Термин | Определение |
 | --- | --- |
-| Organization | Изолированный tenant компании или команды-аккаунта. |
-| Workspace | Логическая область работы внутри Organization для группировки связанных проектов. |
+| Workspace | Изолированный tenant компании или команды. Граница данных, участников и оплаты; содержит проекты. |
 | Project | Продукт или инициативa с собственными артефактами, участниками, интеграциями и агентами. |
 | Artifact | Версионируемый объект знаний: интервью, PRD, ADR, spec, story, тестовый сценарий и т. п. |
 | Source / Evidence | Источник утверждения: интервью, документ, интеграция, пользовательская ссылка или агентный вывод. |
@@ -90,7 +89,7 @@ Intentra — multitenant SaaS для продуктовых и инженерн�
 
 ### 6.1. Создание проекта и discovery
 
-1. Пользователь создаёт Organization, Project и выбирает шаблон (greenfield, новая feature, modernization, integration, compliance).
+1. Пользователь создаёт Workspace, Project и выбирает шаблон (greenfield, новая feature, modernization, integration, compliance).
 2. Он добавляет начальный контекст: идея, ссылки, документы, репозиторий, ограничения, stakeholders.
 3. Discovery Agent формирует план интервью и задаёт вопросы по целям, пользователям, границам домена, процессам, данным, ограничениям, рискам и метрикам.
 4. Пользователь отвечает асинхронно или в live-интервью; все ответы сохраняются как evidence.
@@ -130,8 +129,8 @@ Intentra — multitenant SaaS для продуктовых и инженерн�
 ### 7.1. Tenancy, аккаунты и проекты
 
 - Регистрация, вход, восстановление доступа и инвайты участников.
-- Organization как жёсткая граница данных; пользователь может состоять в нескольких организациях.
-- Workspace и Project с понятным переключением контекста.
+- Workspace как жёсткая граница данных; Account может состоять в нескольких Workspace.
+- Project внутри Workspace с понятным переключением контекста.
 - Создание проекта из шаблона; архивирование вместо безвозвратного удаления по умолчанию.
 - Настройки проекта: язык, часовой пояс, доменная область, подключённые источники, политика ИИ, data classification.
 - Экспорт данных проекта в машиночитаемом и человекочитаемом форматах.
@@ -238,7 +237,7 @@ Intentra должна одинаково хорошо работать с нов
 
 - Каталог готовых агентных ролей: Discovery, Domain Expert, Product Spec Writer, Solution Architect, Security/Privacy Reviewer, QA Strategist, Delivery Planner, Repository Analyst, Release Reviewer.
 - Создание custom agents из роли, system instructions, allowed tools/skills, разрешённых источников, модели, budget, approval policy и output schema.
-- Агент запускается в контексте Organization/Project/Artifact и получает минимально необходимый scoped context.
+- Агент запускается в контексте Workspace/Project/Artifact и получает минимально необходимый scoped context.
 - Запуск может быть ручным, событийным или по расписанию (при наличии соответствующей политики).
 - Очередь запусков, status, streaming progress, retry policy, cancellation и итоговый report.
 - Immutable execution log: prompt/context references, tool calls, approvals, tokens/cost, output artifacts, errors.
@@ -247,7 +246,7 @@ Intentra должна одинаково хорошо работать с нов
 
 ### 7.9. Tools, skills и credentials
 
-- Подключение tools/skills на уровне Organization, Project или конкретного Agent profile.
+- Подключение tools/skills на уровне Workspace, Project или конкретного Agent profile.
 - Реестр credential references без отображения секретного значения в UI, prompt, log или экспортируемом артефакте.
 - Secrets хранятся во внешнем/встроенном vault с encryption at rest и rotation metadata.
 - Доступы к тестовой среде выдаются с ограничением scope, срока действия и действия; production credentials не допускаются политикой по умолчанию.
@@ -272,8 +271,8 @@ MCP Gateway принадлежит bounded context **Integration Hub**. Он н�
 
 **Безопасность и управление доступом:**
 
-- Внешний агент подключается через OAuth/service account или персональный delegated access; каждый client имеет Organization, Project и explicit read scopes.
-- MCP Gateway применяет Organization & Access Control, data classification и policy до выполнения любого resource/tool request; доступ к одному Project не даёт доступ к соседним Project того же tenant.
+- Внешний агент подключается через OAuth/service account или персональный delegated access; каждый client имеет Workspace, Project и explicit read scopes.
+- MCP Gateway применяет Workspace & Access Control, data classification и policy до выполнения любого resource/tool request; доступ к одному Project не даёт доступ к соседним Project того же tenant.
 - По умолчанию MCP доступен только на чтение. Будущие write-tools (`create comment`, `propose requirement`, `create task`) требуют отдельного scope, schema validation, idempotency key и human approval policy.
 - Ответы возвращают canonical IDs и pinned artifact versions. Агент не должен неявно получить более новую версию требования во время выполнения задачи.
 - Secrets, credential values, скрытые internal notes и restricted evidence никогда не выдаются MCP Server; Gateway возвращает безопасную причину отсутствия доступа без утечки метаданных.
@@ -302,11 +301,11 @@ MCP Server должен поддерживать resource discovery и маши�
 
 ### 7.12. RBAC и governance
 
-Базовые системные роли: Organization Owner, Organization Admin, Workspace Admin, Project Admin, Product Editor, Engineering Editor, Contributor, Reviewer, Viewer, Auditor, Integration Manager, Agent Operator.
+Базовые системные роли: Workspace Owner, Workspace Admin, Project Admin, Product Editor, Engineering Editor, Contributor, Reviewer, Viewer, Auditor, Integration Manager, Agent Operator.
 
 RBAC должен поддерживать:
 
-- разрешения на уровне Organization, Workspace, Project, Artifact, Integration и Agent;
+- разрешения на уровне Workspace, Project, Artifact, Integration и Agent;
 - separation of duties для секретов, интеграций и approvals;
 - кастомные роли в enterprise-тарифе;
 - invite policy, domain allowlist и group-based access в будущем;
@@ -362,7 +361,7 @@ RBAC должен поддерживать:
 
 - Structured logs, metrics и traces для приложения, integrations и agent runtime.
 - Correlation ID от пользовательского действия до webhook/agent run/export.
-- Мониторинг стоимости и latency по model, project, agent profile и organization.
+- Мониторинг стоимости и latency по model, project, agent profile и workspace.
 - Alerting для security events, integration failure, job backlog, SLA risk и budget exhaustion.
 
 ## 9. Bounded contexts и context map
@@ -371,9 +370,8 @@ Intentra начинается как **modular monolith** с изолирова�
 
 | Bounded context | Владение и ответственность | Не владеет |
 | --- | --- | --- |
-| **Identity & Account Management** | User, Identity, login method, session, MFA factor, password recovery, consent | Organization, membership, роли и права пользователя в tenant |
-| **Organization & Access Control** | Organization, Membership, Team, Role, Permission, Invitation, access policy, tenant boundary | Учётные данные пользователя, бизнес-артефакты, тарифы |
-| **Project Management** | Workspace, Project, Project Template, Project Membership, stakeholder assignment, project lifecycle | Содержимое требований, доменную модель, delivery backlog |
+| **Identity & Account Management** | Account, Credential, login method, session, MFA factor, password recovery, consent, PlatformRole | Workspace, membership, роли и права внутри tenant |
+| **Workspace & Access Control** | Workspace, Project, Project Template, Membership, Team, Role, Permission, RoleAssignment, Invitation, access policy, tenant boundary, project lifecycle | Учётные данные, платформенные роли, содержимое требований, доменную модель, delivery backlog |
 | **Knowledge Intake & Evidence** | Source, Import, Document snapshot, Evidence, Extract, source freshness, provenance, data classification | Требование, решение или спецификацию как итоговую истину |
 | **System Intelligence** | Repository snapshot, code/document observation, system component, API surface, `SystemDependency`, operational signal, as-is system model and system baseline | Будущее продуктовое требование, план delivery или архитектурное решение как утверждённый выбор |
 | **Product Definition** | Discovery Session, Claim, Assumption, Open Question, Requirement, PRD, Glossary, Business Rule, Domain Model, ADR, architectural constraint, NFR, Specification, Acceptance Criteria | Delivery status, внешние задачи, исполнение agent tools |
@@ -414,14 +412,14 @@ Subdomain и bounded context не являются строгой иерархи
 - Каждый handoff/export фиксирует versioned baseline; иначе связанная story может получить требования, которые изменились после её планирования.
 - Внешний task tracker получает проекцию Delivery Management. Он не становится владельцем requirement или ADR.
 - Agent Runtime получает explicit context package со ссылками на разрешённые версии артефактов; доступ агента не равен правам инициировавшего пользователя.
-- MCP Gateway выдаёт внешнему агенту только policy-approved versioned projections через Integration Hub; он не обходит Organization & Access Control и не является внутренним Agent Runtime.
+- MCP Gateway выдаёт внешнему агенту только policy-approved versioned projections через Integration Hub; он не обходит Workspace & Access Control и не является внутренним Agent Runtime.
 - Governance & Compliance и Outcome Intelligence потребляют опубликованные события и строят свои записи/проекции; они не добавляют скрытых полей в агрегаты core domains.
 
 ### 9.3. Порядок закладки фундамента
 
 Ни один контекст не следует «склеивать ради MVP», но разработку стоит вести вертикальными срезами в таком порядке:
 
-1. **Identity & Account Management**, **Organization & Access Control**, **Project Management**, **Governance & Compliance** — tenancy, authorization, audit и project boundary до первого бизнес-артефакта.
+1. **Identity & Account Management**, **Workspace & Access Control**, **Governance & Compliance** — tenancy, authorization, audit и project boundary до первого бизнес-артефакта.
 2. **Knowledge Intake & Evidence** и **System Intelligence** — два входа: greenfield получает evidence/interview context, brownfield получает воспроизводимый as-is system baseline.
 3. **Product Definition** — первый законченный путь: источник или as-is baseline → интервью → claims → requirements → DDD/ADR → specification.
 4. **Traceability & Change Intelligence** — создаётся вместе с Product Definition и System Intelligence, чтобы links и versioned baselines не пришлось восстанавливать задним числом.
@@ -432,11 +430,11 @@ Subdomain и bounded context не являются строгой иерархи
 
 ## 10. Данные и доменная модель верхнего уровня
 
-Основные сущности: `User`, `Identity`, `Organization`, `Membership`, `Workspace`, `Project`, `ProjectTemplate`, `Source`, `Evidence`, `RepositorySnapshot`, `CodeObservation`, `SystemComponent`, `ApiSurface`, `SystemDependency`, `SystemModelBaseline`, `Claim`, `Requirement`, `Decision`, `Assumption`, `OpenQuestion`, `Risk`, `GlossaryTerm`, `DomainElement`, `Specification`, `TraceLink`, `Baseline`, `ImpactAssessment`, `Comment`, `Approval`, `BacklogItem`, `WorkDependency`, `Release`, `HandoffPackage`, `VerificationEvidence`, `OutcomeHypothesis`, `MetricDefinition`, `IntegrationConnection`, `ExternalObjectLink`, `WebhookSubscription`, `McpClientGrant`, `McpAccessEvent`, `AgentProfile`, `AgentRun`, `ToolGrant`, `SecretReference`, `AuditEvent`, `Entitlement`, `UsageMeter`.
+Основные сущности: `Account`, `Credential`, `Workspace`, `Membership`, `RoleAssignment`, `Project`, `ProjectTemplate`, `Source`, `Evidence`, `RepositorySnapshot`, `CodeObservation`, `SystemComponent`, `ApiSurface`, `SystemDependency`, `SystemModelBaseline`, `Claim`, `Requirement`, `Decision`, `Assumption`, `OpenQuestion`, `Risk`, `GlossaryTerm`, `DomainElement`, `Specification`, `TraceLink`, `Baseline`, `ImpactAssessment`, `Comment`, `Approval`, `BacklogItem`, `WorkDependency`, `Release`, `HandoffPackage`, `VerificationEvidence`, `OutcomeHypothesis`, `MetricDefinition`, `IntegrationConnection`, `ExternalObjectLink`, `WebhookSubscription`, `McpClientGrant`, `McpAccessEvent`, `AgentProfile`, `AgentRun`, `ToolGrant`, `SecretReference`, `AuditEvent`, `Entitlement`, `UsageMeter`.
 
 Инварианты:
 
-- Каждый объект принадлежит ровно одному Organization; Project-scoped данные не должны ссылаться на сущности другого tenant.
+- Каждый объект принадлежит ровно одному Workspace; Project-scoped данные не должны ссылаться на сущности другого tenant. Единственное исключение — `Account` с платформенной ролью и платформенные audit-события: они существуют вне тенантной границы.
 - У утверждённого артефакта есть immutable version; редактирование создаёт draft новой версии.
 - Значимое утверждение либо имеет evidence, либо явно отмечено как assumption/agent inference.
 - Элемент as-is system model ссылается на immutable source snapshot и имеет тип `observed`, `inferred` или `approved`; import не создаёт утверждённый product/architecture artifact автоматически.
@@ -474,7 +472,7 @@ Approval policy настраивается по типу проекта и кр�
 - Количество и среднее время обработки impact-review после изменения.
 - Approval turnaround time.
 - Agent suggestion acceptance/edit/rejection rate.
-- Активные проекты, weekly active collaborators, retention по организациям.
+- Активные проекты, weekly active collaborators, retention по Workspace.
 - Количество повторно используемых agent profiles/templates.
 
 ### 11.3. Guardrail metrics
@@ -492,7 +490,7 @@ MVP должен доказать ценность «из идеи в готов
 
 ### 13.1. Входит в MVP
 
-- Organization, Project, базовый RBAC и приглашения.
+- Workspace, Project, базовый RBAC и приглашения.
 - Текстовое AI-интервью с evidence, claims, assumptions и open questions.
 - GitHub/GitLab read-only import, immutable repository snapshot и citations-based as-is system map с human-reviewed baseline.
 - PRD, glossary, basic domain model и ADR draft generation.
@@ -536,7 +534,7 @@ Custom agents, scoped tools/skills, credentials vault, approvals, sandbox access
 
 ### Phase 4 — Closed-loop Product Delivery
 
-Repository/CI/test integrations, implementation evidence, spec-to-code/test coverage, release outcome feedback, reusable organization knowledge graph.
+Repository/CI/test integrations, implementation evidence, spec-to-code/test coverage, release outcome feedback, reusable workspace knowledge graph.
 
 ## 15. Тарифная логика (гипотеза)
 
@@ -545,7 +543,7 @@ Repository/CI/test integrations, implementation evidence, spec-to-code/test cove
 - **Business:** governance, advanced RBAC, audit/export, custom templates, higher limits.
 - **Enterprise:** SSO/SCIM, custom retention/data residency, BYOK/private model endpoint, custom roles, SLA, security review и dedicated support.
 
-AI usage должен быть прозрачен: показывать credits/cost/budget до и после запуска, allow organization-level limits и запретить неконтролируемый расход.
+AI usage должен быть прозрачен: показывать credits/cost/budget до и после запуска, allow workspace-level limits и запретить неконтролируемый расход.
 
 ## 16. Риски и способы снижения
 
