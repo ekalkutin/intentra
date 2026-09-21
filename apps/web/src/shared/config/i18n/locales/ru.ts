@@ -19,14 +19,14 @@ export const ru: LandingDict = {
       'Intentra даёт продуктовым и инженерным командам непрерывную цепочку от evidence до релиза.',
     principle: 'Сначала evidence. Контекст сохранён.',
     title: 'Войти',
-    description: 'Введите email, привязанный к вашей организации в Intentra.',
+    description: 'Введите email и пароль от аккаунта Intentra.',
     emailLabel: 'Рабочий email',
     emailPlaceholder: 'you@company.com',
-    emailHelp:
-      'Мы отправим безопасную ссылку для входа, когда подключим аутентификацию по email.',
-    continue: 'Продолжить с email',
+    passwordLabel: 'Пароль',
+    passwordPlaceholder: 'Введите пароль',
+    continue: 'Войти',
     unavailable:
-      'В этой среде аутентификация по email ещё не настроена, поэтому ссылка не была отправлена.',
+      'В этой среде вход по паролю ещё не настроен, поэтому учётные данные не были отправлены.',
     invitation:
       'Ещё нет доступа к рабочему пространству? Владелец организации может вас пригласить.',
   },

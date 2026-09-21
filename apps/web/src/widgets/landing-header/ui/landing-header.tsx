@@ -86,7 +86,11 @@ export function LandingHeader({
               carries a wordmark, a menu trigger and the primary action, and a
               fourth control there costs more than it gives. It reappears
               inside the sheet. */}
-          <LanguageSwitch variant={variant} className='hidden sm:flex' />
+          <LanguageSwitch
+            variant={variant}
+            size='header'
+            className='hidden sm:flex'
+          />
           <button
             type='button'
             aria-label={isMenuOpen ? t.header.closeMenu : t.header.openMenu}

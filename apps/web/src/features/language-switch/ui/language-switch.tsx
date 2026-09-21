@@ -21,9 +21,11 @@ import { languageSelected, selectLanguage } from '../model/language-slice';
 
 export function LanguageSwitch({
   variant = 'dark',
+  size = 'compact',
   className,
 }: {
   variant?: 'dark' | 'light';
+  size?: 'compact' | 'header';
   className?: string;
 }) {
   const dispatch = useAppDispatch();
@@ -49,9 +51,12 @@ export function LanguageSwitch({
     >
       <SelectTrigger
         aria-label='Language'
-        size='sm'
+        size={size === 'header' ? 'default' : 'sm'}
         className={cn(
-          'landing-affordance gap-2 px-2.5 text-xs font-semibold tracking-[0.04em]',
+          'landing-affordance gap-2 font-semibold tracking-[0.04em]',
+          size === 'header'
+            ? '!h-10 !rounded-(--landing-radius-button) px-4 text-label'
+            : 'px-2.5 text-xs',
           variant === 'dark'
             ? 'border-white/16 text-white/86 hover:bg-white/10 [&_[data-slot=select-value]]:text-white/86 [&_[data-slot=select-value]+svg]:text-white/55'
             : 'border-border/70 bg-background/80 text-band-ink hover:bg-muted/70 [&_[data-slot=select-value]+svg]:text-muted-foreground',

@@ -4,21 +4,16 @@ import { Link } from 'react-router';
 
 import { LanguageSwitch, useDict } from '@/features/language-switch';
 import { cn } from '@/shared/lib/utils';
+import { Alert, AlertDescription } from '@/shared/ui/primitives/alert';
 import { Button } from '@/shared/ui/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/shared/ui/primitives/card';
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from '@/shared/ui/primitives/field';
+import { Field, FieldGroup, FieldLabel } from '@/shared/ui/primitives/field';
 import { Input } from '@/shared/ui/primitives/input';
 
 function BrandLockup({ inverse = false }: { inverse?: boolean }) {
@@ -35,7 +30,7 @@ function BrandLockup({ inverse = false }: { inverse?: boolean }) {
       />
       <span
         className={cn(
-          'landing-serif text-title-lg sm:text-display-sm leading-none tracking-[-0.01em] lowercase',
+          'text-lg leading-none font-semibold tracking-[-0.025em] lowercase sm:text-xl',
           inverse ? 'text-white/92' : 'text-band-ink',
         )}
       >
@@ -47,11 +42,11 @@ function BrandLockup({ inverse = false }: { inverse?: boolean }) {
 
 export function SignInPage() {
   const t = useDict();
-  const [hasRequestedLink, setHasRequestedLink] = useState(false);
+  const [hasSubmittedCredentials, setHasSubmittedCredentials] = useState(false);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setHasRequestedLink(true);
+    setHasSubmittedCredentials(true);
   }
 
   return (
@@ -64,8 +59,8 @@ export function SignInPage() {
           <BrandLockup inverse />
         </Link>
 
-        <div className='max-w-md pb-[8vh]'>
-          <h1 className='landing-serif text-[clamp(3.3rem,5vw,5.5rem)] leading-[0.92] tracking-[-0.035em] text-balance'>
+        <div className='max-w-lg pb-[8vh]'>
+          <h1 className='max-w-[13ch] text-[clamp(2.75rem,4.2vw,4.5rem)] leading-[0.98] font-semibold tracking-[-0.035em] text-balance'>
             {t.auth.headline}
           </h1>
           <p className='mt-6 max-w-[42ch] text-lg leading-8 text-white/68'>
@@ -94,8 +89,8 @@ export function SignInPage() {
           </div>
 
           <Card className='[--card-spacing:--spacing(6)] sm:[--card-spacing:--spacing(7)]'>
-            <CardHeader className='gap-3'>
-              <CardTitle className='landing-serif text-[2.15rem] leading-none tracking-[-0.03em]'>
+            <CardHeader className='gap-2.5'>
+              <CardTitle className='text-2xl leading-tight font-semibold tracking-[-0.025em] sm:text-[1.75rem]'>
                 {t.auth.title}
               </CardTitle>
               <CardDescription className='max-w-[36ch] leading-6'>
@@ -103,7 +98,7 @@ export function SignInPage() {
               </CardDescription>
             </CardHeader>
 
-            <CardContent>
+            <CardContent className='flex flex-col gap-6'>
               <form onSubmit={handleSubmit}>
                 <FieldGroup>
                   <Field>
@@ -117,24 +112,35 @@ export function SignInPage() {
                       placeholder={t.auth.emailPlaceholder}
                       required
                     />
-                    <FieldDescription>{t.auth.emailHelp}</FieldDescription>
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor='password'>
+                      {t.auth.passwordLabel}
+                    </FieldLabel>
+                    <Input
+                      id='password'
+                      name='password'
+                      type='password'
+                      autoComplete='current-password'
+                      placeholder={t.auth.passwordPlaceholder}
+                      required
+                    />
                   </Field>
                   <Button type='submit' size='lg' className='w-full'>
                     {t.auth.continue}
                     <ArrowRight data-icon='inline-end' />
                   </Button>
-                  {hasRequestedLink ? (
-                    <FieldDescription role='status'>
-                      {t.auth.unavailable}
-                    </FieldDescription>
+                  {hasSubmittedCredentials ? (
+                    <Alert role='status'>
+                      <AlertDescription>{t.auth.unavailable}</AlertDescription>
+                    </Alert>
                   ) : null}
                 </FieldGroup>
               </form>
+              <p className='text-center text-sm leading-6 text-muted-foreground'>
+                {t.auth.invitation}
+              </p>
             </CardContent>
-
-            <CardFooter className='justify-center text-center text-sm leading-6 text-muted-foreground'>
-              {t.auth.invitation}
-            </CardFooter>
           </Card>
         </div>
       </section>

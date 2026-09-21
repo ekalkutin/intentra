@@ -24,15 +24,14 @@ export const en = {
       'Intentra gives product and engineering teams one durable chain from evidence to release.',
     principle: 'Evidence first. Context intact.',
     title: 'Sign in',
-    description:
-      'Use the email address connected to your Intentra organization.',
+    description: 'Enter the email and password for your Intentra account.',
     emailLabel: 'Work email',
     emailPlaceholder: 'you@company.com',
-    emailHelp:
-      'We’ll send a secure sign-in link when email authentication is connected.',
-    continue: 'Continue with email',
+    passwordLabel: 'Password',
+    passwordPlaceholder: 'Enter your password',
+    continue: 'Sign in',
     unavailable:
-      'Email authentication is not configured in this environment, so no link was sent.',
+      'Password sign-in is not configured in this environment, so your credentials were not submitted.',
     invitation:
       'Not in a workspace yet? Your organization owner can invite you.',
   },
