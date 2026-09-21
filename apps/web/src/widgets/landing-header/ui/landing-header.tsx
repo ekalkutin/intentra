@@ -1,8 +1,8 @@
 import { Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
 
 import { LanguageSwitch, useDict } from '@/features/language-switch';
-import { contactHref } from '@/shared/config/site';
 import { cn } from '@/shared/lib/utils';
 import { headerButtonClassName } from '@/shared/ui/landing';
 
@@ -56,8 +56,8 @@ export function LandingHeader({
             <img
               src={
                 variant === 'dark'
-                  ? '/brand/multica-logo-dark.svg'
-                  : '/brand/multica-logo-light.svg'
+                  ? '/brand/intentra-logo-dark.svg'
+                  : '/brand/intentra-logo-light.svg'
               }
               alt=''
               className='size-8 shrink-0 object-contain'
@@ -104,12 +104,12 @@ export function LandingHeader({
               <Menu className='size-4' aria-hidden />
             )}
           </button>
-          <a
-            href={contactHref}
+          <Link
+            to='/auth/sign-in'
             className={headerButtonClassName('solid', variant)}
           >
             {t.header.cta}
-          </a>
+          </Link>
         </div>
       </div>
 

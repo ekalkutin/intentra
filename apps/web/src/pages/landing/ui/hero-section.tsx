@@ -1,8 +1,8 @@
 import { ArrowRight, ImageIcon } from 'lucide-react';
 import type { CSSProperties } from 'react';
+import { Link } from 'react-router';
 
 import { useDict } from '@/features/language-switch';
-import { contactHref } from '@/shared/config/site';
 import { heroButtonClassName } from '@/shared/ui/landing';
 import { LandingHeader } from '@/widgets/landing-header';
 
@@ -50,9 +50,9 @@ export function HeroSection() {
             style={{ '--i': 2 } as CSSProperties}
             className='landing-reveal mt-8 flex flex-wrap items-center justify-center gap-3'
           >
-            <a href={contactHref} className={heroButtonClassName('solid')}>
+            <Link to='/auth/sign-in' className={heroButtonClassName('solid')}>
               {t.hero.cta}
-            </a>
+            </Link>
             <a href='#how-it-works' className={heroButtonClassName('ghost')}>
               {t.hero.ctaSecondary}
             </a>

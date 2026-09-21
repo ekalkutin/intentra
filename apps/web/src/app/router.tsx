@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router';
 
+import { SignInPage } from '@/pages/auth/sign-in';
 import { LandingPage } from '@/pages/landing';
 import { NotFoundPage } from '@/pages/not-found';
 
@@ -14,6 +15,7 @@ export const router = createBrowserRouter([
     Component: RootLayout,
     children: [
       { index: true, Component: LandingPage },
+      { path: 'auth/sign-in', Component: SignInPage },
       { path: '*', Component: NotFoundPage },
     ],
   },

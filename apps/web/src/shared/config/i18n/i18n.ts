@@ -17,6 +17,12 @@ export const LANGUAGE_LABELS: Record<Language, string> = {
   ru: 'RU',
 };
 
+/** Native language names keep the picker intelligible as more locales arrive. */
+export const LANGUAGE_NAMES: Record<Language, string> = {
+  en: 'English',
+  ru: 'Русский',
+};
+
 export const LANGUAGE_STORAGE_KEY = 'intentra.language';
 
 /** The landing reads its copy as a typed object (`useDict()`), not through

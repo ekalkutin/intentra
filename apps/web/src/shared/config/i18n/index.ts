@@ -2,6 +2,7 @@ export {
   DEFAULT_LANGUAGE,
   LANGUAGES,
   LANGUAGE_LABELS,
+  LANGUAGE_NAMES,
   LANGUAGE_STORAGE_KEY,
   dictionaries,
   i18n,

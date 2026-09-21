@@ -1,21 +1,24 @@
+import { Languages } from 'lucide-react';
+
 import { useAppDispatch, useAppSelector } from '@/app/store';
-import { LANGUAGE_LABELS, LANGUAGES } from '@/shared/config/i18n';
+import {
+  isLanguage,
+  LANGUAGE_LABELS,
+  LANGUAGE_NAMES,
+  LANGUAGES,
+} from '@/shared/config/i18n';
 import { cn } from '@/shared/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/primitives/select';
 
 import { languageSelected, selectLanguage } from '../model/language-slice';
 
-/* Ported from the reference footer: codes separated by a hairline, the current
- * one simply less transparent. No flag, no dropdown — with two languages a
- * menu is more chrome than choice.
- *
- * `variant` exists because the control now sits in the header, which is
- * transparent over the dark hero on the landing and solid white elsewhere; one
- * hardcoded palette would be wrong on half of them.
- *
- * The alpha steps are the ones that clear AA at 12px against each band: on
- * ink, white/55 measures 5.2:1 while white/45 only reaches 3.9:1. On white the
- * quiet step is `muted-foreground`, the token pinned to 4.5:1 for exactly this
- * case — an alpha there would land near 2.4:1. */
 export function LanguageSwitch({
   variant = 'dark',
   className,
@@ -25,41 +28,51 @@ export function LanguageSwitch({
 }) {
   const dispatch = useAppDispatch();
   const current = useAppSelector(selectLanguage);
+  const languages = LANGUAGES.map(language => ({
+    label: LANGUAGE_NAMES[language],
+    value: language,
+  }));
+
+  function selectLanguageOption(value: string | null) {
+    const nextLanguage = value ?? undefined;
+
+    if (isLanguage(nextLanguage)) {
+      dispatch(languageSelected(nextLanguage));
+    }
+  }
 
   return (
-    <div
-      role='group'
-      aria-label='Language'
-      className={cn('flex items-center', className)}
+    <Select
+      items={languages}
+      value={current}
+      onValueChange={selectLanguageOption}
     >
-      {LANGUAGES.map((language, i) => {
-        const isCurrent = language === current;
-
-        return (
-          <button
-            type='button'
-            key={language}
-            aria-pressed={isCurrent}
-            onClick={() => dispatch(languageSelected(language))}
-            className={cn(
-              'landing-affordance text-caption px-1.5 py-1 font-medium transition-colors',
-              variant === 'dark'
-                ? isCurrent
-                  ? 'text-white'
-                  : 'text-white/55 hover:text-white/80 active:text-white'
-                : isCurrent
-                  ? 'text-band-ink'
-                  : 'text-muted-foreground hover:text-band-ink active:text-band-ink',
-              i > 0 &&
-                (variant === 'dark'
-                  ? 'border-l border-white/16'
-                  : 'border-band-ink/12 border-l'),
-            )}
-          >
-            {LANGUAGE_LABELS[language]}
-          </button>
-        );
-      })}
-    </div>
+      <SelectTrigger
+        aria-label='Language'
+        size='sm'
+        className={cn(
+          'landing-affordance gap-2 px-2.5 text-xs font-semibold tracking-[0.04em]',
+          variant === 'dark'
+            ? 'border-white/16 text-white/86 hover:bg-white/10 [&_[data-slot=select-value]]:text-white/86 [&_[data-slot=select-value]+svg]:text-white/55'
+            : 'border-border/70 bg-background/80 text-band-ink hover:bg-muted/70 [&_[data-slot=select-value]+svg]:text-muted-foreground',
+          className,
+        )}
+      >
+        <Languages data-icon='inline-start' />
+        <SelectValue>{LANGUAGE_LABELS[current]}</SelectValue>
+      </SelectTrigger>
+      <SelectContent align='end' alignItemWithTrigger={false}>
+        <SelectGroup>
+          {LANGUAGES.map(language => (
+            <SelectItem key={language} value={language}>
+              <span className='font-medium'>{LANGUAGE_NAMES[language]}</span>
+              <span className='text-muted-foreground'>
+                {LANGUAGE_LABELS[language]}
+              </span>
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 }

@@ -1,5 +1,6 @@
+import { Link } from 'react-router';
+
 import { useDict } from '@/features/language-switch';
-import { contactHref } from '@/shared/config/site';
 import { BandLabel } from '@/shared/ui/landing';
 
 /* The reference's two-column band: a narrow left column carrying the overline,
@@ -26,12 +27,12 @@ export function PrinciplesSection() {
             </p>
 
             <div className='mt-8 flex flex-wrap items-center gap-3'>
-              <a
-                href={contactHref}
+              <Link
+                to='/auth/sign-in'
                 className='landing-affordance text-body bg-band-ink hover:bg-band-ink/88 inline-flex items-center justify-center gap-2.5 rounded-(--landing-radius-action) px-5 py-3 font-semibold text-white transition-colors active:translate-y-px'
               >
                 {t.principles.cta}
-              </a>
+              </Link>
             </div>
           </div>
 

@@ -14,7 +14,27 @@ export const en = {
     howItWorks: 'How it works',
     principles: 'Principles',
     faq: 'FAQ',
-    cta: 'Request access',
+    cta: 'Get started',
+  },
+
+  auth: {
+    backToIntentra: 'Back to Intentra',
+    headline: 'Keep every decision connected to delivery.',
+    introduction:
+      'Intentra gives product and engineering teams one durable chain from evidence to release.',
+    principle: 'Evidence first. Context intact.',
+    title: 'Sign in',
+    description:
+      'Use the email address connected to your Intentra organization.',
+    emailLabel: 'Work email',
+    emailPlaceholder: 'you@company.com',
+    emailHelp:
+      'We’ll send a secure sign-in link when email authentication is connected.',
+    continue: 'Continue with email',
+    unavailable:
+      'Email authentication is not configured in this environment, so no link was sent.',
+    invitation:
+      'Not in a workspace yet? Your organization owner can invite you.',
   },
 
   hero: {
@@ -22,7 +42,7 @@ export const en = {
     headlineLine2: 'actually agreed.',
     subheading:
       'Intentra turns a business intent into an agent-ready delivery package without losing the context on the way. Evidence, claim, requirement, ADR, specification — one chain. Change an approved rule and it names every artifact downstream.',
-    cta: 'Request access',
+    cta: 'Get started',
     ctaSecondary: 'See how it works',
     ctaTertiary: 'Read the chain',
     chainLabel: 'The chain a requirement travels',
@@ -162,7 +182,7 @@ export const en = {
           'A version-pinned package built from a specification slice. Markdown, JSON, or read straight from your IDE over MCP.',
       },
     ],
-    cta: 'Request access',
+    cta: 'Get started',
     ctaSecondary: 'Read the principles',
   },
 
@@ -172,7 +192,7 @@ export const en = {
     headlineLine2: 'refuses to do.',
     description:
       'Five commitments that decide the architecture rather than describe it. Each one costs something — that is how you can tell it is real.',
-    cta: 'Request access',
+    cta: 'Get started',
     highlights: [
       {
         title: 'Evidence over fluency',
@@ -237,7 +257,7 @@ export const en = {
   footer: {
     tagline:
       'Intentra turns intent into an agent-ready delivery package — without losing the context on the way.',
-    cta: 'Request access',
+    cta: 'Get started',
     groups: {
       page: {
         label: 'Page',
@@ -250,7 +270,7 @@ export const en = {
       },
       contact: {
         label: 'Contact',
-        links: [{ label: 'Request access', href: 'mailto' }],
+        links: [{ label: 'Get started', href: '/auth/sign-in' }],
       },
     },
     copyright: '© {year} Intentra',

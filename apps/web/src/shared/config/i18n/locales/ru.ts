@@ -9,7 +9,26 @@ export const ru: LandingDict = {
     howItWorks: 'Как это работает',
     principles: 'Принципы',
     faq: 'Вопросы',
-    cta: 'Запросить доступ',
+    cta: 'Начать работу',
+  },
+
+  auth: {
+    backToIntentra: 'Вернуться в Intentra',
+    headline: 'Все решения связаны с поставкой.',
+    introduction:
+      'Intentra даёт продуктовым и инженерным командам непрерывную цепочку от evidence до релиза.',
+    principle: 'Сначала evidence. Контекст сохранён.',
+    title: 'Войти',
+    description: 'Введите email, привязанный к вашей организации в Intentra.',
+    emailLabel: 'Рабочий email',
+    emailPlaceholder: 'you@company.com',
+    emailHelp:
+      'Мы отправим безопасную ссылку для входа, когда подключим аутентификацию по email.',
+    continue: 'Продолжить с email',
+    unavailable:
+      'В этой среде аутентификация по email ещё не настроена, поэтому ссылка не была отправлена.',
+    invitation:
+      'Ещё нет доступа к рабочему пространству? Владелец организации может вас пригласить.',
   },
 
   hero: {
@@ -17,7 +36,7 @@ export const ru: LandingDict = {
     headlineLine2: 'о чём договорились.',
     subheading:
       'Intentra превращает бизнес-намерение в пакет работ, готовый для агента, и не теряет контекст по дороге. Evidence, claim, requirement, ADR, спецификация — одна цепочка. Измените утверждённое правило, и система назовёт каждый затронутый артефакт.',
-    cta: 'Запросить доступ',
+    cta: 'Начать работу',
     ctaSecondary: 'Как это работает',
     ctaTertiary: 'Посмотреть цепочку',
     chainLabel: 'Цепочка, которую проходит требование',
@@ -157,7 +176,7 @@ export const ru: LandingDict = {
           'Пакет с закреплённой версией, собранный из среза спецификации. Markdown, JSON или чтение прямо из IDE через MCP.',
       },
     ],
-    cta: 'Запросить доступ',
+    cta: 'Начать работу',
     ctaSecondary: 'Прочитать принципы',
   },
 
@@ -167,7 +186,7 @@ export const ru: LandingDict = {
     headlineLine2: 'делать не станет.',
     description:
       'Обязательства, которые определяют архитектуру, а не описывают её. Каждое чего-то стоит — по этому и видно, что оно настоящее.',
-    cta: 'Запросить доступ',
+    cta: 'Начать работу',
     highlights: [
       {
         title: 'Evidence важнее гладкости',
@@ -232,7 +251,7 @@ export const ru: LandingDict = {
   footer: {
     tagline:
       'Intentra превращает намерение в пакет работ, готовый для агента, — не теряя контекст по дороге.',
-    cta: 'Запросить доступ',
+    cta: 'Начать работу',
     groups: {
       page: {
         label: 'Страница',
@@ -245,7 +264,7 @@ export const ru: LandingDict = {
       },
       contact: {
         label: 'Контакт',
-        links: [{ label: 'Запросить доступ', href: 'mailto' }],
+        links: [{ label: 'Начать работу', href: '/auth/sign-in' }],
       },
     },
     copyright: '© {year} Intentra',

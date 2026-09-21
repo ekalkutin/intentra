@@ -1,5 +1,6 @@
+import { Link } from 'react-router';
+
 import { useDict } from '@/features/language-switch';
-import { contactHref } from '@/shared/config/site';
 import { BandLabel, heroButtonClassName } from '@/shared/ui/landing';
 
 /* Ported verbatim in shape: dark band, overline, a serif headline whose second
@@ -44,9 +45,9 @@ export function HowItWorksSection() {
         </ol>
 
         <div className='mt-14 flex flex-wrap items-center gap-4'>
-          <a href={contactHref} className={heroButtonClassName('solid')}>
+          <Link to='/auth/sign-in' className={heroButtonClassName('solid')}>
             {t.howItWorks.cta}
-          </a>
+          </Link>
           <a href='#principles' className={heroButtonClassName('ghost')}>
             {t.howItWorks.ctaSecondary}
           </a>

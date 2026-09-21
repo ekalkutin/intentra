@@ -1,3 +1,5 @@
+import { Link } from 'react-router';
+
 import { useDict } from '@/features/language-switch';
 import { contactHref } from '@/shared/config/site';
 
@@ -21,7 +23,7 @@ export function LandingFooter() {
           <div className='lg:w-[340px] lg:shrink-0'>
             <a href='#top' className='flex items-center gap-3'>
               <img
-                src='/brand/multica-logo-dark.svg'
+                src='/brand/intentra-logo-dark.svg'
                 alt=''
                 className='size-9 shrink-0 object-contain'
               />
@@ -33,12 +35,12 @@ export function LandingFooter() {
               {t.footer.tagline}
             </p>
             <div className='mt-6'>
-              <a
-                href={contactHref}
+              <Link
+                to='/auth/sign-in'
                 className='landing-affordance text-label text-band-ink inline-flex items-center justify-center rounded-(--landing-radius-button) bg-white px-5 py-2.5 font-semibold transition-colors hover:bg-white/88 active:translate-y-px'
               >
                 {t.footer.cta}
-              </a>
+              </Link>
             </div>
           </div>
 
