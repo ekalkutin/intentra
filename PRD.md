@@ -147,6 +147,22 @@ Intentra — multitenant SaaS для продуктовых и инженерн�
 - Возможность редактировать модель вручную; агент не должен быть единственным способом управления доменной моделью.
 - Визуальная карта домена и полнотекстовое представление для экспорта.
 
+### 7.2.1. Brownfield onboarding: импорт и исследование существующего продукта
+
+Intentra должна одинаково хорошо работать с новым и существующим продуктом. Для brownfield-сценария пользователь подключает источники, получает проверяемую модель **as-is**, а затем создаёт требования и изменения **to-be** с явным сравнением между ними.
+
+- Read-only подключение GitHub/GitLab с выбором repository, branch/ref, каталогов и allow/deny path rules.
+- Импорт Docs/knowledge sources: Markdown, OpenAPI/AsyncAPI, ADR, README, diagrams, Confluence/Notion/Google Drive, task tracker history и при явном разрешении — CI, observability и incident evidence.
+- Source snapshot неизменно фиксирует repository/ref/commit SHA, path, line range или document revision, import time, authoring system, classification и freshness. Ссылка на код всегда ведёт к конкретной ревизии, а не к движущейся ветке.
+- System Intelligence строит черновую **as-is system map**: services/modules, public APIs, events, data stores, dependencies, ownership signals, workflows, тестовые и operational signals. Любой вывод агента содержит citations и confidence.
+- Агент должен различать `observed fact`, `inference` и `approved system model`. Импорт кода не создаёт requirement, ADR или truth без review человека.
+- Пользователь может подтвердить, исправить или отклонить элементы as-is модели и зафиксировать `System Model Baseline`.
+- При создании feature система строит `as-is → to-be → gap` view: какие модули, контракты, данные, тесты, ADR и delivery items затронуты.
+- Incremental sync по webhook/расписанию формирует новую source snapshot и показывает устаревшие evidence/model elements; исторические baselines остаются воспроизводимыми.
+- До передачи материала LLM применяется secret scanning, path policy, content size/budget policy и sanitization. Нельзя индексировать secrets, `.env`, ключи, private generated data или запрещённые каталоги.
+
+Первый brownfield vertical slice: GitHub/GitLab read-only import → repository snapshot → citations-based system map → human-reviewed baseline → change-impact/handoff для новой feature. Это важнее, чем попытка сразу написать полноценный code intelligence platform.
+
 ### 7.3. Артефакты знаний
 
 Система должна поддерживать минимум следующие типы версионируемых артефактов:
@@ -247,6 +263,7 @@ MCP Gateway принадлежит bounded context **Integration Hub**. Он н�
 **Read-only MVP capabilities:**
 
 - Resource `project context`: утверждённые PRD, glossary, domain model, ADR, NFR и specifications выбранного Project.
+- Resource `as-is system baseline`: human-reviewed system map, source snapshots, public contracts, `SystemDependency` и confidence/citations для существующего продукта.
 - Resource `artifact version`: точная immutable версия артефакта, с metadata, status, source citations и classification.
 - Resource `handoff package`: минимальный контекст для конкретной story/task или implementation slice.
 - Tool `search_project_knowledge`: семантический поиск только в разрешённом Project с цитатами и artifact/version references.
@@ -358,9 +375,10 @@ Intentra начинается как **modular monolith** с изолирова�
 | **Organization & Access Control** | Organization, Membership, Team, Role, Permission, Invitation, access policy, tenant boundary | Учётные данные пользователя, бизнес-артефакты, тарифы |
 | **Project & Portfolio Management** | Workspace, Portfolio, Project, Project Template, Project Membership, stakeholder assignment, project lifecycle | Содержимое требований, доменную модель, delivery backlog |
 | **Knowledge Intake & Evidence** | Source, Import, Document snapshot, Evidence, Extract, source freshness, provenance, data classification | Требование, решение или спецификацию как итоговую истину |
+| **System Intelligence** | Repository snapshot, code/document observation, system component, API surface, `SystemDependency`, operational signal, as-is system model and system baseline | Будущее продуктовое требование, план delivery или архитектурное решение как утверждённый выбор |
 | **Product Definition** | Discovery Session, Claim, Assumption, Open Question, Requirement, PRD, Glossary, Business Rule, Domain Model, ADR, architectural constraint, NFR, Specification, Acceptance Criteria | Delivery status, внешние задачи, исполнение agent tools |
 | **Traceability & Change Intelligence** | Trace Link, Baseline, Coverage Gap, Impact Assessment, Review Queue, change propagation | Семантическое содержимое requirement, ADR, story или test |
-| **Delivery Management** | Initiative, Epic, Story, Task, Dependency, Milestone, Release Plan, Kanban/Gantt, estimate and capacity plan | Изменением утверждённых требований или ADR |
+| **Delivery Management** | Initiative, Epic, Story, Task, `WorkDependency`, Milestone, Release Plan, Kanban/Gantt, estimate and capacity plan | Изменением утверждённых требований или ADR |
 | **Agent Runtime** | Agent Profile, Agent Run, scoped context package, tool grant, approval request, budget, execution log | Пользовательскими identity, постоянными секретами и бизнес-содержимым артефактов |
 | **Integration Hub** | Connection, credential reference, webhook, mapping, synchronization, external object link, sync state, MCP Gateway, MCP client grant and MCP access event | Внутренней моделью Jira/Linear/GitHub и source-of-truth сущностями этих систем |
 | **Delivery Verification** | Handoff Package, implementation evidence, test evidence, coverage assessment, release readiness, rollback evidence | Редактированием исходных requirements, stories и ADR |
@@ -404,22 +422,24 @@ Subdomain и bounded context не являются строгой иерархи
 Ни один контекст не следует «склеивать ради MVP», но разработку стоит вести вертикальными срезами в таком порядке:
 
 1. **Identity & Account Management**, **Organization & Access Control**, **Project & Portfolio Management**, **Governance & Compliance** — tenancy, authorization, audit и project boundary до первого бизнес-артефакта.
-2. **Knowledge Intake & Evidence** и **Product Definition** — первый законченный путь: источник → интервью → claims → requirements → DDD/ADR → specification.
-3. **Traceability & Change Intelligence** — создаётся вместе со вторым шагом, чтобы links и versioned baselines не пришлось восстанавливать задним числом.
-4. **Agent Runtime** — управляемый запуск discovery/spec agents с scoped context и approval, без production-доступов.
-5. **Delivery Management** и **Delivery Verification** — story/task, handoff, evidence реализации и coverage/release readiness.
-6. **Integration Hub** — сначала outbound webhook, read-only MCP Server и один task-tracker; контекст сразу владеет mapping, sync state и внешними agent grants.
-7. **Outcome Intelligence** и **Commercial Entitlements** — первые минимальные модели закладываются заранее, а сложные integrations, experimentation и billing automation развиваются после появления реальных пользователей.
+2. **Knowledge Intake & Evidence** и **System Intelligence** — два входа: greenfield получает evidence/interview context, brownfield получает воспроизводимый as-is system baseline.
+3. **Product Definition** — первый законченный путь: источник или as-is baseline → интервью → claims → requirements → DDD/ADR → specification.
+4. **Traceability & Change Intelligence** — создаётся вместе с Product Definition и System Intelligence, чтобы links и versioned baselines не пришлось восстанавливать задним числом.
+5. **Agent Runtime** — управляемый запуск discovery/spec agents с scoped context и approval, без production-доступов.
+6. **Delivery Management** и **Delivery Verification** — story/task, handoff, evidence реализации и coverage/release readiness.
+7. **Integration Hub** — сначала outbound webhook, read-only MCP Server и один task-tracker; контекст сразу владеет mapping, sync state и внешними agent grants.
+8. **Outcome Intelligence** и **Commercial Entitlements** — первые минимальные модели закладываются заранее, а сложные integrations, experimentation и billing automation развиваются после появления реальных пользователей.
 
 ## 10. Данные и доменная модель верхнего уровня
 
-Основные сущности: `User`, `Identity`, `Organization`, `Membership`, `Workspace`, `Portfolio`, `Project`, `ProjectTemplate`, `Source`, `Evidence`, `Claim`, `Requirement`, `Decision`, `Assumption`, `OpenQuestion`, `Risk`, `GlossaryTerm`, `DomainElement`, `Specification`, `TraceLink`, `Baseline`, `ImpactAssessment`, `Comment`, `Approval`, `BacklogItem`, `Dependency`, `Release`, `HandoffPackage`, `VerificationEvidence`, `OutcomeHypothesis`, `MetricDefinition`, `IntegrationConnection`, `ExternalObjectLink`, `WebhookSubscription`, `McpClientGrant`, `McpAccessEvent`, `AgentProfile`, `AgentRun`, `ToolGrant`, `SecretReference`, `AuditEvent`, `Entitlement`, `UsageMeter`.
+Основные сущности: `User`, `Identity`, `Organization`, `Membership`, `Workspace`, `Portfolio`, `Project`, `ProjectTemplate`, `Source`, `Evidence`, `RepositorySnapshot`, `CodeObservation`, `SystemComponent`, `ApiSurface`, `SystemDependency`, `SystemModelBaseline`, `Claim`, `Requirement`, `Decision`, `Assumption`, `OpenQuestion`, `Risk`, `GlossaryTerm`, `DomainElement`, `Specification`, `TraceLink`, `Baseline`, `ImpactAssessment`, `Comment`, `Approval`, `BacklogItem`, `WorkDependency`, `Release`, `HandoffPackage`, `VerificationEvidence`, `OutcomeHypothesis`, `MetricDefinition`, `IntegrationConnection`, `ExternalObjectLink`, `WebhookSubscription`, `McpClientGrant`, `McpAccessEvent`, `AgentProfile`, `AgentRun`, `ToolGrant`, `SecretReference`, `AuditEvent`, `Entitlement`, `UsageMeter`.
 
 Инварианты:
 
 - Каждый объект принадлежит ровно одному Organization; Project-scoped данные не должны ссылаться на сущности другого tenant.
 - У утверждённого артефакта есть immutable version; редактирование создаёт draft новой версии.
 - Значимое утверждение либо имеет evidence, либо явно отмечено как assumption/agent inference.
+- Элемент as-is system model ссылается на immutable source snapshot и имеет тип `observed`, `inferred` или `approved`; import не создаёт утверждённый product/architecture artifact автоматически.
 - TraceLink имеет тип, источник, цель, автора/происхождение, статус валидации и версию.
 - SecretReference не содержит секрет и не экспортируется как значение.
 - AgentRun сохраняет состав контекста ссылками/версиями, чтобы результат можно было воспроизвести и проверить.
@@ -470,10 +490,11 @@ Approval policy настраивается по типу проекта и кр�
 
 MVP должен доказать ценность «из идеи в готовый к разработке пакет» для одной команды, не пытаясь заменить весь delivery stack.
 
-### 12.1. Входит в MVP
+### 13.1. Входит в MVP
 
 - Organization, Project, базовый RBAC и приглашения.
 - Текстовое AI-интервью с evidence, claims, assumptions и open questions.
+- GitHub/GitLab read-only import, immutable repository snapshot и citations-based as-is system map с human-reviewed baseline.
 - PRD, glossary, basic domain model и ADR draft generation.
 - Ручное редактирование, comments, review/approval и version history.
 - Requirements traceability: requirement ↔ evidence ↔ spec ↔ story ↔ test scenario.
@@ -485,7 +506,7 @@ MVP должен доказать ценность «из идеи в готов
 - Базовый audit log и агентные логи.
 - Один набор готовых агентных ролей, без произвольного исполнения внешних tools по умолчанию.
 
-### 12.2. Отложить после MVP
+### 13.2. Отложить после MVP
 
 - Полноценный Gantt/capacity planning и advanced critical path.
 - Двустороннюю синхронизацию со всеми trackers.
