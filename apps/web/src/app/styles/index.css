@@ -113,6 +113,15 @@ html[lang|='ru'] :is(h1, h2).landing-serif {
   }
 }
 
+/* The shared Sheet emits `data-[side=left]:border-r` in Tailwind's utilities
+   layer. This belongs in that same layer so the dashboard mobile sidebar can
+   opt out without modifying the generated shadcn source. */
+@layer utilities {
+  .data-\[side\=left\]\:border-r[data-side='left'][data-sidebar='sidebar'][data-mobile='true'] {
+    border-right-width: 0;
+  }
+}
+
 @keyframes landing-reveal {
   to {
     opacity: 1;

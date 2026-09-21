@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Outlet, ScrollRestoration } from 'react-router';
+import { Outlet, ScrollRestoration, useLocation } from 'react-router';
 
 import { useAppSelector } from '@/app/store';
 import { selectLanguage, useDict } from '@/features/language-switch';
@@ -10,17 +10,27 @@ import { selectLanguage, useDict } from '@/features/language-switch';
 export function RootLayout() {
   const language = useAppSelector(selectLanguage);
   const t = useDict();
+  const { pathname } = useLocation();
+  const isDashboard = pathname.startsWith('/dashboard');
 
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
 
   useEffect(() => {
-    document.title = `Intentra — ${t.hero.headlineLine1} ${t.hero.headlineLine2}`;
-  }, [t]);
+    document.title = isDashboard
+      ? 'Intentra — Overview'
+      : `Intentra — ${t.hero.headlineLine1} ${t.hero.headlineLine2}`;
+  }, [isDashboard, t]);
 
   return (
-    <div className='landing-light min-h-dvh bg-white'>
+    <div
+      className={
+        isDashboard
+          ? 'min-h-dvh bg-background'
+          : 'landing-light min-h-dvh bg-white'
+      }
+    >
       <Outlet />
       <ScrollRestoration />
     </div>
