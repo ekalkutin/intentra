@@ -1,0 +1,13 @@
+{
+  "scanned": "2026-09-21",
+  "framework": "React 19.2 + Vite 8 (apps/web), Nx 23 monorepo, pnpm 12 workspaces",
+  "architecture": "Feature-Sliced Design (app/pages/widgets/features/entities/shared)",
+  "fonts": ["Geist Variable (@fontsource-variable/geist)", "Instrument Serif (@fontsource/instrument-serif)"],
+  "palette": "tokens.css — ported Multica system: surface ladder, AA-pinned muted/faint split, role-named radius ladder",
+  "tailwind": "v4 via @tailwindcss/vite, @theme + @theme inline",
+  "ui": "shadcn style=base-nova + @base-ui/react + lucide-react; primitives in src/shared/ui/primitives",
+  "motion": "tw-animate-css only — no framer-motion / gsap / lottie",
+  "spacing": "Tailwind default 4pt",
+  "preserve": ["Geist font stack", "Tailwind v4 pipeline", "FSD layer boundaries", "components.json aliases"],
+  "introduce": ["Multica token system", "banded macrostructure", "landing radius language", "editorial serif display"]
+}

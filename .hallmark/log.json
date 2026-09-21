@@ -1,0 +1,14 @@
+[
+  {
+    "date": "2026-09-21",
+    "macrostructure": "Narrative Workflow (banded)",
+    "theme": "studied-DNA",
+    "theme_axes": "alternating dark/light bands / classical-serif display / neutral accent",
+    "source": "local repo multica-ai/multica (apps/web + packages/ui); user is the author",
+    "enrichment": "none — typographic hero, visual slot held open",
+    "nav": "left-grouped brand+links, actions right (ported)",
+    "footer": "brand column + link groups + locale row + giant serif wordmark (ported)",
+    "brief": "Intentra · landing page for a traceability-first product-definition SaaS",
+    "notes": "Studied DNA, diversification suspended. Gate 6 waived at the user's direction; contrast raised above the source on 9 files."
+  }
+]

@@ -1,130 +1,136 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/geist';
+@import '@fontsource/instrument-serif';
+@import './tokens.css';
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
-}
+/* Hallmark · genre: modern-minimal · macrostructure: Narrative Workflow (banded)
+ * theme: studied-DNA (source: local repo multica-ai/multica) · studied: yes
+ * nav: left-grouped brand+links, actions right, 76px, absolute over the hero
+ * footer: brand column + link columns + locale row + giant serif wordmark
+ * bands: hero #05070b · features white · how-it-works #05070b · principles white
+ *        · faq quiet grey · footer band-ink
+ * display: Instrument Serif — h1 3.65/4.85/6.4rem lh .93 tr -.038em
+ *                           · h2 2.6/3.4/4.2rem  lh 1.05 tr -.03em
+ * body: Geist Variable (already in this project; stands in for the source's
+ *       Inter — same role, same register, one import fewer)
+ * brand: oklch(0.55 0.13 162) — Multica's brand lightness, Intentra's hue
+ *
+ * The shadcn `:root` / `.dark` colour blocks that shipped with this file are
+ * gone on purpose: tokens.css now owns every colour, and leaving two
+ * contradictory token sets in one stylesheet is how a system starts lying.
+ * Every `@import` directive above is untouched, so nothing is un-styled.
+ */
 
+@source "../../**/*.{ts,tsx}";
+
+/* Font stack. Composed here in static CSS rather than at the import so it can
+   be overridden per `<html lang>`. Geist Variable covers Cyrillic; the serif
+   display stack and its Cyrillic tail live with the landing tokens. */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+  --font-sans:
+    'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* A plain fallback only. The editorial display face is scoped to the landing
+     tree in tokens.css (`.landing-light`), the way the source scopes its own —
+     so the marketing face never leaks into the product shell. Declared here so
+     `--font-serif` is never an invalid self-reference outside that tree. */
+  --font-serif: ui-serif, Georgia, serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
-.dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+/* Single hook for every landing surface set in the editorial serif. Declared
+   outside Tailwind's layers so the per-locale resets below outrank the inline
+   `tracking-*` / `leading-*` utilities they have to correct. */
+.landing-serif {
+  font-family: var(--font-serif);
+}
+
+/* The landing display sizes are tuned for Latin: negative tracking and sub-1
+   leading, down to `tracking-[-0.038em] leading-[0.93]` at 6.4rem on the hero.
+   Cyrillic runs wider than Latin at the same point size and its lowercase has
+   almost no ascender variation, so tight tracking closes the counters and a
+   0.93 leading collides two lines of a `<br />`-split headline. Relax both for
+   Russian only; the English treatment is untouched. */
+html[lang|='ru'] :is(h1, h2).landing-serif {
+  letter-spacing: -0.015em;
+  line-height: 1.08;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-    }
+  /* `clip`, never `hidden`: `hidden` creates a scroll container and kills
+       `position: sticky` on the features rail. */
+  html,
   body {
-    @apply bg-background text-foreground;
-    }
-  html {
-    @apply font-sans;
-    }
+    overflow-x: clip;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  /* Focus rings appear instantly and are never transitioned. The landing
+       runs light bands and dark bands, so the ring is drawn from the element's
+       own colour — on the dark bands that is white, on the light ones ink —
+       instead of one token that can only be right on half the page. */
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+    border-radius: var(--landing-radius-checkbox, 4px);
+  }
+
+  /* Display type is roman and wraps inside long words rather than pushing
+       the viewport. */
+  h1,
+  h2,
+  h3 {
+    font-style: normal;
+    overflow-wrap: anywhere;
+    min-width: 0;
+  }
+}
+
+@layer components {
+  /* Affordances are single-line objects: a button or nav label that wraps
+       reads as a styling error, not as intent. */
+  .landing-affordance {
+    white-space: nowrap;
+  }
+
+  /* The one orchestrated entrance, staggered by DOM index. Nothing else on
+       the page animates on scroll. */
+  .landing-reveal {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: landing-reveal 520ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+}
+
+@keyframes landing-reveal {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 150ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 150ms !important;
+  }
+
+  .landing-reveal {
+    transform: none;
+  }
 }
