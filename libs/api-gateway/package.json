@@ -1,0 +1,42 @@
+{
+  "name": "@intentra/api-gateway",
+  "version": "0.0.0",
+  "private": true,
+  "description": "HTTP-фасад продукта: говорит транспортом и зовёт клиентские порты",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js"
+    }
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "nx": {
+    "tags": [
+      "type:facade",
+      "deployment:monolith",
+      "deployment:microservices"
+    ]
+  },
+  "dependencies": {
+    "@intentra/api-ports": "workspace:*",
+    "@intentra/iam-contracts": "workspace:*",
+    "@intentra/workspace-contracts": "workspace:*",
+    "@nestjs/common": "catalog:nestjs12",
+    "@nestjs/core": "catalog:nestjs12",
+    "@nestjs/platform-express": "catalog:nestjs12",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "catalog:nestjs12"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "catalog:tooling"
+  }
+}

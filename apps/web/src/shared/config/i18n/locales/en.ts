@@ -23,16 +23,33 @@ export const en = {
     introduction:
       'Intentra gives product and engineering teams one durable chain from evidence to release.',
     principle: 'Evidence first. Context intact.',
-    title: 'Sign in',
-    description: 'Enter the email and password for your Intentra account.',
     emailLabel: 'Work email',
     emailPlaceholder: 'you@company.com',
     passwordLabel: 'Password',
     passwordPlaceholder: 'Enter your password',
-    continue: 'Sign in',
-    unavailable:
-      'Password sign-in is not configured in this environment, so your credentials were not submitted.',
-    invitation: 'Not in a workspace yet? Your workspace owner can invite you.',
+    /* Shown only when the request never reached the server; every other
+     * refusal already carries the server's own sentence. */
+    unreachable: 'Could not reach Intentra. Check your connection and retry.',
+    expired: 'Your session has expired. Sign in again to continue.',
+    signIn: {
+      title: 'Sign in',
+      description: 'Enter the email and password for your Intentra account.',
+      submit: 'Sign in',
+      submitting: 'Signing in…',
+      noAccount: 'No account yet?',
+      goToSignUp: 'Create one',
+    },
+    signUp: {
+      title: 'Create your account',
+      description:
+        'Email and a password, nothing else. You will name your first workspace next.',
+      passwordPlaceholder: 'At least 8 characters',
+      submit: 'Create account',
+      submitting: 'Creating…',
+      haveAccount: 'Already have an account?',
+      goToSignIn: 'Sign in',
+    },
+    signOut: 'Sign out',
   },
 
   hero: {

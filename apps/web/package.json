@@ -8,10 +8,20 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
+  "nx": {
+    "tags": [
+      "type:app",
+      "deployment:monolith",
+      "runtime:browser"
+    ]
+  },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource/instrument-serif": "^5.3.0",
+    "@hookform/resolvers": "^5.9.1",
+    "@intentra/iam-contracts": "workspace:*",
+    "@intentra/workspace-contracts": "workspace:*",
     "@reduxjs/toolkit": "^2.12.0",
     "@shadcn/react": "^0.3.1",
     "@tailwindcss/vite": "^4.3.3",
@@ -27,6 +37,7 @@
     "react": "^19.2.8",
     "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.8",
+    "react-hook-form": "^7.88.0",
     "react-i18next": "^17.0.14",
     "react-redux": "^9.3.0",
     "react-resizable-panels": "^4.13.1",

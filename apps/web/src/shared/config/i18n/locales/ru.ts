@@ -18,17 +18,32 @@ export const ru: LandingDict = {
     introduction:
       'Intentra даёт продуктовым и инженерным командам непрерывную цепочку от evidence до релиза.',
     principle: 'Сначала evidence. Контекст сохранён.',
-    title: 'Войти',
-    description: 'Введите email и пароль от аккаунта Intentra.',
     emailLabel: 'Рабочий email',
     emailPlaceholder: 'you@company.com',
     passwordLabel: 'Пароль',
     passwordPlaceholder: 'Введите пароль',
-    continue: 'Войти',
-    unavailable:
-      'В этой среде вход по паролю ещё не настроен, поэтому учётные данные не были отправлены.',
-    invitation:
-      'Ещё нет доступа к рабочему пространству? Владелец пространства может вас пригласить.',
+    unreachable:
+      'Не удалось связаться с Intentra. Проверьте соединение и повторите.',
+    expired: 'Сессия истекла. Войдите снова, чтобы продолжить.',
+    signIn: {
+      title: 'Войти',
+      description: 'Введите email и пароль от аккаунта Intentra.',
+      submit: 'Войти',
+      submitting: 'Входим…',
+      noAccount: 'Ещё нет аккаунта?',
+      goToSignUp: 'Создать',
+    },
+    signUp: {
+      title: 'Создать аккаунт',
+      description:
+        'Только email и пароль. Первое рабочее пространство назовёте следующим шагом.',
+      passwordPlaceholder: 'Не менее 8 символов',
+      submit: 'Создать аккаунт',
+      submitting: 'Создаём…',
+      haveAccount: 'Аккаунт уже есть?',
+      goToSignIn: 'Войти',
+    },
+    signOut: 'Выйти',
   },
 
   hero: {

@@ -2,10 +2,12 @@ import {
   BookOpenIcon,
   BotIcon,
   ChevronDownIcon,
+  ChevronsUpDownIcon,
   CircleHelpIcon,
   FileTextIcon,
   FolderKanbanIcon,
   LayoutDashboardIcon,
+  LogOutIcon,
   MessageSquareIcon,
   PlusIcon,
   Settings2Icon,
@@ -14,6 +16,9 @@ import {
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
 
+import { useMeQuery } from '@/entities/session';
+import { useDict } from '@/features/language-switch';
+import { useSignOut } from '@/features/sign-out';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,6 +62,47 @@ const aiNavigation = [
 // unmodified so shadcn updates remain safe.
 const navItemClassName =
   'text-muted-foreground hover:not-data-active:bg-sidebar-accent/70 data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground';
+
+/**
+ * Кто вошёл и как выйти.
+ *
+ * Адрес читается запросом `me`, а не разбором токена в браузере: claims — дело
+ * того, кто их подписал, и сервер уже их проверил, пуская этот запрос.
+ */
+function AccountMenu() {
+  const t = useDict();
+  const signOut = useSignOut();
+  const { data: account } = useMeQuery();
+
+  return (
+    <SidebarMenu className='group-data-[collapsible=icon]:hidden'>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<SidebarMenuButton />}>
+            <span className='inline-flex size-5 shrink-0 items-center justify-center rounded-full border bg-muted text-caption font-semibold text-muted-foreground uppercase'>
+              {account?.email.slice(0, 1) ?? '·'}
+            </span>
+            <span className='min-w-0 flex-1 truncate text-muted-foreground'>
+              {account?.email ?? '…'}
+            </span>
+            <ChevronsUpDownIcon className='size-3 text-muted-foreground' />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className='w-56' align='start' side='top'>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className='truncate font-normal'>
+                {account?.email ?? '…'}
+              </DropdownMenuLabel>
+              <DropdownMenuItem onClick={signOut}>
+                <LogOutIcon />
+                <span>{t.auth.signOut}</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  );
+}
 
 export function AppSidebar() {
   const { pathname } = useLocation();
@@ -191,6 +237,7 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        <AccountMenu />
       </SidebarFooter>
     </Sidebar>
   );
