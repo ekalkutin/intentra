@@ -47,3 +47,4 @@ minimumReleaseAgeExclude:
   - "@nestjs/core@12.0.4"
   - "@nestjs/microservices@12.0.4"
   - "@nestjs/platform-express@12.0.4"
+  - '@nestjs/testing@12.0.4'
