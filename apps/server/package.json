@@ -18,8 +18,8 @@
     ]
   },
   "dependencies": {
-    "@intentra/api-gateway": "workspace:*",
     "@intentra/api-ports": "workspace:*",
+    "@intentra/gateway": "workspace:*",
     "@intentra/iam": "workspace:*",
     "@intentra/workspace": "workspace:*",
     "@nestjs/common": "catalog:nestjs12",

@@ -1,8 +1,8 @@
 {
-  "name": "@intentra/api-gateway",
+  "name": "@intentra/gateway",
   "version": "0.0.0",
   "private": true,
-  "description": "HTTP-фасад продукта: говорит транспортом и зовёт клиентские порты",
+  "description": "Фасад продукта: говорит транспортами и зовёт клиентские порты",
   "type": "module",
   "exports": {
     ".": {
@@ -16,7 +16,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "nx": {
     "tags": [
@@ -29,14 +31,18 @@
     "@intentra/api-ports": "workspace:*",
     "@intentra/iam-contracts": "workspace:*",
     "@intentra/workspace-contracts": "workspace:*",
+    "@mastra/core": "^1.67.0",
+    "@mastra/mcp": "^1.18.0",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/core": "catalog:nestjs12",
     "@nestjs/platform-express": "catalog:nestjs12",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "catalog:nestjs12"
+    "rxjs": "catalog:nestjs12",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "@types/node": "catalog:tooling"
+    "@types/node": "catalog:tooling",
+    "vitest": "catalog:tooling"
   }
 }

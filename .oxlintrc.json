@@ -158,7 +158,7 @@
       }
     },
     {
-      "files": ["libs/api-gateway/**/*.ts", "libs/mcp-gateway/**/*.ts"],
+      "files": ["libs/gateway/**/*.ts"],
       "rules": {
         "no-restricted-imports": [
           "error",
@@ -171,7 +171,6 @@
                   "!@intentra/*-contracts",
                   "!@intentra/*-contracts/**",
                   "!@intentra/api-ports",
-                  "!@intentra/api-gateway",
                   "!@intentra/adapter-*"
                 ],
                 "message": "A facade is a driving adapter: it speaks a transport and calls the client ports. It never imports a context package - the composition root binds the implementation."
@@ -182,9 +181,64 @@
       }
     },
     {
+      "files": ["libs/gateway/src/application/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@intentra/**",
+                  "!@intentra/shared",
+                  "!@intentra/*-contracts",
+                  "!@intentra/*-contracts/**",
+                  "!@intentra/api-ports",
+                  "!@intentra/adapter-*"
+                ],
+                "message": "A facade is a driving adapter: it speaks a transport and calls the client ports. It never imports a context package - the composition root binds the implementation."
+              },
+              {
+                "group": ["**/infrastructure/**", "**/presentation/**"],
+                "message": "The application layer declares ports; it does not reach for the adapters that implement them. The module wires them together."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["libs/gateway/src/presentation/**/rest/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@intentra/**",
+                  "!@intentra/shared",
+                  "!@intentra/*-contracts",
+                  "!@intentra/*-contracts/**",
+                  "!@intentra/api-ports",
+                  "!@intentra/adapter-*"
+                ],
+                "message": "A facade is a driving adapter: it speaks a transport and calls the client ports. It never imports a context package - the composition root binds the implementation."
+              },
+              {
+                "group": ["**/mcp/**", "**/graphql/**", "**/mcp.controller*"],
+                "message": "Transports stand next to each other, not on top of each other. What they share is authentication, and it lives in infrastructure/common - not in the neighbour."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "files": [
-        "libs/api-gateway/src/application/**/*.ts",
-        "libs/mcp-gateway/src/application/**/*.ts"
+        "libs/gateway/src/presentation/**/mcp/**/*.ts",
+        "libs/gateway/src/presentation/mcp.controller.ts",
+        "libs/gateway/src/infrastructure/mcp/**/*.ts"
       ],
       "rules": {
         "no-restricted-imports": [
@@ -198,14 +252,13 @@
                   "!@intentra/*-contracts",
                   "!@intentra/*-contracts/**",
                   "!@intentra/api-ports",
-                  "!@intentra/api-gateway",
                   "!@intentra/adapter-*"
                 ],
                 "message": "A facade is a driving adapter: it speaks a transport and calls the client ports. It never imports a context package - the composition root binds the implementation."
               },
               {
-                "group": ["**/infrastructure/**", "**/presentation/**"],
-                "message": "The application layer declares ports; it does not reach for the adapters that implement them. The module wires them together."
+                "group": ["**/rest/**", "**/graphql/**"],
+                "message": "Transports stand next to each other, not on top of each other. What they share is authentication, and it lives in infrastructure/common - not in the neighbour."
               }
             ]
           }
@@ -225,9 +278,10 @@
                   "!@intentra/shared",
                   "!@intentra/*-contracts",
                   "!@intentra/*-contracts/**",
+                  "!@intentra/api-ports",
                   "!@intentra/adapter-*"
                 ],
-                "message": "A context may depend only on contracts, the shared kernel and technical adapters. Contexts integrate through published events, not through each other's packages; the client ports belong to consumers of the published API, not to contexts."
+                "message": "A context may depend only on contracts, the shared kernel, technical adapters and the client ports. It never imports a neighbour's package: it asks the neighbour through its client port when it needs an answer, and tells the world what happened through published events (ADR 0007)."
               }
             ]
           }
@@ -252,7 +306,7 @@
                   "!@intentra/*-contracts/**",
                   "!@intentra/adapter-*"
                 ],
-                "message": "A context may depend only on contracts, the shared kernel and technical adapters. Contexts integrate through published events, not through each other's packages; the client ports belong to consumers of the published API, not to contexts."
+                "message": "The domain may depend only on contracts, the shared kernel and technical adapters. A client port is not among them: calling a neighbour is a use case, not something an entity does."
               },
               {
                 "group": [
@@ -283,9 +337,10 @@
                   "!@intentra/shared",
                   "!@intentra/*-contracts",
                   "!@intentra/*-contracts/**",
+                  "!@intentra/api-ports",
                   "!@intentra/adapter-*"
                 ],
-                "message": "A context may depend only on contracts, the shared kernel and technical adapters. Contexts integrate through published events, not through each other's packages; the client ports belong to consumers of the published API, not to contexts."
+                "message": "A context may depend only on contracts, the shared kernel, technical adapters and the client ports. It never imports a neighbour's package: it asks the neighbour through its client port when it needs an answer, and tells the world what happened through published events (ADR 0007)."
               },
               {
                 "group": ["**/infrastructure/**", "**/presentation/**"],
