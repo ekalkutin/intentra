@@ -1,0 +1,26 @@
+/// Выданное право: кому, какая роль, на какой области.
+///
+/// Область — пара «тип + идентификатор», а не колонка на каждый уровень: права
+/// на новые виды объектов добавляются данными, а не миграцией модели (ADR 0002).
+model RoleAssignment {
+  id          String @id @db.Uuid
+  workspaceId String @map("workspace_id") @db.Uuid
+  accountId   String @map("account_id") @db.Uuid
+
+  /// Код роли из каталога контекста: `owner`, `member`, `viewer`, `editor`.
+  role String @db.VarChar(40)
+
+  /// `workspace` или `project`. Платформенных полномочий здесь не бывает — они
+  /// в IAM, отдельной моделью и отдельным кодом (ADR 0003).
+  scopeType String  @map("scope_type") @db.VarChar(20)
+  scopeId   String? @map("scope_id") @db.Uuid
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  /// Одна и та же роль на одной и той же области выдаётся один раз.
+  @@unique([workspaceId, accountId, role, scopeType, scopeId])
+  @@index([workspaceId, accountId])
+  @@map("role_assignments")
+}

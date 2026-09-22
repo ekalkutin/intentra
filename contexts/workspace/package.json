@@ -1,0 +1,50 @@
+{
+  "name": "@intentra/workspace",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Workspace: \u0442\u0435\u043d\u0430\u043d\u0442, \u0435\u0433\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u044b, \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0438 \u0438 \u043f\u0440\u0430\u0432\u0430",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js"
+    }
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "db:generate": "prisma format && prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "build": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "nx": {
+    "tags": [
+      "type:context",
+      "deployment:monolith",
+      "deployment:microservices"
+    ]
+  },
+  "dependencies": {
+    "@intentra/shared": "workspace:*",
+    "@intentra/workspace-contracts": "workspace:*",
+    "@nestjs/common": "catalog:nestjs12",
+    "@nestjs/core": "catalog:nestjs12",
+    "@nestjs/cqrs": "catalog:nestjs12",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "dotenv": "catalog:",
+    "reflect-metadata": "^0.2.2",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "catalog:nestjs12",
+    "@types/node": "catalog:tooling",
+    "prisma": "^7.9.1",
+    "vitest": "catalog:tooling"
+  }
+}

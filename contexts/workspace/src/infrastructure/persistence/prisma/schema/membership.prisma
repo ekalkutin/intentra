@@ -1,0 +1,16 @@
+/// Принадлежность `Account` этому workspace: «он вообще наш?».
+model Membership {
+  id String @id @db.Uuid
+
+  workspaceId String @map("workspace_id") @db.Uuid
+  accountId   String @map("account_id") @db.Uuid
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  /// Дважды состоять в одном workspace нельзя.
+  @@unique([workspaceId, accountId])
+  @@index([accountId])
+  @@map("memberships")
+}

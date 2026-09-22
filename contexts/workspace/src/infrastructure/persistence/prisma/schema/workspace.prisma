@@ -1,0 +1,15 @@
+/// Граница тенанта. Владельца в себе не держит: владение — это выданное право,
+/// и живёт оно в `role_assignments`.
+model Workspace {
+  id   String @id @db.Uuid
+  name String @db.VarChar(80)
+
+  projects        Project[]
+  memberships     Membership[]
+  roleAssignments RoleAssignment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("workspaces")
+}

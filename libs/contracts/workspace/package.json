@@ -1,0 +1,32 @@
+{
+  "name": "@intentra/workspace-contracts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Опубликованный язык Workspace: DTO и API, безопасные для браузера",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "default": "./build/index.js"
+    }
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "nx": {
+    "tags": [
+      "type:contracts",
+      "deployment:monolith",
+      "deployment:microservices"
+    ]
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  }
+}

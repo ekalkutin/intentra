@@ -1,7 +1,7 @@
-import { Aggregate } from '@intentra/shared';
+import { AccountId, Aggregate } from '@intentra/shared';
 
 import { AccountRegisteredEvent } from '../events/index.js';
-import { AccountId, Email } from '../value-objects/index.js';
+import { Email } from '../value-objects/index.js';
 
 export type RegisterProps = {
   readonly email: string;
