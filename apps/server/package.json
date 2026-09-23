@@ -1,0 +1,29 @@
+{
+  "name": "@intentra/server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch build/main.js",
+    "build": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@nestjs/common": "catalog:nestjs12",
+    "@nestjs/config": "catalog:nestjs12",
+    "@nestjs/core": "catalog:nestjs12",
+    "@nestjs/microservices": "catalog:nestjs12",
+    "@nestjs/platform-express": "catalog:nestjs12",
+    "@intentra/iam": "workspace:*"
+  },
+  "nx": {
+    "tags": [
+      "type:app",
+      "deployment:monolith"
+    ]
+  }
+}
