@@ -7,6 +7,11 @@ export type AccountDocument = HydratedDocument<AccountModel>;
   collection: 'accounts',
 })
 export class AccountModel {
+  // The domain generates ids (AccountId, UUID), so _id stores them as is
+  // instead of a Mongo ObjectId.
+  @Prop({ type: String, required: true })
+  _id: string;
+
   @Prop({ required: true })
   email: string;
 
