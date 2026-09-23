@@ -1,17 +1,29 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 
 import { IamModule } from '@intentra/iam';
 
+import {
+  EnvironmentSchema,
+  Variables,
+} from './infrastructure/config.schema.js';
+
 @Module({
   imports: [
-    IamModule.register({
-      database: {
-        host: 'localhost',
-        name: 'iam',
-        username: '',
-        password: '',
-      },
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env'],
+      validate: config => EnvironmentSchema.parse(config),
     }),
+    MongooseModule.forRootAsync({
+      useFactory: (config: ConfigService<Variables, true>) => ({
+        uri: config.get('database.uri', { infer: true }),
+        authSource: 'admin',
+      }),
+      inject: [ConfigService],
+    }),
+    IamModule.register({}),
   ],
 })
 export class ServerModule {}
