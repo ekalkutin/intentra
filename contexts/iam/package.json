@@ -24,8 +24,8 @@
     "@intentra/iam-contracts": "workspace:*",
     "@intentra/shared": "workspace:*",
     "@nestjs/common": "catalog:nestjs12",
-    "@nestjs/mongoose": "^12.0.0",
-    "mongoose": "^9.10.2"
+    "@nestjs/mongoose": "catalog:nestjs12",
+    "mongoose": "catalog:"
   },
   "nx": {
     "tags": [
