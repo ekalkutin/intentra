@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { GatewayModule } from '@intentra/gateway';
 import { IamModule } from '@intentra/iam';
+import { WorkspaceModule } from '@intentra/workspace';
 
 import {
   EnvironmentSchema,
@@ -25,7 +26,7 @@ import {
       inject: [ConfigService],
     }),
     GatewayModule.register({
-      contexts: [IamModule.register({})],
+      contexts: [IamModule.register({}), WorkspaceModule.register({})],
     }),
   ],
 })

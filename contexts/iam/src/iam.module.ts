@@ -4,7 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AccountApi, AuthApi } from '@intentra/iam-contracts';
 
 import { AccountRepository } from './application/ports/account-repository.port.js';
-import { ConfigurableModuleClass } from './iam.module-definition.js';
+import { ConfigurableModuleClass } from './iam.module-defs.js';
 import { IamService } from './iam.service.js';
 import {
   AccountModel,

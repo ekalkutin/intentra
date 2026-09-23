@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@intentra/iam-contracts": "workspace:*",
+    "@intentra/workspace-contracts": "workspace:*",
     "@modelcontextprotocol/node": "^2.0.0",
     "@modelcontextprotocol/server": "^2.0.0",
     "@nestjs/common": "catalog:nestjs12",

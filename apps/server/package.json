@@ -15,6 +15,7 @@
   "dependencies": {
     "@intentra/gateway": "workspace:*",
     "@intentra/iam": "workspace:*",
+    "@intentra/workspace": "workspace:*",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/config": "catalog:nestjs12",
     "@nestjs/core": "catalog:nestjs12",
