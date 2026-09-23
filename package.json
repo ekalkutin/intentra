@@ -22,11 +22,11 @@
     "@commitlint/config-conventional": "^21.2.3",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@types/node": "^26.6.2",
-    "@vitest/coverage-v8": "^5.0.1",
+    "@vitest/coverage-v8": "catalog:tooling",
     "husky": "^9.1.7",
     "lint-staged": "^17.5.1",
     "nx": "^23.2.1",
-    "oxlint": "^1.83.0",
+    "oxlint": "^1.85.0",
     "prettier": "^3.9.8",
     "typescript": "catalog:tooling",
     "vitest": "catalog:tooling"

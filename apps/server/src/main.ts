@@ -11,7 +11,6 @@ async function bootstrap() {
   );
 
   app.useGlobalPipes(new StandardSchemaValidationPipe());
-  app.setGlobalPrefix('api');
   app.enableCors();
   app.useBodyParser('json', { limit: '1mb' });
 

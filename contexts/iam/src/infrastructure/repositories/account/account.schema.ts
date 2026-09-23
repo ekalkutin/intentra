@@ -7,6 +7,9 @@ export type AccountDocument = HydratedDocument<AccountModel>;
   collection: 'accounts',
 })
 export class AccountModel {
+  @Prop({ type: String, required: true })
+  _id: string;
+
   @Prop({ required: true })
   email: string;
 

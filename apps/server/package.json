@@ -13,15 +13,17 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@intentra/gateway": "workspace:*",
     "@intentra/iam": "workspace:*",
+    "@intentra/workspace": "workspace:*",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/config": "catalog:nestjs12",
     "@nestjs/core": "catalog:nestjs12",
     "@nestjs/microservices": "catalog:nestjs12",
-    "@nestjs/mongoose": "^12.0.0",
+    "@nestjs/mongoose": "catalog:nestjs12",
     "@nestjs/platform-express": "catalog:nestjs12",
-    "mongoose": "^9.10.2",
-    "zod": "^4.6.5"
+    "mongoose": "catalog:",
+    "zod": "catalog:"
   },
   "nx": {
     "tags": [

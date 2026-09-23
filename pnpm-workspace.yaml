@@ -4,15 +4,10 @@ packages:
   - "libs/*"
   - "libs/*/*"
 
-# Рантайм-зависимости, общие для всего воркспейса. Пакет пишет "catalog:".
-# zod здесь, потому что на нём написан каждый опубликованный язык: схема из
-# libs/contracts валидирует и на шлюзе, и в браузере — разъехавшиеся версии
-# означали бы две несовпадающие проверки одного и того же сообщения.
 catalog:
   zod: "^4.6.5"
+  mongoose: "^9.10.2"
 
-# Именованные наборы: версии, которые обязаны двигаться вместе.
-# Пакет пишет "catalog:<имя>".
 catalogs:
   nestjs12:
     "@nestjs/common": "12.0.4"
@@ -20,17 +15,17 @@ catalogs:
     "@nestjs/platform-express": "12.0.4"
     "@nestjs/microservices": "12.0.4"
     "@nestjs/cqrs": "12.0.0"
-    "@nestjs/config": "12.0.0"
+    "@nestjs/config": "12.0.1"
     "@nestjs/testing": "12.0.4"
     "@nestjs/jwt": "12.0.2"
+    "@nestjs/mongoose": "^12.0.0"
     reflect-metadata: "^0.2.2"
     rxjs: "^7.8.2"
   tooling:
     typescript: "7.0.2"
     vitest: "^5.0.1"
+    "@vitest/coverage-v8": "^5.0.1"
 
-# Разрешение на postinstall-скрипты выдаётся поимённо: по умолчанию pnpm их не
-# исполняет. Пополняется по мере появления зависимостей.
 allowBuilds:
   "@nestjs/core": true
   esbuild: true
