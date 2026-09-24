@@ -13,18 +13,18 @@ import {
 export class WorkspaceController {
   constructor(
     @Inject(WorkspaceApi)
-    private readonly workspaceApi: WorkspaceApi,
+    private readonly workspace: WorkspaceApi,
   ) {}
 
   @Get()
   public find(): Promise<WorkspaceDto[]> {
-    return this.workspaceApi.find();
+    return this.workspace.workspaces.find();
   }
 
   @Post()
   public create(
     @Body({ schema: CreateWorkspaceDtoSchema }) data: CreateWorkspaceDto,
   ): Promise<WorkspaceDto> {
-    return this.workspaceApi.create(data);
+    return this.workspace.workspaces.create(data);
   }
 }

@@ -1,8 +1,7 @@
 import { Body, Controller, Inject, Post } from '@nestjs/common';
 
 import {
-  AccountApi,
-  AuthApi,
+  IamApi,
   SignUpDtoSchema,
   TokensDto,
   type SignUpDto,
@@ -13,17 +12,14 @@ import {
 })
 export class AuthController {
   constructor(
-    @Inject(AccountApi)
-    private readonly accountApi: AccountApi,
-
-    @Inject(AuthApi)
-    private readonly authApi: AuthApi,
+    @Inject(IamApi)
+    private readonly iam: IamApi,
   ) {}
 
   @Post('/sign-up')
   public signUp(
     @Body({ schema: SignUpDtoSchema }) signUpDto: SignUpDto,
   ): Promise<TokensDto> {
-    return this.authApi.signUp(signUpDto);
+    return this.iam.auth.signUp(signUpDto);
   }
 }

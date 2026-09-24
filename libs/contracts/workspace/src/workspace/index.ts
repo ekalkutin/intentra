@@ -1,4 +1,4 @@
-export { WorkspaceApi } from './workspace.api.js';
+export type { WorkspacesApi } from './workspaces.api.js';
 export {
   type CreateWorkspaceDto,
   type WorkspaceDto,

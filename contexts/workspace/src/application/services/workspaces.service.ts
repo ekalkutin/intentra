@@ -1,22 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import {
+import type {
   CreateWorkspaceDto,
-  WorkspaceApi,
   WorkspaceDto,
+  WorkspacesApi,
 } from '@intentra/workspace-contracts';
 
-import { WorkspaceRepository } from '../application/ports/index.js';
-import { Workspace } from '../domain/entities/workspace.aggregate.js';
+import { Workspace } from '../../domain/entities/index.js';
+import { WorkspaceRepository } from '../ports/index.js';
 
 @Injectable()
-export class WorkspaceApiAdapter extends WorkspaceApi {
+export class WorkspacesService implements WorkspacesApi {
   constructor(
     @Inject(WorkspaceRepository)
     private readonly workspaceRepository: WorkspaceRepository,
-  ) {
-    super();
-  }
+  ) {}
 
   public async create(data: CreateWorkspaceDto): Promise<WorkspaceDto> {
     const workspace = Workspace.create(data);

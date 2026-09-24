@@ -1,17 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AccountApi, AccountDto } from '@intentra/iam-contracts';
+import type { AccountDto, AccountsApi } from '@intentra/iam-contracts';
 
-import { AccountRepository } from '../../application/ports/index.js';
+import { AccountRepository } from '../ports/index.js';
 
 @Injectable()
-export class AccountApiAdapter extends AccountApi {
+export class AccountsService implements AccountsApi {
   constructor(
     @Inject(AccountRepository)
     private readonly accountRepository: AccountRepository,
-  ) {
-    super();
-  }
+  ) {}
 
   public async find(): Promise<AccountDto[]> {
     const accounts = await this.accountRepository.find();

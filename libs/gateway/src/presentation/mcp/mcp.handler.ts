@@ -7,7 +7,7 @@ import {
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AccountApi } from '@intentra/iam-contracts';
+import { IamApi } from '@intentra/iam-contracts';
 
 import { registerAccountTools } from './tools/accounts.tools.js';
 
@@ -19,11 +19,11 @@ import { registerAccountTools } from './tools/accounts.tools.js';
 export class McpHandler {
   readonly #handle: NodeMcpRequestHandler;
 
-  constructor(@Inject(AccountApi) accountApi: AccountApi) {
+  constructor(@Inject(IamApi) iam: IamApi) {
     this.#handle = toNodeHandler(
       createMcpHandler(() => {
         const server = new McpServer({ name: 'intentra', version: '1.0.0' });
-        registerAccountTools(server, accountApi);
+        registerAccountTools(server, iam.accounts);
         return server;
       }),
     );

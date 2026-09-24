@@ -1,18 +1,20 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { AccountApi, AuthApi } from '@intentra/iam-contracts';
+import { IamApi } from '@intentra/iam-contracts';
 
-import { AccountRepository } from './application/ports/account-repository.port.js';
+import { AccountRepository } from './application/ports/index.js';
+import {
+  AccountsService,
+  AuthService,
+  IamApiService,
+} from './application/services/index.js';
 import { ConfigurableModuleClass } from './iam.module-defs.js';
-import { IamService } from './iam.service.js';
 import {
   AccountModel,
   AccountRepositoryAdapter,
   AccountSchema,
 } from './infrastructure/repositories/account/index.js';
-import { AccountApiAdapter } from './presentation/api/account.api-adapter.js';
-import { AuthApiAdapter } from './presentation/api/auth.api-adapter.js';
 
 @Module({
   imports: [
@@ -25,20 +27,17 @@ import { AuthApiAdapter } from './presentation/api/auth.api-adapter.js';
   ],
 
   providers: [
-    IamService,
+    AccountsService,
+    AuthService,
     {
       provide: AccountRepository,
       useClass: AccountRepositoryAdapter,
     },
     {
-      provide: AccountApi,
-      useClass: AccountApiAdapter,
-    },
-    {
-      provide: AuthApi,
-      useClass: AuthApiAdapter,
+      provide: IamApi,
+      useClass: IamApiService,
     },
   ],
-  exports: [AccountApi, AuthApi],
+  exports: [IamApi],
 })
 export class IamModule extends ConfigurableModuleClass {}

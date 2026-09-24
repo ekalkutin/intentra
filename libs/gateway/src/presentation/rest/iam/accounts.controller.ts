@@ -1,18 +1,18 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 
-import { AccountApi, AccountDto } from '@intentra/iam-contracts';
+import { AccountDto, IamApi } from '@intentra/iam-contracts';
 
 @Controller({
   path: 'iam/accounts',
 })
 export class AccountsController {
   constructor(
-    @Inject(AccountApi)
-    private readonly accountApi: AccountApi,
+    @Inject(IamApi)
+    private readonly iam: IamApi,
   ) {}
 
   @Get()
   public find(): Promise<AccountDto[]> {
-    return this.accountApi.find();
+    return this.iam.accounts.find();
   }
 }

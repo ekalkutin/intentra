@@ -1,11 +1,11 @@
 import type { McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 
-import { AccountApi, AccountDtoSchema } from '@intentra/iam-contracts';
+import { AccountDtoSchema, type AccountsApi } from '@intentra/iam-contracts';
 
 export function registerAccountTools(
   server: McpServer,
-  accountApi: AccountApi,
+  accountsApi: AccountsApi,
 ): void {
   server.registerTool(
     'find-accounts',
@@ -16,7 +16,7 @@ export function registerAccountTools(
       outputSchema: z.object({ accounts: z.array(AccountDtoSchema) }),
     },
     async () => {
-      const accounts = await accountApi.find();
+      const accounts = await accountsApi.find();
       return {
         content: [{ type: 'text', text: JSON.stringify(accounts) }],
         structuredContent: { accounts },

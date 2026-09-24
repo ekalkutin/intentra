@@ -1,23 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AuthApi, SignUpDto, TokensDto } from '@intentra/iam-contracts';
+import type { AuthApi, SignUpDto, TokensDto } from '@intentra/iam-contracts';
 
-import { AccountRepository } from '../../application/ports/index.js';
 import { Account } from '../../domain/entities/index.js';
+import { AccountRepository } from '../ports/index.js';
 
 @Injectable()
-export class AuthApiAdapter extends AuthApi {
+export class AuthService implements AuthApi {
   constructor(
     @Inject(AccountRepository)
     private readonly accountRepository: AccountRepository,
-  ) {
-    super();
-  }
+  ) {}
 
   public async signUp(data: SignUpDto): Promise<TokensDto> {
-    const acccount = Account.signUp(data.email, data.password);
+    const account = Account.signUp(data.email, data.password);
 
-    await this.accountRepository.save(acccount);
+    await this.accountRepository.save(account);
 
     return {
       accessToken: 'dummy-access-token',

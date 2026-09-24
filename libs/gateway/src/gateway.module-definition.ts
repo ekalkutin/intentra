@@ -9,7 +9,7 @@ import { RestModule } from './presentation/rest/rest.module.js';
 // Options of the gateway itself. Empty for now.
 export type GatewayModuleOptions = {};
 
-// Extras: modules that provide the context ports (AccountApi, ...).
+// Extras: modules that provide the context ports (IamApi, WorkspaceApi, ...).
 // The composition root decides: local context modules or transport clients.
 type GatewayModuleExtras = PresentationModuleOptions;
 
