@@ -15,3 +15,7 @@ _Avoid_: Product, Initiative
 **Member**:
 An account's participation in one workspace, together with its role there. The same account can be a member of many workspaces with a different role in each.
 _Avoid_: User, Participant, Seat
+
+**Project Member**:
+A member's access to one project, together with their role in that project. Being a member of the workspace alone does not open any of its projects.
+_Avoid_: Project Membership, Collaborator, Assignee

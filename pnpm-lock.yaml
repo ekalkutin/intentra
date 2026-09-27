@@ -243,6 +243,9 @@ importers:
 
   apps/server:
     dependencies:
+      '@intentra/agents':
+        specifier: workspace:*
+        version: link:../../contexts/agents
       '@intentra/gateway':
         specifier: workspace:*
         version: link:../../libs/gateway
@@ -276,6 +279,12 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 4.6.5
+
+  contexts/agents:
+    dependencies:
+      '@nestjs/common':
+        specifier: catalog:nestjs12
+        version: 12.0.4(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0)
 
   contexts/iam:
     dependencies:

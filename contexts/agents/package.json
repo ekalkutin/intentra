@@ -1,0 +1,30 @@
+{
+  "name": "@intentra/agents",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js"
+    }
+  },
+  "files": [
+    "build"
+  ],
+  "dependencies": {
+    "@nestjs/common": "catalog:nestjs12"
+  },
+  "nx": {
+    "tags": [
+      "type:context",
+      "deployment:monolith",
+      "deployment:microservices"
+    ]
+  }
+}
