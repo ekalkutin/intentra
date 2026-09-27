@@ -1,8 +1,10 @@
 export type { WorkspacesApi } from './workspace/workspaces.api.js';
 export {
   type CreateWorkspaceDto,
+  type FindWorkspacesDto,
   type WorkspaceDto,
   CreateWorkspaceDtoSchema,
+  FindWorkspacesDtoSchema,
   WorkspaceDtoSchema,
 } from './workspace/workspace.dto.js';
 export type { ProjectsApi } from './project/project.api.js';

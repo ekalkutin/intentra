@@ -18,14 +18,22 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@apollo/server": "^5.5.1",
+    "@as-integrations/express5": "^1.1.2",
     "@intentra/agent-surface": "workspace:*",
     "@intentra/contracts": "workspace:*",
     "@modelcontextprotocol/node": "^2.1.0",
     "@modelcontextprotocol/server": "^2.1.0",
+    "@nestjs/apollo": "14.0.2",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/core": "catalog:nestjs12",
-    "@nestjs/platform-express": "catalog:nestjs12",
+    "@nestjs/graphql": "14.0.2",
+    "dataloader": "^2.2.3",
+    "graphql": "^16.14.2",
     "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "@nestjs/platform-express": "catalog:nestjs12"
   },
   "nx": {
     "tags": [

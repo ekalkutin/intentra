@@ -26,6 +26,7 @@ catalogs:
     "@vitest/coverage-v8": "^5.0.2"
 
 allowBuilds:
+  "@apollo/protobufjs": true
   "@nestjs/core": true
   esbuild: true
   nx: true

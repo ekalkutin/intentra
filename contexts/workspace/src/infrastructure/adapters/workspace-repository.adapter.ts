@@ -25,8 +25,9 @@ export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
     await workspaceModel.save();
   }
 
-  public async find(): Promise<Workspace[]> {
-    const workspaces = await this.workspaceModel.find().exec();
+  public async find(ids?: WorkspaceId[]): Promise<Workspace[]> {
+    const filter = ids ? { _id: { $in: ids.map(id => id.value) } } : {};
+    const workspaces = await this.workspaceModel.find(filter).exec();
     return workspaces.map(workspace => this.toDomain(workspace));
   }
 
