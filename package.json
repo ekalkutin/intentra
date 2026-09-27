@@ -12,6 +12,10 @@
     "build": "nx run-many -t build",
     "typecheck": "nx run-many -t typecheck",
     "test": "nx run-many -t test",
+    "db:contract": "nx run-many -t db:contract",
+    "db:plan": "nx run-many -t db:plan --parallel=1",
+    "db:migrate": "nx run-many -t db:migrate --parallel=1",
+    "db:reset": "nx run-many -t db:reset --parallel=1",
     "lint": "oxlint --no-error-on-unmatched-pattern apps/ contexts/ libs/",
     "prettier": "prettier --write \"{apps,contexts,libs}/**/*.{ts,tsx,json}\"",
     "prettier:check": "prettier --check \"{apps,contexts,libs}/**/*.{ts,tsx,json}\"",
@@ -28,13 +32,14 @@
     "lint-staged": "^17.6.0",
     "nx": "^23.2.1",
     "oxlint": "^1.85.0",
+    "pg": "8.22.0",
     "prettier": "^3.9.9",
     "typescript": "catalog:tooling",
     "vitest": "catalog:tooling"
   },
   "lint-staged": {
     "**/!(*.generated).{ts,tsx}": [
-      "oxlint --fix",
+      "oxlint --fix --no-error-on-unmatched-pattern",
       "prettier --write"
     ]
   }

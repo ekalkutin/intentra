@@ -1,0 +1,689 @@
+[
+  {
+    "id": "table.members",
+    "label": "Create table \"members\"",
+    "summary": "Creates table \"members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"members\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"members\"",
+        "sql": "CREATE TABLE \"public\".\"members\" (\n  \"account_id\" uuid NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"role_id\" uuid NOT NULL,\n  \"workspace_id\" uuid NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"members\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.project_members",
+    "label": "Create table \"project_members\"",
+    "summary": "Creates table \"project_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "project_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"project_members\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"project_members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"project_members\"",
+        "sql": "CREATE TABLE \"public\".\"project_members\" (\n  \"member_id\" uuid NOT NULL,\n  \"project_id\" uuid NOT NULL,\n  \"role_id\" uuid NOT NULL,\n  PRIMARY KEY (\"project_id\", \"member_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"project_members\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"project_members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.roles",
+    "label": "Create table \"roles\"",
+    "summary": "Creates table \"roles\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "roles"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"roles\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roles\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"roles\"",
+        "sql": "CREATE TABLE \"public\".\"roles\" (\n  \"id\" uuid NOT NULL,\n  \"name\" text NOT NULL,\n  \"scope\" text NOT NULL,\n  \"workspace_id\" uuid,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"roles_scope_check_0058d1ca\" CHECK (\"scope\" IN ('workspace', 'project'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"roles\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roles\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.members.members_workspace_id_account_id_key",
+    "label": "Add unique constraint on \"members\" (workspace_id, account_id)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "members_workspace_id_account_id_key",
+        "table": "members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"members_workspace_id_account_id_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "members_workspace_id_account_id_key",
+          "public",
+          "\"public\".\"members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"members_workspace_id_account_id_key\"",
+        "sql": "ALTER TABLE \"public\".\"members\" ADD CONSTRAINT \"members_workspace_id_account_id_key\" UNIQUE (\"workspace_id\", \"account_id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"members_workspace_id_account_id_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "members_workspace_id_account_id_key",
+          "public",
+          "\"public\".\"members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.roles.roles_workspace_id_scope_name_key",
+    "label": "Add unique constraint on \"roles\" (workspace_id, scope, name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "roles_workspace_id_scope_name_key",
+        "table": "roles"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"roles_workspace_id_scope_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roles_workspace_id_scope_name_key",
+          "public",
+          "\"public\".\"roles\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"roles_workspace_id_scope_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"roles\" ADD CONSTRAINT \"roles_workspace_id_scope_name_key\" UNIQUE (\"workspace_id\", \"scope\", \"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"roles_workspace_id_scope_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roles_workspace_id_scope_name_key",
+          "public",
+          "\"public\".\"roles\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.members.members_role_id_idx_d9467c50",
+    "label": "Create index \"members_role_id_idx_d9467c50\" on \"members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "members_role_id_idx_d9467c50",
+        "table": "members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"members_role_id_idx_d9467c50\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"members_role_id_idx_d9467c50\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"members_role_id_idx_d9467c50\"",
+        "sql": "CREATE INDEX \"members_role_id_idx_d9467c50\" ON \"public\".\"members\" (\"role_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"members_role_id_idx_d9467c50\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"members_role_id_idx_d9467c50\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.members.members_workspace_id_idx_90a9f461",
+    "label": "Create index \"members_workspace_id_idx_90a9f461\" on \"members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "members_workspace_id_idx_90a9f461",
+        "table": "members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"members_workspace_id_idx_90a9f461\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"members_workspace_id_idx_90a9f461\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"members_workspace_id_idx_90a9f461\"",
+        "sql": "CREATE INDEX \"members_workspace_id_idx_90a9f461\" ON \"public\".\"members\" (\"workspace_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"members_workspace_id_idx_90a9f461\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"members_workspace_id_idx_90a9f461\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.project_members.project_members_member_id_idx_10d5a0e2",
+    "label": "Create index \"project_members_member_id_idx_10d5a0e2\" on \"project_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "project_members_member_id_idx_10d5a0e2",
+        "table": "project_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"project_members_member_id_idx_10d5a0e2\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"project_members_member_id_idx_10d5a0e2\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"project_members_member_id_idx_10d5a0e2\"",
+        "sql": "CREATE INDEX \"project_members_member_id_idx_10d5a0e2\" ON \"public\".\"project_members\" (\"member_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"project_members_member_id_idx_10d5a0e2\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"project_members_member_id_idx_10d5a0e2\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.project_members.project_members_project_id_idx_6ad92603",
+    "label": "Create index \"project_members_project_id_idx_6ad92603\" on \"project_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "project_members_project_id_idx_6ad92603",
+        "table": "project_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"project_members_project_id_idx_6ad92603\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"project_members_project_id_idx_6ad92603\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"project_members_project_id_idx_6ad92603\"",
+        "sql": "CREATE INDEX \"project_members_project_id_idx_6ad92603\" ON \"public\".\"project_members\" (\"project_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"project_members_project_id_idx_6ad92603\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"project_members_project_id_idx_6ad92603\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.project_members.project_members_role_id_idx_d9467c50",
+    "label": "Create index \"project_members_role_id_idx_d9467c50\" on \"project_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "project_members_role_id_idx_d9467c50",
+        "table": "project_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"project_members_role_id_idx_d9467c50\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"project_members_role_id_idx_d9467c50\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"project_members_role_id_idx_d9467c50\"",
+        "sql": "CREATE INDEX \"project_members_role_id_idx_d9467c50\" ON \"public\".\"project_members\" (\"role_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"project_members_role_id_idx_d9467c50\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"project_members_role_id_idx_d9467c50\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.roles.roles_workspace_id_idx_90a9f461",
+    "label": "Create index \"roles_workspace_id_idx_90a9f461\" on \"roles\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "roles_workspace_id_idx_90a9f461",
+        "table": "roles"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"roles_workspace_id_idx_90a9f461\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roles_workspace_id_idx_90a9f461\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"roles_workspace_id_idx_90a9f461\"",
+        "sql": "CREATE INDEX \"roles_workspace_id_idx_90a9f461\" ON \"public\".\"roles\" (\"workspace_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"roles_workspace_id_idx_90a9f461\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roles_workspace_id_idx_90a9f461\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.members.members_workspace_id_fkey",
+    "label": "Add foreign key \"members_workspace_id_fkey\" on \"members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "members_workspace_id_fkey",
+        "table": "members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"members_workspace_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "members_workspace_id_fkey",
+          "public",
+          "\"public\".\"members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"members_workspace_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"members\"\nADD CONSTRAINT \"members_workspace_id_fkey\"\nFOREIGN KEY (\"workspace_id\")\nREFERENCES \"public\".\"workspaces\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"members_workspace_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "members_workspace_id_fkey",
+          "public",
+          "\"public\".\"members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.members.members_role_id_fkey",
+    "label": "Add foreign key \"members_role_id_fkey\" on \"members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "members_role_id_fkey",
+        "table": "members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"members_role_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "members_role_id_fkey",
+          "public",
+          "\"public\".\"members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"members_role_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"members\"\nADD CONSTRAINT \"members_role_id_fkey\"\nFOREIGN KEY (\"role_id\")\nREFERENCES \"public\".\"roles\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"members_role_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "members_role_id_fkey",
+          "public",
+          "\"public\".\"members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.project_members.project_members_project_id_fkey",
+    "label": "Add foreign key \"project_members_project_id_fkey\" on \"project_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "project_members_project_id_fkey",
+        "table": "project_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"project_members_project_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "project_members_project_id_fkey",
+          "public",
+          "\"public\".\"project_members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"project_members_project_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"project_members\"\nADD CONSTRAINT \"project_members_project_id_fkey\"\nFOREIGN KEY (\"project_id\")\nREFERENCES \"public\".\"projects\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"project_members_project_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "project_members_project_id_fkey",
+          "public",
+          "\"public\".\"project_members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.project_members.project_members_member_id_fkey",
+    "label": "Add foreign key \"project_members_member_id_fkey\" on \"project_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "project_members_member_id_fkey",
+        "table": "project_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"project_members_member_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "project_members_member_id_fkey",
+          "public",
+          "\"public\".\"project_members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"project_members_member_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"project_members\"\nADD CONSTRAINT \"project_members_member_id_fkey\"\nFOREIGN KEY (\"member_id\")\nREFERENCES \"public\".\"members\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"project_members_member_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "project_members_member_id_fkey",
+          "public",
+          "\"public\".\"project_members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.project_members.project_members_role_id_fkey",
+    "label": "Add foreign key \"project_members_role_id_fkey\" on \"project_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "project_members_role_id_fkey",
+        "table": "project_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"project_members_role_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "project_members_role_id_fkey",
+          "public",
+          "\"public\".\"project_members\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"project_members_role_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"project_members\"\nADD CONSTRAINT \"project_members_role_id_fkey\"\nFOREIGN KEY (\"role_id\")\nREFERENCES \"public\".\"roles\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"project_members_role_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "project_members_role_id_fkey",
+          "public",
+          "\"public\".\"project_members\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.roles.roles_workspace_id_fkey",
+    "label": "Add foreign key \"roles_workspace_id_fkey\" on \"roles\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "roles_workspace_id_fkey",
+        "table": "roles"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"roles_workspace_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roles_workspace_id_fkey",
+          "public",
+          "\"public\".\"roles\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"roles_workspace_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"roles\"\nADD CONSTRAINT \"roles_workspace_id_fkey\"\nFOREIGN KEY (\"workspace_id\")\nREFERENCES \"public\".\"workspaces\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"roles_workspace_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roles_workspace_id_fkey",
+          "public",
+          "\"public\".\"roles\""
+        ]
+      }
+    ]
+  }
+]

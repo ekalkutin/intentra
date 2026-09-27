@@ -238,6 +238,9 @@ importers:
       oxlint:
         specifier: ^1.85.0
         version: 1.85.0
+      pg:
+        specifier: 8.22.0
+        version: 8.22.0
       prettier:
         specifier: ^3.9.9
         version: 3.9.9

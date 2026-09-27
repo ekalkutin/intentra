@@ -9,9 +9,10 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "contract:emit": "prisma contract emit",
+    "db:contract": "prisma contract emit",
+    "db:plan": "prisma migration plan",
     "db:migrate": "prisma db migrate --advance-ref db",
-    "migration:plan": "prisma migration plan"
+    "db:reset": "node ../../scripts/db-reset.mjs && prisma db migrate --advance-ref db"
   },
   "exports": {
     ".": {

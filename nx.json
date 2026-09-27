@@ -28,6 +28,9 @@
     "dev": {
       "continuous": true,
       "dependsOn": ["watch"]
+    },
+    "db:plan": {
+      "dependsOn": ["db:contract"]
     }
   },
   "analytics": false
