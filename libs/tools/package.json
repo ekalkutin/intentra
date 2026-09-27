@@ -1,5 +1,5 @@
 {
-  "name": "@intentra/gateway",
+  "name": "@intentra/tools",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,21 +15,17 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@intentra/contracts": "workspace:*",
-    "@intentra/tools": "workspace:*",
-    "@modelcontextprotocol/node": "^2.0.0",
-    "@modelcontextprotocol/server": "^2.0.0",
-    "@nestjs/common": "catalog:nestjs12",
-    "@nestjs/core": "catalog:nestjs12",
-    "@nestjs/platform-express": "catalog:nestjs12",
     "zod": "catalog:"
   },
   "nx": {
     "tags": [
-      "type:gateway",
+      "type:tools",
       "deployment:monolith",
       "deployment:microservices"
     ]

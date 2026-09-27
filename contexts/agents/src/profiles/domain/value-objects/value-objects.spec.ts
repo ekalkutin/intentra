@@ -39,13 +39,14 @@ describe('ModelRef', () => {
 });
 
 describe('ToolId', () => {
-  it('restores a known tool as the declared instance', () => {
-    expect(ToolId.from('get_traceability')).toBe(ToolId.GetTraceability);
+  it('accepts a snake_case id', () => {
+    expect(new ToolId('list_workspaces').value).toBe('list_workspaces');
   });
 
-  it('rejects an unknown tool', () => {
-    expect(() => ToolId.from('drop_database')).toThrow(
-      'Unknown tool: drop_database',
-    );
-  });
+  it.each(['', 'find-accounts', 'ListWorkspaces', 'list__workspaces'])(
+    'rejects %j',
+    value => {
+      expect(() => new ToolId(value)).toThrow('Tool id must be snake_case');
+    },
+  );
 });

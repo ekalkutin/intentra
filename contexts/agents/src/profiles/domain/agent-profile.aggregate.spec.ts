@@ -9,6 +9,9 @@ import { Instructions } from './value-objects/instructions.vo.js';
 import { ModelRef } from './value-objects/model-ref.vo.js';
 import { ToolId } from './value-objects/tool-id.vo.js';
 
+const listWorkspaces = new ToolId('list_workspaces');
+const searchKnowledge = new ToolId('search_project_knowledge');
+
 const createProfile = (): AgentProfile =>
   AgentProfile.create({
     workspaceId: new WorkspaceId(),
@@ -28,38 +31,35 @@ describe('AgentProfile', () => {
   it('allows a tool only once', () => {
     const profile = createProfile();
 
-    profile.allowTool(ToolId.GetTraceability);
-    profile.allowTool(ToolId.GetTraceability);
+    profile.allowTool(listWorkspaces);
+    profile.allowTool(listWorkspaces);
 
-    expect(profile.tools).toEqual([ToolId.GetTraceability]);
+    expect(profile.tools).toEqual([listWorkspaces]);
   });
 
   it('revokes an allowed tool', () => {
     const profile = createProfile();
-    profile.allowTool(ToolId.GetTraceability);
-    profile.allowTool(ToolId.SearchProjectKnowledge);
+    profile.allowTool(listWorkspaces);
+    profile.allowTool(searchKnowledge);
 
-    profile.revokeTool(ToolId.GetTraceability);
+    profile.revokeTool(listWorkspaces);
 
-    expect(profile.tools).toEqual([ToolId.SearchProjectKnowledge]);
+    expect(profile.tools).toEqual([searchKnowledge]);
   });
 
   it('replaces the whole tool list, dropping duplicates', () => {
     const profile = createProfile();
-    profile.allowTool(ToolId.GetTraceability);
+    profile.allowTool(listWorkspaces);
 
-    profile.replaceTools([
-      ToolId.SearchProjectKnowledge,
-      ToolId.SearchProjectKnowledge,
-    ]);
+    profile.replaceTools([searchKnowledge, searchKnowledge]);
 
-    expect(profile.tools).toEqual([ToolId.SearchProjectKnowledge]);
+    expect(profile.tools).toEqual([searchKnowledge]);
   });
 
   it('does not expose its tools for outside changes', () => {
     const profile = createProfile();
 
-    (profile.tools as ToolId[]).push(ToolId.GetTraceability);
+    (profile.tools as ToolId[]).push(listWorkspaces);
 
     expect(profile.tools).toEqual([]);
   });
@@ -72,7 +72,7 @@ describe('AgentProfile', () => {
     expect(() => profile.rename(new AgentName('Other'))).toThrow(
       AgentProfileArchivedError,
     );
-    expect(() => profile.allowTool(ToolId.GetTraceability)).toThrow(
+    expect(() => profile.allowTool(listWorkspaces)).toThrow(
       AgentProfileArchivedError,
     );
     expect(() => profile.archive()).toThrow(AgentProfileArchivedError);

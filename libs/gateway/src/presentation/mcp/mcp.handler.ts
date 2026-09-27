@@ -8,22 +8,31 @@ import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { IamApi } from '@intentra/contracts/iam';
+import { WorkspaceApi } from '@intentra/contracts/workspace';
+import { TOOL_CATALOG } from '@intentra/tools';
 
-import { registerAccountTools } from './tools/accounts.tools.js';
+import { registerMcpTools, selectMcpTools } from './catalog-tools.js';
 
 /**
  * Stateless MCP over Streamable HTTP: the factory builds a fresh McpServer
- * for every request, tools get the context ports through Nest DI.
+ * for every request and offers it the catalog tools exposed to MCP, bound to
+ * the published APIs from Nest DI.
  */
 @Injectable()
 export class McpHandler {
   readonly #handle: NodeMcpRequestHandler;
 
-  constructor(@Inject(IamApi) iam: IamApi) {
+  constructor(
+    @Inject(IamApi) iam: IamApi,
+    @Inject(WorkspaceApi) workspace: WorkspaceApi,
+  ) {
+    const tools = selectMcpTools(TOOL_CATALOG);
+    const apis = { iam, workspace };
+
     this.#handle = toNodeHandler(
       createMcpHandler(() => {
         const server = new McpServer({ name: 'intentra', version: '1.0.0' });
-        registerAccountTools(server, iam.accounts);
+        registerMcpTools(server, tools, apis);
         return server;
       }),
     );

@@ -72,7 +72,7 @@ export class AgentProfileRepositoryAdapter extends AgentProfileRepository {
       name: new AgentName(profile.name),
       instructions: new Instructions(profile.instructions),
       model: new ModelRef(profile.modelProvider, profile.modelName),
-      tools: profile.tools.map(tool => ToolId.from(tool)),
+      tools: profile.tools.map(tool => new ToolId(tool)),
       archivedAt: profile.archivedAt,
     });
   }

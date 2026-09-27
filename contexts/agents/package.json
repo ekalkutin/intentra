@@ -22,6 +22,7 @@
   "dependencies": {
     "@intentra/contracts": "workspace:*",
     "@intentra/shared": "workspace:*",
+    "@intentra/tools": "workspace:*",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/mongoose": "catalog:nestjs12",
     "mongoose": "catalog:"

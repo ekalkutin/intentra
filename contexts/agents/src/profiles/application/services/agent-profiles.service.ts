@@ -14,14 +14,19 @@ import { AgentProfileId } from '../../domain/value-objects/agent-profile-id.vo.j
 import { Instructions } from '../../domain/value-objects/instructions.vo.js';
 import { ModelRef } from '../../domain/value-objects/model-ref.vo.js';
 import { ToolId } from '../../domain/value-objects/tool-id.vo.js';
+import { UnknownToolError } from '../errors/unknown-tool.error.js';
 import { toAgentProfileDto } from '../mappers/agent-profile.mapper.js';
 import { AgentProfileRepository } from '../ports/agent-profile-repository.port.js';
+import { ToolCatalog } from '../ports/tool-catalog.port.js';
 
 @Injectable()
 export class AgentProfilesService implements AgentProfilesApi {
   constructor(
     @Inject(AgentProfileRepository)
     private readonly agentProfileRepository: AgentProfileRepository,
+
+    @Inject(ToolCatalog)
+    private readonly toolCatalog: ToolCatalog,
   ) {}
 
   public async create(
@@ -34,7 +39,7 @@ export class AgentProfilesService implements AgentProfilesApi {
       instructions: new Instructions(data.instructions),
       model: new ModelRef(data.model.provider, data.model.name),
     });
-    profile.replaceTools((data.tools ?? []).map(tool => ToolId.from(tool)));
+    profile.replaceTools(this.#toAvailableTools(data.tools ?? []));
 
     await this.agentProfileRepository.save(profile);
     return toAgentProfileDto(profile);
@@ -75,7 +80,7 @@ export class AgentProfilesService implements AgentProfilesApi {
       profile.changeModel(new ModelRef(data.model.provider, data.model.name));
     }
     if (data.tools !== undefined) {
-      profile.replaceTools(data.tools.map(tool => ToolId.from(tool)));
+      profile.replaceTools(this.#toAvailableTools(data.tools));
     }
 
     await this.agentProfileRepository.save(profile);
@@ -90,6 +95,17 @@ export class AgentProfilesService implements AgentProfilesApi {
 
     profile.archive();
     await this.agentProfileRepository.save(profile);
+  }
+
+  /** New tools must be in the catalog; stored ones are not checked again. */
+  #toAvailableTools(ids: readonly string[]): ToolId[] {
+    return ids.map(id => {
+      const tool = new ToolId(id);
+      if (!this.toolCatalog.isAvailable(tool)) {
+        throw new UnknownToolError(tool);
+      }
+      return tool;
+    });
   }
 
   /** An archived profile counts as deleted, so it is not found either. */
