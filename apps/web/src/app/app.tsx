@@ -1,3 +1,7 @@
-import { AppRouterProvider } from './providers';
+import { AppRouterProvider, GraphQLProvider } from './providers';
 
-export const App = () => <AppRouterProvider />;
+export const App = () => (
+  <GraphQLProvider>
+    <AppRouterProvider />
+  </GraphQLProvider>
+);

@@ -4,7 +4,9 @@
     "**/build/**",
     "node_modules/**",
     "**/generated/**",
-    "**/*.generated.ts"
+    "**/*.generated.ts",
+    "**/__generated__/**",
+    "apps/web/src/app/graphql.ts"
   ],
   "plugins": ["import", "typescript", "oxc", "unicorn"],
   "categories": {
