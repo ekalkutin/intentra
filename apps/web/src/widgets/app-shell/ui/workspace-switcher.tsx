@@ -32,7 +32,7 @@ export const WorkspaceSwitcher = () => {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <SidebarMenuButton>
+          <SidebarMenuButton tooltip={workspace.name}>
             <WorkspaceAvatar name={workspace.name} />
             <span className='flex-1 truncate font-medium'>
               {workspace.name}

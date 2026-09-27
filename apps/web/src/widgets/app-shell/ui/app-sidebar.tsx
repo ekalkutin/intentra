@@ -12,7 +12,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
 } from '@/shared/ui/sidebar';
 
 import { AI_TEAM_NAV, UTILITY_NAV, WORK_NAV, type NavItem } from '../model/nav';
@@ -31,6 +30,7 @@ const NavLinkItem = ({ item }: { item: NavItem }) => {
     <SidebarMenuItem>
       <SidebarMenuButton
         isActive={isActive}
+        tooltip={item.label}
         render={<Link to={generatePath(item.path, { alias })} />}
         className={NAV_ITEM_CLASS_NAME}
       >
@@ -61,7 +61,7 @@ const NavGroup = ({
 );
 
 export const AppSidebar = () => (
-  <Sidebar variant='inset'>
+  <Sidebar variant='inset' collapsible='icon'>
     <SidebarHeader className='py-3'>
       <SidebarMenu>
         <SidebarMenuItem>
@@ -82,6 +82,5 @@ export const AppSidebar = () => (
         ))}
       </SidebarMenu>
     </SidebarFooter>
-    <SidebarRail />
   </Sidebar>
 );

@@ -19,13 +19,9 @@ import {
 import { Skeleton } from '@/shared/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip';
 
-const SIDEBAR_WIDTH_DEFAULT = 256;
-const SIDEBAR_WIDTH_MIN = 200;
-const SIDEBAR_WIDTH_MAX = 360;
-const SIDEBAR_WIDTH_STORAGE_KEY = 'sidebar_width';
+const SIDEBAR_WIDTH = '16rem';
 const SIDEBAR_WIDTH_MOBILE = '18rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
-const SIDEBAR_DRAG_THRESHOLD = 2;
 // Tailwind `lg`–`xl`: wide enough to keep a two-pane list/detail surface, too
 // narrow to also spend 256px on the nav. The nav starts collapsed here and the
 // header's trigger brings it back.
@@ -47,10 +43,6 @@ const SIDEBAR_AUTO_COLLAPSE_QUERY =
  * non-inset half, e.g. `bg-app-shell [--sidebar-wrapper-fill:var(--app-shell)]`.
  */
 const SIDEBAR_WRAPPER_FILL_CLASS = 'bg-(--sidebar-wrapper-fill)';
-
-function clampSidebarWidth(width: number) {
-  return Math.max(SIDEBAR_WIDTH_MIN, Math.min(SIDEBAR_WIDTH_MAX, width));
-}
 
 type SidebarContextProps = {
   state: 'expanded' | 'collapsed';
@@ -78,16 +70,7 @@ type SidebarContextProps = {
   hasExternalTrigger: boolean;
 };
 
-type SidebarResizeContextProps = {
-  commitWidth: (width: number) => void;
-};
-
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
-// Width previews are written directly to the layout shells and opt-in chrome
-// consumers during drag. This context only exposes the one committed state
-// transition on pointer-up.
-const SidebarResizeContext =
-  React.createContext<SidebarResizeContextProps | null>(null);
 
 function useSidebar() {
   const context = React.use(SidebarContext);
@@ -100,15 +83,6 @@ function useSidebar() {
 
 function useSidebarSafe() {
   return React.use(SidebarContext);
-}
-
-function useSidebarResize() {
-  const context = React.use(SidebarResizeContext);
-  if (!context) {
-    throw new Error('useSidebarResize must be used within a SidebarProvider.');
-  }
-
-  return context;
 }
 
 function SidebarProvider({
@@ -136,22 +110,6 @@ function SidebarProvider({
 }) {
   const isCompact = useIsCompact();
   const [openMobile, setOpenMobile] = React.useState(false);
-
-  const [width, _setWidth] = React.useState(SIDEBAR_WIDTH_DEFAULT);
-  React.useEffect(() => {
-    const stored = localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY);
-    if (stored) {
-      const storedWidth = Number(stored);
-      if (Number.isFinite(storedWidth)) {
-        _setWidth(clampSidebarWidth(storedWidth));
-      }
-    }
-  }, []);
-  const commitWidth = React.useCallback((w: number) => {
-    const clamped = clampSidebarWidth(w);
-    _setWidth(clamped);
-    localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(clamped));
-  }, []);
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -241,41 +199,33 @@ function SidebarProvider({
       hasExternalTrigger,
     ],
   );
-  const resizeContextValue = React.useMemo<SidebarResizeContextProps>(
-    () => ({
-      commitWidth,
-    }),
-    [commitWidth],
-  );
 
   return (
     <SidebarContext.Provider value={contextValue}>
-      <SidebarResizeContext.Provider value={resizeContextValue}>
-        <div
-          data-slot='sidebar-wrapper'
-          style={
-            {
-              '--sidebar-width': `${width}px`,
-              '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
-              ...style,
-            } as React.CSSProperties
-          }
-          className={cn(
-            'group/sidebar-wrapper flex min-h-svh w-full',
-            // Both halves of the inset branch carry the identical :has()
-            // condition, so SIDEBAR_WRAPPER_FILL_CLASS can never name a colour
-            // this element is not actually painted with. The non-inset fill is
-            // the consumer's (this component paints nothing then), so the
-            // consumer declares that half of the variable next to its own
-            // background class.
-            'has-data-[variant=inset]:bg-sidebar has-data-[variant=inset]:[--sidebar-wrapper-fill:var(--sidebar)]',
-            className,
-          )}
-          {...props}
-        >
-          {children}
-        </div>
-      </SidebarResizeContext.Provider>
+      <div
+        data-slot='sidebar-wrapper'
+        style={
+          {
+            '--sidebar-width': SIDEBAR_WIDTH,
+            '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
+            ...style,
+          } as React.CSSProperties
+        }
+        className={cn(
+          'group/sidebar-wrapper flex min-h-svh w-full',
+          // Both halves of the inset branch carry the identical :has()
+          // condition, so SIDEBAR_WRAPPER_FILL_CLASS can never name a colour
+          // this element is not actually painted with. The non-inset fill is
+          // the consumer's (this component paints nothing then), so the
+          // consumer declares that half of the variable next to its own
+          // background class.
+          'has-data-[variant=inset]:bg-sidebar has-data-[variant=inset]:[--sidebar-wrapper-fill:var(--sidebar)]',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
     </SidebarContext.Provider>
   );
 }
@@ -415,165 +365,19 @@ function SidebarTrigger({
 
 function SidebarRail({ className, ...props }: React.ComponentProps<'button'>) {
   const { toggleSidebar } = useSidebar();
-  const { commitWidth } = useSidebarResize();
-  const toggleLabel = 'Toggle sidebar';
-  const didDragRef = React.useRef(false);
-  const dragRef = React.useRef<{
-    pointerId: number;
-    startX: number;
-    startWidth: number;
-    latestWidth: number;
-    direction: 1 | -1;
-    wrapperEl: HTMLElement;
-    gapEl: HTMLElement;
-    containerEl: HTMLElement;
-    liveWidthConsumers: HTMLElement[];
-  } | null>(null);
-  const cancelActiveDragRef = React.useRef<(() => void) | null>(null);
-
-  React.useEffect(() => () => cancelActiveDragRef.current?.(), []);
-
-  const onPointerDown = React.useCallback(
-    (e: React.PointerEvent<HTMLButtonElement>) => {
-      if (e.button !== 0 || e.isPrimary === false) return;
-      e.preventDefault();
-      cancelActiveDragRef.current?.();
-      didDragRef.current = false;
-      const railEl = e.currentTarget;
-      const sidebarEl = railEl.closest<HTMLElement>("[data-slot='sidebar']");
-      const wrapperEl = railEl.closest<HTMLElement>(
-        "[data-slot='sidebar-wrapper']",
-      );
-      const gapEl = sidebarEl?.querySelector<HTMLElement>(
-        "[data-slot='sidebar-gap']",
-      );
-      const containerEl = sidebarEl?.querySelector<HTMLElement>(
-        "[data-slot='sidebar-container']",
-      );
-      if (!sidebarEl || !wrapperEl || !gapEl || !containerEl) return;
-      const liveWidthConsumers = Array.from(
-        wrapperEl.querySelectorAll<HTMLElement>(
-          '[data-sidebar-resize-consumer]',
-        ),
-      );
-
-      const startWidth = clampSidebarWidth(
-        containerEl.getBoundingClientRect().width,
-      );
-      dragRef.current = {
-        pointerId: e.pointerId,
-        startX: e.clientX,
-        startWidth,
-        latestWidth: startWidth,
-        direction: sidebarEl.dataset.side === 'right' ? -1 : 1,
-        wrapperEl,
-        gapEl,
-        containerEl,
-        liveWidthConsumers,
-      };
-
-      wrapperEl.setAttribute('data-sidebar-resizing', 'true');
-      document.documentElement.setAttribute('data-sidebar-resizing', 'true');
-
-      let finished = false;
-      const finishDrag = (mode: 'commit' | 'cancel') => {
-        if (finished) return;
-        finished = true;
-
-        document.removeEventListener('pointermove', onPointerMove);
-        document.removeEventListener('pointerup', onPointerUp);
-        document.removeEventListener('pointercancel', onPointerCancel);
-        window.removeEventListener('blur', onWindowBlur);
-        railEl.removeEventListener('lostpointercapture', onLostPointerCapture);
-
-        const drag = dragRef.current;
-        if (drag) {
-          if (mode === 'commit' && didDragRef.current) {
-            drag.wrapperEl.style.setProperty(
-              '--sidebar-width',
-              `${drag.latestWidth}px`,
-            );
-            commitWidth(drag.latestWidth);
-          }
-          drag.gapEl.style.removeProperty('width');
-          drag.containerEl.style.removeProperty('width');
-          for (const consumer of drag.liveWidthConsumers) {
-            consumer.style.removeProperty('--sidebar-live-width');
-          }
-          drag.wrapperEl.removeAttribute('data-sidebar-resizing');
-        }
-
-        dragRef.current = null;
-        cancelActiveDragRef.current = null;
-        document.documentElement.removeAttribute('data-sidebar-resizing');
-
-        if (railEl.hasPointerCapture?.(e.pointerId)) {
-          railEl.releasePointerCapture?.(e.pointerId);
-        }
-      };
-
-      const onPointerMove = (event: PointerEvent) => {
-        const drag = dragRef.current;
-        if (!drag || event.pointerId !== drag.pointerId) return;
-
-        const delta = (event.clientX - drag.startX) * drag.direction;
-        if (!didDragRef.current && Math.abs(delta) < SIDEBAR_DRAG_THRESHOLD) {
-          return;
-        }
-
-        didDragRef.current = true;
-        const nextWidth = clampSidebarWidth(drag.startWidth + delta);
-        if (nextWidth === drag.latestWidth) return;
-
-        drag.latestWidth = nextWidth;
-        // Direct writes let the browser coalesce layout at paint time without
-        // a React commit or an inherited custom-property invalidation on the
-        // whole app tree. Optional chrome consumers receive the same preview
-        // through a local custom property.
-        drag.gapEl.style.width = `${nextWidth}px`;
-        drag.containerEl.style.width = `${nextWidth}px`;
-        for (const consumer of drag.liveWidthConsumers) {
-          consumer.style.setProperty('--sidebar-live-width', `${nextWidth}px`);
-        }
-      };
-      const onPointerUp = (event: PointerEvent) => {
-        if (event.pointerId === e.pointerId) finishDrag('commit');
-      };
-      const onPointerCancel = (event: PointerEvent) => {
-        if (event.pointerId === e.pointerId) finishDrag('cancel');
-      };
-      const onLostPointerCapture = (event: PointerEvent) => {
-        if (event.pointerId === e.pointerId) finishDrag('cancel');
-      };
-      const onWindowBlur = () => finishDrag('cancel');
-
-      document.addEventListener('pointermove', onPointerMove);
-      document.addEventListener('pointerup', onPointerUp);
-      document.addEventListener('pointercancel', onPointerCancel);
-      window.addEventListener('blur', onWindowBlur);
-      railEl.addEventListener('lostpointercapture', onLostPointerCapture);
-      cancelActiveDragRef.current = () => finishDrag('cancel');
-      railEl.setPointerCapture?.(e.pointerId);
-    },
-    [commitWidth],
-  );
-
-  const handleClick = React.useCallback(() => {
-    if (!didDragRef.current) toggleSidebar();
-  }, [toggleSidebar]);
 
   return (
     <button
-      type='button'
       data-sidebar='rail'
       data-slot='sidebar-rail'
-      aria-label={toggleLabel}
+      aria-label='Toggle Sidebar'
       tabIndex={-1}
-      onClick={handleClick}
-      onPointerDown={onPointerDown}
-      title={toggleLabel}
+      onClick={toggleSidebar}
+      title='Toggle Sidebar'
       className={cn(
-        'absolute inset-y-0 z-20 hidden w-4 touch-none cursor-ew-resize transition-[transform,background-color] ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:start-1/2 after:w-[2px] hover:after:bg-sidebar-border sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2',
+        'absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:start-1/2 after:w-[2px] hover:after:bg-sidebar-border sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2',
+        'in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize',
+        '[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
         'group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full hover:group-data-[collapsible=offcanvas]:bg-sidebar',
         '[[data-side=left][data-collapsible=offcanvas]_&]:-right-2',
         '[[data-side=right][data-collapsible=offcanvas]_&]:-left-2',

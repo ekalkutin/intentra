@@ -11,9 +11,7 @@ import { PageHeader } from '@/widgets/app-shell';
 
 export const AgentsPage = () => (
   <>
-    <PageHeader>
-      <h1 className='text-body font-medium'>Agents</h1>
-    </PageHeader>
+    <PageHeader title='Agents' />
     <Empty className='flex-1'>
       <EmptyHeader>
         <EmptyMedia variant='icon'>
