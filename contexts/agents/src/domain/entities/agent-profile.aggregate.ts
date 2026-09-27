@@ -44,21 +44,6 @@ export class AgentProfile extends Aggregate<AgentProfileId> {
     this.#archivedAt = props.archivedAt;
   }
 
-  public static create(props: CreateAgentProfileProps): AgentProfile {
-    return new AgentProfile(new AgentProfileId(), {
-      ...props,
-      tools: [],
-      archivedAt: null,
-    });
-  }
-
-  public static reconstitute(
-    id: AgentProfileId,
-    props: AgentProfileProps,
-  ): AgentProfile {
-    return new AgentProfile(id, props);
-  }
-
   get workspaceId(): WorkspaceId {
     return this.#workspaceId;
   }
@@ -131,5 +116,20 @@ export class AgentProfile extends Aggregate<AgentProfileId> {
     if (this.isArchived) {
       throw new AgentProfileArchivedError(this.id);
     }
+  }
+
+  public static create(props: CreateAgentProfileProps): AgentProfile {
+    return new AgentProfile(new AgentProfileId(), {
+      ...props,
+      tools: [],
+      archivedAt: null,
+    });
+  }
+
+  public static reconstitute(
+    id: AgentProfileId,
+    props: AgentProfileProps,
+  ): AgentProfile {
+    return new AgentProfile(id, props);
   }
 }
