@@ -20,8 +20,8 @@
   "dependencies": {
     "@intentra/agent-surface": "workspace:*",
     "@intentra/contracts": "workspace:*",
-    "@modelcontextprotocol/node": "^2.0.0",
-    "@modelcontextprotocol/server": "^2.0.0",
+    "@modelcontextprotocol/node": "^2.1.0",
+    "@modelcontextprotocol/server": "^2.1.0",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/core": "catalog:nestjs12",
     "@nestjs/platform-express": "catalog:nestjs12",
