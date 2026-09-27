@@ -297,6 +297,121 @@
           }
         ]
       }
+    },
+    {
+      "files": ["apps/web/src/pages/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/app", "@/app/**", "@/pages/**"],
+                "message": "FSD: a layer imports only from layers below it (app > pages > widgets > features > entities > shared), and a slice never imports a sibling slice of the same layer."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["apps/web/src/widgets/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/app",
+                  "@/app/**",
+                  "@/pages",
+                  "@/pages/**",
+                  "@/widgets/**"
+                ],
+                "message": "FSD: a layer imports only from layers below it (app > pages > widgets > features > entities > shared), and a slice never imports a sibling slice of the same layer."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["apps/web/src/features/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/app",
+                  "@/app/**",
+                  "@/pages",
+                  "@/pages/**",
+                  "@/widgets",
+                  "@/widgets/**",
+                  "@/features/**"
+                ],
+                "message": "FSD: a layer imports only from layers below it (app > pages > widgets > features > entities > shared), and a slice never imports a sibling slice of the same layer."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["apps/web/src/entities/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/app",
+                  "@/app/**",
+                  "@/pages",
+                  "@/pages/**",
+                  "@/widgets",
+                  "@/widgets/**",
+                  "@/features",
+                  "@/features/**",
+                  "@/entities/**"
+                ],
+                "message": "FSD: a layer imports only from layers below it (app > pages > widgets > features > entities > shared), and a slice never imports a sibling slice of the same layer."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["apps/web/src/shared/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/app",
+                  "@/app/**",
+                  "@/pages",
+                  "@/pages/**",
+                  "@/widgets",
+                  "@/widgets/**",
+                  "@/features",
+                  "@/features/**",
+                  "@/entities",
+                  "@/entities/**"
+                ],
+                "message": "FSD: a layer imports only from layers below it (app > pages > widgets > features > entities > shared), and a slice never imports a sibling slice of the same layer."
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }
