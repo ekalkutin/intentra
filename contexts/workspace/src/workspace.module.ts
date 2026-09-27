@@ -13,6 +13,13 @@ import {
   WorkspaceRepositoryAdapter,
   WorkspaceSchema,
 } from './infrastructure/repositories/workspace/index.js';
+import { ProjectRepository } from './subdomains/projects/application/ports/project.repository.js';
+import { ProjectsService } from './subdomains/projects/application/services/projects.service.js';
+import {
+  ProjectModel,
+  ProjectRepositoryAdapter,
+  ProjectSchema,
+} from './subdomains/projects/infrastructure/repositories/project/index.js';
 import { ConfigurableModuleClass } from './workspace.module-defs.js';
 
 @Module({
@@ -22,10 +29,15 @@ import { ConfigurableModuleClass } from './workspace.module-defs.js';
         name: WorkspaceModel.name,
         schema: WorkspaceSchema,
       },
+      {
+        name: ProjectModel.name,
+        schema: ProjectSchema,
+      },
     ]),
   ],
   providers: [
     WorkspacesService,
+    ProjectsService,
     {
       provide: WorkspaceRepository,
       useClass: WorkspaceRepositoryAdapter,
@@ -33,6 +45,11 @@ import { ConfigurableModuleClass } from './workspace.module-defs.js';
     {
       provide: WorkspaceApi,
       useClass: WorkspaceApiService,
+    },
+
+    {
+      provide: ProjectRepository,
+      useClass: ProjectRepositoryAdapter,
     },
   ],
   exports: [WorkspaceApi],

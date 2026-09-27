@@ -1,3 +1,4 @@
+import type { ProjectApi } from './project/index.js';
 import type { WorkspacesApi } from './workspace/index.js';
 
 /**
@@ -7,4 +8,5 @@ import type { WorkspacesApi } from './workspace/index.js';
  */
 export abstract class WorkspaceApi {
   abstract readonly workspaces: WorkspacesApi;
+  abstract readonly projects: ProjectApi;
 }
