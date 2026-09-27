@@ -1,6 +1,5 @@
-import { LogOut } from 'lucide-react';
+import { LogOutIcon } from 'lucide-react';
 
-import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
 
 import { useSignOut } from '../model/use-sign-out';
@@ -9,13 +8,8 @@ export const SignOutButton = ({ className }: { className?: string }) => {
   const signOut = useSignOut();
 
   return (
-    <Button
-      variant='ghost'
-      size='sm'
-      className={cn('text-muted-foreground hover:text-foreground', className)}
-      onClick={signOut}
-    >
-      <LogOut />
+    <Button variant='ghost' size='sm' className={className} onClick={signOut}>
+      <LogOutIcon data-icon='inline-start' />
       Log out
     </Button>
   );

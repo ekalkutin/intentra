@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeftIcon } from 'lucide-react';
 import { generatePath, useNavigate } from 'react-router';
 
 import { CreateWorkspaceForm } from '@/features/create-workspace';
@@ -17,10 +17,10 @@ export const NewWorkspacePage = () => {
         <Button
           variant='ghost'
           size='sm'
-          className='-ml-2 w-fit shrink-0 text-muted-foreground hover:text-foreground'
+          className='-ml-2 w-fit shrink-0'
           onClick={() => navigate(-1)}
         >
-          <ArrowLeft />
+          <ArrowLeftIcon data-icon='inline-start' />
           Back
         </Button>
       }

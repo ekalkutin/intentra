@@ -1,7 +1,11 @@
+import { TooltipProvider } from '@/shared/ui/tooltip';
+
 import { AppRouterProvider, GraphQLProvider } from './providers';
 
 export const App = () => (
   <GraphQLProvider>
-    <AppRouterProvider />
+    <TooltipProvider>
+      <AppRouterProvider />
+    </TooltipProvider>
   </GraphQLProvider>
 );

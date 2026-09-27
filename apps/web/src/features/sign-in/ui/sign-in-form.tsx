@@ -88,7 +88,7 @@ export const SignInForm = ({ onSuccess }: SignInFormProps) => {
       </FieldGroup>
 
       <Button type='submit' size='lg' className='w-full' disabled={loading}>
-        {loading ? <Spinner /> : null}
+        {loading ? <Spinner data-icon='inline-start' /> : null}
         Sign in
       </Button>
     </form>

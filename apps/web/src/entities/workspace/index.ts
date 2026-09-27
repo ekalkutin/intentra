@@ -6,4 +6,3 @@ export {
   useCurrentWorkspace,
   type Workspace,
 } from './model/current-workspace';
-export { WorkspaceAvatar } from './ui/workspace-avatar';

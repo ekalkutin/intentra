@@ -1,11 +1,13 @@
+'use client';
+
 import { mergeProps } from '@base-ui/react/merge-props';
 import { useRender } from '@base-ui/react/use-render';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from 'cn';
 import { PanelLeftIcon } from 'lucide-react';
 import * as React from 'react';
 
-import { useIsCompact } from '@/shared/lib/hooks/use-mobile';
-import { cn } from '@/shared/lib/utils';
+import { useIsMobile } from '@/shared/lib/hooks/use-mobile';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Separator } from '@/shared/ui/separator';
@@ -19,30 +21,12 @@ import {
 import { Skeleton } from '@/shared/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip';
 
+const SIDEBAR_COOKIE_NAME = 'sidebar_state';
+const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = '16rem';
 const SIDEBAR_WIDTH_MOBILE = '18rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
-// Tailwind `lg`–`xl`: wide enough to keep a two-pane list/detail surface, too
-// narrow to also spend 256px on the nav. The nav starts collapsed here and the
-// header's trigger brings it back.
-const SIDEBAR_AUTO_COLLAPSE_QUERY =
-  '(min-width: 1024px) and (max-width: 1279px)';
-
-/**
- * Paints an element with whatever the sidebar wrapper is currently filled with.
- *
- * A descendant that has to lay down an opaque layer over the wrapper — rather
- * than over its own parent — must match the wrapper's fill exactly, and that
- * fill is conditional: `bg-sidebar` while an inset-variant sidebar is mounted,
- * the consumer's own background otherwise. Naming a token at the descendant
- * reproduces that condition in a second place, which then drifts (#6874). Use
- * this class instead: the wrapper publishes its fill as `--sidebar-wrapper-fill`
- * under the same `:has()` condition that paints it, so the two cannot disagree.
- *
- * Consumers that give the wrapper a background must declare the matching
- * non-inset half, e.g. `bg-app-shell [--sidebar-wrapper-fill:var(--app-shell)]`.
- */
-const SIDEBAR_WRAPPER_FILL_CLASS = 'bg-(--sidebar-wrapper-fill)';
+const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
 type SidebarContextProps = {
   state: 'expanded' | 'collapsed';
@@ -50,30 +34,14 @@ type SidebarContextProps = {
   setOpen: (open: boolean) => void;
   openMobile: boolean;
   setOpenMobile: (open: boolean) => void;
-  /**
-   * The sidebar is an overlay sheet rather than a column in the main flow.
-   * True below the compact breakpoint, which covers tablets and folded inner
-   * screens as well as phones, not phones alone.
-   */
-  isCompact: boolean;
+  isMobile: boolean;
   toggleSidebar: () => void;
-  /**
-   * The app shell keeps a `SidebarTrigger` of its own on screen, outside the
-   * page chrome — the desktop window toolbar does, beside the traffic lights.
-   *
-   * Surfaces that would otherwise supply a fallback trigger read this and
-   * supply nothing: the shell's own is always reachable, so a second one is
-   * duplicate chrome rather than a way back to a nav that had none (MUL-6218).
-   * It describes the shell, not the current viewport, so it does not track
-   * whether that trigger happens to be mounted this render.
-   */
-  hasExternalTrigger: boolean;
 };
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
 
 function useSidebar() {
-  const context = React.use(SidebarContext);
+  const context = React.useContext(SidebarContext);
   if (!context) {
     throw new Error('useSidebar must be used within a SidebarProvider.');
   }
@@ -81,15 +49,10 @@ function useSidebar() {
   return context;
 }
 
-function useSidebarSafe() {
-  return React.use(SidebarContext);
-}
-
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
   onOpenChange: setOpenProp,
-  hasExternalTrigger = false,
   className,
   style,
   children,
@@ -98,30 +61,12 @@ function SidebarProvider({
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /**
-   * Declare that this shell keeps its own always-reachable `SidebarTrigger`
-   * outside the page chrome. See `SidebarContextProps.hasExternalTrigger`.
-   *
-   * Defaults to false, and the default is the safe one: a shell that forgets
-   * to opt out shows one redundant icon, while a shell that has to opt in and
-   * forgets leaves a collapsed nav with no way back.
-   */
-  hasExternalTrigger?: boolean;
 }) {
-  const isCompact = useIsCompact();
+  const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
-  //
-  // Deliberately not persisted. Upstream shadcn writes a `sidebar_state` cookie
-  // here and seeds `defaultOpen` from it on the server; we dropped the write
-  // because nothing ever read it, and restoring the pair would be a bug rather
-  // than a feature: the auto-collapse below drives `setOpen(false)` from the
-  // viewport, so persisting its result would carry a collapse the user never
-  // asked for out of the `lg`–`xl` band and into their next session on a wider
-  // display. Persisting this needs a source that distinguishes a user toggle
-  // from an automated one — not a cookie on this callback.
   const [_open, _setOpen] = React.useState(defaultOpen);
   const open = openProp ?? _open;
   const setOpen = React.useCallback(
@@ -132,46 +77,33 @@ function SidebarProvider({
       } else {
         _setOpen(openState);
       }
+
+      // This sets the cookie to keep the sidebar state.
+      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
     },
     [setOpenProp, open],
   );
 
-  // Auto-collapse across the `lg`–`xl` band. Only the two crossings are
-  // automated: entering it parks the state we came in with and closes the nav,
-  // leaving it restores that state. Anything the user does in between — most
-  // of all re-opening the nav — is left alone until the next crossing.
-  //
-  // `setOpen`'s identity changes with `open`, so the listener reads both
-  // through a ref instead of resubscribing on every toggle. The ref is seeded
-  // at first render and refreshed after each commit — declared above the
-  // listener so on mount it is already current when that effect first runs.
-  const latest = React.useRef({ open, setOpen });
-  React.useEffect(() => {
-    latest.current = { open, setOpen };
-  });
-  const parkedOpenRef = React.useRef<boolean | null>(null);
-  React.useEffect(() => {
-    const mql = window.matchMedia(SIDEBAR_AUTO_COLLAPSE_QUERY);
-    const apply = (matches: boolean) => {
-      if (matches) {
-        if (parkedOpenRef.current !== null) return;
-        parkedOpenRef.current = latest.current.open;
-        latest.current.setOpen(false);
-      } else if (parkedOpenRef.current !== null) {
-        latest.current.setOpen(parkedOpenRef.current);
-        parkedOpenRef.current = null;
-      }
-    };
-    apply(mql.matches);
-    const onChange = (e: MediaQueryListEvent) => apply(e.matches);
-    mql.addEventListener('change', onChange);
-    return () => mql.removeEventListener('change', onChange);
-  }, []);
-
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
-    return isCompact ? setOpenMobile(open => !open) : setOpen(open => !open);
-  }, [isCompact, setOpen, setOpenMobile]);
+    return isMobile ? setOpenMobile(open => !open) : setOpen(open => !open);
+  }, [isMobile, setOpen, setOpenMobile]);
+
+  // Adds a keyboard shortcut to toggle the sidebar.
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
+        (event.metaKey || event.ctrlKey)
+      ) {
+        event.preventDefault();
+        toggleSidebar();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleSidebar]);
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
@@ -182,22 +114,12 @@ function SidebarProvider({
       state,
       open,
       setOpen,
-      isCompact,
+      isMobile,
       openMobile,
       setOpenMobile,
       toggleSidebar,
-      hasExternalTrigger,
     }),
-    [
-      state,
-      open,
-      setOpen,
-      isCompact,
-      openMobile,
-      setOpenMobile,
-      toggleSidebar,
-      hasExternalTrigger,
-    ],
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
   );
 
   return (
@@ -212,14 +134,7 @@ function SidebarProvider({
           } as React.CSSProperties
         }
         className={cn(
-          'group/sidebar-wrapper flex min-h-svh w-full',
-          // Both halves of the inset branch carry the identical :has()
-          // condition, so SIDEBAR_WRAPPER_FILL_CLASS can never name a colour
-          // this element is not actually painted with. The non-inset fill is
-          // the consumer's (this component paints nothing then), so the
-          // consumer declares that half of the variable next to its own
-          // background class.
-          'has-data-[variant=inset]:bg-sidebar has-data-[variant=inset]:[--sidebar-wrapper-fill:var(--sidebar)]',
+          'group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar',
           className,
         )}
         {...props}
@@ -243,7 +158,7 @@ function Sidebar({
   variant?: 'sidebar' | 'floating' | 'inset';
   collapsible?: 'offcanvas' | 'icon' | 'none';
 }) {
-  const { isCompact, state, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
 
   if (collapsible === 'none') {
     return (
@@ -260,7 +175,7 @@ function Sidebar({
     );
   }
 
-  if (isCompact) {
+  if (isMobile) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
@@ -286,13 +201,9 @@ function Sidebar({
     );
   }
 
-  // `lg`, not `md`: this CSS gate has to agree with the `useIsCompact()` gate
-  // that chose the in-flow branch over the sheet above. While they disagreed,
-  // every load between the two breakpoints painted a 256px sidebar for one
-  // frame before the hook resolved and collapsed it into a sheet.
   return (
     <div
-      className='group peer hidden text-sidebar-foreground lg:block'
+      className='group peer hidden text-sidebar-foreground md:block'
       data-state={state}
       data-collapsible={state === 'collapsed' ? collapsible : ''}
       data-variant={variant}
@@ -303,7 +214,7 @@ function Sidebar({
       <div
         data-slot='sidebar-gap'
         className={cn(
-          'relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-out motion-reduce:transition-none',
+          'relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear',
           'group-data-[collapsible=offcanvas]:w-0',
           'group-data-[side=right]:rotate-180',
           variant === 'floating' || variant === 'inset'
@@ -315,8 +226,7 @@ function Sidebar({
         data-slot='sidebar-container'
         data-side={side}
         className={cn(
-          'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-out motion-reduce:transition-none lg:flex',
-          'data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
+          'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex',
           // Adjust the padding for floating and inset variants.
           variant === 'floating' || variant === 'inset'
             ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
@@ -358,7 +268,7 @@ function SidebarTrigger({
       {...props}
     >
       <PanelLeftIcon />
-      <span className='sr-only'>Toggle sidebar</span>
+      <span className='sr-only'>Toggle Sidebar</span>
     </Button>
   );
 }
@@ -393,7 +303,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<'main'>) {
     <main
       data-slot='sidebar-inset'
       className={cn(
-        'relative flex w-full flex-1 flex-col bg-page-canvas lg:peer-data-[variant=inset]:m-2 lg:peer-data-[variant=inset]:ml-0 lg:peer-data-[variant=inset]:rounded-xl lg:peer-data-[variant=inset]:ring-1 lg:peer-data-[variant=inset]:ring-surface-border lg:peer-data-[variant=inset]:shadow-[var(--surface-shadow)] lg:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2',
+        'relative flex w-full flex-1 flex-col bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2',
         className,
       )}
       {...props}
@@ -486,7 +396,7 @@ function SidebarGroupLabel({
     props: mergeProps<'div'>(
       {
         className: cn(
-          'flex h-8 shrink-0 items-center rounded-md px-2 text-caption font-medium text-muted-foreground ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
+          'flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
           className,
         ),
       },
@@ -532,7 +442,7 @@ function SidebarGroupContent({
     <div
       data-slot='sidebar-group-content'
       data-sidebar='group-content'
-      className={cn('w-full text-body', className)}
+      className={cn('w-full text-sm', className)}
       {...props}
     />
   );
@@ -561,18 +471,18 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<'li'>) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  'peer/menu-button group/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-body ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground data-active:hover:bg-sidebar-accent [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate',
+  'peer/menu-button group/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate',
   {
     variants: {
       variant: {
         default: 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
         outline:
-          'bg-background shadow-[0_0_0_1px_var(--color-sidebar-border)] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_var(--color-sidebar-accent)]',
+          'bg-background shadow-[0_0_0_1px_var(--sidebar-border)] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_var(--sidebar-accent)]',
       },
       size: {
-        default: 'h-8 text-body',
-        sm: 'h-7 text-caption',
-        lg: 'h-12 text-body group-data-[collapsible=icon]:p-0!',
+        default: 'h-8 text-sm',
+        sm: 'h-7 text-xs',
+        lg: 'h-12 text-sm group-data-[collapsible=icon]:p-0!',
       },
     },
     defaultVariants: {
@@ -595,7 +505,7 @@ function SidebarMenuButton({
     isActive?: boolean;
     tooltip?: string | React.ComponentProps<typeof TooltipContent>;
   } & VariantProps<typeof sidebarMenuButtonVariants>) {
-  const { isCompact, state } = useSidebar();
+  const { isMobile, state } = useSidebar();
   const comp = useRender({
     defaultTagName: 'button',
     props: mergeProps<'button'>(
@@ -629,7 +539,7 @@ function SidebarMenuButton({
       <TooltipContent
         side='right'
         align='center'
-        hidden={state !== 'collapsed' || isCompact}
+        hidden={state !== 'collapsed' || isMobile}
         {...tooltip}
       />
     </Tooltip>
@@ -675,7 +585,7 @@ function SidebarMenuBadge({
       data-slot='sidebar-menu-badge'
       data-sidebar='menu-badge'
       className={cn(
-        'pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-caption font-medium text-sidebar-foreground tabular-nums select-none group-data-[collapsible=icon]:hidden peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1 peer-data-active/menu-button:text-sidebar-accent-foreground',
+        'pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-xs font-medium text-sidebar-foreground tabular-nums select-none group-data-[collapsible=icon]:hidden peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1 peer-data-active/menu-button:text-sidebar-accent-foreground',
         className,
       )}
       {...props}
@@ -765,7 +675,7 @@ function SidebarMenuSubButton({
     props: mergeProps<'a'>(
       {
         className: cn(
-          'flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground ring-sidebar-ring outline-hidden group-data-[collapsible=icon]:hidden hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-body data-[size=sm]:text-caption data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground data-active:hover:bg-sidebar-accent [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground',
+          'flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground ring-sidebar-ring outline-hidden group-data-[collapsible=icon]:hidden hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-sm data-[size=sm]:text-xs data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground',
           className,
         ),
       },
@@ -782,7 +692,6 @@ function SidebarMenuSubButton({
 }
 
 export {
-  SIDEBAR_WRAPPER_FILL_CLASS,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -807,5 +716,4 @@ export {
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
-  useSidebarSafe,
 };

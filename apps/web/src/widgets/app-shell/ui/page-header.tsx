@@ -3,7 +3,6 @@ import { generatePath, Link } from 'react-router';
 
 import { useCurrentWorkspace } from '@/entities/workspace';
 import { ROUTES } from '@/shared/config';
-import { cn } from '@/shared/lib/utils';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,47 +18,43 @@ type PageHeaderProps = {
   title: string;
   /** Page actions, on the right. */
   children?: ReactNode;
-  className?: string;
 };
 
-/** The sidebar toggle lives here, before the breadcrumbs, on every page. */
-export const PageHeader = ({ title, children, className }: PageHeaderProps) => {
+/** shadcn `sidebar-07` header: the sidebar toggle, then the breadcrumbs. */
+export const PageHeader = ({ title, children }: PageHeaderProps) => {
   const workspace = useCurrentWorkspace();
 
   return (
-    <header
-      className={cn(
-        'flex h-12 shrink-0 items-center gap-2 border-b px-4',
-        className,
-      )}
-    >
-      <SidebarTrigger className='-ml-1' />
-      <Separator
-        orientation='vertical'
-        className='mr-1 data-vertical:h-4 data-vertical:self-center'
-      />
-      <Breadcrumb className='min-w-0 flex-1'>
-        <BreadcrumbList>
-          <BreadcrumbItem className='hidden md:inline-flex'>
-            <BreadcrumbLink
-              render={
-                <Link
-                  to={generatePath(ROUTES.WORKSPACE.ROOT, {
-                    alias: workspace.alias,
-                  })}
-                />
-              }
-            >
-              {workspace.name}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator className='hidden md:block' />
-          <BreadcrumbItem>
-            <BreadcrumbPage className='font-medium'>{title}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      {children}
+    <header className='flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12'>
+      <div className='flex flex-1 items-center gap-2 px-4'>
+        <SidebarTrigger className='-ml-1' />
+        <Separator
+          orientation='vertical'
+          className='mr-2 data-vertical:h-4 data-vertical:self-auto'
+        />
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem className='hidden md:block'>
+              <BreadcrumbLink
+                render={
+                  <Link
+                    to={generatePath(ROUTES.WORKSPACE.ROOT, {
+                      alias: workspace.alias,
+                    })}
+                  />
+                }
+              >
+                {workspace.name}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className='hidden md:block' />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        {children ? <div className='ml-auto'>{children}</div> : null}
+      </div>
     </header>
   );
 };

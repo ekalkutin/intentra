@@ -16,10 +16,8 @@ import {
 
 import { AI_TEAM_NAV, UTILITY_NAV, WORK_NAV, type NavItem } from '../model/nav';
 
+import { NavUser } from './nav-user';
 import { WorkspaceSwitcher } from './workspace-switcher';
-
-const NAV_ITEM_CLASS_NAME =
-  'text-muted-foreground hover:not-data-active:bg-sidebar-accent/70 data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground';
 
 const NavLinkItem = ({ item }: { item: NavItem }) => {
   const { alias } = useCurrentWorkspace();
@@ -29,10 +27,9 @@ const NavLinkItem = ({ item }: { item: NavItem }) => {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        isActive={isActive}
         tooltip={item.label}
+        isActive={isActive}
         render={<Link to={generatePath(item.path, { alias })} />}
-        className={NAV_ITEM_CLASS_NAME}
       >
         <Icon />
         <span>{item.label}</span>
@@ -49,9 +46,13 @@ const NavGroup = ({
   items: readonly NavItem[];
 }) => (
   <SidebarGroup>
-    <SidebarGroupLabel>{label}</SidebarGroupLabel>
+    {/* Collapsed, the label fades and slides up over the previous group's
+        items; without this it swallows their clicks. */}
+    <SidebarGroupLabel className='group-data-[collapsible=icon]:pointer-events-none'>
+      {label}
+    </SidebarGroupLabel>
     <SidebarGroupContent>
-      <SidebarMenu className='gap-0.5'>
+      <SidebarMenu>
         {items.map(item => (
           <NavLinkItem key={item.path} item={item} />
         ))}
@@ -60,27 +61,23 @@ const NavGroup = ({
   </SidebarGroup>
 );
 
+/** Laid out after shadcn's `sidebar-07` block: collapses to icons. */
 export const AppSidebar = () => (
-  <Sidebar variant='inset' collapsible='icon'>
-    <SidebarHeader className='py-3'>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <WorkspaceSwitcher />
-        </SidebarMenuItem>
-      </SidebarMenu>
+  <Sidebar collapsible='icon'>
+    <SidebarHeader>
+      <WorkspaceSwitcher />
     </SidebarHeader>
-
     <SidebarContent>
       <NavGroup label='Work' items={WORK_NAV} />
       <NavGroup label='AI team' items={AI_TEAM_NAV} />
     </SidebarContent>
-
-    <SidebarFooter className='p-2'>
-      <SidebarMenu className='gap-0.5'>
+    <SidebarFooter>
+      <SidebarMenu>
         {UTILITY_NAV.map(item => (
           <NavLinkItem key={item.path} item={item} />
         ))}
       </SidebarMenu>
+      <NavUser />
     </SidebarFooter>
   </Sidebar>
 );

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Dices } from 'lucide-react';
+import { DicesIcon } from 'lucide-react';
 import { useRef } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 
@@ -17,7 +17,13 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/shared/ui/field';
-import { Input } from '@/shared/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupText,
+} from '@/shared/ui/input-group';
 import { Spinner } from '@/shared/ui/spinner';
 import {
   CreateWorkspaceDtoSchema,
@@ -93,14 +99,13 @@ export const CreateWorkspaceForm = ({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor='workspace-name'>Workspace name</FieldLabel>
-              <div className='flex items-center gap-2'>
-                <Input
+              <InputGroup>
+                <InputGroupInput
                   {...field}
                   id='workspace-name'
                   autoFocus
                   autoComplete='off'
                   placeholder='Acme Labs'
-                  className='min-w-0'
                   aria-invalid={fieldState.invalid}
                   onChange={event => {
                     field.onChange(event);
@@ -109,17 +114,13 @@ export const CreateWorkspaceForm = ({
                     }
                   }}
                 />
-                <Button
-                  type='button'
-                  variant='outline'
-                  onClick={rollRandomName}
-                  disabled={loading}
-                  className='shrink-0'
-                >
-                  <Dices />
-                  Random
-                </Button>
-              </div>
+                <InputGroupAddon align='inline-end'>
+                  <InputGroupButton onClick={rollRandomName} disabled={loading}>
+                    <DicesIcon data-icon='inline-start' />
+                    Random
+                  </InputGroupButton>
+                </InputGroupAddon>
+              </InputGroup>
               {fieldState.invalid ? (
                 <FieldError errors={[fieldState.error]} />
               ) : null}
@@ -133,28 +134,24 @@ export const CreateWorkspaceForm = ({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor='workspace-alias'>Alias</FieldLabel>
-              <div
-                aria-invalid={fieldState.invalid}
-                className='flex items-center rounded-lg border border-input bg-muted transition-colors focus-within:border-ring aria-invalid:border-destructive'
-              >
-                <span className='select-none pl-2.5 font-mono text-body text-muted-foreground'>
-                  {ALIAS_HOST}
-                </span>
-                <Input
+              <InputGroup>
+                <InputGroupAddon>
+                  <InputGroupText>{ALIAS_HOST}</InputGroupText>
+                </InputGroupAddon>
+                <InputGroupInput
                   {...field}
                   id='workspace-alias'
                   autoComplete='off'
                   autoCapitalize='none'
                   spellCheck={false}
                   placeholder='acme-labs'
-                  className='border-0 bg-transparent pl-0 font-mono shadow-none focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent'
                   aria-invalid={fieldState.invalid}
                   onChange={event => {
                     aliasTouched.current = true;
                     field.onChange(event.target.value.toLowerCase());
                   }}
                 />
-              </div>
+              </InputGroup>
               {fieldState.invalid ? (
                 <FieldError errors={[fieldState.error]} />
               ) : (
@@ -176,7 +173,7 @@ export const CreateWorkspaceForm = ({
               : 'Name your workspace to continue.'}
         </p>
         <Button type='submit' className='w-full' disabled={loading}>
-          {loading ? <Spinner /> : null}
+          {loading ? <Spinner data-icon='inline-start' /> : null}
           {name ? `Create ${name}` : 'Create workspace'}
         </Button>
       </div>
