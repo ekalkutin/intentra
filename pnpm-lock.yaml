@@ -282,15 +282,15 @@ importers:
 
   contexts/agents:
     dependencies:
+      '@intentra/agent-surface':
+        specifier: workspace:*
+        version: link:../../libs/agent-surface
       '@intentra/contracts':
         specifier: workspace:*
         version: link:../../libs/contracts
       '@intentra/shared':
         specifier: workspace:*
         version: link:../../libs/shared
-      '@intentra/tools':
-        specifier: workspace:*
-        version: link:../../libs/tools
       '@nestjs/common':
         specifier: catalog:nestjs12
         version: 12.0.4(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0)
@@ -337,6 +337,15 @@ importers:
         specifier: 'catalog:'
         version: 9.10.2(@aws-sdk/credential-providers@3.1137.0)
 
+  libs/agent-surface:
+    dependencies:
+      '@intentra/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.5
+
   libs/contracts:
     dependencies:
       zod:
@@ -345,12 +354,12 @@ importers:
 
   libs/gateway:
     dependencies:
+      '@intentra/agent-surface':
+        specifier: workspace:*
+        version: link:../agent-surface
       '@intentra/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@intentra/tools':
-        specifier: workspace:*
-        version: link:../tools
       '@modelcontextprotocol/node':
         specifier: ^2.0.0
         version: 2.0.0(@modelcontextprotocol/server@2.0.0)(hono@4.13.8)
@@ -371,15 +380,6 @@ importers:
         version: 4.6.5
 
   libs/shared: {}
-
-  libs/tools:
-    dependencies:
-      '@intentra/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      zod:
-        specifier: 'catalog:'
-        version: 4.6.5
 
 packages:
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ToolApis } from '../define-tool.js';
+import type { ToolApis } from '../../define-tool.js';
 
 import { listWorkspacesTool } from './list-workspaces.tool.js';
 

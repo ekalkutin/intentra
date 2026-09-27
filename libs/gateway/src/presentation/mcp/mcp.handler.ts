@@ -7,9 +7,9 @@ import {
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { Inject, Injectable } from '@nestjs/common';
 
+import { TOOL_CATALOG } from '@intentra/agent-surface';
 import { IamApi } from '@intentra/contracts/iam';
 import { WorkspaceApi } from '@intentra/contracts/workspace';
-import { TOOL_CATALOG } from '@intentra/tools';
 
 import { registerMcpTools, selectMcpTools } from './catalog-tools.js';
 

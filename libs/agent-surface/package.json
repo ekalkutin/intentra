@@ -1,5 +1,5 @@
 {
-  "name": "@intentra/tools",
+  "name": "@intentra/agent-surface",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -25,7 +25,7 @@
   },
   "nx": {
     "tags": [
-      "type:tools",
+      "type:agent-surface",
       "deployment:monolith",
       "deployment:microservices"
     ]

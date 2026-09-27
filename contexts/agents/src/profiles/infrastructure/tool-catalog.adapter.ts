@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { TOOL_CATALOG } from '@intentra/tools';
+import { TOOL_CATALOG } from '@intentra/agent-surface';
 
 import { ToolCatalog } from '../application/ports/tool-catalog.port.js';
 import type { ToolId } from '../domain/value-objects/tool-id.vo.js';

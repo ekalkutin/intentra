@@ -133,7 +133,7 @@
       }
     },
     {
-      "files": ["libs/tools/**/*.ts"],
+      "files": ["libs/agent-surface/**/*.ts"],
       "rules": {
         "no-restricted-imports": [
           "error",
@@ -145,7 +145,7 @@
                   "!@intentra/contracts",
                   "!@intentra/contracts/**"
                 ],
-                "message": "The tool catalog describes tools once for MCP and for Intentra's own agents. It calls the published APIs from the contracts and nothing else: never a context package, the gateway or the shared kernel."
+                "message": "The agent surface describes what agents can see and call, once for MCP and for Intentra's own agents. It calls the published APIs from the contracts and nothing else: never a context package, the gateway or the shared kernel."
               }
             ]
           }
@@ -185,9 +185,9 @@
                   "@intentra/**",
                   "!@intentra/contracts",
                   "!@intentra/contracts/**",
-                  "!@intentra/tools"
+                  "!@intentra/agent-surface"
                 ],
-                "message": "The gateway is a driving adapter: it speaks a transport and calls the published APIs from the contracts, or the shared tool catalog. It never imports a context package - the composition root binds the implementation."
+                "message": "The gateway is a driving adapter: it speaks a transport and calls the published APIs from the contracts, or the agent surface. It never imports a context package - the composition root binds the implementation."
               }
             ]
           }
@@ -206,9 +206,9 @@
                   "@intentra/**",
                   "!@intentra/contracts",
                   "!@intentra/contracts/**",
-                  "!@intentra/tools"
+                  "!@intentra/agent-surface"
                 ],
-                "message": "The gateway is a driving adapter: it speaks a transport and calls the published APIs from the contracts, or the shared tool catalog. It never imports a context package - the composition root binds the implementation."
+                "message": "The gateway is a driving adapter: it speaks a transport and calls the published APIs from the contracts, or the agent surface. It never imports a context package - the composition root binds the implementation."
               },
               {
                 "group": ["**/infrastructure/**", "**/presentation/**"],
@@ -232,10 +232,10 @@
                   "!@intentra/shared",
                   "!@intentra/contracts",
                   "!@intentra/contracts/**",
-                  "!@intentra/tools",
+                  "!@intentra/agent-surface",
                   "!@intentra/adapter-*"
                 ],
-                "message": "A context may depend only on contracts, the shared kernel, the tool catalog (from infrastructure only) and technical adapters. Contexts integrate through published events, not through each other's packages; the client ports belong to consumers of the published API, not to contexts."
+                "message": "A context may depend only on contracts, the shared kernel, the agent surface (from infrastructure only) and technical adapters. Contexts integrate through published events, not through each other's packages; the client ports belong to consumers of the published API, not to contexts."
               }
             ]
           }

@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/server';
 
-import type { ToolApis, ToolDefinition } from '@intentra/tools';
+import type { ToolApis, ToolDefinition } from '@intentra/agent-surface';
 
 /**
  * The catalog tools offered through MCP. Called once at startup, so a tool that

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { WorkspaceDtoSchema } from '@intentra/contracts/workspace';
 
-import { defineTool } from '../define-tool.js';
+import { defineTool } from '../../define-tool.js';
 
 // Until authorization exists this lists every workspace; once there is a
 // caller, it must list only the workspaces the caller is a member of.
