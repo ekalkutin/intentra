@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 
-import type { Exposure, ToolApis } from '../surface.js';
+import type { Caller, Exposure, ToolApis } from '../surface.js';
 
 const SCHEME = 'intentra://';
 const VARIABLE = /\{([^}]*)\}/g;
@@ -32,7 +32,11 @@ export type ResourceDefinition<
    */
   readonly content: TContent;
   readonly exposure: Exposure;
-  read(apis: ToolApis, params: z.infer<TParams>): Promise<z.infer<TContent>>;
+  read(
+    apis: ToolApis,
+    params: z.infer<TParams>,
+    caller: Caller,
+  ): Promise<z.infer<TContent>>;
 };
 
 /**

@@ -4,9 +4,9 @@ import { Model } from 'mongoose';
 
 import { ProjectId, WorkspaceId } from '@intentra/shared';
 
-import { ProjectRepository } from '../../application/ports/project-repository.port.js';
-import { Project } from '../../domain/entities/project.aggregate.js';
-import { ProjectModel } from '../database/project.schema.js';
+import { ProjectRepository } from '../../application/ports/index.js';
+import { Project } from '../../domain/entities/index.js';
+import { ProjectModel } from '../database/index.js';
 
 @Injectable()
 export class ProjectRepositoryAdapter extends ProjectRepository {
@@ -27,8 +27,12 @@ export class ProjectRepositoryAdapter extends ProjectRepository {
     await projectModel.save();
   }
 
-  public async find(): Promise<Project[]> {
-    const projects = await this.projectModel.find().exec();
+  public async findByWorkspaces(
+    workspaceIds: WorkspaceId[],
+  ): Promise<Project[]> {
+    const projects = await this.projectModel
+      .find({ workspaceId: { $in: workspaceIds.map(id => id.value) } })
+      .exec();
     return projects.map(project => this.toDomain(project));
   }
 

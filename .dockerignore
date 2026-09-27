@@ -1,0 +1,10 @@
+**/node_modules
+**/build
+**/coverage
+**/*.tsbuildinfo
+**/.env
+.nx
+.git
+.husky
+.claude
+.agents

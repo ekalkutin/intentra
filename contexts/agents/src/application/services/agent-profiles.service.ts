@@ -1,23 +1,27 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type {
-  AgentProfileDto,
-  AgentProfilesApi,
-  CreateAgentProfileDto,
-  UpdateAgentProfileDto,
+import {
+  type AgentProfileDto,
+  type AgentProfilesApi,
+  type CreateAgentProfileDto,
+  type UpdateAgentProfileDto,
 } from '@intentra/contracts/agents';
 import { WorkspaceId } from '@intentra/shared';
 
-import { AgentProfile } from '../../domain/entities/agent-profile.aggregate.js';
-import { AgentName } from '../../domain/value-objects/agent-name.vo.js';
-import { AgentProfileId } from '../../domain/value-objects/agent-profile-id.vo.js';
-import { Instructions } from '../../domain/value-objects/instructions.vo.js';
-import { ModelRef } from '../../domain/value-objects/model-ref.vo.js';
-import { ToolId } from '../../domain/value-objects/tool-id.vo.js';
-import { UnknownToolError } from '../errors/unknown-tool.error.js';
-import { toAgentProfileDto } from '../mappers/agent-profile.mapper.js';
-import { AgentProfileRepository } from '../ports/agent-profile-repository.port.js';
-import { ToolCatalog } from '../ports/tool-catalog.port.js';
+import { AgentProfile } from '../../domain/entities/index.js';
+import {
+  AgentName,
+  AgentProfileId,
+  Instructions,
+  ModelRef,
+  ToolId,
+} from '../../domain/value-objects/index.js';
+import {
+  AgentProfileNotFoundException,
+  UnknownToolException,
+} from '../exceptions/index.js';
+import { toAgentProfileDto } from '../mappers/index.js';
+import { AgentProfileRepository, ToolCatalog } from '../ports/index.js';
 
 @Injectable()
 export class AgentProfilesService implements AgentProfilesApi {
@@ -52,23 +56,19 @@ export class AgentProfilesService implements AgentProfilesApi {
     return profiles.map(toAgentProfileDto);
   }
 
-  public async findById(
+  public async getById(
     workspaceId: string,
     id: string,
-  ): Promise<AgentProfileDto | null> {
-    const profile = await this.#findActive(workspaceId, id);
-    return profile ? toAgentProfileDto(profile) : null;
+  ): Promise<AgentProfileDto> {
+    return toAgentProfileDto(await this.#getActive(workspaceId, id));
   }
 
   public async update(
     workspaceId: string,
     id: string,
     data: UpdateAgentProfileDto,
-  ): Promise<AgentProfileDto | null> {
-    const profile = await this.#findActive(workspaceId, id);
-    if (!profile) {
-      return null;
-    }
+  ): Promise<AgentProfileDto> {
+    const profile = await this.#getActive(workspaceId, id);
 
     if (data.name !== undefined) {
       profile.rename(new AgentName(data.name));
@@ -88,11 +88,7 @@ export class AgentProfilesService implements AgentProfilesApi {
   }
 
   public async delete(workspaceId: string, id: string): Promise<void> {
-    const profile = await this.#findActive(workspaceId, id);
-    if (!profile) {
-      return;
-    }
-
+    const profile = await this.#getActive(workspaceId, id);
     profile.archive();
     await this.agentProfileRepository.save(profile);
   }
@@ -102,21 +98,21 @@ export class AgentProfilesService implements AgentProfilesApi {
     return ids.map(id => {
       const tool = new ToolId(id);
       if (!this.toolCatalog.isAvailable(tool)) {
-        throw new UnknownToolError(tool);
+        throw new UnknownToolException(tool);
       }
       return tool;
     });
   }
 
   /** An archived profile counts as deleted, so it is not found either. */
-  async #findActive(
-    workspaceId: string,
-    id: string,
-  ): Promise<AgentProfile | null> {
-    const profile = await this.agentProfileRepository.findById(
+  async #getActive(workspaceId: string, id: string): Promise<AgentProfile> {
+    const profile = await this.agentProfileRepository.getById(
       new WorkspaceId(workspaceId),
       new AgentProfileId(id),
     );
-    return profile && !profile.isArchived ? profile : null;
+    if (profile.isArchived) {
+      throw new AgentProfileNotFoundException(id);
+    }
+    return profile;
   }
 }

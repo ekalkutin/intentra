@@ -10,6 +10,11 @@ import {
   type UpdateAgentProfileDto,
 } from '@intentra/contracts/agents';
 
+import {
+  CurrentAccount,
+  WorkspaceMembership,
+  type AuthenticatedAccount,
+} from '../../auth/index.js';
 import { SchemaPipe } from '../schema.pipe.js';
 
 import {
@@ -23,26 +28,33 @@ export class AgentProfilesResolver {
   constructor(
     @Inject(AgentsApi)
     private readonly agents: AgentsApi,
+
+    @Inject(WorkspaceMembership)
+    private readonly membership: WorkspaceMembership,
   ) {}
 
   @Query(() => [AgentProfileType], { name: 'agentProfiles' })
-  public agentProfiles(
+  public async agentProfiles(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Args('workspaceId', { type: () => ID }) workspaceId: string,
   ): Promise<AgentProfileDto[]> {
+    await this.membership.assert(account.id, workspaceId);
     return this.agents.profiles.find(workspaceId);
   }
 
-  /** `null` when there is no such profile in the workspace. */
-  @Query(() => AgentProfileType, { name: 'agentProfile', nullable: true })
-  public agentProfile(
+  @Query(() => AgentProfileType, { name: 'agentProfile' })
+  public async agentProfile(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Args('workspaceId', { type: () => ID }) workspaceId: string,
     @Args('id', { type: () => ID }) id: string,
-  ): Promise<AgentProfileDto | null> {
-    return this.agents.profiles.findById(workspaceId, id);
+  ): Promise<AgentProfileDto> {
+    await this.membership.assert(account.id, workspaceId);
+    return this.agents.profiles.getById(workspaceId, id);
   }
 
   @Mutation(() => AgentProfileType, { name: 'createAgentProfile' })
-  public createAgentProfile(
+  public async createAgentProfile(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Args('workspaceId', { type: () => ID }) workspaceId: string,
     @Args(
       'input',
@@ -51,15 +63,13 @@ export class AgentProfilesResolver {
     )
     input: CreateAgentProfileDto,
   ): Promise<AgentProfileDto> {
+    await this.membership.assert(account.id, workspaceId);
     return this.agents.profiles.create(workspaceId, input);
   }
 
-  /** `null` when there is no such profile in the workspace. */
-  @Mutation(() => AgentProfileType, {
-    name: 'updateAgentProfile',
-    nullable: true,
-  })
-  public updateAgentProfile(
+  @Mutation(() => AgentProfileType, { name: 'updateAgentProfile' })
+  public async updateAgentProfile(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Args('workspaceId', { type: () => ID }) workspaceId: string,
     @Args('id', { type: () => ID }) id: string,
     @Args(
@@ -68,16 +78,18 @@ export class AgentProfilesResolver {
       new SchemaPipe(UpdateAgentProfileDtoSchema),
     )
     input: UpdateAgentProfileDto,
-  ): Promise<AgentProfileDto | null> {
+  ): Promise<AgentProfileDto> {
+    await this.membership.assert(account.id, workspaceId);
     return this.agents.profiles.update(workspaceId, id, input);
   }
 
-  /** Idempotent: deleting a missing profile still returns `true`. */
   @Mutation(() => Boolean, { name: 'deleteAgentProfile' })
   public async deleteAgentProfile(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Args('workspaceId', { type: () => ID }) workspaceId: string,
     @Args('id', { type: () => ID }) id: string,
   ): Promise<boolean> {
+    await this.membership.assert(account.id, workspaceId);
     await this.agents.profiles.delete(workspaceId, id);
     return true;
   }

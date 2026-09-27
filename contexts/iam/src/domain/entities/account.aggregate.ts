@@ -1,26 +1,26 @@
-import { Aggregate } from '@intentra/shared';
+import { AccountId, Aggregate } from '@intentra/shared';
 
-import { AccountId } from '../value-objects/index.js';
+import type { Email } from '../value-objects/index.js';
 
 export type AccountProps = {
-  readonly email: string;
-  readonly password: string;
+  readonly email: Email;
+  readonly passwordHash: string;
 };
 
 export class Account extends Aggregate<AccountId> {
   private constructor(
     id: AccountId,
-    public readonly email: string,
-    public readonly password: string,
+    public readonly email: Email,
+    public readonly passwordHash: string,
   ) {
     super(id);
   }
 
-  public static signUp(email: string, passwordHash: string): Account {
-    return new Account(new AccountId(), email, passwordHash);
+  public static signUp(props: AccountProps): Account {
+    return new Account(new AccountId(), props.email, props.passwordHash);
   }
 
   public static reconstitute(id: AccountId, props: AccountProps): Account {
-    return new Account(id, props.email, props.password);
+    return new Account(id, props.email, props.passwordHash);
   }
 }

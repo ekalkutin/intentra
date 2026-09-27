@@ -1,18 +1,16 @@
-import { Controller, Get, Inject } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
-import { AccountDto, IamApi } from '@intentra/contracts/iam';
+import type { AccountDto } from '@intentra/contracts/iam';
+
+import { CurrentAccount, type AuthenticatedAccount } from '../../auth/index.js';
 
 @Controller({
   path: 'iam/accounts',
 })
 export class AccountsController {
-  constructor(
-    @Inject(IamApi)
-    private readonly iam: IamApi,
-  ) {}
-
-  @Get()
-  public find(): Promise<AccountDto[]> {
-    return this.iam.accounts.find();
+  /** Already read by the guard: no second trip to IAM. */
+  @Get('/me')
+  public me(@CurrentAccount() account: AuthenticatedAccount): AccountDto {
+    return { id: account.id, email: account.email };
   }
 }

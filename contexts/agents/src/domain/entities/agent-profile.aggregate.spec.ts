@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import { WorkspaceId } from '@intentra/shared';
 
-import { AgentProfileArchivedError } from '../errors/agent-profile-archived.error.js';
-import { AgentName } from '../value-objects/agent-name.vo.js';
-import { Instructions } from '../value-objects/instructions.vo.js';
-import { ModelRef } from '../value-objects/model-ref.vo.js';
-import { ToolId } from '../value-objects/tool-id.vo.js';
+import { AgentProfileArchivedException } from '../exceptions/index.js';
+import {
+  AgentName,
+  Instructions,
+  ModelRef,
+  ToolId,
+} from '../value-objects/index.js';
 
 import { AgentProfile } from './agent-profile.aggregate.js';
 
@@ -71,11 +73,11 @@ describe('AgentProfile', () => {
 
     expect(profile.isArchived).toBe(true);
     expect(() => profile.rename(new AgentName('Other'))).toThrow(
-      AgentProfileArchivedError,
+      AgentProfileArchivedException,
     );
     expect(() => profile.allowTool(listWorkspaces)).toThrow(
-      AgentProfileArchivedError,
+      AgentProfileArchivedException,
     );
-    expect(() => profile.archive()).toThrow(AgentProfileArchivedError);
+    expect(() => profile.archive()).toThrow(AgentProfileArchivedException);
   });
 });

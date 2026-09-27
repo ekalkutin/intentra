@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { AccountRepository } from '../../application/ports/account-repository.port.js';
-import { Account } from '../../domain/entities/account.aggregate.js';
-import { AccountId } from '../../domain/value-objects/account-id.vo.js';
-import { AccountModel } from '../database/account.schema.js';
+import { AccountId } from '@intentra/shared';
+
+import { AccountRepository } from '../../application/ports/index.js';
+import { Account } from '../../domain/entities/index.js';
+import { Email } from '../../domain/value-objects/index.js';
+import { AccountModel } from '../database/index.js';
 
 @Injectable()
 export class AccountRepositoryAdapter extends AccountRepository {
@@ -19,19 +21,28 @@ export class AccountRepositoryAdapter extends AccountRepository {
   public async save(account: Account): Promise<void> {
     const accountModel = new this.accountModel({
       _id: account.id.value,
-      email: account.email,
-      password: account.password,
+      email: account.email.value,
+      passwordHash: account.passwordHash,
     });
     await accountModel.save();
   }
 
-  public async find(): Promise<Account[]> {
-    const accounts = await this.accountModel.find().exec();
-    return accounts.map(account =>
-      Account.reconstitute(new AccountId(account._id), {
-        email: account.email,
-        password: account.password,
-      }),
-    );
+  public async findById(id: AccountId): Promise<Account | null> {
+    const account = await this.accountModel.findById(id.value).exec();
+    return account ? this.toDomain(account) : null;
+  }
+
+  public async findByEmail(email: Email): Promise<Account | null> {
+    const account = await this.accountModel
+      .findOne({ email: email.value })
+      .exec();
+    return account ? this.toDomain(account) : null;
+  }
+
+  private toDomain(account: AccountModel): Account {
+    return Account.reconstitute(new AccountId(account._id), {
+      email: new Email(account.email),
+      passwordHash: account.passwordHash,
+    });
   }
 }

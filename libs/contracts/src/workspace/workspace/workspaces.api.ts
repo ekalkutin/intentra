@@ -4,9 +4,15 @@ import type {
   WorkspaceDto,
 } from './workspace.dto.js';
 
-/** Workspaces. Reached through `WorkspaceApi.workspaces`. */
+/**
+ * Workspaces. Reached through `WorkspaceApi.workspaces`. An account sees only
+ * the workspaces it is a member of; the others do not exist for it.
+ */
 export interface WorkspacesApi {
-  create(data: CreateWorkspaceDto): Promise<WorkspaceDto>;
+  /** The account becomes the first member. */
+  create(accountId: string, data: CreateWorkspaceDto): Promise<WorkspaceDto>;
   /** Ids with no workspace are skipped; order is not guaranteed. */
-  find(query?: FindWorkspacesDto): Promise<WorkspaceDto[]>;
+  find(accountId: string, query?: FindWorkspacesDto): Promise<WorkspaceDto[]>;
+  /** Throws `WORKSPACE_NOT_FOUND` (404), also for a non-member. */
+  getById(accountId: string, id: string): Promise<WorkspaceDto>;
 }

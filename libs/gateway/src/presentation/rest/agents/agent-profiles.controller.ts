@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
-  NotFoundException,
   Param,
   Patch,
   Post,
@@ -21,6 +20,12 @@ import {
   type UpdateAgentProfileDto,
 } from '@intentra/contracts/agents';
 
+import {
+  CurrentAccount,
+  WorkspaceMembership,
+  type AuthenticatedAccount,
+} from '../../auth/index.js';
+
 @Controller({
   path: '/workspaces/:workspaceId/agents',
 })
@@ -28,54 +33,59 @@ export class AgentProfilesController {
   constructor(
     @Inject(AgentsApi)
     private readonly agents: AgentsApi,
+
+    @Inject(WorkspaceMembership)
+    private readonly membership: WorkspaceMembership,
   ) {}
 
   @Get()
-  public find(
+  public async find(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Param('workspaceId') workspaceId: string,
   ): Promise<AgentProfileDto[]> {
+    await this.membership.assert(account.id, workspaceId);
     return this.agents.profiles.find(workspaceId);
   }
 
   @Get(':id')
-  public async findById(
+  public async getById(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Param('workspaceId') workspaceId: string,
     @Param('id') id: string,
   ): Promise<AgentProfileDto> {
-    const profile = await this.agents.profiles.findById(workspaceId, id);
-    if (!profile) {
-      throw new NotFoundException();
-    }
-    return profile;
+    await this.membership.assert(account.id, workspaceId);
+    return this.agents.profiles.getById(workspaceId, id);
   }
 
   @Post()
-  public create(
+  public async create(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Param('workspaceId') workspaceId: string,
     @Body({ schema: CreateAgentProfileDtoSchema }) data: CreateAgentProfileDto,
   ): Promise<AgentProfileDto> {
+    await this.membership.assert(account.id, workspaceId);
     return this.agents.profiles.create(workspaceId, data);
   }
 
   @Patch(':id')
   public async update(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Param('workspaceId') workspaceId: string,
     @Param('id') id: string,
     @Body({ schema: UpdateAgentProfileDtoSchema }) data: UpdateAgentProfileDto,
   ): Promise<AgentProfileDto> {
-    const profile = await this.agents.profiles.update(workspaceId, id, data);
-    if (!profile) {
-      throw new NotFoundException();
-    }
-    return profile;
+    await this.membership.assert(account.id, workspaceId);
+    return this.agents.profiles.update(workspaceId, id, data);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  public delete(
+  public async delete(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Param('workspaceId') workspaceId: string,
     @Param('id') id: string,
   ): Promise<void> {
+    await this.membership.assert(account.id, workspaceId);
     return this.agents.profiles.delete(workspaceId, id);
   }
 }

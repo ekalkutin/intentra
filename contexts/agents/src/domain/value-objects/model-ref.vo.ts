@@ -1,3 +1,5 @@
+import { InvalidAgentProfileException } from '../exceptions/index.js';
+
 /** Which LLM an agent runs on: the provider and the model name it knows. */
 export class ModelRef {
   readonly #provider: string;
@@ -7,10 +9,10 @@ export class ModelRef {
     const trimmedProvider = provider.trim();
     const trimmedName = name.trim();
     if (!trimmedProvider) {
-      throw new Error('Model provider cannot be empty');
+      throw new InvalidAgentProfileException('Model provider cannot be empty');
     }
     if (!trimmedName) {
-      throw new Error('Model name cannot be empty');
+      throw new InvalidAgentProfileException('Model name cannot be empty');
     }
     this.#provider = trimmedProvider;
     this.#name = trimmedName;

@@ -1,4 +1,4 @@
-export type { Exposure, ToolApis } from './surface.js';
+export type { Caller, Exposure, ToolApis } from './surface.js';
 export { defineTool, type ToolDefinition } from './tools/define-tool.js';
 export {
   defineResource,

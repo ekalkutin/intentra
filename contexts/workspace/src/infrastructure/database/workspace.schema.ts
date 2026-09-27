@@ -12,6 +12,10 @@ export class WorkspaceModel {
 
   @Prop({ required: true })
   name: string;
+
+  /** Account ids. */
+  @Prop({ type: [String], required: true, index: true })
+  members: string[];
 }
 
 export const WorkspaceSchema = SchemaFactory.createForClass(WorkspaceModel);

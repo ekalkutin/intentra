@@ -1,17 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type {
-  CreateProjectDto,
-  ProjectDto,
-  ProjectsApi,
+import {
+  type CreateProjectDto,
+  type ProjectDto,
+  type ProjectsApi,
 } from '@intentra/contracts/workspace';
-import { WorkspaceId } from '@intentra/shared';
+import { AccountId, WorkspaceId } from '@intentra/shared';
 
-import { Project } from '../../domain/entities/project.aggregate.js';
-import { WorkspaceNotFoundError } from '../errors/workspace-not-found.error.js';
-import { toProjectDto } from '../mappers/project.mapper.js';
-import { ProjectRepository } from '../ports/project-repository.port.js';
-import { WorkspaceRepository } from '../ports/workspace-repository.port.js';
+import { Project } from '../../domain/entities/index.js';
+import { WorkspaceNotFoundException } from '../exceptions/index.js';
+import { toProjectDto } from '../mappers/index.js';
+import { ProjectRepository, WorkspaceRepository } from '../ports/index.js';
 
 @Injectable()
 export class ProjectsService implements ProjectsApi {
@@ -23,11 +22,15 @@ export class ProjectsService implements ProjectsApi {
     private readonly workspaceRepository: WorkspaceRepository,
   ) {}
 
-  public async create(data: CreateProjectDto): Promise<ProjectDto> {
+  public async create(
+    accountId: string,
+    data: CreateProjectDto,
+  ): Promise<ProjectDto> {
     const workspaceId = new WorkspaceId(data.workspaceId);
-    const workspace = await this.workspaceRepository.findById(workspaceId);
-    if (!workspace) {
-      throw new WorkspaceNotFoundError(workspaceId);
+    const workspace = await this.workspaceRepository.getById(workspaceId);
+    // Not a member: the workspace does not exist for this account.
+    if (!workspace.hasMember(new AccountId(accountId))) {
+      throw new WorkspaceNotFoundException(workspaceId.value);
     }
 
     const project = Project.create({
@@ -39,8 +42,13 @@ export class ProjectsService implements ProjectsApi {
     return toProjectDto(project);
   }
 
-  public async find(): Promise<ProjectDto[]> {
-    const projects = await this.projectRepository.find();
+  public async find(accountId: string): Promise<ProjectDto[]> {
+    const workspaces = await this.workspaceRepository.findByMember(
+      new AccountId(accountId),
+    );
+    const projects = await this.projectRepository.findByWorkspaces(
+      workspaces.map(workspace => workspace.id),
+    );
     return projects.map(toProjectDto);
   }
 }

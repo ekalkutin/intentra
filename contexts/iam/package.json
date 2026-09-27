@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "exports": {
     ".": {
@@ -26,6 +28,7 @@
     "@intentra/shared": "workspace:*",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/cqrs": "catalog:nestjs12",
+    "@nestjs/jwt": "catalog:nestjs12",
     "@nestjs/mongoose": "catalog:nestjs12",
     "mongoose": "catalog:"
   },

@@ -1,3 +1,5 @@
+import { InvalidAgentProfileException } from '../exceptions/index.js';
+
 /** The system instructions an agent runs with. */
 export class Instructions {
   public static readonly MAX_LENGTH = 20_000;
@@ -7,10 +9,10 @@ export class Instructions {
   constructor(value: string) {
     const trimmed = value.trim();
     if (!trimmed) {
-      throw new Error('Instructions cannot be empty');
+      throw new InvalidAgentProfileException('Instructions cannot be empty');
     }
     if (trimmed.length > Instructions.MAX_LENGTH) {
-      throw new Error(
+      throw new InvalidAgentProfileException(
         `Instructions cannot be longer than ${Instructions.MAX_LENGTH} characters`,
       );
     }

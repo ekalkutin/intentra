@@ -7,6 +7,8 @@ import {
   type CreateWorkspaceDto,
 } from '@intentra/contracts/workspace';
 
+import { CurrentAccount, type AuthenticatedAccount } from '../../auth/index.js';
+
 @Controller({
   path: '/workspaces',
 })
@@ -17,14 +19,17 @@ export class WorkspacesController {
   ) {}
 
   @Get()
-  public find(): Promise<WorkspaceDto[]> {
-    return this.workspace.workspaces.find();
+  public find(
+    @CurrentAccount() account: AuthenticatedAccount,
+  ): Promise<WorkspaceDto[]> {
+    return this.workspace.workspaces.find(account.id);
   }
 
   @Post()
   public create(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Body({ schema: CreateWorkspaceDtoSchema }) data: CreateWorkspaceDto,
   ): Promise<WorkspaceDto> {
-    return this.workspace.workspaces.create(data);
+    return this.workspace.workspaces.create(account.id, data);
   }
 }

@@ -1,5 +1,6 @@
 import type { AccountsApi } from './account/accounts.api.js';
 import type { AuthApi } from './auth/auth.api.js';
+import type { PersonalAccessTokensApi } from './personal-access-token/personal-access-tokens.api.js';
 
 /**
  * Published API of IAM. The class itself is the DI token; the sub-APIs are
@@ -9,4 +10,5 @@ import type { AuthApi } from './auth/auth.api.js';
 export abstract class IamApi {
   abstract readonly accounts: AccountsApi;
   abstract readonly auth: AuthApi;
+  abstract readonly personalAccessTokens: PersonalAccessTokensApi;
 }

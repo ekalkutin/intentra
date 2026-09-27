@@ -1,11 +1,13 @@
-import { Aggregate, WorkspaceId } from '@intentra/shared';
+import { Aggregate, Timestamp, WorkspaceId } from '@intentra/shared';
 
-import { AgentProfileArchivedError } from '../errors/agent-profile-archived.error.js';
-import { AgentName } from '../value-objects/agent-name.vo.js';
-import { AgentProfileId } from '../value-objects/agent-profile-id.vo.js';
-import { Instructions } from '../value-objects/instructions.vo.js';
-import { ModelRef } from '../value-objects/model-ref.vo.js';
-import { ToolId } from '../value-objects/tool-id.vo.js';
+import { AgentProfileArchivedException } from '../exceptions/index.js';
+import {
+  AgentName,
+  AgentProfileId,
+  Instructions,
+  ModelRef,
+  ToolId,
+} from '../value-objects/index.js';
 
 export type AgentProfileProps = {
   readonly workspaceId: WorkspaceId;
@@ -13,7 +15,7 @@ export type AgentProfileProps = {
   readonly instructions: Instructions;
   readonly model: ModelRef;
   readonly tools: readonly ToolId[];
-  readonly archivedAt: Date | null;
+  readonly archivedAt: Timestamp | null;
 };
 
 export type CreateAgentProfileProps = Pick<
@@ -32,7 +34,7 @@ export class AgentProfile extends Aggregate<AgentProfileId> {
   #instructions: Instructions;
   #model: ModelRef;
   #tools: ToolId[];
-  #archivedAt: Date | null;
+  #archivedAt: Timestamp | null;
 
   private constructor(id: AgentProfileId, props: AgentProfileProps) {
     super(id);
@@ -64,7 +66,7 @@ export class AgentProfile extends Aggregate<AgentProfileId> {
     return [...this.#tools];
   }
 
-  get archivedAt(): Date | null {
+  get archivedAt(): Timestamp | null {
     return this.#archivedAt;
   }
 
@@ -109,12 +111,12 @@ export class AgentProfile extends Aggregate<AgentProfileId> {
 
   public archive(): void {
     this.#assertNotArchived();
-    this.#archivedAt = new Date();
+    this.#archivedAt = Timestamp.now();
   }
 
   #assertNotArchived(): void {
     if (this.isArchived) {
-      throw new AgentProfileArchivedError(this.id);
+      throw new AgentProfileArchivedException(this.id);
     }
   }
 

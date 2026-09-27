@@ -2,16 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { WorkspaceId } from '@intentra/shared';
+import { Timestamp, WorkspaceId } from '@intentra/shared';
 
-import { AgentProfileRepository } from '../../application/ports/agent-profile-repository.port.js';
-import { AgentProfile } from '../../domain/entities/agent-profile.aggregate.js';
-import { AgentName } from '../../domain/value-objects/agent-name.vo.js';
-import { AgentProfileId } from '../../domain/value-objects/agent-profile-id.vo.js';
-import { Instructions } from '../../domain/value-objects/instructions.vo.js';
-import { ModelRef } from '../../domain/value-objects/model-ref.vo.js';
-import { ToolId } from '../../domain/value-objects/tool-id.vo.js';
-import { AgentProfileModel } from '../database/agent-profile.schema.js';
+import { AgentProfileRepository } from '../../application/ports/index.js';
+import { AgentProfile } from '../../domain/entities/index.js';
+import {
+  AgentName,
+  AgentProfileId,
+  Instructions,
+  ModelRef,
+  ToolId,
+} from '../../domain/value-objects/index.js';
+import { AgentProfileModel } from '../database/index.js';
 
 @Injectable()
 export class AgentProfileRepositoryAdapter extends AgentProfileRepository {
@@ -61,7 +63,7 @@ export class AgentProfileRepositoryAdapter extends AgentProfileRepository {
       modelProvider: profile.model.provider,
       modelName: profile.model.name,
       tools: profile.tools.map(tool => tool.value),
-      archivedAt: profile.archivedAt,
+      archivedAt: profile.archivedAt?.toDate() ?? null,
     };
   }
 
@@ -72,7 +74,7 @@ export class AgentProfileRepositoryAdapter extends AgentProfileRepository {
       instructions: new Instructions(profile.instructions),
       model: new ModelRef(profile.modelProvider, profile.modelName),
       tools: profile.tools.map(tool => new ToolId(tool)),
-      archivedAt: profile.archivedAt,
+      archivedAt: profile.archivedAt && Timestamp.fromDate(profile.archivedAt),
     });
   }
 }

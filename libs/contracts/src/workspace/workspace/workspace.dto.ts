@@ -9,7 +9,7 @@ export const CreateWorkspaceDtoSchema = z.object({
   name: z.string().nonempty(),
 });
 
-/** Without `ids`, every workspace. */
+/** Without `ids`, every workspace of the account. */
 export const FindWorkspacesDtoSchema = z.object({
   ids: z.array(z.string().nonempty()).optional(),
 });

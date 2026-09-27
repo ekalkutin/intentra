@@ -14,11 +14,15 @@ import {
 
 @Module({})
 export class GQLModule {
-  static register({ contexts }: PresentationModuleOptions): DynamicModule {
+  static register({
+    contexts,
+    auth,
+  }: PresentationModuleOptions): DynamicModule {
     return {
       module: GQLModule,
       imports: [
         ...contexts,
+        auth,
         GraphQLModule.forRoot<ApolloDriverConfig>({
           driver: ApolloDriver,
           // In memory, not a file: nothing reads an SDL dump, and a client

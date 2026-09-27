@@ -1,3 +1,5 @@
+import { InvalidAgentProfileException } from '../exceptions/index.js';
+
 /**
  * The id of a tool an agent may be allowed to use, in `snake_case`. Which tools
  * exist is not the domain's knowledge: the application checks new ids against
@@ -8,7 +10,9 @@ export class ToolId {
 
   constructor(public readonly value: string) {
     if (!ToolId.#FORMAT.test(value)) {
-      throw new Error(`Tool id must be snake_case: ${value}`);
+      throw new InvalidAgentProfileException(
+        `Tool id must be snake_case: ${value}`,
+      );
     }
   }
 

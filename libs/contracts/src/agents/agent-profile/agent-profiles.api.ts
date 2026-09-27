@@ -7,6 +7,8 @@ import type {
 /**
  * Agent profiles of a workspace. Reached through `AgentsApi.profiles`.
  * A deleted profile is archived: it stays for history but is no longer found.
+ * A profile missing from the workspace, or archived, throws
+ * `AGENT_PROFILE_NOT_FOUND` (404).
  */
 export interface AgentProfilesApi {
   create(
@@ -14,14 +16,11 @@ export interface AgentProfilesApi {
     data: CreateAgentProfileDto,
   ): Promise<AgentProfileDto>;
   find(workspaceId: string): Promise<AgentProfileDto[]>;
-  /** `null` when there is no such profile in the workspace. */
-  findById(workspaceId: string, id: string): Promise<AgentProfileDto | null>;
-  /** `null` when there is no such profile in the workspace. */
+  getById(workspaceId: string, id: string): Promise<AgentProfileDto>;
   update(
     workspaceId: string,
     id: string,
     data: UpdateAgentProfileDto,
-  ): Promise<AgentProfileDto | null>;
-  /** Idempotent: deleting a missing profile does nothing. */
+  ): Promise<AgentProfileDto>;
   delete(workspaceId: string, id: string): Promise<void>;
 }

@@ -1,6 +1,6 @@
 import type { AgentProfileDto } from '@intentra/contracts/agents';
 
-import type { AgentProfile } from '../../domain/entities/agent-profile.aggregate.js';
+import type { AgentProfile } from '../../domain/entities/index.js';
 
 export function toAgentProfileDto(profile: AgentProfile): AgentProfileDto {
   return {

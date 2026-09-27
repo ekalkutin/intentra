@@ -3,20 +3,24 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { WorkspaceApi } from '@intentra/contracts/workspace';
 
-import { ProjectRepository } from './application/ports/project-repository.port.js';
-import { WorkspaceRepository } from './application/ports/workspace-repository.port.js';
-import { ProjectsService } from './application/services/projects.service.js';
-import { WorkspacesService } from './application/services/workspaces.service.js';
-import { ProjectRepositoryAdapter } from './infrastructure/adapters/project-repository.adapter.js';
-import { WorkspaceRepositoryAdapter } from './infrastructure/adapters/workspace-repository.adapter.js';
+import {
+  ProjectRepository,
+  WorkspaceRepository,
+} from './application/ports/index.js';
+import {
+  ProjectsService,
+  WorkspacesService,
+} from './application/services/index.js';
+import {
+  ProjectRepositoryAdapter,
+  WorkspaceRepositoryAdapter,
+} from './infrastructure/adapters/index.js';
 import {
   ProjectModel,
   ProjectSchema,
-} from './infrastructure/database/project.schema.js';
-import {
   WorkspaceModel,
   WorkspaceSchema,
-} from './infrastructure/database/workspace.schema.js';
+} from './infrastructure/database/index.js';
 import { WorkspaceApiService } from './workspace-api.service.js';
 import { ConfigurableModuleClass } from './workspace.module-definition.js';
 

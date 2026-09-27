@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/server';
 
-import type { ToolApis, ToolDefinition } from '@intentra/agent-surface';
+import type { Caller, ToolApis, ToolDefinition } from '@intentra/agent-surface';
 
 /**
  * The catalog tools offered through MCP. Called once at startup, so a tool that
@@ -25,6 +25,7 @@ export function registerMcpTools(
   server: McpServer,
   tools: readonly ToolDefinition[],
   apis: ToolApis,
+  caller: Caller,
 ): void {
   for (const tool of tools) {
     server.registerTool(
@@ -35,7 +36,7 @@ export function registerMcpTools(
         outputSchema: tool.output,
       },
       async input => {
-        const result = await tool.run(apis, input);
+        const result = await tool.run(apis, input, caller);
         return {
           content: [{ type: 'text', text: JSON.stringify(result) }],
           structuredContent: result,

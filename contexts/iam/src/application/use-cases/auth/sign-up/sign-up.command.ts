@@ -1,10 +1,16 @@
 import { Inject } from '@nestjs/common';
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import type { SignUpDto, TokensDto } from '@intentra/contracts/iam';
+import { type SignUpDto, type TokensDto } from '@intentra/contracts/iam';
 
-import { Account } from '../../../../domain/entities/account.aggregate.js';
-import { AccountRepository, PasswordHasher } from '../../../ports/index.js';
+import { Account } from '../../../../domain/entities/index.js';
+import { Email } from '../../../../domain/value-objects/index.js';
+import { EmailAlreadyTakenException } from '../../../exceptions/index.js';
+import {
+  AccountRepository,
+  PasswordHasher,
+  TokenIssuer,
+} from '../../../ports/index.js';
 
 export class SignUpCommand extends Command<TokensDto> {
   constructor(public readonly payload: SignUpDto) {
@@ -12,6 +18,7 @@ export class SignUpCommand extends Command<TokensDto> {
   }
 }
 
+/** A new account is signed in right away. */
 @CommandHandler(SignUpCommand)
 export class SignUpCommandHandler implements ICommandHandler<SignUpCommand> {
   constructor(
@@ -20,21 +27,23 @@ export class SignUpCommandHandler implements ICommandHandler<SignUpCommand> {
 
     @Inject(PasswordHasher)
     private readonly passwordHasher: PasswordHasher,
+
+    @Inject(TokenIssuer)
+    private readonly tokenIssuer: TokenIssuer,
   ) {}
 
-  public async execute(command: SignUpCommand): Promise<TokensDto> {
-    const { payload } = command;
+  public async execute({ payload }: SignUpCommand): Promise<TokensDto> {
+    const email = new Email(payload.email);
+    if (await this.accountRepository.findByEmail(email)) {
+      throw new EmailAlreadyTakenException();
+    }
 
-    const account = Account.signUp(
-      payload.email,
-      await this.passwordHasher.hash(payload.password),
-    );
-
+    const account = Account.signUp({
+      email,
+      passwordHash: await this.passwordHasher.hash(payload.password),
+    });
     await this.accountRepository.save(account);
 
-    return {
-      accessToken: 'dummy-access-token',
-      refreshToken: 'dummy-refresh-token',
-    };
+    return this.tokenIssuer.issue(account.id);
   }
 }

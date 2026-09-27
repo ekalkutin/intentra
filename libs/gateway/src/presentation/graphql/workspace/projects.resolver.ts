@@ -8,6 +8,7 @@ import {
   type ProjectDto,
 } from '@intentra/contracts/workspace';
 
+import { CurrentAccount, type AuthenticatedAccount } from '../../auth/index.js';
 import { SchemaPipe } from '../schema.pipe.js';
 
 import { CreateProjectInput, ProjectType } from './dto/index.js';
@@ -20,12 +21,15 @@ export class ProjectsResolver {
   ) {}
 
   @Query(() => [ProjectType], { name: 'projects' })
-  public projects(): Promise<ProjectDto[]> {
-    return this.workspace.projects.find();
+  public projects(
+    @CurrentAccount() account: AuthenticatedAccount,
+  ): Promise<ProjectDto[]> {
+    return this.workspace.projects.find(account.id);
   }
 
   @Mutation(() => ProjectType, { name: 'createProject' })
   public createProject(
+    @CurrentAccount() account: AuthenticatedAccount,
     @Args(
       'input',
       { type: () => CreateProjectInput },
@@ -33,6 +37,6 @@ export class ProjectsResolver {
     )
     input: CreateProjectDto,
   ): Promise<ProjectDto> {
-    return this.workspace.projects.create(input);
+    return this.workspace.projects.create(account.id, input);
   }
 }

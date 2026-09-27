@@ -7,10 +7,13 @@ import { McpHandler } from './mcp.handler.js';
 
 @Module({})
 export class McpModule {
-  static register({ contexts }: PresentationModuleOptions): DynamicModule {
+  static register({
+    contexts,
+    auth,
+  }: PresentationModuleOptions): DynamicModule {
     return {
       module: McpModule,
-      imports: contexts,
+      imports: [...contexts, auth],
       controllers: [McpController],
       providers: [McpHandler],
     };

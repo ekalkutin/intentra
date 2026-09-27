@@ -10,11 +10,11 @@ export class AccountModel {
   @Prop({ type: String, required: true })
   _id: string;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true, unique: true })
   email: string;
 
-  @Prop({ required: true })
-  password: string;
+  @Prop({ type: String, required: true })
+  passwordHash: string;
 }
 
 export const AccountSchema = SchemaFactory.createForClass(AccountModel);

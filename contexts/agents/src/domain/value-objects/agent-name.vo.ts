@@ -1,3 +1,5 @@
+import { InvalidAgentProfileException } from '../exceptions/index.js';
+
 export class AgentName {
   public static readonly MAX_LENGTH = 80;
 
@@ -6,10 +8,10 @@ export class AgentName {
   constructor(value: string) {
     const trimmed = value.trim();
     if (!trimmed) {
-      throw new Error('Agent name cannot be empty');
+      throw new InvalidAgentProfileException('Agent name cannot be empty');
     }
     if (trimmed.length > AgentName.MAX_LENGTH) {
-      throw new Error(
+      throw new InvalidAgentProfileException(
         `Agent name cannot be longer than ${AgentName.MAX_LENGTH} characters`,
       );
     }

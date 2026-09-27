@@ -1,4 +1,4 @@
-import type { ModuleMetadata } from '@nestjs/common';
+import type { DynamicModule, ModuleMetadata } from '@nestjs/common';
 
 // Modules that provide the context ports (IamApi, WorkspaceApi, ...). Every
 // presentation module imports them itself: imports of the parent module are
@@ -7,4 +7,6 @@ import type { ModuleMetadata } from '@nestjs/common';
 // `IamModule.register({})` would create a second IAM.
 export type PresentationModuleOptions = {
   readonly contexts: NonNullable<ModuleMetadata['imports']>;
+  /** The one `AuthModule`: access checks such as `WorkspaceMembership`. */
+  readonly auth: DynamicModule;
 };

@@ -20,7 +20,7 @@ import { registerMcpTools, selectMcpTools } from './catalog-tools.js';
 /**
  * Stateless MCP over Streamable HTTP: the factory builds a fresh McpServer
  * for every request and offers it the catalog tools and resources exposed to
- * MCP, bound to the published APIs from Nest DI.
+ * MCP, bound to the published APIs from Nest DI and to the calling account.
  */
 @Injectable()
 export class McpHandler {
@@ -35,10 +35,16 @@ export class McpHandler {
     const apis = { iam, workspace };
 
     this.#handle = toNodeHandler(
-      createMcpHandler(() => {
+      createMcpHandler(({ authInfo }) => {
+        // Set by the controller once the personal access token is verified.
+        if (!authInfo) {
+          throw new Error('MCP request without an authenticated account');
+        }
+        const caller = { accountId: authInfo.clientId };
+
         const server = new McpServer({ name: 'intentra', version: '1.0.0' });
-        registerMcpTools(server, tools, apis);
-        registerMcpResources(server, resources, apis);
+        registerMcpTools(server, tools, apis, caller);
+        registerMcpResources(server, resources, apis, caller);
         return server;
       }),
     );

@@ -10,6 +10,11 @@ export type ToolApis = {
   readonly workspace: WorkspaceApi;
 };
 
+/** On whose behalf a tool runs or a resource is read. */
+export type Caller = {
+  readonly accountId: string;
+};
+
 /**
  * Where a tool or resource is offered. Both flags are required, so every entry
  * states it explicitly and nothing is exposed by default.

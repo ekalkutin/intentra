@@ -2,12 +2,16 @@ import { describe, expect, it } from 'vitest';
 
 import type { WorkspaceId } from '@intentra/shared';
 
-import type { AgentProfile } from '../../domain/entities/agent-profile.aggregate.js';
-import type { AgentProfileId } from '../../domain/value-objects/agent-profile-id.vo.js';
-import type { ToolId } from '../../domain/value-objects/tool-id.vo.js';
-import { UnknownToolError } from '../errors/unknown-tool.error.js';
-import { AgentProfileRepository } from '../ports/agent-profile-repository.port.js';
-import { ToolCatalog } from '../ports/tool-catalog.port.js';
+import type { AgentProfile } from '../../domain/entities/index.js';
+import type {
+  AgentProfileId,
+  ToolId,
+} from '../../domain/value-objects/index.js';
+import {
+  AgentProfileNotFoundException,
+  UnknownToolException,
+} from '../exceptions/index.js';
+import { AgentProfileRepository, ToolCatalog } from '../ports/index.js';
 
 import { AgentProfilesService } from './agent-profiles.service.js';
 
@@ -74,7 +78,7 @@ describe('AgentProfilesService', () => {
 
     await expect(
       service.create('ws-1', { ...data, tools: ['get_traceability'] }),
-    ).rejects.toThrow(UnknownToolError);
+    ).rejects.toThrow(UnknownToolException);
     expect(repository.saved).toHaveLength(0);
   });
 
@@ -88,6 +92,23 @@ describe('AgentProfilesService', () => {
 
     await expect(
       service.update('ws-1', created.id, { tools: ['get_traceability'] }),
-    ).rejects.toThrow(UnknownToolError);
+    ).rejects.toThrow(UnknownToolException);
+  });
+
+  it('does not find an archived profile', async () => {
+    const service = new AgentProfilesService(
+      new InMemoryAgentProfileRepository(),
+      new FakeToolCatalog([]),
+    );
+    const created = await service.create('ws-1', data);
+
+    await service.delete('ws-1', created.id);
+
+    await expect(service.getById('ws-1', created.id)).rejects.toThrow(
+      AgentProfileNotFoundException,
+    );
+    await expect(service.delete('ws-1', created.id)).rejects.toThrow(
+      AgentProfileNotFoundException,
+    );
   });
 });

@@ -5,7 +5,11 @@ import {
   type McpServer,
 } from '@modelcontextprotocol/server';
 
-import type { ResourceDefinition, ToolApis } from '@intentra/agent-surface';
+import type {
+  Caller,
+  ResourceDefinition,
+  ToolApis,
+} from '@intentra/agent-surface';
 
 const JSON_MIME_TYPE = 'application/json';
 
@@ -26,12 +30,12 @@ export function registerMcpResources(
   server: McpServer,
   resources: readonly ResourceDefinition[],
   apis: ToolApis,
+  caller: Caller,
 ): void {
   for (const resource of resources) {
     server.registerResource(
       resource.id,
-      // Listing every concrete URI needs to know the caller, so there is none
-      // until authorization exists; clients read by URI.
+      // No listing of concrete URIs yet; clients read by URI.
       new ResourceTemplate(resource.uriTemplate, { list: undefined }),
       { description: resource.description, mimeType: JSON_MIME_TYPE },
       async (uri, variables) => {
@@ -43,7 +47,7 @@ export function registerMcpResources(
             params.error.issues,
           );
         }
-        const content = await resource.read(apis, params.data);
+        const content = await resource.read(apis, params.data, caller);
         return {
           contents: [
             {

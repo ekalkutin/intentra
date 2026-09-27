@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 
-import type { Exposure, ToolApis } from '../surface.js';
+import type { Caller, Exposure, ToolApis } from '../surface.js';
 
 /**
  * One tool, described once for every place it is offered. The output is always
@@ -18,7 +18,11 @@ export type ToolDefinition<
   /** A tool that changes data is never offered through MCP. */
   readonly readOnly: boolean;
   readonly exposure: Exposure;
-  run(apis: ToolApis, input: z.infer<TInput>): Promise<z.infer<TOutput>>;
+  run(
+    apis: ToolApis,
+    input: z.infer<TInput>,
+    caller: Caller,
+  ): Promise<z.infer<TOutput>>;
 };
 
 export function defineTool<

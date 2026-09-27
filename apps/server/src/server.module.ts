@@ -28,7 +28,11 @@ import {
     }),
     GatewayModule.register({
       contexts: [
-        IamModule.register({}),
+        IamModule.registerAsync({
+          useFactory: (config: ConfigService<Variables, true>) =>
+            config.get('jwt', { infer: true }),
+          inject: [ConfigService],
+        }),
         WorkspaceModule.register({}),
         AgentsModule.register({}),
       ],

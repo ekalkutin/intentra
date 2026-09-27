@@ -1,19 +1,16 @@
-import { Inject } from '@nestjs/common';
 import { Query, Resolver } from '@nestjs/graphql';
 
-import { IamApi, type AccountDto } from '@intentra/contracts/iam';
+import type { AccountDto } from '@intentra/contracts/iam';
+
+import { CurrentAccount, type AuthenticatedAccount } from '../../auth/index.js';
 
 import { AccountType } from './dto/index.js';
 
 @Resolver()
 export class AccountsResolver {
-  constructor(
-    @Inject(IamApi)
-    private readonly iam: IamApi,
-  ) {}
-
-  @Query(() => [AccountType], { name: 'accounts' })
-  public accounts(): Promise<AccountDto[]> {
-    return this.iam.accounts.find();
+  /** The signed-in account, already read by the guard. */
+  @Query(() => AccountType, { name: 'me' })
+  public me(@CurrentAccount() account: AuthenticatedAccount): AccountDto {
+    return { id: account.id, email: account.email };
   }
 }

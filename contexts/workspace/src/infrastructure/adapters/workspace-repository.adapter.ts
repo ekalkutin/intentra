@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { WorkspaceId } from '@intentra/shared';
+import { AccountId, WorkspaceId } from '@intentra/shared';
 
-import { WorkspaceRepository } from '../../application/ports/workspace-repository.port.js';
-import { Workspace } from '../../domain/entities/workspace.aggregate.js';
-import { WorkspaceModel } from '../database/workspace.schema.js';
+import { WorkspaceRepository } from '../../application/ports/index.js';
+import { Workspace } from '../../domain/entities/index.js';
+import { WorkspaceModel } from '../database/index.js';
 
 @Injectable()
 export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
@@ -21,12 +21,19 @@ export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
     const workspaceModel = new this.workspaceModel({
       _id: workspace.id.value,
       name: workspace.name,
+      members: workspace.members.map(member => member.value),
     });
     await workspaceModel.save();
   }
 
-  public async find(ids?: WorkspaceId[]): Promise<Workspace[]> {
-    const filter = ids ? { _id: { $in: ids.map(id => id.value) } } : {};
+  public async findByMember(
+    member: AccountId,
+    ids?: WorkspaceId[],
+  ): Promise<Workspace[]> {
+    const filter = {
+      members: member.value,
+      ...(ids && { _id: { $in: ids.map(id => id.value) } }),
+    };
     const workspaces = await this.workspaceModel.find(filter).exec();
     return workspaces.map(workspace => this.toDomain(workspace));
   }
@@ -39,6 +46,7 @@ export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
   private toDomain(workspace: WorkspaceModel): Workspace {
     return Workspace.reconstitute(new WorkspaceId(workspace._id), {
       name: workspace.name,
+      members: workspace.members.map(member => new AccountId(member)),
     });
   }
 }

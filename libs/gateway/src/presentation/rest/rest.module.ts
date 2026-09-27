@@ -8,10 +8,13 @@ import { WORKSPACE_CONTROLLERS } from './workspace/index.js';
 
 @Module({})
 export class RestModule {
-  static register({ contexts }: PresentationModuleOptions): DynamicModule {
+  static register({
+    contexts,
+    auth,
+  }: PresentationModuleOptions): DynamicModule {
     return {
       module: RestModule,
-      imports: contexts,
+      imports: [...contexts, auth],
       controllers: [
         ...IAM_CONTROLLERS,
         ...WORKSPACE_CONTROLLERS,
