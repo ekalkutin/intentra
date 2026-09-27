@@ -6,9 +6,11 @@ import type {
 
 /**
  * Agent profiles of a workspace. Reached through `AgentsApi.profiles`.
- * A deleted profile is archived: it stays for history but is no longer found.
- * A profile missing from the workspace, or archived, throws
- * `AGENT_PROFILE_NOT_FOUND` (404).
+ * Every workspace has one orchestrator, made on first use: `find` returns it
+ * first. `create` makes a specialist. A deleted profile is archived: it stays
+ * for history but is no longer found. A profile missing from the workspace, or
+ * archived, throws `AGENT_PROFILE_NOT_FOUND` (404); deleting the orchestrator
+ * throws `ORCHESTRATOR_CANNOT_BE_ARCHIVED` (400).
  */
 export interface AgentProfilesApi {
   create(

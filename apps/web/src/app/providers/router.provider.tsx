@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 
 import { AgentsPage } from '@/pages/agents';
+import { ChatPage } from '@/pages/chat';
 import { NewWorkspacePage } from '@/pages/new-workspace';
 import { NotFoundPage } from '@/pages/not-found';
 import { OnboardingPage } from '@/pages/onboarding';
@@ -73,6 +74,7 @@ const router = createBrowserRouter([
                     element: <ProjectsPage />,
                   },
                   { path: ROUTES.WORKSPACE.AGENTS, element: <AgentsPage /> },
+                  { path: ROUTES.WORKSPACE.CHAT, element: <ChatPage /> },
                   {
                     path: ROUTES.WORKSPACE.SETTINGS.ROOT,
                     element: <Navigate to='profile' replace />,

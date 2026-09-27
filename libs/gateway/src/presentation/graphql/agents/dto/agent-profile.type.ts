@@ -1,15 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 
-import type { AgentProfileDto } from '@intentra/contracts/agents';
-
-@ObjectType('ModelRef')
-export class ModelRefType {
-  @Field()
-  public readonly provider: string;
-
-  @Field()
-  public readonly name: string;
-}
+import type { AgentProfileDto, AgentRole } from '@intentra/contracts/agents';
 
 @ObjectType('AgentProfile')
 export class AgentProfileType implements AgentProfileDto {
@@ -19,14 +10,22 @@ export class AgentProfileType implements AgentProfileDto {
   @Field(() => ID)
   public readonly workspaceId: string;
 
+  /** `orchestrator` or `specialist`. */
+  @Field(() => String)
+  public readonly role: AgentRole;
+
   @Field()
   public readonly name: string;
 
   @Field()
+  public readonly description: string;
+
+  @Field()
   public readonly instructions: string;
 
-  @Field(() => ModelRefType)
-  public readonly model: ModelRefType;
+  /** An OpenRouter model id, such as `anthropic/claude-sonnet-4.5`. */
+  @Field()
+  public readonly model: string;
 
   @Field(() => [String])
   public readonly tools: string[];

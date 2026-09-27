@@ -11,6 +11,7 @@ import type {
 import {
   CreateAgentProfileCommand,
   DeleteAgentProfileCommand,
+  EnsureOrchestratorCommand,
   FindManyAgentProfilesQuery,
   GetOneAgentProfileQuery,
   UpdateAgentProfileCommand,
@@ -36,7 +37,8 @@ export class AgentProfilesService implements AgentProfilesApi {
     return this.getById(workspaceId, id);
   }
 
-  public find(workspaceId: string): Promise<AgentProfileDto[]> {
+  public async find(workspaceId: string): Promise<AgentProfileDto[]> {
+    await this.commandBus.execute(new EnsureOrchestratorCommand(workspaceId));
     return this.queryBus.execute(new FindManyAgentProfilesQuery(workspaceId));
   }
 

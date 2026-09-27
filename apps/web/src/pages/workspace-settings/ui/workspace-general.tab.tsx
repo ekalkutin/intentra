@@ -1,4 +1,5 @@
 import { RenameWorkspaceForm } from '@/features/rename-workspace';
+import { OpenRouterKeyForm } from '@/features/set-open-router-key';
 import { SettingsSection, SettingsTab } from '@/shared/ui/settings';
 
 export const WorkspaceGeneralTab = () => (
@@ -8,6 +9,9 @@ export const WorkspaceGeneralTab = () => (
   >
     <SettingsSection title='Workspace'>
       <RenameWorkspaceForm />
+    </SettingsSection>
+    <SettingsSection title='OpenRouter'>
+      <OpenRouterKeyForm />
     </SettingsSection>
   </SettingsTab>
 );

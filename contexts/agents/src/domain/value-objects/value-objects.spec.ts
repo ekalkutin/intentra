@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
+import { AgentDescription } from './agent-description.vo.js';
 import { AgentName } from './agent-name.vo.js';
+import { AgentRole } from './agent-role.vo.js';
+import { ApiKey } from './api-key.vo.js';
 import { Instructions } from './instructions.vo.js';
-import { ModelRef } from './model-ref.vo.js';
+import { ModelId } from './model-id.vo.js';
 import { ToolId } from './tool-id.vo.js';
 
 describe('AgentName', () => {
@@ -25,16 +28,47 @@ describe('Instructions', () => {
   });
 });
 
-describe('ModelRef', () => {
-  it('compares by provider and name', () => {
-    const model = new ModelRef('anthropic', 'claude-sonnet-5');
+describe('AgentDescription', () => {
+  it('rejects an empty description', () => {
+    expect(() => new AgentDescription(' ')).toThrow(
+      'Agent description cannot be empty',
+    );
+  });
+});
 
-    expect(model.equals(new ModelRef('anthropic', 'claude-sonnet-5'))).toBe(
-      true,
+describe('ModelId', () => {
+  it('accepts an OpenRouter id and trims it', () => {
+    expect(new ModelId(' openai/gpt-5:free ').value).toBe('openai/gpt-5:free');
+  });
+
+  it.each(['', 'claude-sonnet-5', 'anthropic/ claude'])('rejects %j', value => {
+    expect(() => new ModelId(value)).toThrow('Model id must look like');
+  });
+});
+
+describe('AgentRole', () => {
+  it('reads a stored role back as the same instance', () => {
+    expect(AgentRole.from('orchestrator')).toBe(AgentRole.ORCHESTRATOR);
+  });
+
+  it('rejects an unknown role', () => {
+    expect(() => AgentRole.from('admin')).toThrow('Unknown agent role');
+  });
+});
+
+describe('ApiKey', () => {
+  it('hints with the last four characters', () => {
+    expect(new ApiKey(' sk-or-v1-abcdef1234 ').hint).toBe('1234');
+  });
+
+  it('never shows itself in JSON', () => {
+    expect(JSON.stringify({ key: new ApiKey('sk-or-v1-secret1234') })).toBe(
+      '{"key":"…1234"}',
     );
-    expect(model.equals(new ModelRef('anthropic', 'claude-opus-5-5'))).toBe(
-      false,
-    );
+  });
+
+  it('rejects a key with spaces', () => {
+    expect(() => new ApiKey('sk or')).toThrow();
   });
 });
 

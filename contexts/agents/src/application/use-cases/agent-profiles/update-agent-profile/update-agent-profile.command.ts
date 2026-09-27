@@ -5,10 +5,11 @@ import type { UpdateAgentProfileDto } from '@intentra/contracts/agents';
 import { WorkspaceId } from '@intentra/shared';
 
 import {
+  AgentDescription,
   AgentName,
   AgentProfileId,
   Instructions,
-  ModelRef,
+  ModelId,
 } from '../../../../domain/value-objects/index.js';
 import { AgentProfileRepository, ToolCatalog } from '../../../ports/index.js';
 
@@ -45,13 +46,14 @@ export class UpdateAgentProfileCommandHandler implements ICommandHandler<UpdateA
     if (payload.name !== undefined) {
       profile.rename(new AgentName(payload.name));
     }
+    if (payload.description !== undefined) {
+      profile.describe(new AgentDescription(payload.description));
+    }
     if (payload.instructions !== undefined) {
       profile.changeInstructions(new Instructions(payload.instructions));
     }
     if (payload.model !== undefined) {
-      profile.changeModel(
-        new ModelRef(payload.model.provider, payload.model.name),
-      );
+      profile.changeModel(new ModelId(payload.model));
     }
     if (payload.tools !== undefined) {
       profile.replaceTools(this.toolCatalog.requireAvailable(payload.tools));

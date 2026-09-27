@@ -5,25 +5,19 @@ import type {
   UpdateAgentProfileDto,
 } from '@intentra/contracts/agents';
 
-@InputType('ModelRefInput')
-export class ModelRefInput {
-  @Field()
-  public readonly provider: string;
-
-  @Field()
-  public readonly name: string;
-}
-
 @InputType('CreateAgentProfileInput')
 export class CreateAgentProfileInput implements CreateAgentProfileDto {
   @Field()
   public readonly name: string;
 
   @Field()
+  public readonly description: string;
+
+  @Field()
   public readonly instructions: string;
 
-  @Field(() => ModelRefInput)
-  public readonly model: ModelRefInput;
+  @Field()
+  public readonly model: string;
 
   @Field(() => [String], { nullable: true })
   public readonly tools?: string[];
@@ -36,10 +30,13 @@ export class UpdateAgentProfileInput implements UpdateAgentProfileDto {
   public readonly name?: string;
 
   @Field(() => String, { nullable: true })
+  public readonly description?: string;
+
+  @Field(() => String, { nullable: true })
   public readonly instructions?: string;
 
-  @Field(() => ModelRefInput, { nullable: true })
-  public readonly model?: ModelRefInput;
+  @Field(() => String, { nullable: true })
+  public readonly model?: string;
 
   @Field(() => [String], { nullable: true })
   public readonly tools?: string[];

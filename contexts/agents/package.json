@@ -23,10 +23,14 @@
     "@intentra/agent-surface": "workspace:*",
     "@intentra/contracts": "workspace:*",
     "@intentra/shared": "workspace:*",
+    "@mastra/ai-sdk": "^1.10.5",
+    "@mastra/core": "^1.71.0",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/cqrs": "catalog:nestjs12",
     "@nestjs/mongoose": "catalog:nestjs12",
-    "mongoose": "catalog:"
+    "ai": "catalog:",
+    "mongoose": "catalog:",
+    "zod": "catalog:"
   },
   "nx": {
     "tags": [

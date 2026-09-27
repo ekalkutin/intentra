@@ -2,6 +2,7 @@ import {
   Bot,
   Building2,
   FolderKanban,
+  MessagesSquare,
   UserRound,
   type LucideIcon,
 } from 'lucide-react';
@@ -19,6 +20,7 @@ export const WORK_NAV: readonly NavItem[] = [
 ];
 
 export const AI_TEAM_NAV: readonly NavItem[] = [
+  { label: 'Chat', path: ROUTES.WORKSPACE.CHAT, icon: MessagesSquare },
   { label: 'Agents', path: ROUTES.WORKSPACE.AGENTS, icon: Bot },
 ];
 

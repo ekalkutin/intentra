@@ -1,5 +1,9 @@
+export { AgentDescription } from './agent-description.vo.js';
 export { AgentName } from './agent-name.vo.js';
 export { AgentProfileId } from './agent-profile-id.vo.js';
+export { AgentRole } from './agent-role.vo.js';
+export { ApiKey } from './api-key.vo.js';
+export { EncryptedApiKey } from './encrypted-api-key.vo.js';
 export { Instructions } from './instructions.vo.js';
-export { ModelRef } from './model-ref.vo.js';
+export { ModelId } from './model-id.vo.js';
 export { ToolId } from './tool-id.vo.js';

@@ -1,45 +1,74 @@
 import { Aggregate, Timestamp, WorkspaceId } from '@intentra/shared';
 
-import { AgentProfileArchivedException } from '../exceptions/index.js';
 import {
+  AgentProfileArchivedException,
+  OrchestratorCannotBeArchivedException,
+} from '../exceptions/index.js';
+import {
+  AgentDescription,
   AgentName,
   AgentProfileId,
+  AgentRole,
   Instructions,
-  ModelRef,
+  ModelId,
   ToolId,
 } from '../value-objects/index.js';
 
 export type AgentProfileProps = {
   readonly workspaceId: WorkspaceId;
+  readonly role: AgentRole;
   readonly name: AgentName;
+  readonly description: AgentDescription;
   readonly instructions: Instructions;
-  readonly model: ModelRef;
+  readonly model: ModelId;
   readonly tools: readonly ToolId[];
   readonly archivedAt: Timestamp | null;
 };
 
-export type CreateAgentProfileProps = Pick<
+export type CreateSpecialistProps = Pick<
   AgentProfileProps,
-  'workspaceId' | 'name' | 'instructions' | 'model'
+  'workspaceId' | 'name' | 'description' | 'instructions' | 'model'
 >;
+
+export type CreateOrchestratorProps = Pick<
+  AgentProfileProps,
+  'workspaceId' | 'model'
+>;
+
+const ORCHESTRATOR_NAME = new AgentName('Orchestrator');
+const ORCHESTRATOR_DESCRIPTION = new AgentDescription(
+  'Talks to the members of the workspace and delegates to its agents.',
+);
+const ORCHESTRATOR_INSTRUCTIONS = new Instructions(
+  [
+    'You are the orchestrator of an Intentra workspace. You talk to its members.',
+    'The workspace has specialist agents; each one is described to you.',
+    'When a request fits a specialist, delegate it with a clear, self-contained task',
+    'and pass the answer on. Answer simple questions yourself.',
+  ].join(' '),
+);
 
 /**
  * An agent configured by a workspace: who it is, how it is instructed, which
- * model it runs on and which tools it may use. Belongs to the whole workspace;
- * projects decide later which profiles they use.
+ * model it runs on and which tools it may use. Every workspace has one
+ * orchestrator, which cannot be deleted, and any number of specialists.
  */
 export class AgentProfile extends Aggregate<AgentProfileId> {
   readonly #workspaceId: WorkspaceId;
+  readonly #role: AgentRole;
   #name: AgentName;
+  #description: AgentDescription;
   #instructions: Instructions;
-  #model: ModelRef;
+  #model: ModelId;
   #tools: ToolId[];
   #archivedAt: Timestamp | null;
 
   private constructor(id: AgentProfileId, props: AgentProfileProps) {
     super(id);
     this.#workspaceId = props.workspaceId;
+    this.#role = props.role;
     this.#name = props.name;
+    this.#description = props.description;
     this.#instructions = props.instructions;
     this.#model = props.model;
     this.#tools = [...props.tools];
@@ -50,15 +79,23 @@ export class AgentProfile extends Aggregate<AgentProfileId> {
     return this.#workspaceId;
   }
 
+  get role(): AgentRole {
+    return this.#role;
+  }
+
   get name(): AgentName {
     return this.#name;
+  }
+
+  get description(): AgentDescription {
+    return this.#description;
   }
 
   get instructions(): Instructions {
     return this.#instructions;
   }
 
-  get model(): ModelRef {
+  get model(): ModelId {
     return this.#model;
   }
 
@@ -79,12 +116,17 @@ export class AgentProfile extends Aggregate<AgentProfileId> {
     this.#name = name;
   }
 
+  public describe(description: AgentDescription): void {
+    this.#assertNotArchived();
+    this.#description = description;
+  }
+
   public changeInstructions(instructions: Instructions): void {
     this.#assertNotArchived();
     this.#instructions = instructions;
   }
 
-  public changeModel(model: ModelRef): void {
+  public changeModel(model: ModelId): void {
     this.#assertNotArchived();
     this.#model = model;
   }
@@ -111,6 +153,9 @@ export class AgentProfile extends Aggregate<AgentProfileId> {
 
   public archive(): void {
     this.#assertNotArchived();
+    if (this.#role.isOrchestrator) {
+      throw new OrchestratorCannotBeArchivedException();
+    }
     this.#archivedAt = Timestamp.now();
   }
 
@@ -120,9 +165,25 @@ export class AgentProfile extends Aggregate<AgentProfileId> {
     }
   }
 
-  public static create(props: CreateAgentProfileProps): AgentProfile {
+  public static createSpecialist(props: CreateSpecialistProps): AgentProfile {
     return new AgentProfile(new AgentProfileId(), {
       ...props,
+      role: AgentRole.SPECIALIST,
+      tools: [],
+      archivedAt: null,
+    });
+  }
+
+  /** With default wording; the workspace changes it later as it likes. */
+  public static createOrchestrator(
+    props: CreateOrchestratorProps,
+  ): AgentProfile {
+    return new AgentProfile(new AgentProfileId(), {
+      ...props,
+      role: AgentRole.ORCHESTRATOR,
+      name: ORCHESTRATOR_NAME,
+      description: ORCHESTRATOR_DESCRIPTION,
+      instructions: ORCHESTRATOR_INSTRUCTIONS,
       tools: [],
       archivedAt: null,
     });

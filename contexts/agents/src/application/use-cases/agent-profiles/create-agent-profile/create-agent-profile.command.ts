@@ -6,12 +6,14 @@ import { WorkspaceId } from '@intentra/shared';
 
 import { AgentProfile } from '../../../../domain/entities/index.js';
 import {
+  AgentDescription,
   AgentName,
   Instructions,
-  ModelRef,
+  ModelId,
 } from '../../../../domain/value-objects/index.js';
 import { AgentProfileRepository, ToolCatalog } from '../../../ports/index.js';
 
+/** Creates a specialist: the orchestrator is made by the workspace itself. */
 export class CreateAgentProfileCommand extends Command<string> {
   constructor(
     public readonly workspaceId: string,
@@ -35,11 +37,12 @@ export class CreateAgentProfileCommandHandler implements ICommandHandler<CreateA
     workspaceId,
     payload,
   }: CreateAgentProfileCommand): Promise<string> {
-    const profile = AgentProfile.create({
+    const profile = AgentProfile.createSpecialist({
       workspaceId: new WorkspaceId(workspaceId),
       name: new AgentName(payload.name),
+      description: new AgentDescription(payload.description),
       instructions: new Instructions(payload.instructions),
-      model: new ModelRef(payload.model.provider, payload.model.name),
+      model: new ModelId(payload.model),
     });
     profile.replaceTools(
       this.toolCatalog.requireAvailable(payload.tools ?? []),

@@ -34,9 +34,11 @@ export class GetOneAgentProfileQueryHandler implements IQueryHandler<GetOneAgent
     return {
       id: profile.id.value,
       workspaceId: profile.workspaceId.value,
+      role: profile.role.value,
       name: profile.name.value,
+      description: profile.description.value,
       instructions: profile.instructions.value,
-      model: { provider: profile.model.provider, name: profile.model.name },
+      model: profile.model.value,
       tools: profile.tools.map(tool => tool.value),
     };
   }

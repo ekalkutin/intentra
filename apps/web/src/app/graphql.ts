@@ -18,13 +18,21 @@ export type Account = {
 
 export type AgentProfile = {
   __typename?: 'AgentProfile';
+  description: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   instructions: Scalars['String']['output'];
-  model: ModelRef;
+  model: Scalars['String']['output'];
   name: Scalars['String']['output'];
+  role: Scalars['String']['output'];
   tools: Array<Scalars['String']['output']>;
   workspace?: Maybe<Workspace>;
   workspaceId: Scalars['ID']['output'];
+};
+
+export type AgentTool = {
+  __typename?: 'AgentTool';
+  description: Scalars['String']['output'];
+  id: Scalars['String']['output'];
 };
 
 export type ChangePasswordInput = {
@@ -33,8 +41,9 @@ export type ChangePasswordInput = {
 };
 
 export type CreateAgentProfileInput = {
+  description: Scalars['String']['input'];
   instructions: Scalars['String']['input'];
-  model: ModelRefInput;
+  model: Scalars['String']['input'];
   name: Scalars['String']['input'];
   tools?: InputMaybe<Array<Scalars['String']['input']>>;
 };
@@ -61,15 +70,11 @@ export type CreatedPersonalAccessToken = {
   token: Scalars['String']['output'];
 };
 
-export type ModelRef = {
-  __typename?: 'ModelRef';
+export type Model = {
+  __typename?: 'Model';
+  contextLength?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['String']['output'];
   name: Scalars['String']['output'];
-  provider: Scalars['String']['output'];
-};
-
-export type ModelRefInput = {
-  name: Scalars['String']['input'];
-  provider: Scalars['String']['input'];
 };
 
 export type Mutation = {
@@ -81,7 +86,9 @@ export type Mutation = {
   createWorkspace: Workspace;
   deleteAgentProfile: Scalars['Boolean']['output'];
   refresh: Tokens;
+  removeOpenRouterKey: Scalars['Boolean']['output'];
   revokePersonalAccessToken: Scalars['Boolean']['output'];
+  setOpenRouterKey: OpenRouterKey;
   signIn: Tokens;
   signUp: Tokens;
   updateAccount: Account;
@@ -127,8 +134,19 @@ export type MutationRefreshArgs = {
 };
 
 
+export type MutationRemoveOpenRouterKeyArgs = {
+  workspaceId: Scalars['ID']['input'];
+};
+
+
 export type MutationRevokePersonalAccessTokenArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationSetOpenRouterKeyArgs = {
+  input: SetOpenRouterKeyInput;
+  workspaceId: Scalars['ID']['input'];
 };
 
 
@@ -159,6 +177,12 @@ export type MutationUpdateWorkspaceArgs = {
   input: UpdateWorkspaceInput;
 };
 
+export type OpenRouterKey = {
+  __typename?: 'OpenRouterKey';
+  hint: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export type PersonalAccessToken = {
   __typename?: 'PersonalAccessToken';
   createdAt: Scalars['String']['output'];
@@ -181,7 +205,10 @@ export type Query = {
   __typename?: 'Query';
   agentProfile: AgentProfile;
   agentProfiles: Array<AgentProfile>;
+  agentTools: Array<AgentTool>;
   me: Account;
+  models: Array<Model>;
+  openRouterKey?: Maybe<OpenRouterKey>;
   personalAccessTokens: Array<PersonalAccessToken>;
   projects: Array<Project>;
   workspaces: Array<Workspace>;
@@ -198,8 +225,17 @@ export type QueryAgentProfilesArgs = {
   workspaceId: Scalars['ID']['input'];
 };
 
+
+export type QueryOpenRouterKeyArgs = {
+  workspaceId: Scalars['ID']['input'];
+};
+
 export type RefreshInput = {
   refreshToken: Scalars['String']['input'];
+};
+
+export type SetOpenRouterKeyInput = {
+  apiKey: Scalars['String']['input'];
 };
 
 export type SignInInput = {
@@ -223,8 +259,9 @@ export type UpdateAccountInput = {
 };
 
 export type UpdateAgentProfileInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
   instructions?: InputMaybe<Scalars['String']['input']>;
-  model?: InputMaybe<ModelRefInput>;
+  model?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   tools?: InputMaybe<Array<Scalars['String']['input']>>;
 };

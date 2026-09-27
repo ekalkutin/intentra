@@ -12,6 +12,7 @@ export const ROUTES = {
     ROOT: '/:alias',
     PROJECTS: '/:alias/projects',
     AGENTS: '/:alias/agents',
+    CHAT: '/:alias/chat',
     /** Each category is its own page; its tabs are nested routes. */
     SETTINGS: {
       ROOT: '/:alias/settings',

@@ -6,6 +6,7 @@ packages:
 catalog:
   zod: "^4.6.5"
   mongoose: "^9.10.2"
+  ai: "^7.0.118"
 
 catalogs:
   nestjs12:
@@ -30,3 +31,8 @@ allowBuilds:
   "@nestjs/core": true
   esbuild: true
   nx: true
+
+minimumReleaseAgeExclude:
+  - '@ai-sdk/gateway@4.0.96'
+  - ai@7.0.118
+  - '@ai-sdk/react@4.0.121'

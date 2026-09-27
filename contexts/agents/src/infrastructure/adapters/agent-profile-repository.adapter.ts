@@ -7,10 +7,12 @@ import { Timestamp, WorkspaceId } from '@intentra/shared';
 import { AgentProfileRepository } from '../../application/ports/index.js';
 import { AgentProfile } from '../../domain/entities/index.js';
 import {
+  AgentDescription,
   AgentName,
   AgentProfileId,
+  AgentRole,
   Instructions,
-  ModelRef,
+  ModelId,
   ToolId,
 } from '../../domain/value-objects/index.js';
 import { AgentProfileModel } from '../database/index.js';
@@ -35,12 +37,40 @@ export class AgentProfileRepositoryAdapter extends AgentProfileRepository {
       .exec();
   }
 
+  /** The unique index turns a lost race into an update of nothing. */
+  public async addOrchestratorIfAbsent(
+    orchestrator: AgentProfile,
+  ): Promise<void> {
+    await this.agentProfileModel
+      .updateOne(
+        {
+          workspaceId: orchestrator.workspaceId.value,
+          role: AgentRole.ORCHESTRATOR.value,
+        },
+        { $setOnInsert: this.toDocument(orchestrator) },
+        { upsert: true },
+      )
+      .exec();
+  }
+
   public async findById(
     workspaceId: WorkspaceId,
     id: AgentProfileId,
   ): Promise<AgentProfile | null> {
     const profile = await this.agentProfileModel
       .findOne({ _id: id.value, workspaceId: workspaceId.value })
+      .exec();
+    return profile ? this.toDomain(profile) : null;
+  }
+
+  public async findOrchestrator(
+    workspaceId: WorkspaceId,
+  ): Promise<AgentProfile | null> {
+    const profile = await this.agentProfileModel
+      .findOne({
+        workspaceId: workspaceId.value,
+        role: AgentRole.ORCHESTRATOR.value,
+      })
       .exec();
     return profile ? this.toDomain(profile) : null;
   }
@@ -58,10 +88,11 @@ export class AgentProfileRepositoryAdapter extends AgentProfileRepository {
     return {
       _id: profile.id.value,
       workspaceId: profile.workspaceId.value,
+      role: profile.role.value,
       name: profile.name.value,
+      description: profile.description.value,
       instructions: profile.instructions.value,
-      modelProvider: profile.model.provider,
-      modelName: profile.model.name,
+      model: profile.model.value,
       tools: profile.tools.map(tool => tool.value),
       archivedAt: profile.archivedAt?.toDate() ?? null,
     };
@@ -70,9 +101,11 @@ export class AgentProfileRepositoryAdapter extends AgentProfileRepository {
   private toDomain(profile: AgentProfileModel): AgentProfile {
     return AgentProfile.reconstitute(new AgentProfileId(profile._id), {
       workspaceId: new WorkspaceId(profile.workspaceId),
+      role: AgentRole.from(profile.role),
       name: new AgentName(profile.name),
+      description: new AgentDescription(profile.description),
       instructions: new Instructions(profile.instructions),
-      model: new ModelRef(profile.modelProvider, profile.modelName),
+      model: new ModelId(profile.model),
       tools: profile.tools.map(tool => new ToolId(tool)),
       archivedAt: profile.archivedAt && Timestamp.fromDate(profile.archivedAt),
     });

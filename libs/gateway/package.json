@@ -28,6 +28,7 @@
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/core": "catalog:nestjs12",
     "@nestjs/graphql": "14.0.2",
+    "ai": "catalog:",
     "dataloader": "^2.2.3",
     "graphql": "^16.14.2",
     "zod": "catalog:"

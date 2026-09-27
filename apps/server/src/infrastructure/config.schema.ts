@@ -10,6 +10,15 @@ export const EnvironmentSchema = z
     // JWT: two different secrets, so a refresh token cannot pass as an access one
     JWT_ACCESS_SECRET: z.string().min(32),
     JWT_REFRESH_SECRET: z.string().min(32),
+
+    // Agents: encrypts the OpenRouter keys in the database (32 bytes, base64)
+    AGENTS_SECRETS_KEY: z
+      .base64()
+      .refine(key => Buffer.from(key, 'base64').length === 32, {
+        message: 'AGENTS_SECRETS_KEY must be 32 bytes',
+      }),
+    // The OpenRouter model a new orchestrator starts on
+    AGENTS_DEFAULT_MODEL: z.string().default('anthropic/claude-sonnet-4.5'),
   })
   .refine(env => env.JWT_ACCESS_SECRET !== env.JWT_REFRESH_SECRET, {
     message: 'JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must differ',
@@ -24,6 +33,10 @@ export const EnvironmentSchema = z
     jwt: {
       accessTokenSecret: env.JWT_ACCESS_SECRET,
       refreshTokenSecret: env.JWT_REFRESH_SECRET,
+    },
+    agents: {
+      secretsKey: env.AGENTS_SECRETS_KEY,
+      defaultModel: env.AGENTS_DEFAULT_MODEL,
     },
   }));
 
