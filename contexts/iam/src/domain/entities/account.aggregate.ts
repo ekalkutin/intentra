@@ -16,10 +16,8 @@ export class Account extends Aggregate<AccountId> {
     super(id);
   }
 
-  public static signUp(email: string, password: string): Account {
-    const account = new Account(new AccountId(), email, password);
-    // You might want to handle the password here, e.g., hashing it and storing it securely.
-    return account;
+  public static signUp(email: string, passwordHash: string): Account {
+    return new Account(new AccountId(), email, passwordHash);
   }
 
   public static reconstitute(id: AccountId, props: AccountProps): Account {
