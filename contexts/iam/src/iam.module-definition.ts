@@ -1,7 +1,15 @@
 import { ConfigurableModuleBuilder } from '@nestjs/common';
 
-// Options of the IAM context. Empty for now; add fields as the context needs them.
-export type IamModuleOptions = {};
+export type IamModuleOptions = {
+  readonly database: {
+    /** Postgres URL of IAM's own database. */
+    readonly url: string;
+  };
+};
 
 export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN: IAM_OPTIONS } =
-  new ConfigurableModuleBuilder<IamModuleOptions>().build();
+  new ConfigurableModuleBuilder<IamModuleOptions>()
+    // Global so the context's feature modules (accounts, ...) can inject
+    // IamDatabase. Nothing outside IAM can name that token: it is not exported.
+    .setExtras({}, definition => ({ ...definition, global: true }))
+    .build();

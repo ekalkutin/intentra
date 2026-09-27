@@ -1,16 +1,17 @@
 services:
-  mongo:
-    image: mongo:7
+  postgres:
+    image: postgres:18
     restart: unless-stopped
     ports:
-      - '27017:27017'
+      - '5432:5432'
     env_file: .env
     volumes:
-      - mongo-data:/data/db
+      # Since 18 the image keeps data in a versioned subdirectory of this path.
+      - postgres-data:/var/lib/postgresql
     healthcheck:
-      test: ['CMD', 'mongosh', '--quiet', '--eval', 'db.adminCommand("ping")']
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
       interval: 10s
       retries: 5
 
 volumes:
-  mongo-data:
+  postgres-data:

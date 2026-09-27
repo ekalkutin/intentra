@@ -1,0 +1,97 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.agent_profiles",
+    "label": "Create table \"agent_profiles\"",
+    "summary": "Creates table \"agent_profiles\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "agent_profiles"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"agent_profiles\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"agent_profiles\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"agent_profiles\"",
+        "sql": "CREATE TABLE \"public\".\"agent_profiles\" (\n  \"archived_at\" timestamptz(3),\n  \"id\" uuid NOT NULL,\n  \"instructions\" text NOT NULL,\n  \"model_name\" text NOT NULL,\n  \"model_provider\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"tools\" text[] NOT NULL,\n  \"workspace_id\" uuid NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"agent_profiles_tools_elem_not_null_89bdc909\" CHECK (array_position(\"tools\", NULL) IS NULL)\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"agent_profiles\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"agent_profiles\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.agent_profiles.agent_profiles_workspace_id_idx_90a9f461",
+    "label": "Create index \"agent_profiles_workspace_id_idx_90a9f461\" on \"agent_profiles\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "agent_profiles_workspace_id_idx_90a9f461",
+        "table": "agent_profiles"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"agent_profiles_workspace_id_idx_90a9f461\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"agent_profiles_workspace_id_idx_90a9f461\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"agent_profiles_workspace_id_idx_90a9f461\"",
+        "sql": "CREATE INDEX \"agent_profiles_workspace_id_idx_90a9f461\" ON \"public\".\"agent_profiles\" (\"workspace_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"agent_profiles_workspace_id_idx_90a9f461\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"agent_profiles_workspace_id_idx_90a9f461\""
+        ]
+      }
+    ]
+  }
+]

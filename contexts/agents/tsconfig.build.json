@@ -9,6 +9,12 @@
     "composite": true,
     "tsBuildInfoFile": "./build/.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["build", "node_modules", "src/**/*.spec.ts"]
+  "include": ["src/**/*", "src/**/*.json"],
+  "exclude": [
+    "build",
+    "node_modules",
+    "src/**/*.spec.ts",
+    "src/**/migrations/**",
+    "src/**/prisma.config.ts"
+  ]
 }

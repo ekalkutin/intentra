@@ -2,3 +2,8 @@
 **/generated/**
 **/__generated__/
 pnpm-lock.yaml
+
+# Prisma 8: emitted contract artefacts and migration packages
+**/database/contract.json
+**/database/contract.d.ts
+**/migrations/**

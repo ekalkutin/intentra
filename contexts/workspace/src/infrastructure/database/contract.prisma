@@ -1,0 +1,19 @@
+// use prisma-8
+
+model Workspace {
+  id   Uuid   @id
+  name String
+
+  @@map("workspaces")
+}
+
+model Project {
+  id          Uuid      @id
+  workspaceId Uuid      @map("workspace_id")
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  name        String
+  description String?
+
+  @@index([workspaceId])
+  @@map("projects")
+}

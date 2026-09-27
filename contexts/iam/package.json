@@ -6,7 +6,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "contract:emit": "prisma contract emit --config src/infrastructure/database/prisma.config.ts",
+    "db:migrate": "prisma db migrate --advance-ref db --config src/infrastructure/database/prisma.config.ts",
+    "migration:plan": "prisma migration plan --config src/infrastructure/database/prisma.config.ts"
   },
   "exports": {
     ".": {
@@ -25,8 +28,11 @@
     "@intentra/contracts": "workspace:*",
     "@intentra/shared": "workspace:*",
     "@nestjs/common": "catalog:nestjs12",
-    "@nestjs/mongoose": "catalog:nestjs12",
-    "mongoose": "catalog:"
+    "@prisma/orm-postgres": "catalog:prisma8"
+  },
+  "devDependencies": {
+    "@prisma/cli-engine": "catalog:prisma8",
+    "prisma": "catalog:prisma8"
   },
   "nx": {
     "tags": [

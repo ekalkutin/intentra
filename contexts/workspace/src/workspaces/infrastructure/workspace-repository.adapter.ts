@@ -1,43 +1,46 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { WorkspaceId } from '@intentra/shared';
 
+import { WorkspaceDatabase } from '../../infrastructure/database/workspace-database.js';
 import { WorkspaceRepository } from '../application/workspace-repository.port.js';
 import { Workspace } from '../domain/workspace.aggregate.js';
 
-import { WorkspaceModel } from './workspace.schema.js';
+type WorkspaceRow = {
+  readonly id: string;
+  readonly name: string;
+};
 
 @Injectable()
 export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
   constructor(
-    @InjectModel(WorkspaceModel.name)
-    private readonly workspaceModel: Model<WorkspaceModel>,
+    @Inject(WorkspaceDatabase)
+    private readonly database: WorkspaceDatabase,
   ) {
     super();
   }
 
   public async save(workspace: Workspace): Promise<void> {
-    const workspaceModel = new this.workspaceModel({
-      _id: workspace.id.value,
+    await this.database.orm.public.Workspace.create({
+      id: workspace.id.value,
       name: workspace.name,
     });
-    await workspaceModel.save();
   }
 
   public async find(): Promise<Workspace[]> {
-    const workspaces = await this.workspaceModel.find().exec();
+    const workspaces = await this.database.orm.public.Workspace.all();
     return workspaces.map(workspace => this.toDomain(workspace));
   }
 
   public async findById(id: WorkspaceId): Promise<Workspace | null> {
-    const workspace = await this.workspaceModel.findById(id.value).exec();
+    const workspace = await this.database.orm.public.Workspace.first({
+      id: id.value,
+    });
     return workspace ? this.toDomain(workspace) : null;
   }
 
-  private toDomain(workspace: WorkspaceModel): Workspace {
-    return Workspace.reconstitute(new WorkspaceId(workspace._id), {
+  private toDomain(workspace: WorkspaceRow): Workspace {
+    return Workspace.reconstitute(new WorkspaceId(workspace.id), {
       name: workspace.name,
     });
   }
