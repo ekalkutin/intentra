@@ -1,11 +1,6 @@
 import { ConfigurableModuleBuilder } from '@nestjs/common';
 
-export type WorkspaceModuleOptions = {
-  readonly database: {
-    /** Postgres URL of Workspace's own database. */
-    readonly url: string;
-  };
-};
+export type WorkspaceModuleOptions = {};
 
 export const {
   ConfigurableModuleClass,

@@ -1,4 +1,5 @@
-import { Inject, Module, type OnApplicationShutdown } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 
 import { IamApi } from '@intentra/contracts/iam';
 
@@ -6,28 +7,26 @@ import { AccountRepository } from './application/ports/account-repository.port.j
 import { AccountsService } from './application/services/accounts.service.js';
 import { AuthService } from './application/services/auth.service.js';
 import { IamApiService } from './iam-api.service.js';
-import {
-  ConfigurableModuleClass,
-  IAM_OPTIONS,
-  type IamModuleOptions,
-} from './iam.module-definition.js';
+import { ConfigurableModuleClass } from './iam.module-definition.js';
 import { AccountRepositoryAdapter } from './infrastructure/adapters/account-repository.adapter.js';
 import {
-  createIamDatabase,
-  IamDatabase,
-} from './infrastructure/database/iam-database.js';
+  AccountModel,
+  AccountSchema,
+} from './infrastructure/database/account.schema.js';
 
 @Module({
+  imports: [
+    MongooseModule.forFeature([
+      {
+        name: AccountModel.name,
+        schema: AccountSchema,
+      },
+    ]),
+  ],
   providers: [
     {
       provide: IamApi,
       useClass: IamApiService,
-    },
-    {
-      provide: IamDatabase,
-      useFactory: (options: IamModuleOptions) =>
-        createIamDatabase(options.database.url),
-      inject: [IAM_OPTIONS],
     },
     AccountsService,
     AuthService,
@@ -38,18 +37,4 @@ import {
   ],
   exports: [IamApi],
 })
-export class IamModule
-  extends ConfigurableModuleClass
-  implements OnApplicationShutdown
-{
-  constructor(
-    @Inject(IamDatabase)
-    private readonly database: IamDatabase,
-  ) {
-    super();
-  }
-
-  public async onApplicationShutdown(): Promise<void> {
-    await this.database.close();
-  }
-}
+export class IamModule extends ConfigurableModuleClass {}

@@ -1,9 +1,0 @@
-// use prisma-8
-
-model Account {
-  id       Uuid   @id
-  email    String
-  password String
-
-  @@map("accounts")
-}

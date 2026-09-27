@@ -8,11 +8,7 @@
     "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "db:contract": "prisma contract emit",
-    "db:plan": "prisma migration plan",
-    "db:migrate": "prisma db migrate --advance-ref db",
-    "db:reset": "node ../../scripts/db-reset.mjs && prisma db migrate --advance-ref db"
+    "test:watch": "vitest"
   },
   "exports": {
     ".": {
@@ -28,11 +24,8 @@
     "@intentra/contracts": "workspace:*",
     "@intentra/shared": "workspace:*",
     "@nestjs/common": "catalog:nestjs12",
-    "@prisma/orm-postgres": "catalog:prisma8"
-  },
-  "devDependencies": {
-    "@prisma/cli-engine": "catalog:prisma8",
-    "prisma": "catalog:prisma8"
+    "@nestjs/mongoose": "catalog:nestjs12",
+    "mongoose": "catalog:"
   },
   "nx": {
     "tags": [

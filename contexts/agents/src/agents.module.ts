@@ -1,34 +1,33 @@
-import { Inject, Module, type OnApplicationShutdown } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 
 import { AgentsApi } from '@intentra/contracts/agents';
 
 import { AgentsApiService } from './agents-api.service.js';
-import {
-  AGENTS_OPTIONS,
-  ConfigurableModuleClass,
-  type AgentsModuleOptions,
-} from './agents.module-definition.js';
+import { ConfigurableModuleClass } from './agents.module-definition.js';
 import { AgentProfileRepository } from './application/ports/agent-profile-repository.port.js';
 import { ToolCatalog } from './application/ports/tool-catalog.port.js';
 import { AgentProfilesService } from './application/services/agent-profiles.service.js';
 import { AgentProfileRepositoryAdapter } from './infrastructure/adapters/agent-profile-repository.adapter.js';
 import { ToolCatalogAdapter } from './infrastructure/adapters/tool-catalog.adapter.js';
 import {
-  AgentsDatabase,
-  createAgentsDatabase,
-} from './infrastructure/database/agents-database.js';
+  AgentProfileModel,
+  AgentProfileSchema,
+} from './infrastructure/database/agent-profile.schema.js';
 
 @Module({
+  imports: [
+    MongooseModule.forFeature([
+      {
+        name: AgentProfileModel.name,
+        schema: AgentProfileSchema,
+      },
+    ]),
+  ],
   providers: [
     {
       provide: AgentsApi,
       useClass: AgentsApiService,
-    },
-    {
-      provide: AgentsDatabase,
-      useFactory: (options: AgentsModuleOptions) =>
-        createAgentsDatabase(options.database.url),
-      inject: [AGENTS_OPTIONS],
     },
     AgentProfilesService,
     {
@@ -42,18 +41,4 @@ import {
   ],
   exports: [AgentsApi],
 })
-export class AgentsModule
-  extends ConfigurableModuleClass
-  implements OnApplicationShutdown
-{
-  constructor(
-    @Inject(AgentsDatabase)
-    private readonly database: AgentsDatabase,
-  ) {
-    super();
-  }
-
-  public async onApplicationShutdown(): Promise<void> {
-    await this.database.close();
-  }
-}
+export class AgentsModule extends ConfigurableModuleClass {}

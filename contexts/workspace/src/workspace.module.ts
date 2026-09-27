@@ -1,4 +1,5 @@
-import { Inject, Module, type OnApplicationShutdown } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 
 import { WorkspaceApi } from '@intentra/contracts/workspace';
 
@@ -9,27 +10,33 @@ import { WorkspacesService } from './application/services/workspaces.service.js'
 import { ProjectRepositoryAdapter } from './infrastructure/adapters/project-repository.adapter.js';
 import { WorkspaceRepositoryAdapter } from './infrastructure/adapters/workspace-repository.adapter.js';
 import {
-  createWorkspaceDatabase,
-  WorkspaceDatabase,
-} from './infrastructure/database/workspace-database.js';
-import { WorkspaceApiService } from './workspace-api.service.js';
+  ProjectModel,
+  ProjectSchema,
+} from './infrastructure/database/project.schema.js';
 import {
-  ConfigurableModuleClass,
-  WORKSPACE_OPTIONS,
-  type WorkspaceModuleOptions,
-} from './workspace.module-definition.js';
+  WorkspaceModel,
+  WorkspaceSchema,
+} from './infrastructure/database/workspace.schema.js';
+import { WorkspaceApiService } from './workspace-api.service.js';
+import { ConfigurableModuleClass } from './workspace.module-definition.js';
 
 @Module({
+  imports: [
+    MongooseModule.forFeature([
+      {
+        name: WorkspaceModel.name,
+        schema: WorkspaceSchema,
+      },
+      {
+        name: ProjectModel.name,
+        schema: ProjectSchema,
+      },
+    ]),
+  ],
   providers: [
     {
       provide: WorkspaceApi,
       useClass: WorkspaceApiService,
-    },
-    {
-      provide: WorkspaceDatabase,
-      useFactory: (options: WorkspaceModuleOptions) =>
-        createWorkspaceDatabase(options.database.url),
-      inject: [WORKSPACE_OPTIONS],
     },
     WorkspacesService,
     ProjectsService,
@@ -44,18 +51,4 @@ import {
   ],
   exports: [WorkspaceApi],
 })
-export class WorkspaceModule
-  extends ConfigurableModuleClass
-  implements OnApplicationShutdown
-{
-  constructor(
-    @Inject(WorkspaceDatabase)
-    private readonly database: WorkspaceDatabase,
-  ) {
-    super();
-  }
-
-  public async onApplicationShutdown(): Promise<void> {
-    await this.database.close();
-  }
-}
+export class WorkspaceModule extends ConfigurableModuleClass {}

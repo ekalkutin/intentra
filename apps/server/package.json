@@ -22,7 +22,9 @@
     "@nestjs/config": "catalog:nestjs12",
     "@nestjs/core": "catalog:nestjs12",
     "@nestjs/microservices": "catalog:nestjs12",
+    "@nestjs/mongoose": "catalog:nestjs12",
     "@nestjs/platform-express": "catalog:nestjs12",
+    "mongoose": "catalog:",
     "zod": "catalog:"
   },
   "nx": {

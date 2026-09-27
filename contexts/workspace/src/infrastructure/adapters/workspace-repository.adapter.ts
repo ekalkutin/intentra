@@ -1,46 +1,42 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 import { WorkspaceId } from '@intentra/shared';
 
 import { WorkspaceRepository } from '../../application/ports/workspace-repository.port.js';
 import { Workspace } from '../../domain/entities/workspace.aggregate.js';
-import { WorkspaceDatabase } from '../database/workspace-database.js';
-
-type WorkspaceRow = {
-  readonly id: string;
-  readonly name: string;
-};
+import { WorkspaceModel } from '../database/workspace.schema.js';
 
 @Injectable()
 export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
   constructor(
-    @Inject(WorkspaceDatabase)
-    private readonly database: WorkspaceDatabase,
+    @InjectModel(WorkspaceModel.name)
+    private readonly workspaceModel: Model<WorkspaceModel>,
   ) {
     super();
   }
 
   public async save(workspace: Workspace): Promise<void> {
-    await this.database.orm.public.Workspace.create({
-      id: workspace.id.value,
+    const workspaceModel = new this.workspaceModel({
+      _id: workspace.id.value,
       name: workspace.name,
     });
+    await workspaceModel.save();
   }
 
   public async find(): Promise<Workspace[]> {
-    const workspaces = await this.database.orm.public.Workspace.all();
+    const workspaces = await this.workspaceModel.find().exec();
     return workspaces.map(workspace => this.toDomain(workspace));
   }
 
   public async findById(id: WorkspaceId): Promise<Workspace | null> {
-    const workspace = await this.database.orm.public.Workspace.first({
-      id: id.value,
-    });
+    const workspace = await this.workspaceModel.findById(id.value).exec();
     return workspace ? this.toDomain(workspace) : null;
   }
 
-  private toDomain(workspace: WorkspaceRow): Workspace {
-    return Workspace.reconstitute(new WorkspaceId(workspace.id), {
+  private toDomain(workspace: WorkspaceModel): Workspace {
+    return Workspace.reconstitute(new WorkspaceId(workspace._id), {
       name: workspace.name,
     });
   }

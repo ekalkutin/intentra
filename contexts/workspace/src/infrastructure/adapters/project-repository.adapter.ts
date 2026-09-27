@@ -1,46 +1,42 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 import { ProjectId, WorkspaceId } from '@intentra/shared';
 
 import { ProjectRepository } from '../../application/ports/project-repository.port.js';
 import { Project } from '../../domain/entities/project.aggregate.js';
-import { WorkspaceDatabase } from '../database/workspace-database.js';
-
-type ProjectRow = {
-  readonly id: string;
-  readonly workspaceId: string;
-  readonly name: string;
-  readonly description: string | null;
-};
+import { ProjectModel } from '../database/project.schema.js';
 
 @Injectable()
 export class ProjectRepositoryAdapter extends ProjectRepository {
   constructor(
-    @Inject(WorkspaceDatabase)
-    private readonly database: WorkspaceDatabase,
+    @InjectModel(ProjectModel.name)
+    private readonly projectModel: Model<ProjectModel>,
   ) {
     super();
   }
 
   public async save(project: Project): Promise<void> {
-    await this.database.orm.public.Project.create({
-      id: project.id.value,
+    const projectModel = new this.projectModel({
+      _id: project.id.value,
       workspaceId: project.workspaceId.value,
       name: project.name,
-      description: project.description ?? null,
+      description: project.description,
     });
+    await projectModel.save();
   }
 
   public async find(): Promise<Project[]> {
-    const projects = await this.database.orm.public.Project.all();
+    const projects = await this.projectModel.find().exec();
     return projects.map(project => this.toDomain(project));
   }
 
-  private toDomain(project: ProjectRow): Project {
-    return Project.reconstitute(new ProjectId(project.id), {
+  private toDomain(project: ProjectModel): Project {
+    return Project.reconstitute(new ProjectId(project._id), {
       workspaceId: new WorkspaceId(project.workspaceId),
       name: project.name,
-      description: project.description ?? undefined,
+      description: project.description,
     });
   }
 }

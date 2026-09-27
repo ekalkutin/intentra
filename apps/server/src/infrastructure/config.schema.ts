@@ -4,29 +4,15 @@ export const EnvironmentSchema = z
   .object({
     PORT: z.coerce.number().default(3000),
 
-    // Postgres: every bounded context owns its database
-    IAM_DATABASE_URL: z.url(),
-    WORKSPACE_DATABASE_URL: z.url(),
-    AGENTS_DATABASE_URL: z.url(),
+    // MongoDB: one shared connection for all bounded contexts
+    DB_URI: z.url(),
   })
   .transform(env => ({
     listen: {
       port: env.PORT,
     },
-    iam: {
-      database: {
-        url: env.IAM_DATABASE_URL,
-      },
-    },
-    workspace: {
-      database: {
-        url: env.WORKSPACE_DATABASE_URL,
-      },
-    },
-    agents: {
-      database: {
-        url: env.AGENTS_DATABASE_URL,
-      },
+    database: {
+      uri: env.DB_URI,
     },
   }));
 

@@ -1,31 +1,34 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 import { AccountRepository } from '../../application/ports/account-repository.port.js';
 import { Account } from '../../domain/entities/account.aggregate.js';
 import { AccountId } from '../../domain/value-objects/account-id.vo.js';
-import { IamDatabase } from '../database/iam-database.js';
+import { AccountModel } from '../database/account.schema.js';
 
 @Injectable()
 export class AccountRepositoryAdapter extends AccountRepository {
   constructor(
-    @Inject(IamDatabase)
-    private readonly database: IamDatabase,
+    @InjectModel(AccountModel.name)
+    private readonly accountModel: Model<AccountModel>,
   ) {
     super();
   }
 
   public async save(account: Account): Promise<void> {
-    await this.database.orm.public.Account.create({
-      id: account.id.value,
+    const accountModel = new this.accountModel({
+      _id: account.id.value,
       email: account.email,
       password: account.password,
     });
+    await accountModel.save();
   }
 
   public async find(): Promise<Account[]> {
-    const accounts = await this.database.orm.public.Account.all();
+    const accounts = await this.accountModel.find().exec();
     return accounts.map(account =>
-      Account.reconstitute(new AccountId(account.id), {
+      Account.reconstitute(new AccountId(account._id), {
         email: account.email,
         password: account.password,
       }),

@@ -4,9 +4,7 @@
     "**/build/**",
     "node_modules/**",
     "**/generated/**",
-    "**/*.generated.ts",
-    "**/database/contract.d.ts",
-    "**/migrations/**"
+    "**/*.generated.ts"
   ],
   "plugins": ["import", "typescript", "oxc", "unicorn"],
   "categories": {
