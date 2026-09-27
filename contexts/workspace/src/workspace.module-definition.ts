@@ -10,8 +10,4 @@ export type WorkspaceModuleOptions = {
 export const {
   ConfigurableModuleClass,
   MODULE_OPTIONS_TOKEN: WORKSPACE_OPTIONS,
-} = new ConfigurableModuleBuilder<WorkspaceModuleOptions>()
-  // Global so the context's feature modules (workspaces, projects) can inject
-  // WorkspaceDatabase. Nothing outside Workspace can name that token.
-  .setExtras({}, definition => ({ ...definition, global: true }))
-  .build();
+} = new ConfigurableModuleBuilder<WorkspaceModuleOptions>().build();

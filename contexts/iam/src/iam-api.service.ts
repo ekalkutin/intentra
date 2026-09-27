@@ -2,7 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import type { IamApi } from '@intentra/contracts/iam';
 
-import { AccountsService, AuthService } from './accounts/index.js';
+import { AccountsService } from './application/services/accounts.service.js';
+import { AuthService } from './application/services/auth.service.js';
 
 /** Local binding of `IamApi`: groups the services under one token. */
 @Injectable()

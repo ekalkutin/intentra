@@ -245,7 +245,7 @@
       }
     },
     {
-      "files": ["contexts/*/src/*/domain/**/*.ts"],
+      "files": ["contexts/*/src/**/domain/**/*.ts"],
       "rules": {
         "no-restricted-imports": [
           "error",
@@ -275,7 +275,7 @@
       }
     },
     {
-      "files": ["contexts/*/src/*/application/**/*.ts"],
+      "files": ["contexts/*/src/**/application/**/*.ts"],
       "rules": {
         "no-restricted-imports": [
           "error",

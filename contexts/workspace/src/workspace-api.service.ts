@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import type { WorkspaceApi } from '@intentra/contracts/workspace';
 
-import { ProjectsService } from './projects/index.js';
-import { WorkspacesService } from './workspaces/index.js';
+import { ProjectsService } from './application/services/projects.service.js';
+import { WorkspacesService } from './application/services/workspaces.service.js';
 
 /** Local binding of `WorkspaceApi`: groups the services under one token. */
 @Injectable()

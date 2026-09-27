@@ -8,14 +8,17 @@ import {
   ConfigurableModuleClass,
   type AgentsModuleOptions,
 } from './agents.module-definition.js';
+import { AgentProfileRepository } from './application/ports/agent-profile-repository.port.js';
+import { ToolCatalog } from './application/ports/tool-catalog.port.js';
+import { AgentProfilesService } from './application/services/agent-profiles.service.js';
+import { AgentProfileRepositoryAdapter } from './infrastructure/adapters/agent-profile-repository.adapter.js';
+import { ToolCatalogAdapter } from './infrastructure/adapters/tool-catalog.adapter.js';
 import {
   AgentsDatabase,
   createAgentsDatabase,
 } from './infrastructure/database/agents-database.js';
-import { ProfilesModule } from './profiles/index.js';
 
 @Module({
-  imports: [ProfilesModule],
   providers: [
     {
       provide: AgentsApi,
@@ -27,8 +30,17 @@ import { ProfilesModule } from './profiles/index.js';
         createAgentsDatabase(options.database.url),
       inject: [AGENTS_OPTIONS],
     },
+    AgentProfilesService,
+    {
+      provide: AgentProfileRepository,
+      useClass: AgentProfileRepositoryAdapter,
+    },
+    {
+      provide: ToolCatalog,
+      useClass: ToolCatalogAdapter,
+    },
   ],
-  exports: [AgentsApi, AgentsDatabase],
+  exports: [AgentsApi],
 })
 export class AgentsModule
   extends ConfigurableModuleClass
