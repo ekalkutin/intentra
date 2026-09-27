@@ -1,22 +1,32 @@
 import { Provider } from '@nestjs/common';
 
 import {
-  RefreshCommand,
-  RefreshCommandHandler,
-} from './refresh/refresh.command.js';
+  RefreshTokensCommand,
+  RefreshTokensCommandHandler,
+} from './refresh-tokens/refresh-tokens.command.js';
 import {
-  SignInCommand,
-  SignInCommandHandler,
-} from './sign-in/sign-in.command.js';
+  SignInAccountCommand,
+  SignInAccountCommandHandler,
+} from './sign-in-account/sign-in-account.command.js';
 import {
-  SignUpCommand,
-  SignUpCommandHandler,
-} from './sign-up/sign-up.command.js';
+  SignUpAccountCommand,
+  SignUpAccountCommandHandler,
+} from './sign-up-account/sign-up-account.command.js';
+import {
+  VerifyAccessTokenQuery,
+  VerifyAccessTokenQueryHandler,
+} from './verify-access-token/verify-access-token.query.js';
 
-export { RefreshCommand, SignInCommand, SignUpCommand };
+export {
+  RefreshTokensCommand,
+  SignInAccountCommand,
+  SignUpAccountCommand,
+  VerifyAccessTokenQuery,
+};
 
 export const AUTH_CQRS_HANDLERS: Provider[] = [
-  SignUpCommandHandler,
-  SignInCommandHandler,
-  RefreshCommandHandler,
+  SignUpAccountCommandHandler,
+  SignInAccountCommandHandler,
+  RefreshTokensCommandHandler,
+  VerifyAccessTokenQueryHandler,
 ];

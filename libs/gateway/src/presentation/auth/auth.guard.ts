@@ -42,19 +42,18 @@ export class AuthGuard implements CanActivate {
 
     const request = requestOf(context);
     const token = bearerToken(request);
-    const account = token ? await this.#verify(method, token) : null;
-    if (!account) {
+    if (!token) {
       throw new UnauthorizedException();
     }
 
-    authenticate(request, { ...account, method });
+    authenticate(request, { ...(await this.#verify(method, token)), method });
     return true;
   }
 
   #verify(
     method: AuthMethod.AccessToken | AuthMethod.PersonalAccessToken,
     token: string,
-  ): Promise<AccountDto | null> {
+  ): Promise<AccountDto> {
     return method === AuthMethod.PersonalAccessToken
       ? this.iam.personalAccessTokens.verify(token)
       : this.iam.auth.verifyAccessToken(token);

@@ -11,18 +11,27 @@ export abstract class AgentProfileRepository {
     workspaceId: WorkspaceId,
     id: AgentProfileId,
   ): Promise<AgentProfile | null>;
-  /** Profiles of the workspace that are not archived. */
   abstract findActiveByWorkspace(
     workspaceId: WorkspaceId,
   ): Promise<AgentProfile[]>;
 
-  /** Archived profiles too. Throws `AgentProfileNotFoundException`. */
   public async getById(
     workspaceId: WorkspaceId,
     id: AgentProfileId,
   ): Promise<AgentProfile> {
     const profile = await this.findById(workspaceId, id);
     if (!profile) {
+      throw new AgentProfileNotFoundException(id.value);
+    }
+    return profile;
+  }
+
+  public async getActiveById(
+    workspaceId: WorkspaceId,
+    id: AgentProfileId,
+  ): Promise<AgentProfile> {
+    const profile = await this.getById(workspaceId, id);
+    if (profile.isArchived) {
       throw new AgentProfileNotFoundException(id.value);
     }
     return profile;

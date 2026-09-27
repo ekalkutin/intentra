@@ -1,66 +1,47 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
-import {
-  type AgentProfileDto,
-  type AgentProfilesApi,
-  type CreateAgentProfileDto,
-  type UpdateAgentProfileDto,
+import type {
+  AgentProfileDto,
+  AgentProfilesApi,
+  CreateAgentProfileDto,
+  UpdateAgentProfileDto,
 } from '@intentra/contracts/agents';
-import { WorkspaceId } from '@intentra/shared';
 
-import { AgentProfile } from '../../domain/entities/index.js';
 import {
-  AgentName,
-  AgentProfileId,
-  Instructions,
-  ModelRef,
-  ToolId,
-} from '../../domain/value-objects/index.js';
-import {
-  AgentProfileNotFoundException,
-  UnknownToolException,
-} from '../exceptions/index.js';
-import { toAgentProfileDto } from '../mappers/index.js';
-import { AgentProfileRepository, ToolCatalog } from '../ports/index.js';
+  CreateAgentProfileCommand,
+  DeleteAgentProfileCommand,
+  FindManyAgentProfilesQuery,
+  GetOneAgentProfileQuery,
+  UpdateAgentProfileCommand,
+} from '../use-cases/agent-profiles/index.js';
 
 @Injectable()
 export class AgentProfilesService implements AgentProfilesApi {
   constructor(
-    @Inject(AgentProfileRepository)
-    private readonly agentProfileRepository: AgentProfileRepository,
+    @Inject(CommandBus)
+    private readonly commandBus: CommandBus,
 
-    @Inject(ToolCatalog)
-    private readonly toolCatalog: ToolCatalog,
+    @Inject(QueryBus)
+    private readonly queryBus: QueryBus,
   ) {}
 
   public async create(
     workspaceId: string,
     data: CreateAgentProfileDto,
   ): Promise<AgentProfileDto> {
-    const profile = AgentProfile.create({
-      workspaceId: new WorkspaceId(workspaceId),
-      name: new AgentName(data.name),
-      instructions: new Instructions(data.instructions),
-      model: new ModelRef(data.model.provider, data.model.name),
-    });
-    profile.replaceTools(this.#toAvailableTools(data.tools ?? []));
-
-    await this.agentProfileRepository.save(profile);
-    return toAgentProfileDto(profile);
-  }
-
-  public async find(workspaceId: string): Promise<AgentProfileDto[]> {
-    const profiles = await this.agentProfileRepository.findActiveByWorkspace(
-      new WorkspaceId(workspaceId),
+    const id = await this.commandBus.execute(
+      new CreateAgentProfileCommand(workspaceId, data),
     );
-    return profiles.map(toAgentProfileDto);
+    return this.getById(workspaceId, id);
   }
 
-  public async getById(
-    workspaceId: string,
-    id: string,
-  ): Promise<AgentProfileDto> {
-    return toAgentProfileDto(await this.#getActive(workspaceId, id));
+  public find(workspaceId: string): Promise<AgentProfileDto[]> {
+    return this.queryBus.execute(new FindManyAgentProfilesQuery(workspaceId));
+  }
+
+  public getById(workspaceId: string, id: string): Promise<AgentProfileDto> {
+    return this.queryBus.execute(new GetOneAgentProfileQuery(workspaceId, id));
   }
 
   public async update(
@@ -68,51 +49,15 @@ export class AgentProfilesService implements AgentProfilesApi {
     id: string,
     data: UpdateAgentProfileDto,
   ): Promise<AgentProfileDto> {
-    const profile = await this.#getActive(workspaceId, id);
-
-    if (data.name !== undefined) {
-      profile.rename(new AgentName(data.name));
-    }
-    if (data.instructions !== undefined) {
-      profile.changeInstructions(new Instructions(data.instructions));
-    }
-    if (data.model !== undefined) {
-      profile.changeModel(new ModelRef(data.model.provider, data.model.name));
-    }
-    if (data.tools !== undefined) {
-      profile.replaceTools(this.#toAvailableTools(data.tools));
-    }
-
-    await this.agentProfileRepository.save(profile);
-    return toAgentProfileDto(profile);
-  }
-
-  public async delete(workspaceId: string, id: string): Promise<void> {
-    const profile = await this.#getActive(workspaceId, id);
-    profile.archive();
-    await this.agentProfileRepository.save(profile);
-  }
-
-  /** New tools must be in the catalog; stored ones are not checked again. */
-  #toAvailableTools(ids: readonly string[]): ToolId[] {
-    return ids.map(id => {
-      const tool = new ToolId(id);
-      if (!this.toolCatalog.isAvailable(tool)) {
-        throw new UnknownToolException(tool);
-      }
-      return tool;
-    });
-  }
-
-  /** An archived profile counts as deleted, so it is not found either. */
-  async #getActive(workspaceId: string, id: string): Promise<AgentProfile> {
-    const profile = await this.agentProfileRepository.getById(
-      new WorkspaceId(workspaceId),
-      new AgentProfileId(id),
+    await this.commandBus.execute(
+      new UpdateAgentProfileCommand(workspaceId, id, data),
     );
-    if (profile.isArchived) {
-      throw new AgentProfileNotFoundException(id);
-    }
-    return profile;
+    return this.getById(workspaceId, id);
+  }
+
+  public delete(workspaceId: string, id: string): Promise<void> {
+    return this.commandBus.execute(
+      new DeleteAgentProfileCommand(workspaceId, id),
+    );
   }
 }

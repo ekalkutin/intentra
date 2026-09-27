@@ -1,8 +1,8 @@
 import { ConfigurableModuleBuilder } from '@nestjs/common';
-import { APP_INTERCEPTOR, RouterModule } from '@nestjs/core';
+import { APP_FILTER, RouterModule } from '@nestjs/core';
 
 import { AuthModule } from './presentation/auth/index.js';
-import { ExceptionsInterceptor } from './presentation/exceptions/index.js';
+import { ExceptionsFilter } from './presentation/exceptions/index.js';
 import { GQLModule } from './presentation/graphql/gql.module.js';
 import { McpModule } from './presentation/mcp/mcp.module.js';
 import type { PresentationModuleOptions } from './presentation/presentation-module.options.js';
@@ -39,7 +39,7 @@ export const {
       ],
       providers: [
         ...(definition.providers ?? []),
-        { provide: APP_INTERCEPTOR, useClass: ExceptionsInterceptor },
+        { provide: APP_FILTER, useClass: ExceptionsFilter },
       ],
     };
   })

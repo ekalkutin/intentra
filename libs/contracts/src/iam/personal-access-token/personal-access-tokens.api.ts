@@ -22,6 +22,6 @@ export interface PersonalAccessTokensApi {
    * account. Revoking a revoked token again does nothing.
    */
   revoke(accountId: string, id: string): Promise<void>;
-  /** The account of an active token, `null` otherwise. */
-  verify(token: string): Promise<AccountDto | null>;
+  /** Throws `INVALID_CREDENTIALS` (401) for an expired or revoked token too. */
+  verify(token: string): Promise<AccountDto>;
 }

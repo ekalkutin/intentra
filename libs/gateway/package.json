@@ -30,7 +30,6 @@
     "@nestjs/graphql": "14.0.2",
     "dataloader": "^2.2.3",
     "graphql": "^16.14.2",
-    "rxjs": "catalog:nestjs12",
     "zod": "catalog:"
   },
   "peerDependencies": {

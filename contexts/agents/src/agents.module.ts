@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AgentsApi } from '@intentra/contracts/agents';
@@ -10,6 +11,7 @@ import {
   ToolCatalog,
 } from './application/ports/index.js';
 import { AgentProfilesService } from './application/services/index.js';
+import { CQRS_HANDLERS } from './application/use-cases/index.js';
 import {
   AgentProfileRepositoryAdapter,
   ToolCatalogAdapter,
@@ -21,6 +23,7 @@ import {
 
 @Module({
   imports: [
+    CqrsModule,
     MongooseModule.forFeature([
       {
         name: AgentProfileModel.name,
@@ -33,6 +36,7 @@ import {
       provide: AgentsApi,
       useClass: AgentsApiService,
     },
+    ...CQRS_HANDLERS,
     AgentProfilesService,
     {
       provide: AgentProfileRepository,

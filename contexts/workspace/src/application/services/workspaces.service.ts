@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 import type {
   CreateWorkspaceDto,
@@ -6,51 +7,43 @@ import type {
   WorkspaceDto,
   WorkspacesApi,
 } from '@intentra/contracts/workspace';
-import { AccountId, WorkspaceId } from '@intentra/shared';
 
-import { Workspace } from '../../domain/entities/index.js';
-import { WorkspaceNotFoundException } from '../exceptions/index.js';
-import { toWorkspaceDto } from '../mappers/index.js';
-import { WorkspaceRepository } from '../ports/index.js';
+import {
+  CreateWorkspaceCommand,
+  FindManyWorkspacesQuery,
+  GetOneWorkspaceQuery,
+} from '../use-cases/workspaces/index.js';
 
 @Injectable()
 export class WorkspacesService implements WorkspacesApi {
   constructor(
-    @Inject(WorkspaceRepository)
-    private readonly workspaceRepository: WorkspaceRepository,
+    @Inject(CommandBus)
+    private readonly commandBus: CommandBus,
+
+    @Inject(QueryBus)
+    private readonly queryBus: QueryBus,
   ) {}
 
   public async create(
     accountId: string,
     data: CreateWorkspaceDto,
   ): Promise<WorkspaceDto> {
-    const workspace = Workspace.create({
-      name: data.name,
-      creator: new AccountId(accountId),
-    });
-    await this.workspaceRepository.save(workspace);
-    return toWorkspaceDto(workspace);
+    const id = await this.commandBus.execute(
+      new CreateWorkspaceCommand(accountId, data),
+    );
+    return this.getById(accountId, id);
   }
 
-  public async find(
+  public find(
     accountId: string,
-    query: FindWorkspacesDto = {},
+    filter?: FindWorkspacesDto,
   ): Promise<WorkspaceDto[]> {
-    const workspaces = await this.workspaceRepository.findByMember(
-      new AccountId(accountId),
-      query.ids?.map(id => new WorkspaceId(id)),
+    return this.queryBus.execute(
+      new FindManyWorkspacesQuery(accountId, filter),
     );
-    return workspaces.map(toWorkspaceDto);
   }
 
-  public async getById(accountId: string, id: string): Promise<WorkspaceDto> {
-    const workspace = await this.workspaceRepository.getById(
-      new WorkspaceId(id),
-    );
-    // Not a member: the workspace does not exist for this account.
-    if (!workspace.hasMember(new AccountId(accountId))) {
-      throw new WorkspaceNotFoundException(id);
-    }
-    return toWorkspaceDto(workspace);
+  public getById(accountId: string, id: string): Promise<WorkspaceDto> {
+    return this.queryBus.execute(new GetOneWorkspaceQuery(accountId, id));
   }
 }

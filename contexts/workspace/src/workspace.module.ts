@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { WorkspaceApi } from '@intentra/contracts/workspace';
@@ -11,6 +12,7 @@ import {
   ProjectsService,
   WorkspacesService,
 } from './application/services/index.js';
+import { CQRS_HANDLERS } from './application/use-cases/index.js';
 import {
   ProjectRepositoryAdapter,
   WorkspaceRepositoryAdapter,
@@ -26,6 +28,7 @@ import { ConfigurableModuleClass } from './workspace.module-definition.js';
 
 @Module({
   imports: [
+    CqrsModule,
     MongooseModule.forFeature([
       {
         name: WorkspaceModel.name,
@@ -42,6 +45,7 @@ import { ConfigurableModuleClass } from './workspace.module-definition.js';
       provide: WorkspaceApi,
       useClass: WorkspaceApiService,
     },
+    ...CQRS_HANDLERS,
     WorkspacesService,
     ProjectsService,
     {

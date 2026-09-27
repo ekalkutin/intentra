@@ -9,7 +9,6 @@ export abstract class AccountRepository {
   abstract findById(id: AccountId): Promise<Account | null>;
   abstract findByEmail(email: Email): Promise<Account | null>;
 
-  /** Throws `AccountNotFoundException`. */
   public async getById(id: AccountId): Promise<Account> {
     const account = await this.findById(id);
     if (!account) {

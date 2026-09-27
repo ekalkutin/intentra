@@ -6,6 +6,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import type { PresentationModuleOptions } from '../presentation-module.options.js';
 
 import { AGENTS_GQL_RESOLVERS } from './agents/index.js';
+import { formatGraphQLError } from './format-error.js';
 import { IAM_GQL_RESOLVERS } from './iam/index.js';
 import {
   WORKSPACE_GQL_LOADERS,
@@ -36,6 +37,7 @@ export class GQLModule {
           plugins: [ApolloServerPluginLandingPageLocalDefault()],
           context: ({ req }: { req: unknown }) => ({ req }),
           includeStacktraceInErrorResponses: false,
+          formatError: formatGraphQLError,
         }),
       ],
       providers: [

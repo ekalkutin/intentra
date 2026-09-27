@@ -13,6 +13,6 @@ export interface AuthApi {
   signIn(data: SignInDto): Promise<TokensDto>;
   /** A new pair for a valid refresh token. Throws `INVALID_CREDENTIALS` (401). */
   refresh(data: RefreshDto): Promise<TokensDto>;
-  /** The account of a valid access token, `null` otherwise. */
-  verifyAccessToken(accessToken: string): Promise<AccountDto | null>;
+  /** Throws `INVALID_CREDENTIALS` (401). */
+  verifyAccessToken(accessToken: string): Promise<AccountDto>;
 }

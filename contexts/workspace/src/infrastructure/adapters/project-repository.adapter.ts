@@ -27,6 +27,11 @@ export class ProjectRepositoryAdapter extends ProjectRepository {
     await projectModel.save();
   }
 
+  public async findById(id: ProjectId): Promise<Project | null> {
+    const project = await this.projectModel.findById(id.value).exec();
+    return project ? this.toDomain(project) : null;
+  }
+
   public async findByWorkspaces(
     workspaceIds: WorkspaceId[],
   ): Promise<Project[]> {

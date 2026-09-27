@@ -16,7 +16,6 @@ export abstract class PersonalAccessTokenRepository {
     secretHash: string,
   ): Promise<PersonalAccessToken | null>;
 
-  /** Throws `PersonalAccessTokenNotFoundException`, also for another account's. */
   public async getById(
     accountId: AccountId,
     id: PersonalAccessTokenId,

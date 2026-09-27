@@ -1,1 +1,1 @@
-export { ExceptionsInterceptor } from './exceptions.interceptor.js';
+export { ExceptionsFilter } from './exceptions.filter.js';

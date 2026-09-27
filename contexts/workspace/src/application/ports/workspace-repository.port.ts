@@ -12,7 +12,6 @@ export abstract class WorkspaceRepository {
   ): Promise<Workspace[]>;
   abstract findById(id: WorkspaceId): Promise<Workspace | null>;
 
-  /** Throws `WorkspaceNotFoundException`. */
   public async getById(id: WorkspaceId): Promise<Workspace> {
     const workspace = await this.findById(id);
     if (!workspace) {
