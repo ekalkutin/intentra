@@ -1,25 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
 
 import type { AuthApi, SignUpDto, TokensDto } from '@intentra/contracts/iam';
 
-import { Account } from '../../domain/entities/account.aggregate.js';
-import { AccountRepository } from '../ports/account-repository.port.js';
+import { SignUpCommand } from '../use-cases/auth/index.js';
 
 @Injectable()
 export class AuthService implements AuthApi {
   constructor(
-    @Inject(AccountRepository)
-    private readonly accountRepository: AccountRepository,
+    @Inject(CommandBus)
+    private readonly commandBus: CommandBus,
   ) {}
 
   public async signUp(data: SignUpDto): Promise<TokensDto> {
-    const account = Account.signUp(data.email, data.password);
-
-    await this.accountRepository.save(account);
-
-    return {
-      accessToken: 'dummy-access-token',
-      refreshToken: 'dummy-refresh-token',
-    };
+    return this.commandBus.execute(new SignUpCommand(data));
   }
 }
