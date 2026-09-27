@@ -1,7 +1,7 @@
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { useMutation } from '@apollo/client/react';
 
-import { WORKSPACES_QUERY } from '@/entities/workspace';
+import { WORKSPACES_QUERY, type Workspace } from '@/entities/workspace';
 import { describeError } from '@/shared/api';
 import type { CreateWorkspaceDto } from '@intentra/contracts/workspace';
 
@@ -28,14 +28,21 @@ export const useCreateWorkspace = () => {
 
   const createWorkspace = async (
     input: CreateWorkspaceDto,
-  ): Promise<CreateWorkspaceFailure | null> => {
+  ): Promise<
+    | { workspace: Workspace; failure?: never }
+    | { workspace?: never; failure: CreateWorkspaceFailure }
+  > => {
     try {
       const { data } = await mutate({ variables: { input } });
-      return data ? null : { message: FALLBACK_ERROR, aliasTaken: false };
+      return data
+        ? { workspace: data.createWorkspace }
+        : { failure: { message: FALLBACK_ERROR, aliasTaken: false } };
     } catch (error) {
       return {
-        message: describeError(error, FALLBACK_ERROR),
-        aliasTaken: isAliasTaken(error),
+        failure: {
+          message: describeError(error, FALLBACK_ERROR),
+          aliasTaken: isAliasTaken(error),
+        },
       };
     }
   };

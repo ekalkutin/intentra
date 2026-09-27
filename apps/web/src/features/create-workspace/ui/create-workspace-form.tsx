@@ -6,6 +6,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
   nameToWorkspaceAlias,
   randomWorkspaceIdentity,
+  type Workspace,
 } from '@/entities/workspace';
 import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
@@ -26,7 +27,7 @@ import {
 import { useCreateWorkspace } from '../model/use-create-workspace';
 
 type CreateWorkspaceFormProps = {
-  onCreated: () => void;
+  onCreated: (workspace: Workspace) => void;
 };
 
 const ALIAS_HOST = `${window.location.host}/`;
@@ -58,12 +59,12 @@ export const CreateWorkspaceForm = ({
   };
 
   const onSubmit = async (values: CreateWorkspaceDto) => {
-    const failure = await createWorkspace({
+    const { workspace, failure } = await createWorkspace({
       name: values.name.trim(),
       alias: values.alias,
     });
-    if (!failure) {
-      onCreated();
+    if (workspace) {
+      onCreated(workspace);
       return;
     }
     form.setError(failure.aliasTaken ? 'alias' : 'root', {

@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router';
+import { generatePath, useNavigate } from 'react-router';
 
 import { CreateWorkspaceForm } from '@/features/create-workspace';
 import { SignOutButton } from '@/features/sign-out';
@@ -19,7 +19,11 @@ export const OnboardingPage = () => {
           description='A workspace holds your projects, your team and your agents. You can rename it later.'
         />
         <CreateWorkspaceForm
-          onCreated={() => navigate(ROUTES.HOME, { replace: true })}
+          onCreated={({ alias }) =>
+            navigate(generatePath(ROUTES.WORKSPACE.ROOT, { alias }), {
+              replace: true,
+            })
+          }
         />
       </div>
     </OnboardingShell>

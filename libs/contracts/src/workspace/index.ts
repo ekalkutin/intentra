@@ -9,6 +9,7 @@ export {
   WORKSPACE_ALIAS_MAX_LENGTH,
   WORKSPACE_ALIAS_MIN_LENGTH,
   WORKSPACE_ALIAS_PATTERN,
+  WORKSPACE_RESERVED_ALIASES,
 } from './workspace/workspace.dto.js';
 export type { ProjectsApi } from './project/project.api.js';
 export {

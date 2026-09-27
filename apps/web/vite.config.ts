@@ -16,8 +16,13 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      '@': path.resolve(import.meta.dirname, 'src'),
-    },
+    alias: [
+      { find: '@', replacement: path.resolve(import.meta.dirname, 'src') },
+      // Generated shadcn components import the bare `cn`; see shared/lib/cn.ts.
+      {
+        find: /^cn$/,
+        replacement: path.resolve(import.meta.dirname, 'src/shared/lib/cn.ts'),
+      },
+    ],
   },
 });

@@ -14,4 +14,8 @@ describe('WorkspaceAlias', () => {
     expect(() => new WorkspaceAlias('-acme')).toThrow();
     expect(() => new WorkspaceAlias('acme_labs')).toThrow();
   });
+
+  it('rejects a route the web app uses for itself', () => {
+    expect(() => new WorkspaceAlias('Onboarding')).toThrow();
+  });
 });

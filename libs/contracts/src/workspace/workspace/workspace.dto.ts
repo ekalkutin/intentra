@@ -4,6 +4,13 @@ import { z } from 'zod';
 export const WORKSPACE_ALIAS_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const WORKSPACE_ALIAS_MIN_LENGTH = 3;
 export const WORKSPACE_ALIAS_MAX_LENGTH = 40;
+/** The alias is the first URL segment, so it cannot shadow the app's own routes. */
+export const WORKSPACE_RESERVED_ALIASES: readonly string[] = [
+  'api',
+  'auth',
+  'onboarding',
+  'workspaces',
+];
 
 /** Unique across Intentra; `WORKSPACE_ALIAS_ALREADY_TAKEN` (409) otherwise. */
 const WorkspaceAliasSchema = z
@@ -12,6 +19,9 @@ const WorkspaceAliasSchema = z
   .max(WORKSPACE_ALIAS_MAX_LENGTH)
   .regex(WORKSPACE_ALIAS_PATTERN, {
     error: 'Use lowercase letters, digits and single hyphens.',
+  })
+  .refine(alias => !WORKSPACE_RESERVED_ALIASES.includes(alias), {
+    error: 'This alias is reserved.',
   });
 
 export const WorkspaceDtoSchema = z.object({
