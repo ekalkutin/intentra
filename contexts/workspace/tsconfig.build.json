@@ -14,7 +14,6 @@
     "build",
     "node_modules",
     "src/**/*.spec.ts",
-    "src/**/migrations/**",
-    "src/**/prisma.config.ts"
+    "src/**/migrations/**"
   ]
 }

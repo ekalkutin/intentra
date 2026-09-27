@@ -4,6 +4,6 @@
     "noEmit": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*", "test/**/*"],
+  "include": ["src/**/*", "test/**/*", "prisma.config.ts"],
   "exclude": ["build", "node_modules", "src/**/migrations/**"]
 }

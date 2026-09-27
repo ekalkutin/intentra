@@ -4,11 +4,11 @@ import { definePrismaConfig } from '@prisma/cli-engine';
 import { defineConfig as ormConfig } from '@prisma/orm-postgres/config';
 
 // IAM owns its database: one contract, one migration history, one marker.
-// Paths are relative to this file; the CLI finds it through --config.
+// Paths are relative to this file; the CLI finds it in the context root.
 export default definePrismaConfig({
   orm: ormConfig({
-    contract: './contract.prisma',
+    contract: './src/infrastructure/database/contract.prisma',
     db: { connection: process.env['DATABASE_URL'] },
-    migrations: { dir: 'migrations' },
+    migrations: { dir: './src/infrastructure/database/migrations' },
   }),
 });
