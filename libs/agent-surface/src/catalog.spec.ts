@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { TOOL_CATALOG } from './catalog.js';
+import { RESOURCE_CATALOG, TOOL_CATALOG } from './catalog.js';
 
 describe('TOOL_CATALOG', () => {
   it('has unique tool ids', () => {
@@ -21,5 +21,19 @@ describe('TOOL_CATALOG', () => {
     );
 
     expect(writableOverMcp).toEqual([]);
+  });
+});
+
+describe('RESOURCE_CATALOG', () => {
+  it('has unique resource ids', () => {
+    const ids = RESOURCE_CATALOG.map(resource => resource.id);
+
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('names every resource in snake_case', () => {
+    for (const resource of RESOURCE_CATALOG) {
+      expect(resource.id).toMatch(/^[a-z]+(_[a-z]+)*$/);
+    }
   });
 });

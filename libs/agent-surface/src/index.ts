@@ -1,7 +1,7 @@
+export type { Exposure, ToolApis } from './surface.js';
+export { defineTool, type ToolDefinition } from './tools/define-tool.js';
 export {
-  defineTool,
-  type ToolApis,
-  type ToolDefinition,
-  type ToolExposure,
-} from './define-tool.js';
-export { TOOL_CATALOG } from './catalog.js';
+  defineResource,
+  type ResourceDefinition,
+} from './resources/define-resource.js';
+export { RESOURCE_CATALOG, TOOL_CATALOG } from './catalog.js';
