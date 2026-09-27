@@ -1,38 +1,14 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { IamApi } from '@intentra/iam-contracts';
+import { IamApi } from '@intentra/contracts/iam';
 
-import { AccountRepository } from './application/ports/index.js';
-import {
-  AccountsService,
-  AuthService,
-  IamApiService,
-} from './application/services/index.js';
-import { ConfigurableModuleClass } from './iam.module-defs.js';
-import {
-  AccountModel,
-  AccountRepositoryAdapter,
-  AccountSchema,
-} from './infrastructure/repositories/account/index.js';
+import { AccountsModule } from './accounts/index.js';
+import { IamApiService } from './iam-api.service.js';
+import { ConfigurableModuleClass } from './iam.module-definition.js';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      {
-        name: AccountModel.name,
-        schema: AccountSchema,
-      },
-    ]),
-  ],
-
+  imports: [AccountsModule],
   providers: [
-    AccountsService,
-    AuthService,
-    {
-      provide: AccountRepository,
-      useClass: AccountRepositoryAdapter,
-    },
     {
       provide: IamApi,
       useClass: IamApiService,

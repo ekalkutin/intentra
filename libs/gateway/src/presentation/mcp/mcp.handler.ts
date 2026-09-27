@@ -7,7 +7,7 @@ import {
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { Inject, Injectable } from '@nestjs/common';
 
-import { IamApi } from '@intentra/iam-contracts';
+import { IamApi } from '@intentra/contracts/iam';
 
 import { registerAccountTools } from './tools/accounts.tools.js';
 

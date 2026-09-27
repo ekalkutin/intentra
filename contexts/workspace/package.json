@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput"
+    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "exports": {
     ".": {
@@ -21,7 +22,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@intentra/workspace-contracts": "workspace:*",
+    "@intentra/contracts": "workspace:*",
     "@intentra/shared": "workspace:*",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/mongoose": "catalog:nestjs12",

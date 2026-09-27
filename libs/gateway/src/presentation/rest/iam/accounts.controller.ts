@@ -1,6 +1,6 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 
-import { AccountDto, IamApi } from '@intentra/iam-contracts';
+import { AccountDto, IamApi } from '@intentra/contracts/iam';
 
 @Controller({
   path: 'iam/accounts',

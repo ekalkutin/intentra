@@ -1,3 +1,4 @@
-import { WorkspaceController } from './workspace.controller.js';
+import { ProjectsController } from './projects/projects.controller.js';
+import { WorkspacesController } from './workspaces.controller.js';
 
-export const WORKSPACE_CONTROLLERS = [WorkspaceController];
+export const WORKSPACE_CONTROLLERS = [WorkspacesController, ProjectsController];

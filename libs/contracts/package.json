@@ -1,0 +1,34 @@
+{
+  "name": "@intentra/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./iam": {
+      "types": "./build/iam/index.d.ts",
+      "import": "./build/iam/index.js"
+    },
+    "./workspace": {
+      "types": "./build/workspace/index.d.ts",
+      "import": "./build/workspace/index.js"
+    }
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "nx": {
+    "tags": [
+      "type:contract",
+      "deployment:monolith",
+      "deployment:microservices"
+    ]
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  }
+}

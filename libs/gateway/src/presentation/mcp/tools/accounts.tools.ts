@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 
-import { AccountDtoSchema, type AccountsApi } from '@intentra/iam-contracts';
+import { AccountDtoSchema, type AccountsApi } from '@intentra/contracts/iam';
 
 export function registerAccountTools(
   server: McpServer,

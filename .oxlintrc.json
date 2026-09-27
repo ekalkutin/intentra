@@ -124,12 +124,8 @@
           {
             "patterns": [
               {
-                "group": [
-                  "@intentra/**",
-                  "!@intentra/shared",
-                  "!@intentra/common-contracts"
-                ],
-                "message": "A published language may depend only on the shared kernel and the common contracts. A contract that reaches for a runtime dependency is no longer a wire contract."
+                "group": ["@intentra/**"],
+                "message": "Contracts are shared with the frontend: zod schemas and types only. A contract that reaches for another workspace package (even the shared kernel, which uses node:crypto) no longer builds for the browser."
               }
             ]
           }
@@ -147,8 +143,8 @@
                 "group": [
                   "@intentra/**",
                   "!@intentra/shared",
-                  "!@intentra/*-contracts",
-                  "!@intentra/*-contracts/**"
+                  "!@intentra/contracts",
+                  "!@intentra/contracts/**"
                 ],
                 "message": "The client ports are the published API seen from outside: contracts and the shared kernel, nothing else. Never a context package."
               }
@@ -168,8 +164,8 @@
                 "group": [
                   "@intentra/**",
                   "!@intentra/shared",
-                  "!@intentra/*-contracts",
-                  "!@intentra/*-contracts/**",
+                  "!@intentra/contracts",
+                  "!@intentra/contracts/**",
                   "!@intentra/api-ports",
                   "!@intentra/api-gateway",
                   "!@intentra/adapter-*"
@@ -195,8 +191,8 @@
                 "group": [
                   "@intentra/**",
                   "!@intentra/shared",
-                  "!@intentra/*-contracts",
-                  "!@intentra/*-contracts/**",
+                  "!@intentra/contracts",
+                  "!@intentra/contracts/**",
                   "!@intentra/api-ports",
                   "!@intentra/api-gateway",
                   "!@intentra/adapter-*"
@@ -223,8 +219,8 @@
                 "group": [
                   "@intentra/**",
                   "!@intentra/shared",
-                  "!@intentra/*-contracts",
-                  "!@intentra/*-contracts/**",
+                  "!@intentra/contracts",
+                  "!@intentra/contracts/**",
                   "!@intentra/adapter-*"
                 ],
                 "message": "A context may depend only on contracts, the shared kernel and technical adapters. Contexts integrate through published events, not through each other's packages; the client ports belong to consumers of the published API, not to contexts."
@@ -235,10 +231,7 @@
       }
     },
     {
-      "files": [
-        "contexts/*/src/domain/**/*.ts",
-        "contexts/*/src/subdomains/*/domain/**/*.ts"
-      ],
+      "files": ["contexts/*/src/*/domain/**/*.ts"],
       "rules": {
         "no-restricted-imports": [
           "error",
@@ -248,8 +241,8 @@
                 "group": [
                   "@intentra/**",
                   "!@intentra/shared",
-                  "!@intentra/*-contracts",
-                  "!@intentra/*-contracts/**",
+                  "!@intentra/contracts",
+                  "!@intentra/contracts/**",
                   "!@intentra/adapter-*"
                 ],
                 "message": "A context may depend only on contracts, the shared kernel and technical adapters. Contexts integrate through published events, not through each other's packages; the client ports belong to consumers of the published API, not to contexts."
@@ -268,10 +261,7 @@
       }
     },
     {
-      "files": [
-        "contexts/*/src/application/**/*.ts",
-        "contexts/*/src/subdomains/*/application/**/*.ts"
-      ],
+      "files": ["contexts/*/src/*/application/**/*.ts"],
       "rules": {
         "no-restricted-imports": [
           "error",
@@ -281,8 +271,8 @@
                 "group": [
                   "@intentra/**",
                   "!@intentra/shared",
-                  "!@intentra/*-contracts",
-                  "!@intentra/*-contracts/**",
+                  "!@intentra/contracts",
+                  "!@intentra/contracts/**",
                   "!@intentra/adapter-*"
                 ],
                 "message": "A context may depend only on contracts, the shared kernel and technical adapters. Contexts integrate through published events, not through each other's packages; the client ports belong to consumers of the published API, not to contexts."

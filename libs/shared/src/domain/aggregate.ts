@@ -6,22 +6,22 @@ export abstract class Aggregate<TEntityId extends EntityId> {
 
   constructor(public readonly id: TEntityId) {}
 
-  public apply(event: DomainEvent): void {
+  public raise(event: DomainEvent): void {
     this.#events.push(event);
   }
 
-  /** Что поднято и ещё не забрано — представление для тестов и проверок. */
+  /** Raised and not yet pulled: a view for tests and checks. */
   public get events(): readonly DomainEvent[] {
     return this.#events;
   }
 
   /**
-   * Забирает поднятые события в порядке их появления.
+   * Pulls the raised events in the order they were raised.
    *
-   * Один вызов и возвращает, и очищает: репозиторий, записывающий агрегат,
-   * зовёт его последним и отдаёт результат unit of work — второго шага, который
-   * можно забыть, здесь нет. Повторный `pullEvents()` вернёт пусто, поэтому
-   * второй `save` не объявит тот же факт дважды.
+   * One call both returns and clears: the repository that writes the aggregate
+   * calls it last and hands the result to the unit of work, so there is no
+   * second step to forget. A repeated `pullEvents()` returns nothing, so a
+   * second `save` does not announce the same fact twice.
    */
   public pullEvents(): DomainEvent[] {
     const events = this.#events;

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --watch build/main.js",
     "build": "tsc -p tsconfig.build.json",
-    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput"
+    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "keywords": [],
   "author": "",

@@ -2,9 +2,9 @@ import { randomUUID } from 'node:crypto';
 
 export abstract class EntityId {
   /**
-   * `#`, а не `protected`: значение идентичности не читает и не подменяет ни
-   * один наследник — они лишь добавляют тип-бренд. Так его не подменит никто и
-   * впредь, причём в рантайме, а не по договорённости.
+   * `#`, not `protected`: no subclass reads or replaces the identity value,
+   * they only add a type brand. So nobody can replace it later either, and
+   * that is enforced at runtime, not by convention.
    */
   readonly #value: string;
 
@@ -15,9 +15,9 @@ export abstract class EntityId {
   }
 
   /**
-   * `protected`, потому что это точка расширения: наследник, которому нужен
-   * формат строже непустой строки, переопределяет её. Приватным именем такой
-   * перегрузки не бывает — база звала бы свою.
+   * `protected` because it is an extension point: a subclass that needs a
+   * stricter format than a non-empty string overrides it. A private name cannot
+   * be overridden: the base would call its own.
    */
   protected validate(value: string): void {
     if (!value) {

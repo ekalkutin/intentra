@@ -14,11 +14,11 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput"
+    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@intentra/iam-contracts": "workspace:*",
-    "@intentra/workspace-contracts": "workspace:*",
+    "@intentra/contracts": "workspace:*",
     "@modelcontextprotocol/node": "^2.0.0",
     "@modelcontextprotocol/server": "^2.0.0",
     "@nestjs/common": "catalog:nestjs12",

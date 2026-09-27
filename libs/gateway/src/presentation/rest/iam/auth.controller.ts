@@ -5,7 +5,7 @@ import {
   SignUpDtoSchema,
   TokensDto,
   type SignUpDto,
-} from '@intentra/iam-contracts';
+} from '@intentra/contracts/iam';
 
 @Controller({
   path: 'iam/auth',
