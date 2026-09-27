@@ -1,0 +1,42 @@
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+    font-synthesis: style;
+  }
+
+  @media (max-width: 767px), (pointer: coarse) {
+    input:not([type='button']):not([type='checkbox']):not([type='color']):not(
+        [type='file']
+      ):not([type='hidden']):not([type='image']):not([type='radio']):not(
+        [type='range']
+      ):not([type='reset']):not([type='submit']),
+    textarea,
+    select,
+    [contenteditable]:not([contenteditable='false']) {
+      /* iOS Safari zooms the page when focused editable text is below 16px. */
+      font-size: 16px !important;
+    }
+  }
+}
