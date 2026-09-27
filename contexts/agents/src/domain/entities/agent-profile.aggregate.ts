@@ -1,12 +1,11 @@
 import { Aggregate, WorkspaceId } from '@intentra/shared';
 
+import { AgentProfileArchivedError } from '../errors/agent-profile-archived.error.js';
 import { AgentName } from '../value-objects/agent-name.vo.js';
 import { AgentProfileId } from '../value-objects/agent-profile-id.vo.js';
 import { Instructions } from '../value-objects/instructions.vo.js';
 import { ModelRef } from '../value-objects/model-ref.vo.js';
 import { ToolId } from '../value-objects/tool-id.vo.js';
-
-import { AgentProfileArchivedError } from './agent-profile-archived.error.js';
 
 export type AgentProfileProps = {
   readonly workspaceId: WorkspaceId;

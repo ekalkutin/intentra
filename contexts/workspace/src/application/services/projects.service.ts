@@ -7,7 +7,7 @@ import type {
 } from '@intentra/contracts/workspace';
 import { WorkspaceId } from '@intentra/shared';
 
-import { Project } from '../../domain/project/project.aggregate.js';
+import { Project } from '../../domain/entities/project.aggregate.js';
 import { WorkspaceNotFoundError } from '../errors/workspace-not-found.error.js';
 import { toProjectDto } from '../mappers/project.mapper.js';
 import { ProjectRepository } from '../ports/project-repository.port.js';

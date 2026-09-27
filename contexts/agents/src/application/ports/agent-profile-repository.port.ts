@@ -1,6 +1,6 @@
 import type { WorkspaceId } from '@intentra/shared';
 
-import type { AgentProfile } from '../../domain/agent-profile/agent-profile.aggregate.js';
+import type { AgentProfile } from '../../domain/entities/agent-profile.aggregate.js';
 import type { AgentProfileId } from '../../domain/value-objects/agent-profile-id.vo.js';
 
 export abstract class AgentProfileRepository {

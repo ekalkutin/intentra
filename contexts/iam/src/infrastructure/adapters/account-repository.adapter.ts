@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AccountRepository } from '../../application/ports/account-repository.port.js';
-import { Account } from '../../domain/account/account.aggregate.js';
+import { Account } from '../../domain/entities/account.aggregate.js';
 import { AccountId } from '../../domain/value-objects/account-id.vo.js';
 import { IamDatabase } from '../database/iam-database.js';
 

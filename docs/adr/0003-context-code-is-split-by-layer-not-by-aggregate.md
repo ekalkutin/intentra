@@ -4,7 +4,7 @@ The unit of DDD is the bounded context, not the aggregate, so a context is laid 
 
 ## Layout
 
-- `domain/<aggregate>/`: the aggregate and its errors; `domain/value-objects/`: the context's value objects; `domain/services/`: domain services that apply a rule to several aggregates.
+- `domain/` is grouped by kind, like every other layer: `entities/` (aggregates and entities), `value-objects/`, `errors/`, and later `services/` (domain services that apply a rule to several aggregates) and `events/`. No folder per aggregate.
 - `application/{ports,services,mappers,errors}/`: use cases load aggregates through ports, call the domain, and save. One transaction changes one aggregate; the others are only read.
 - `infrastructure/adapters/`: implementations of the ports; `infrastructure/database/`: the context's database.
 - `<context>.module.ts` lists every provider; `<context>-api.service.ts` binds the published API.

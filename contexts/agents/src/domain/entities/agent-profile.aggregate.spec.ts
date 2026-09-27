@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import { WorkspaceId } from '@intentra/shared';
 
+import { AgentProfileArchivedError } from '../errors/agent-profile-archived.error.js';
 import { AgentName } from '../value-objects/agent-name.vo.js';
 import { Instructions } from '../value-objects/instructions.vo.js';
 import { ModelRef } from '../value-objects/model-ref.vo.js';
 import { ToolId } from '../value-objects/tool-id.vo.js';
 
-import { AgentProfileArchivedError } from './agent-profile-archived.error.js';
 import { AgentProfile } from './agent-profile.aggregate.js';
 
 const listWorkspaces = new ToolId('list_workspaces');

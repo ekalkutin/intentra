@@ -1,6 +1,6 @@
 import { WorkspaceId } from '@intentra/shared';
 
-import type { Workspace } from '../../domain/workspace/workspace.aggregate.js';
+import type { Workspace } from '../../domain/entities/workspace.aggregate.js';
 
 export abstract class WorkspaceRepository {
   abstract save(workspace: Workspace): Promise<void>;

@@ -6,7 +6,7 @@ import type {
   WorkspacesApi,
 } from '@intentra/contracts/workspace';
 
-import { Workspace } from '../../domain/workspace/workspace.aggregate.js';
+import { Workspace } from '../../domain/entities/workspace.aggregate.js';
 import { toWorkspaceDto } from '../mappers/workspace.mapper.js';
 import { WorkspaceRepository } from '../ports/workspace-repository.port.js';
 

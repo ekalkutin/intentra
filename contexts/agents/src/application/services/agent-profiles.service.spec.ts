@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { WorkspaceId } from '@intentra/shared';
 
-import type { AgentProfile } from '../../domain/agent-profile/agent-profile.aggregate.js';
+import type { AgentProfile } from '../../domain/entities/agent-profile.aggregate.js';
 import type { AgentProfileId } from '../../domain/value-objects/agent-profile-id.vo.js';
 import type { ToolId } from '../../domain/value-objects/tool-id.vo.js';
 import { UnknownToolError } from '../errors/unknown-tool.error.js';

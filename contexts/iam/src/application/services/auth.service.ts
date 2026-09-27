@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import type { AuthApi, SignUpDto, TokensDto } from '@intentra/contracts/iam';
 
-import { Account } from '../../domain/account/account.aggregate.js';
+import { Account } from '../../domain/entities/account.aggregate.js';
 import { AccountRepository } from '../ports/account-repository.port.js';
 
 @Injectable()

@@ -1,4 +1,4 @@
-import { Project } from '../../domain/project/project.aggregate.js';
+import { Project } from '../../domain/entities/project.aggregate.js';
 
 export abstract class ProjectRepository {
   abstract find(): Promise<Project[]>;

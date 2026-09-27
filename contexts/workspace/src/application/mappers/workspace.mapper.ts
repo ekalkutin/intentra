@@ -1,6 +1,6 @@
 import type { WorkspaceDto } from '@intentra/contracts/workspace';
 
-import type { Workspace } from '../../domain/workspace/workspace.aggregate.js';
+import type { Workspace } from '../../domain/entities/workspace.aggregate.js';
 
 export function toWorkspaceDto(workspace: Workspace): WorkspaceDto {
   return {

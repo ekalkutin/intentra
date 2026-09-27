@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ProjectId, WorkspaceId } from '@intentra/shared';
 
 import { ProjectRepository } from '../../application/ports/project-repository.port.js';
-import { Project } from '../../domain/project/project.aggregate.js';
+import { Project } from '../../domain/entities/project.aggregate.js';
 import { WorkspaceDatabase } from '../database/workspace-database.js';
 
 type ProjectRow = {

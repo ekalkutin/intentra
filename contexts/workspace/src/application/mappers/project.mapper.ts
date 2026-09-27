@@ -1,6 +1,6 @@
 import type { ProjectDto } from '@intentra/contracts/workspace';
 
-import type { Project } from '../../domain/project/project.aggregate.js';
+import type { Project } from '../../domain/entities/project.aggregate.js';
 
 export function toProjectDto(project: Project): ProjectDto {
   return {

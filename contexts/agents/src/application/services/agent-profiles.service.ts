@@ -8,7 +8,7 @@ import type {
 } from '@intentra/contracts/agents';
 import { WorkspaceId } from '@intentra/shared';
 
-import { AgentProfile } from '../../domain/agent-profile/agent-profile.aggregate.js';
+import { AgentProfile } from '../../domain/entities/agent-profile.aggregate.js';
 import { AgentName } from '../../domain/value-objects/agent-name.vo.js';
 import { AgentProfileId } from '../../domain/value-objects/agent-profile-id.vo.js';
 import { Instructions } from '../../domain/value-objects/instructions.vo.js';

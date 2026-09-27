@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { WorkspaceId } from '@intentra/shared';
 
 import { WorkspaceRepository } from '../../application/ports/workspace-repository.port.js';
-import { Workspace } from '../../domain/workspace/workspace.aggregate.js';
+import { Workspace } from '../../domain/entities/workspace.aggregate.js';
 import { WorkspaceDatabase } from '../database/workspace-database.js';
 
 type WorkspaceRow = {
