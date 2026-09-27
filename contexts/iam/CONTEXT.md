@@ -8,6 +8,10 @@ Identity of the people using Intentra: who they are and how they prove it.
 A person's identity in Intentra, identified by a unique email and protected by a password.
 _Avoid_: User, profile
 
+**Display name**:
+How an Account is shown to other members. Optional; until it is set, the email stands in for it.
+_Avoid_: Username, full name, nickname
+
 **Sign up**:
 Creating a new Account; the person is signed in right away.
 _Avoid_: Register, registration

@@ -21,6 +21,10 @@ export class GetOneAccountQueryHandler implements IQueryHandler<GetOneAccountQue
 
   public async execute({ id }: GetOneAccountQuery): Promise<AccountDto> {
     const account = await this.accountRepository.getById(new AccountId(id));
-    return { id: account.id.value, email: account.email.value };
+    return {
+      id: account.id.value,
+      email: account.email.value,
+      displayName: account.displayName?.value ?? null,
+    };
   }
 }

@@ -35,8 +35,9 @@ export class GetOneWorkspaceQueryHandler implements IQueryHandler<GetOneWorkspac
     }
     return {
       id: workspace.id.value,
-      name: workspace.name,
+      name: workspace.name.value,
       alias: workspace.alias.value,
+      memberIds: workspace.members.map(member => member.value),
     };
   }
 }

@@ -6,7 +6,9 @@ import { listWorkspacesTool } from './list-workspaces.tool.js';
 
 describe('list_workspaces', () => {
   it('wraps the workspaces of the caller into an object', async () => {
-    const workspaces = [{ id: 'ws-1', name: 'Acme', alias: 'acme' }];
+    const workspaces = [
+      { id: 'ws-1', name: 'Acme', alias: 'acme', memberIds: ['acc-1'] },
+    ];
     const find = vi.fn(async () => workspaces);
     const apis = { workspace: { workspaces: { find } } } as unknown as ToolApis;
 

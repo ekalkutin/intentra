@@ -1,4 +1,10 @@
-import { Bot, FolderKanban, Settings, type LucideIcon } from 'lucide-react';
+import {
+  Bot,
+  Building2,
+  FolderKanban,
+  UserRound,
+  type LucideIcon,
+} from 'lucide-react';
 
 import { ROUTES } from '@/shared/config';
 
@@ -16,6 +22,16 @@ export const AI_TEAM_NAV: readonly NavItem[] = [
   { label: 'Agents', path: ROUTES.WORKSPACE.AGENTS, icon: Bot },
 ];
 
-export const UTILITY_NAV: readonly NavItem[] = [
-  { label: 'Settings', path: ROUTES.WORKSPACE.SETTINGS, icon: Settings },
+/** One entry per settings category; each opens its own settings page. */
+export const SETTINGS_NAV: readonly NavItem[] = [
+  {
+    label: 'Profile',
+    path: ROUTES.WORKSPACE.SETTINGS.PROFILE.ROOT,
+    icon: UserRound,
+  },
+  {
+    label: 'Workspace',
+    path: ROUTES.WORKSPACE.SETTINGS.WORKSPACE.ROOT,
+    icon: Building2,
+  },
 ];

@@ -15,6 +15,9 @@ export class AccountModel {
 
   @Prop({ type: String, required: true })
   passwordHash: string;
+
+  @Prop({ type: String, default: null })
+  displayName: string | null;
 }
 
 export const AccountSchema = SchemaFactory.createForClass(AccountModel);

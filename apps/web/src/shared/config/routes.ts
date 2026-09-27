@@ -12,6 +12,20 @@ export const ROUTES = {
     ROOT: '/:alias',
     PROJECTS: '/:alias/projects',
     AGENTS: '/:alias/agents',
-    SETTINGS: '/:alias/settings',
+    /** Each category is its own page; its tabs are nested routes. */
+    SETTINGS: {
+      ROOT: '/:alias/settings',
+      PROFILE: {
+        ROOT: '/:alias/settings/profile',
+        GENERAL: '/:alias/settings/profile/general',
+        SECURITY: '/:alias/settings/profile/security',
+        ACCESS_TOKENS: '/:alias/settings/profile/access-tokens',
+      },
+      WORKSPACE: {
+        ROOT: '/:alias/settings/workspace',
+        GENERAL: '/:alias/settings/workspace/general',
+        MEMBERS: '/:alias/settings/workspace/members',
+      },
+    },
   },
 } as const;

@@ -11,6 +11,7 @@ export type Scalars = {
 
 export type Account = {
   __typename?: 'Account';
+  displayName?: Maybe<Scalars['String']['output']>;
   email: Scalars['String']['output'];
   id: Scalars['ID']['output'];
 };
@@ -24,6 +25,11 @@ export type AgentProfile = {
   tools: Array<Scalars['String']['output']>;
   workspace?: Maybe<Workspace>;
   workspaceId: Scalars['ID']['output'];
+};
+
+export type ChangePasswordInput = {
+  currentPassword: Scalars['String']['input'];
+  newPassword: Scalars['String']['input'];
 };
 
 export type CreateAgentProfileInput = {
@@ -68,6 +74,7 @@ export type ModelRefInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  changePassword: Scalars['Boolean']['output'];
   createAgentProfile: AgentProfile;
   createPersonalAccessToken: CreatedPersonalAccessToken;
   createProject: Project;
@@ -77,7 +84,14 @@ export type Mutation = {
   revokePersonalAccessToken: Scalars['Boolean']['output'];
   signIn: Tokens;
   signUp: Tokens;
+  updateAccount: Account;
   updateAgentProfile: AgentProfile;
+  updateWorkspace: Workspace;
+};
+
+
+export type MutationChangePasswordArgs = {
+  input: ChangePasswordInput;
 };
 
 
@@ -128,10 +142,21 @@ export type MutationSignUpArgs = {
 };
 
 
+export type MutationUpdateAccountArgs = {
+  input: UpdateAccountInput;
+};
+
+
 export type MutationUpdateAgentProfileArgs = {
   id: Scalars['ID']['input'];
   input: UpdateAgentProfileInput;
   workspaceId: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdateWorkspaceArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateWorkspaceInput;
 };
 
 export type PersonalAccessToken = {
@@ -193,6 +218,10 @@ export type Tokens = {
   refreshToken: Scalars['String']['output'];
 };
 
+export type UpdateAccountInput = {
+  displayName?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdateAgentProfileInput = {
   instructions?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<ModelRefInput>;
@@ -200,9 +229,15 @@ export type UpdateAgentProfileInput = {
   tools?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
+export type UpdateWorkspaceInput = {
+  name: Scalars['String']['input'];
+};
+
 export type Workspace = {
   __typename?: 'Workspace';
   alias: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  memberIds: Array<Scalars['ID']['output']>;
+  members: Array<Account>;
   name: Scalars['String']['output'];
 };

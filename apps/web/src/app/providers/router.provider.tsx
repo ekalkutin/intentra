@@ -5,10 +5,20 @@ import { AgentsPage } from '@/pages/agents';
 import { NewWorkspacePage } from '@/pages/new-workspace';
 import { NotFoundPage } from '@/pages/not-found';
 import { OnboardingPage } from '@/pages/onboarding';
+import {
+  ProfileAccessTokensTab,
+  ProfileGeneralTab,
+  ProfileSecurityTab,
+  ProfileSettingsPage,
+} from '@/pages/profile-settings';
 import { ProjectsPage } from '@/pages/projects';
-import { SettingsPage } from '@/pages/settings';
 import { SignInPage } from '@/pages/sign-in';
 import { SignUpPage } from '@/pages/sign-up';
+import {
+  WorkspaceGeneralTab,
+  WorkspaceMembersTab,
+  WorkspaceSettingsPage,
+} from '@/pages/workspace-settings';
 import { ROUTES } from '@/shared/config';
 import { AppShell } from '@/widgets/app-shell';
 import { AuthLayout } from '@/widgets/auth-layout';
@@ -64,8 +74,48 @@ const router = createBrowserRouter([
                   },
                   { path: ROUTES.WORKSPACE.AGENTS, element: <AgentsPage /> },
                   {
-                    path: ROUTES.WORKSPACE.SETTINGS,
-                    element: <SettingsPage />,
+                    path: ROUTES.WORKSPACE.SETTINGS.ROOT,
+                    element: <Navigate to='profile' replace />,
+                  },
+                  {
+                    path: ROUTES.WORKSPACE.SETTINGS.PROFILE.ROOT,
+                    element: <ProfileSettingsPage />,
+                    children: [
+                      {
+                        index: true,
+                        element: <Navigate to='general' replace />,
+                      },
+                      {
+                        path: ROUTES.WORKSPACE.SETTINGS.PROFILE.GENERAL,
+                        element: <ProfileGeneralTab />,
+                      },
+                      {
+                        path: ROUTES.WORKSPACE.SETTINGS.PROFILE.SECURITY,
+                        element: <ProfileSecurityTab />,
+                      },
+                      {
+                        path: ROUTES.WORKSPACE.SETTINGS.PROFILE.ACCESS_TOKENS,
+                        element: <ProfileAccessTokensTab />,
+                      },
+                    ],
+                  },
+                  {
+                    path: ROUTES.WORKSPACE.SETTINGS.WORKSPACE.ROOT,
+                    element: <WorkspaceSettingsPage />,
+                    children: [
+                      {
+                        index: true,
+                        element: <Navigate to='general' replace />,
+                      },
+                      {
+                        path: ROUTES.WORKSPACE.SETTINGS.WORKSPACE.GENERAL,
+                        element: <WorkspaceGeneralTab />,
+                      },
+                      {
+                        path: ROUTES.WORKSPACE.SETTINGS.WORKSPACE.MEMBERS,
+                        element: <WorkspaceMembersTab />,
+                      },
+                    ],
                   },
                   { path: '*', element: <NotFoundPage /> },
                 ],

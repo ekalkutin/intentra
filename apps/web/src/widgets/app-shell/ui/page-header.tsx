@@ -16,12 +16,14 @@ import { SidebarTrigger } from '@/shared/ui/sidebar';
 
 type PageHeaderProps = {
   title: string;
+  /** A crumb between the workspace and the title: "Settings". */
+  section?: string;
   /** Page actions, on the right. */
   children?: ReactNode;
 };
 
 /** shadcn `sidebar-07` header: the sidebar toggle, then the breadcrumbs. */
-export const PageHeader = ({ title, children }: PageHeaderProps) => {
+export const PageHeader = ({ title, section, children }: PageHeaderProps) => {
   const workspace = useCurrentWorkspace();
 
   return (
@@ -48,6 +50,14 @@ export const PageHeader = ({ title, children }: PageHeaderProps) => {
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className='hidden md:block' />
+            {section ? (
+              <>
+                <BreadcrumbItem className='hidden md:block'>
+                  {section}
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className='hidden md:block' />
+              </>
+            ) : null}
             <BreadcrumbItem>
               <BreadcrumbPage>{title}</BreadcrumbPage>
             </BreadcrumbItem>

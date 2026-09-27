@@ -12,4 +12,8 @@ export class WorkspaceType implements WorkspaceDto {
 
   @Field()
   public readonly alias: string;
+
+  /** Account ids; the creator comes first. */
+  @Field(() => [ID])
+  public readonly memberIds: string[];
 }

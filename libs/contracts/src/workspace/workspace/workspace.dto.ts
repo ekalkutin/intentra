@@ -12,6 +12,14 @@ export const WORKSPACE_RESERVED_ALIASES: readonly string[] = [
   'workspaces',
 ];
 
+export const WORKSPACE_NAME_MAX_LENGTH = 80;
+
+const WorkspaceNameSchema = z
+  .string()
+  .trim()
+  .nonempty()
+  .max(WORKSPACE_NAME_MAX_LENGTH);
+
 /** Unique across Intentra; `WORKSPACE_ALIAS_ALREADY_TAKEN` (409) otherwise. */
 const WorkspaceAliasSchema = z
   .string()
@@ -28,11 +36,17 @@ export const WorkspaceDtoSchema = z.object({
   id: z.string().nonempty(),
   name: z.string().nonempty(),
   alias: WorkspaceAliasSchema,
+  /** Account ids; the creator comes first. */
+  memberIds: z.array(z.string().nonempty()),
 });
 
 export const CreateWorkspaceDtoSchema = z.object({
-  name: z.string().nonempty(),
+  name: WorkspaceNameSchema,
   alias: WorkspaceAliasSchema,
+});
+
+export const UpdateWorkspaceDtoSchema = z.object({
+  name: WorkspaceNameSchema,
 });
 
 /** Without `ids`, every workspace of the account. */
@@ -42,4 +56,5 @@ export const FindWorkspacesDtoSchema = z.object({
 
 export type WorkspaceDto = z.infer<typeof WorkspaceDtoSchema>;
 export type CreateWorkspaceDto = z.infer<typeof CreateWorkspaceDtoSchema>;
+export type UpdateWorkspaceDto = z.infer<typeof UpdateWorkspaceDtoSchema>;
 export type FindWorkspacesDto = z.infer<typeof FindWorkspacesDtoSchema>;

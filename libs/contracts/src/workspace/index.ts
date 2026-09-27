@@ -2,12 +2,15 @@ export type { WorkspacesApi } from './workspace/workspaces.api.js';
 export {
   type CreateWorkspaceDto,
   type FindWorkspacesDto,
+  type UpdateWorkspaceDto,
   type WorkspaceDto,
   CreateWorkspaceDtoSchema,
   FindWorkspacesDtoSchema,
+  UpdateWorkspaceDtoSchema,
   WorkspaceDtoSchema,
   WORKSPACE_ALIAS_MAX_LENGTH,
   WORKSPACE_ALIAS_MIN_LENGTH,
+  WORKSPACE_NAME_MAX_LENGTH,
   WORKSPACE_ALIAS_PATTERN,
   WORKSPACE_RESERVED_ALIASES,
 } from './workspace/workspace.dto.js';

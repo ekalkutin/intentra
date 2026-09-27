@@ -10,6 +10,7 @@ export const ME_QUERY: TypedDocumentNode<MeQuery, MeQueryVariables> = gql`
     me {
       id
       email
+      displayName
     }
   }
 `;

@@ -35,8 +35,9 @@ export class FindManyWorkspacesQueryHandler implements IQueryHandler<FindManyWor
     );
     return workspaces.map(workspace => ({
       id: workspace.id.value,
-      name: workspace.name,
+      name: workspace.name.value,
       alias: workspace.alias.value,
+      memberIds: workspace.members.map(member => member.value),
     }));
   }
 }

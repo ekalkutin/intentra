@@ -5,7 +5,10 @@ import type { CreateWorkspaceDto } from '@intentra/contracts/workspace';
 import { AccountId } from '@intentra/shared';
 
 import { Workspace } from '../../../../domain/entities/index.js';
-import { WorkspaceAlias } from '../../../../domain/value-objects/index.js';
+import {
+  WorkspaceAlias,
+  WorkspaceName,
+} from '../../../../domain/value-objects/index.js';
 import { WorkspaceAliasAlreadyTakenException } from '../../../exceptions/index.js';
 import { WorkspaceRepository } from '../../../ports/index.js';
 
@@ -35,7 +38,7 @@ export class CreateWorkspaceCommandHandler implements ICommandHandler<CreateWork
     }
 
     const workspace = Workspace.create({
-      name: payload.name,
+      name: new WorkspaceName(payload.name),
       alias,
       creator: new AccountId(accountId),
     });

@@ -1,15 +1,15 @@
 import { AccountId, Aggregate, WorkspaceId } from '@intentra/shared';
 
-import type { WorkspaceAlias } from '../value-objects/index.js';
+import type { WorkspaceAlias, WorkspaceName } from '../value-objects/index.js';
 
 export type WorkspaceProps = {
-  readonly name: string;
+  readonly name: WorkspaceName;
   readonly alias: WorkspaceAlias;
   readonly members: readonly AccountId[];
 };
 
 export type CreateWorkspaceProps = {
-  readonly name: string;
+  readonly name: WorkspaceName;
   readonly alias: WorkspaceAlias;
   /** Becomes the first member. */
   readonly creator: AccountId;
@@ -17,7 +17,7 @@ export type CreateWorkspaceProps = {
 
 /** Only its members can see or change it. */
 export class Workspace extends Aggregate<WorkspaceId> {
-  #name: string;
+  #name: WorkspaceName;
   readonly #alias: WorkspaceAlias;
   readonly #members: AccountId[];
 
@@ -28,7 +28,7 @@ export class Workspace extends Aggregate<WorkspaceId> {
     this.#members = [...props.members];
   }
 
-  get name(): string {
+  get name(): WorkspaceName {
     return this.#name;
   }
 
@@ -38,6 +38,10 @@ export class Workspace extends Aggregate<WorkspaceId> {
 
   get members(): readonly AccountId[] {
     return [...this.#members];
+  }
+
+  public rename(name: WorkspaceName): void {
+    this.#name = name;
   }
 
   public hasMember(accountId: AccountId): boolean {

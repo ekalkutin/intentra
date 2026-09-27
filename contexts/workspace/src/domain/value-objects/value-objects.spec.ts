@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { WorkspaceAlias } from './workspace-alias.vo.js';
+import { WorkspaceName } from './workspace-name.vo.js';
 
 describe('WorkspaceAlias', () => {
   it('is stored trimmed and lower-case', () => {
@@ -17,5 +18,16 @@ describe('WorkspaceAlias', () => {
 
   it('rejects a route the web app uses for itself', () => {
     expect(() => new WorkspaceAlias('Onboarding')).toThrow();
+  });
+});
+
+describe('WorkspaceName', () => {
+  it('is stored trimmed', () => {
+    expect(new WorkspaceName('  Acme Labs ').value).toBe('Acme Labs');
+  });
+
+  it('rejects an empty or too long name', () => {
+    expect(() => new WorkspaceName('  ')).toThrow();
+    expect(() => new WorkspaceName('x'.repeat(81))).toThrow();
   });
 });

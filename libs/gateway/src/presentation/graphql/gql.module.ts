@@ -7,7 +7,7 @@ import type { PresentationModuleOptions } from '../presentation-module.options.j
 
 import { AGENTS_GQL_RESOLVERS } from './agents/index.js';
 import { formatGraphQLError } from './format-error.js';
-import { IAM_GQL_RESOLVERS } from './iam/index.js';
+import { IAM_GQL_LOADERS, IAM_GQL_RESOLVERS } from './iam/index.js';
 import {
   WORKSPACE_GQL_LOADERS,
   WORKSPACE_GQL_RESOLVERS,
@@ -44,6 +44,7 @@ export class GQLModule {
         ...IAM_GQL_RESOLVERS,
         ...WORKSPACE_GQL_RESOLVERS,
         ...AGENTS_GQL_RESOLVERS,
+        ...IAM_GQL_LOADERS,
         ...WORKSPACE_GQL_LOADERS,
       ],
     };

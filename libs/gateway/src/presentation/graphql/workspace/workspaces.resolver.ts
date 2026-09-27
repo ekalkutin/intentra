@@ -1,17 +1,23 @@
 import { Inject } from '@nestjs/common';
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import {
   CreateWorkspaceDtoSchema,
+  UpdateWorkspaceDtoSchema,
   WorkspaceApi,
   type CreateWorkspaceDto,
+  type UpdateWorkspaceDto,
   type WorkspaceDto,
 } from '@intentra/contracts/workspace';
 
 import { CurrentAccount, type AuthenticatedAccount } from '../../auth/index.js';
 import { SchemaPipe } from '../schema.pipe.js';
 
-import { CreateWorkspaceInput, WorkspaceType } from './dto/index.js';
+import {
+  CreateWorkspaceInput,
+  UpdateWorkspaceInput,
+  WorkspaceType,
+} from './dto/index.js';
 
 @Resolver()
 export class WorkspacesResolver {
@@ -38,5 +44,19 @@ export class WorkspacesResolver {
     input: CreateWorkspaceDto,
   ): Promise<WorkspaceDto> {
     return this.workspace.workspaces.create(account.id, input);
+  }
+
+  @Mutation(() => WorkspaceType, { name: 'updateWorkspace' })
+  public updateWorkspace(
+    @CurrentAccount() account: AuthenticatedAccount,
+    @Args('id', { type: () => ID }) id: string,
+    @Args(
+      'input',
+      { type: () => UpdateWorkspaceInput },
+      new SchemaPipe(UpdateWorkspaceDtoSchema),
+    )
+    input: UpdateWorkspaceDto,
+  ): Promise<WorkspaceDto> {
+    return this.workspace.workspaces.update(account.id, id, input);
   }
 }

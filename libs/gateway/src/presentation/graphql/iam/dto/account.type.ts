@@ -9,4 +9,8 @@ export class AccountType implements AccountDto {
 
   @Field()
   public readonly email: string;
+
+  /** `null`: not set yet; show the email instead. */
+  @Field(() => String, { nullable: true })
+  public readonly displayName: string | null;
 }

@@ -14,7 +14,12 @@ import {
   SidebarMenuItem,
 } from '@/shared/ui/sidebar';
 
-import { AI_TEAM_NAV, UTILITY_NAV, WORK_NAV, type NavItem } from '../model/nav';
+import {
+  AI_TEAM_NAV,
+  SETTINGS_NAV,
+  WORK_NAV,
+  type NavItem,
+} from '../model/nav';
 
 import { NavUser } from './nav-user';
 import { WorkspaceSwitcher } from './workspace-switcher';
@@ -70,13 +75,9 @@ export const AppSidebar = () => (
     <SidebarContent>
       <NavGroup label='Work' items={WORK_NAV} />
       <NavGroup label='AI team' items={AI_TEAM_NAV} />
+      <NavGroup label='Settings' items={SETTINGS_NAV} />
     </SidebarContent>
     <SidebarFooter>
-      <SidebarMenu>
-        {UTILITY_NAV.map(item => (
-          <NavLinkItem key={item.path} item={item} />
-        ))}
-      </SidebarMenu>
       <NavUser />
     </SidebarFooter>
   </Sidebar>

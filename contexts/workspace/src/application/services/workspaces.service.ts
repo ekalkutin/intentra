@@ -4,6 +4,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import type {
   CreateWorkspaceDto,
   FindWorkspacesDto,
+  UpdateWorkspaceDto,
   WorkspaceDto,
   WorkspacesApi,
 } from '@intentra/contracts/workspace';
@@ -12,6 +13,7 @@ import {
   CreateWorkspaceCommand,
   FindManyWorkspacesQuery,
   GetOneWorkspaceQuery,
+  UpdateWorkspaceCommand,
 } from '../use-cases/workspaces/index.js';
 
 @Injectable()
@@ -30,6 +32,17 @@ export class WorkspacesService implements WorkspacesApi {
   ): Promise<WorkspaceDto> {
     const id = await this.commandBus.execute(
       new CreateWorkspaceCommand(accountId, data),
+    );
+    return this.getById(accountId, id);
+  }
+
+  public async update(
+    accountId: string,
+    id: string,
+    data: UpdateWorkspaceDto,
+  ): Promise<WorkspaceDto> {
+    await this.commandBus.execute(
+      new UpdateWorkspaceCommand(accountId, id, data),
     );
     return this.getById(accountId, id);
   }

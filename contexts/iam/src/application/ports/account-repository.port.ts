@@ -7,6 +7,7 @@ import { AccountNotFoundException } from '../exceptions/index.js';
 export abstract class AccountRepository {
   abstract save(account: Account): Promise<void>;
   abstract findById(id: AccountId): Promise<Account | null>;
+  abstract findByIds(ids: AccountId[]): Promise<Account[]>;
   abstract findByEmail(email: Email): Promise<Account | null>;
 
   public async getById(id: AccountId): Promise<Account> {

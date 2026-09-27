@@ -1,5 +1,16 @@
 export type { AccountsApi } from './account/accounts.api.js';
-export { type AccountDto, AccountDtoSchema } from './account/account.dto.js';
+export {
+  type AccountDto,
+  type ChangePasswordDto,
+  type FindAccountsDto,
+  type UpdateAccountDto,
+  ACCOUNT_DISPLAY_NAME_MAX_LENGTH,
+  ACCOUNT_PASSWORD_MIN_LENGTH,
+  AccountDtoSchema,
+  ChangePasswordDtoSchema,
+  FindAccountsDtoSchema,
+  UpdateAccountDtoSchema,
+} from './account/account.dto.js';
 export type { AuthApi } from './auth/auth.api.js';
 export { type RefreshDto, RefreshDtoSchema } from './auth/refresh.dto.js';
 export { type SignInDto, SignInDtoSchema } from './auth/sign-in.dto.js';

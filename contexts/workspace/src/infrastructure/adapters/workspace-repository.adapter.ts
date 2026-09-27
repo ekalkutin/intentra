@@ -6,7 +6,10 @@ import { AccountId, WorkspaceId } from '@intentra/shared';
 
 import { WorkspaceRepository } from '../../application/ports/index.js';
 import { Workspace } from '../../domain/entities/index.js';
-import { WorkspaceAlias } from '../../domain/value-objects/index.js';
+import {
+  WorkspaceAlias,
+  WorkspaceName,
+} from '../../domain/value-objects/index.js';
 import { WorkspaceModel } from '../database/index.js';
 
 @Injectable()
@@ -19,13 +22,17 @@ export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
   }
 
   public async save(workspace: Workspace): Promise<void> {
-    const workspaceModel = new this.workspaceModel({
-      _id: workspace.id.value,
-      name: workspace.name,
-      alias: workspace.alias.value,
-      members: workspace.members.map(member => member.value),
-    });
-    await workspaceModel.save();
+    await this.workspaceModel
+      .replaceOne(
+        { _id: workspace.id.value },
+        {
+          name: workspace.name.value,
+          alias: workspace.alias.value,
+          members: workspace.members.map(member => member.value),
+        },
+        { upsert: true },
+      )
+      .exec();
   }
 
   public async findByMember(
@@ -54,7 +61,7 @@ export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
 
   private toDomain(workspace: WorkspaceModel): Workspace {
     return Workspace.reconstitute(new WorkspaceId(workspace._id), {
-      name: workspace.name,
+      name: new WorkspaceName(workspace.name),
       alias: new WorkspaceAlias(workspace.alias),
       members: workspace.members.map(member => new AccountId(member)),
     });

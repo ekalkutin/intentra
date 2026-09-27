@@ -1,4 +1,5 @@
 export { AccountType } from './account.type.js';
+export { ChangePasswordInput } from './change-password.input.js';
 export { CreatePersonalAccessTokenInput } from './create-personal-access-token.input.js';
 export {
   CreatedPersonalAccessTokenType,
@@ -8,3 +9,4 @@ export { RefreshInput } from './refresh.input.js';
 export { SignInInput } from './sign-in.input.js';
 export { SignUpInput } from './sign-up.input.js';
 export { TokensType } from './tokens.type.js';
+export { UpdateAccountInput } from './update-account.input.js';

@@ -1,10 +1,20 @@
-import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 
 import {
   CreateWorkspaceDtoSchema,
+  UpdateWorkspaceDtoSchema,
   WorkspaceApi,
   WorkspaceDto,
   type CreateWorkspaceDto,
+  type UpdateWorkspaceDto,
 } from '@intentra/contracts/workspace';
 
 import { CurrentAccount, type AuthenticatedAccount } from '../../auth/index.js';
@@ -31,5 +41,14 @@ export class WorkspacesController {
     @Body({ schema: CreateWorkspaceDtoSchema }) data: CreateWorkspaceDto,
   ): Promise<WorkspaceDto> {
     return this.workspace.workspaces.create(account.id, data);
+  }
+
+  @Patch(':id')
+  public update(
+    @CurrentAccount() account: AuthenticatedAccount,
+    @Param('id') id: string,
+    @Body({ schema: UpdateWorkspaceDtoSchema }) data: UpdateWorkspaceDto,
+  ): Promise<WorkspaceDto> {
+    return this.workspace.workspaces.update(account.id, id, data);
   }
 }
