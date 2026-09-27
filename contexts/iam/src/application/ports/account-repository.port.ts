@@ -1,4 +1,4 @@
-import type { Account } from '../../domain/entities/account.aggregate.js';
+import type { Account } from '../../domain/entities/index.js';
 
 export abstract class AccountRepository {
   abstract find(): Promise<Account[]>;

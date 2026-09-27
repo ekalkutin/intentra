@@ -1,6 +1,6 @@
 import { Aggregate } from '@intentra/shared';
 
-import { AccountId } from '../value-objects/account-id.vo.js';
+import { AccountId } from '../value-objects/index.js';
 
 export type AccountProps = {
   readonly email: string;

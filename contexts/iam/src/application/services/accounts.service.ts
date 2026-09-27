@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import type { AccountDto, AccountsApi } from '@intentra/contracts/iam';
 
-import { AccountRepository } from '../ports/account-repository.port.js';
+import { AccountRepository } from '../ports/index.js';
 
 @Injectable()
 export class AccountsService implements AccountsApi {

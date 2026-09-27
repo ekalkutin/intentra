@@ -4,8 +4,7 @@ import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import type { SignUpDto, TokensDto } from '@intentra/contracts/iam';
 
 import { Account } from '../../../../domain/entities/account.aggregate.js';
-import { AccountRepository } from '../../../ports/account-repository.port.js';
-import { PasswordHasher } from '../../../ports/password-hasher.port.js';
+import { AccountRepository, PasswordHasher } from '../../../ports/index.js';
 
 export class SignUpCommand extends Command<TokensDto> {
   constructor(public readonly payload: SignUpDto) {
