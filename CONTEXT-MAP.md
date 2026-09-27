@@ -4,6 +4,7 @@
 
 - IAM (`contexts/iam`): who a person is: accounts, sign-up and sign-in; knows nothing about workspaces or roles
 - [Workspace](./contexts/workspace/CONTEXT.md): workspaces (the tenant), their members and roles, and the projects inside them
+- [Agents](./contexts/agents/CONTEXT.md): agent profiles a workspace configures and, later, their runs
 
 ## Relationships
 
