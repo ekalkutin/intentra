@@ -2,6 +2,7 @@ import { DynamicModule, Module } from '@nestjs/common';
 
 import type { PresentationModuleOptions } from '../presentation-module.options.js';
 
+import { AGENTS_CONTROLLERS } from './agents/index.js';
 import { IAM_CONTROLLERS } from './iam/index.js';
 import { WORKSPACE_CONTROLLERS } from './workspace/index.js';
 
@@ -11,7 +12,11 @@ export class RestModule {
     return {
       module: RestModule,
       imports: contexts,
-      controllers: [...IAM_CONTROLLERS, ...WORKSPACE_CONTROLLERS],
+      controllers: [
+        ...IAM_CONTROLLERS,
+        ...WORKSPACE_CONTROLLERS,
+        ...AGENTS_CONTROLLERS,
+      ],
     };
   }
 }

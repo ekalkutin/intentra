@@ -44,11 +44,11 @@ export class AgentProfileRepositoryAdapter extends AgentProfileRepository {
     return profile ? this.toDomain(profile) : null;
   }
 
-  public async findByWorkspace(
+  public async findActiveByWorkspace(
     workspaceId: WorkspaceId,
   ): Promise<AgentProfile[]> {
     const profiles = await this.agentProfileModel
-      .find({ workspaceId: workspaceId.value })
+      .find({ workspaceId: workspaceId.value, archivedAt: null })
       .exec();
     return profiles.map(profile => this.toDomain(profile));
   }

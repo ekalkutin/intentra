@@ -4,6 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./agents": {
+      "types": "./build/agents/index.d.ts",
+      "import": "./build/agents/index.js"
+    },
     "./iam": {
       "types": "./build/iam/index.d.ts",
       "import": "./build/iam/index.js"

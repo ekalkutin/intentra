@@ -44,6 +44,18 @@ describe('AgentProfile', () => {
     expect(profile.tools).toEqual([ToolId.SearchProjectKnowledge]);
   });
 
+  it('replaces the whole tool list, dropping duplicates', () => {
+    const profile = createProfile();
+    profile.allowTool(ToolId.GetTraceability);
+
+    profile.replaceTools([
+      ToolId.SearchProjectKnowledge,
+      ToolId.SearchProjectKnowledge,
+    ]);
+
+    expect(profile.tools).toEqual([ToolId.SearchProjectKnowledge]);
+  });
+
   it('does not expose its tools for outside changes', () => {
     const profile = createProfile();
 

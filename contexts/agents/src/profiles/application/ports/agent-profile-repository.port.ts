@@ -9,5 +9,8 @@ export abstract class AgentProfileRepository {
     workspaceId: WorkspaceId,
     id: AgentProfileId,
   ): Promise<AgentProfile | null>;
-  abstract findByWorkspace(workspaceId: WorkspaceId): Promise<AgentProfile[]>;
+  /** Profiles of the workspace that are not archived. */
+  abstract findActiveByWorkspace(
+    workspaceId: WorkspaceId,
+  ): Promise<AgentProfile[]>;
 }

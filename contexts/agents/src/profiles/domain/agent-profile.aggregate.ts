@@ -109,6 +109,14 @@ export class AgentProfile extends Aggregate<AgentProfileId> {
     }
   }
 
+  /** Sets the allowed tools to exactly this list, without duplicates. */
+  public replaceTools(tools: readonly ToolId[]): void {
+    this.#assertNotArchived();
+    this.#tools = tools.filter(
+      (tool, index) => tools.findIndex(other => other.equals(tool)) === index,
+    );
+  }
+
   public revokeTool(tool: ToolId): void {
     this.#assertNotArchived();
     this.#tools = this.#tools.filter(allowed => !allowed.equals(tool));
