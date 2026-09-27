@@ -45,6 +45,7 @@ export type CreateProjectInput = {
 };
 
 export type CreateWorkspaceInput = {
+  alias: Scalars['String']['input'];
   name: Scalars['String']['input'];
 };
 
@@ -201,6 +202,7 @@ export type UpdateAgentProfileInput = {
 
 export type Workspace = {
   __typename?: 'Workspace';
+  alias: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
 };

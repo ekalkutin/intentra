@@ -1,1 +1,1 @@
-export { readAccessToken, writeTokens } from './tokens';
+export { clearTokens, readAccessToken, writeTokens } from './tokens';

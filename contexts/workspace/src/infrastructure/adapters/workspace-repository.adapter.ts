@@ -6,6 +6,7 @@ import { AccountId, WorkspaceId } from '@intentra/shared';
 
 import { WorkspaceRepository } from '../../application/ports/index.js';
 import { Workspace } from '../../domain/entities/index.js';
+import { WorkspaceAlias } from '../../domain/value-objects/index.js';
 import { WorkspaceModel } from '../database/index.js';
 
 @Injectable()
@@ -21,6 +22,7 @@ export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
     const workspaceModel = new this.workspaceModel({
       _id: workspace.id.value,
       name: workspace.name,
+      alias: workspace.alias.value,
       members: workspace.members.map(member => member.value),
     });
     await workspaceModel.save();
@@ -43,9 +45,17 @@ export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
     return workspace ? this.toDomain(workspace) : null;
   }
 
+  public async findByAlias(alias: WorkspaceAlias): Promise<Workspace | null> {
+    const workspace = await this.workspaceModel
+      .findOne({ alias: alias.value })
+      .exec();
+    return workspace ? this.toDomain(workspace) : null;
+  }
+
   private toDomain(workspace: WorkspaceModel): Workspace {
     return Workspace.reconstitute(new WorkspaceId(workspace._id), {
       name: workspace.name,
+      alias: new WorkspaceAlias(workspace.alias),
       members: workspace.members.map(member => new AccountId(member)),
     });
   }

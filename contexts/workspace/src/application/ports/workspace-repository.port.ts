@@ -1,6 +1,7 @@
 import type { AccountId, WorkspaceId } from '@intentra/shared';
 
 import type { Workspace } from '../../domain/entities/index.js';
+import type { WorkspaceAlias } from '../../domain/value-objects/index.js';
 import { WorkspaceNotFoundException } from '../exceptions/index.js';
 
 export abstract class WorkspaceRepository {
@@ -11,6 +12,7 @@ export abstract class WorkspaceRepository {
     ids?: WorkspaceId[],
   ): Promise<Workspace[]>;
   abstract findById(id: WorkspaceId): Promise<Workspace | null>;
+  abstract findByAlias(alias: WorkspaceAlias): Promise<Workspace | null>;
 
   public async getById(id: WorkspaceId): Promise<Workspace> {
     const workspace = await this.findById(id);

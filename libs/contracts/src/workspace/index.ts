@@ -6,6 +6,9 @@ export {
   CreateWorkspaceDtoSchema,
   FindWorkspacesDtoSchema,
   WorkspaceDtoSchema,
+  WORKSPACE_ALIAS_MAX_LENGTH,
+  WORKSPACE_ALIAS_MIN_LENGTH,
+  WORKSPACE_ALIAS_PATTERN,
 } from './workspace/workspace.dto.js';
 export type { ProjectsApi } from './project/project.api.js';
 export {

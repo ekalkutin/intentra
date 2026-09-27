@@ -33,6 +33,10 @@ export class GetOneWorkspaceQueryHandler implements IQueryHandler<GetOneWorkspac
     if (!workspace.hasMember(new AccountId(accountId))) {
       throw new WorkspaceNotFoundException(id);
     }
-    return { id: workspace.id.value, name: workspace.name };
+    return {
+      id: workspace.id.value,
+      name: workspace.name,
+      alias: workspace.alias.value,
+    };
   }
 }

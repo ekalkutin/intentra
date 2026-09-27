@@ -6,4 +6,7 @@ import type { CreateWorkspaceDto } from '@intentra/contracts/workspace';
 export class CreateWorkspaceInput implements CreateWorkspaceDto {
   @Field()
   public readonly name: string;
+
+  @Field()
+  public readonly alias: string;
 }

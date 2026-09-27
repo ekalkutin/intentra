@@ -13,6 +13,9 @@ export class WorkspaceModel {
   @Prop({ required: true })
   name: string;
 
+  @Prop({ type: String, required: true, unique: true })
+  alias: string;
+
   /** Account ids. */
   @Prop({ type: [String], required: true, index: true })
   members: string[];

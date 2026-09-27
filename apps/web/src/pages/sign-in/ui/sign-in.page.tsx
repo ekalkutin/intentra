@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 import { SignInForm } from '@/features/sign-in';
 import { ROUTES } from '@/shared/config';
@@ -17,6 +17,15 @@ export const SignInPage = () => {
         </p>
       </div>
       <SignInForm onSuccess={() => navigate(ROUTES.HOME, { replace: true })} />
+      <p className='text-center text-body text-muted-foreground'>
+        No account yet?{' '}
+        <Link
+          to={ROUTES.AUTH.SIGN_UP}
+          className='font-medium text-foreground underline-offset-4 hover:underline'
+        >
+          Create one
+        </Link>
+      </p>
     </div>
   );
 };

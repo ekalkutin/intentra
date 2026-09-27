@@ -9,4 +9,7 @@ export class WorkspaceType implements WorkspaceDto {
 
   @Field()
   public readonly name: string;
+
+  @Field()
+  public readonly alias: string;
 }
