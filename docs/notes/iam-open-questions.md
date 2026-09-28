@@ -1,0 +1,7 @@
+# IAM — open questions and deferred ideas
+
+## Deferred (post-MVP)
+
+- **Revocable refresh tokens.** MVP: access and refresh tokens are stateless JWTs returned in the response body; the access token travels as `Authorization: Bearer`. A refresh token cannot be revoked and stays valid until it expires, and logout only means the client forgets its tokens. Later: store refresh sessions in Redis with a TTL, delete the key on logout, keep an Account's session keys in one set for "log out everywhere", and rotate the refresh token on every refresh.
+- **Email verification.** See [workspace open questions](workspace-open-questions.md): an Invitation relies on the email being owned by the Account.
+- **Access for MCP agents.** Codex, Claude Code and others need their own mechanism (API keys or OAuth), separate from browser sign-in.
