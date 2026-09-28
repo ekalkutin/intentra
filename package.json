@@ -1,16 +1,36 @@
 {
   "name": "intentra",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "version": "0.0.0",
+  "private": true,
   "type": "module",
+  "scripts": {
+    "dev": "nx run-many -t dev -p tag:type:app",
+    "build": "nx run-many -t build",
+    "typecheck": "nx run-many -t typecheck",
+    "test": "nx run-many -t test",
+    "lint": "oxlint --no-error-on-unmatched-pattern apps/ packages/ libs/",
+    "prettier": "prettier --write \"{apps,packages,libs}/**/*.{ts,tsx,json}\"",
+    "prettier:check": "prettier --check \"{apps,packages,libs}/**/*.{ts,tsx,json}\"",
+    "prepare": "husky"
+  },
   "devDependencies": {
-    "typescript": "^7.0.2"
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@types/node": "^26.6.3",
+    "@vitest/coverage-v8": "catalog:tooling",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "nx": "^23.2.1",
+    "oxlint": "^1.86.0",
+    "prettier": "^3.9.9",
+    "typescript": "catalog:tooling",
+    "vitest": "catalog:tooling"
+  },
+  "lint-staged": {
+    "**/!(*.generated).{ts,tsx}": [
+      "oxlint --fix --no-error-on-unmatched-pattern",
+      "prettier --write"
+    ]
   }
 }
