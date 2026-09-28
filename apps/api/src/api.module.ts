@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { GatewayModule } from '@intentra/gateway';
 import { IamModule, type IamModuleOptions } from '@intentra/iam';
+import { WorkspaceModule } from '@intentra/workspace';
 
 import {
   EnvironmentSchema,
@@ -17,6 +18,8 @@ const iam = IamModule.registerAsync({
     configService: ConfigService<Variables, true>,
   ): IamModuleOptions => configService.get('iam', { infer: true }),
 });
+
+const workspace = WorkspaceModule.register({});
 
 @Module({
   imports: [
@@ -33,7 +36,7 @@ const iam = IamModule.registerAsync({
       }),
       inject: [ConfigService],
     }),
-    GatewayModule.register({ contexts: [iam] }),
+    GatewayModule.register({ contexts: [iam, workspace] }),
   ],
 })
 export class ApiModule {}

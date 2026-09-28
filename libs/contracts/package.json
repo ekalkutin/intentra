@@ -20,9 +20,15 @@
     "./iam": {
       "types": "./build/iam/index.d.ts",
       "import": "./build/iam/index.js"
+    },
+    "./workspace": {
+      "types": "./build/workspace/index.d.ts",
+      "import": "./build/workspace/index.js"
     }
   },
-  "files": ["build"],
+  "files": [
+    "build"
+  ],
   "dependencies": {
     "zod": "catalog:"
   }
