@@ -1,0 +1,13 @@
+# Workspace — open questions and deferred ideas
+
+## Open questions
+
+- **Email verification in IAM.** Only an Account with the invited email can accept an Invitation, but IAM does not verify email ownership yet. Until it does, someone can register with another person's email and accept their Invitation if the link leaks.
+
+## Deferred (post-MVP)
+
+- **Soft delete of Workspace.** MVP deletes a Workspace and everything in it immediately. Later: mark it Deleted, allow an Owner to restore it within 30 days, then delete permanently.
+- **Per-Project access.** MVP: every Member sees every Project. Later: Projects with their own list of Members.
+- **Email delivery for Invitations.** MVP: the Owner copies the Invitation link and sends it themselves. Later: send it by email through an adapter.
+- **Configurable Project permissions.** MVP: only an Owner creates, renames and deletes Projects. Later: a dedicated permission that lets a Member create Projects and delete the ones they created.
+- **Permissions model.** MVP: the only Role is Contributor, and ownership is a property of the Workspace. Next step: fixed Roles that each carry a set of permissions. Custom Roles per Workspace only if customers ask for them.
