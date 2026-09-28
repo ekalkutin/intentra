@@ -1,5 +1,5 @@
 {
-  "name": "@intentra/gateway",
+  "name": "@intentra/agent-toolkit",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,20 +15,18 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@intentra/agent-toolkit": "workspace:*",
     "@intentra/contracts": "workspace:*",
     "@mastra/core": "catalog:",
-    "@modelcontextprotocol/node": "catalog:",
-    "@modelcontextprotocol/server": "catalog:",
-    "@nestjs/common": "catalog:nestjs12",
-    "@nestjs/core": "catalog:nestjs12"
+    "zod": "catalog:"
   },
   "nx": {
     "tags": [
-      "type:gateway",
+      "type:agent-toolkit",
       "deployment:monolith"
     ]
   }

@@ -1,13 +1,15 @@
 import { HttpStatus } from '@nestjs/common';
 import { afterAll, afterEach, beforeAll, describe, it } from 'vitest';
 
+import { AgentsModule } from '@intentra/agents';
 import { GatewayModule } from '@intentra/gateway';
 import { IamModule } from '@intentra/iam';
 import { TestingApp } from '@intentra/platform-testing';
+import { WorkspaceModule } from '@intentra/workspace';
 
-const SIGN_UP_PATH = '/iam/auth/sign-up';
+const SIGN_UP_PATH = '/api/iam/auth/sign-up';
 
-describe('POST /iam/auth/sign-up', () => {
+describe('POST /api/iam/auth/sign-up', () => {
   let app: TestingApp;
 
   beforeAll(async () => {
@@ -19,6 +21,8 @@ describe('POST /iam/auth/sign-up', () => {
               accessTokenSecret: 'test-access-secret',
               refreshTokenSecret: 'test-refresh-secret',
             }),
+            WorkspaceModule.register({}),
+            AgentsModule.register({}),
           ],
         }),
       ],

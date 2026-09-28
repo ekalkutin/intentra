@@ -1,5 +1,7 @@
 import { ConfigurableModuleBuilder, type ModuleMetadata } from '@nestjs/common';
+import { RouterModule } from '@nestjs/core';
 
+import { McpModule } from './presentation/mcp/mcp.module.js';
 import { RestModule } from './presentation/rest/rest.module.js';
 
 export type GatewayModuleOptions = {};
@@ -13,6 +15,13 @@ export const {
 } = new ConfigurableModuleBuilder<GatewayModuleOptions>()
   .setExtras<GatewayModuleExtras>({ contexts: [] }, (definition, extras) => ({
     ...definition,
-    imports: [...(definition.imports ?? []), RestModule.register(extras)],
+    imports: [
+      ...(definition.imports ?? []),
+      RestModule.register(extras),
+      McpModule.register(extras),
+      RouterModule.register([
+        { path: 'api', children: [RestModule, McpModule] },
+      ]),
+    ],
   }))
   .build();
