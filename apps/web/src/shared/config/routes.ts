@@ -11,8 +11,18 @@ export const ROUTES = {
   WORKSPACE: {
     ROOT: '/:alias',
     PROJECTS: '/:alias/projects',
-    AGENTS: '/:alias/agents',
-    CHAT: '/:alias/chat',
+    /** `:projectId` is the project's id; its sections replace the sidebar's menu. */
+    PROJECT: {
+      ROOT: '/:alias/projects/:projectId',
+      CHAT: '/:alias/projects/:projectId/chat',
+      OVERVIEW: '/:alias/projects/:projectId/overview',
+      REPOSITORIES: '/:alias/projects/:projectId/repositories',
+      SETTINGS: {
+        ROOT: '/:alias/projects/:projectId/settings',
+        GENERAL: '/:alias/projects/:projectId/settings/general',
+        MEMBERS: '/:alias/projects/:projectId/settings/members',
+      },
+    },
     /** Each category is its own page; its tabs are nested routes. */
     SETTINGS: {
       ROOT: '/:alias/settings',
@@ -26,6 +36,7 @@ export const ROUTES = {
         ROOT: '/:alias/settings/workspace',
         GENERAL: '/:alias/settings/workspace/general',
         MEMBERS: '/:alias/settings/workspace/members',
+        AGENTS: '/:alias/settings/workspace/agents',
       },
     },
   },

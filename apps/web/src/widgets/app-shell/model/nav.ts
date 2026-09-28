@@ -1,8 +1,10 @@
 import {
-  Bot,
   Building2,
   FolderKanban,
+  GitBranch,
+  LayoutDashboard,
   MessagesSquare,
+  Settings,
   UserRound,
   type LucideIcon,
 } from 'lucide-react';
@@ -15,13 +17,9 @@ export type NavItem = {
   readonly icon: LucideIcon;
 };
 
-export const WORK_NAV: readonly NavItem[] = [
+/** The sidebar outside a project. */
+export const WORKSPACE_NAV: readonly NavItem[] = [
   { label: 'Projects', path: ROUTES.WORKSPACE.PROJECTS, icon: FolderKanban },
-];
-
-export const AI_TEAM_NAV: readonly NavItem[] = [
-  { label: 'Chat', path: ROUTES.WORKSPACE.CHAT, icon: MessagesSquare },
-  { label: 'Agents', path: ROUTES.WORKSPACE.AGENTS, icon: Bot },
 ];
 
 /** One entry per settings category; each opens its own settings page. */
@@ -35,5 +33,25 @@ export const SETTINGS_NAV: readonly NavItem[] = [
     label: 'Workspace',
     path: ROUTES.WORKSPACE.SETTINGS.WORKSPACE.ROOT,
     icon: Building2,
+  },
+];
+
+/** The sidebar inside a project. Chat leads: most work goes through the agents. */
+export const PROJECT_NAV: readonly NavItem[] = [
+  { label: 'Chat', path: ROUTES.WORKSPACE.PROJECT.CHAT, icon: MessagesSquare },
+  {
+    label: 'Overview',
+    path: ROUTES.WORKSPACE.PROJECT.OVERVIEW,
+    icon: LayoutDashboard,
+  },
+  {
+    label: 'Repositories',
+    path: ROUTES.WORKSPACE.PROJECT.REPOSITORIES,
+    icon: GitBranch,
+  },
+  {
+    label: 'Settings',
+    path: ROUTES.WORKSPACE.PROJECT.SETTINGS.ROOT,
+    icon: Settings,
   },
 ];

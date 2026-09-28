@@ -1,8 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 
-import { AgentsPage } from '@/pages/agents';
-import { ChatPage } from '@/pages/chat';
 import { NewWorkspacePage } from '@/pages/new-workspace';
 import { NotFoundPage } from '@/pages/not-found';
 import { OnboardingPage } from '@/pages/onboarding';
@@ -12,10 +10,19 @@ import {
   ProfileSecurityTab,
   ProfileSettingsPage,
 } from '@/pages/profile-settings';
+import { ProjectChatPage } from '@/pages/project-chat';
+import { ProjectOverviewPage } from '@/pages/project-overview';
+import { ProjectRepositoriesPage } from '@/pages/project-repositories';
+import {
+  ProjectGeneralTab,
+  ProjectMembersTab,
+  ProjectSettingsPage,
+} from '@/pages/project-settings';
 import { ProjectsPage } from '@/pages/projects';
 import { SignInPage } from '@/pages/sign-in';
 import { SignUpPage } from '@/pages/sign-up';
 import {
+  WorkspaceAgentsTab,
   WorkspaceGeneralTab,
   WorkspaceMembersTab,
   WorkspaceSettingsPage,
@@ -26,6 +33,7 @@ import { AuthLayout } from '@/widgets/auth-layout';
 
 import {
   DefaultWorkspaceRedirect,
+  ProjectScope,
   RedirectAuthenticated,
   RequireSession,
   WorkspaceGate,
@@ -73,8 +81,46 @@ const router = createBrowserRouter([
                     path: ROUTES.WORKSPACE.PROJECTS,
                     element: <ProjectsPage />,
                   },
-                  { path: ROUTES.WORKSPACE.AGENTS, element: <AgentsPage /> },
-                  { path: ROUTES.WORKSPACE.CHAT, element: <ChatPage /> },
+                  {
+                    path: ROUTES.WORKSPACE.PROJECT.ROOT,
+                    element: <ProjectScope />,
+                    children: [
+                      {
+                        index: true,
+                        element: <Navigate to='chat' replace />,
+                      },
+                      {
+                        path: ROUTES.WORKSPACE.PROJECT.CHAT,
+                        element: <ProjectChatPage />,
+                      },
+                      {
+                        path: ROUTES.WORKSPACE.PROJECT.OVERVIEW,
+                        element: <ProjectOverviewPage />,
+                      },
+                      {
+                        path: ROUTES.WORKSPACE.PROJECT.REPOSITORIES,
+                        element: <ProjectRepositoriesPage />,
+                      },
+                      {
+                        path: ROUTES.WORKSPACE.PROJECT.SETTINGS.ROOT,
+                        element: <ProjectSettingsPage />,
+                        children: [
+                          {
+                            index: true,
+                            element: <Navigate to='general' replace />,
+                          },
+                          {
+                            path: ROUTES.WORKSPACE.PROJECT.SETTINGS.GENERAL,
+                            element: <ProjectGeneralTab />,
+                          },
+                          {
+                            path: ROUTES.WORKSPACE.PROJECT.SETTINGS.MEMBERS,
+                            element: <ProjectMembersTab />,
+                          },
+                        ],
+                      },
+                    ],
+                  },
                   {
                     path: ROUTES.WORKSPACE.SETTINGS.ROOT,
                     element: <Navigate to='profile' replace />,
@@ -116,6 +162,10 @@ const router = createBrowserRouter([
                       {
                         path: ROUTES.WORKSPACE.SETTINGS.WORKSPACE.MEMBERS,
                         element: <WorkspaceMembersTab />,
+                      },
+                      {
+                        path: ROUTES.WORKSPACE.SETTINGS.WORKSPACE.AGENTS,
+                        element: <WorkspaceAgentsTab />,
                       },
                     ],
                   },

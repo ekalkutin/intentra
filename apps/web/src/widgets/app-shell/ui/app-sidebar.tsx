@@ -1,31 +1,37 @@
+import { ArrowLeft } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { generatePath, Link, useMatch } from 'react-router';
 
 import { useCurrentWorkspace } from '@/entities/workspace';
+import { ROUTES } from '@/shared/config';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/shared/ui/sidebar';
 
 import {
-  AI_TEAM_NAV,
+  PROJECT_NAV,
   SETTINGS_NAV,
-  WORK_NAV,
+  WORKSPACE_NAV,
   type NavItem,
 } from '../model/nav';
 
-import { NavUser } from './nav-user';
-import { WorkspaceSwitcher } from './workspace-switcher';
+type RouteParams = Record<string, string>;
 
-const NavLinkItem = ({ item }: { item: NavItem }) => {
-  const { alias } = useCurrentWorkspace();
+const NavLinkItem = ({
+  item,
+  params,
+}: {
+  item: NavItem;
+  /** Fill the item's path: the workspace alias, and the project id inside one. */
+  params: RouteParams;
+}) => {
   const isActive = useMatch({ path: item.path, end: false }) !== null;
   const Icon = item.icon;
 
@@ -34,7 +40,7 @@ const NavLinkItem = ({ item }: { item: NavItem }) => {
       <SidebarMenuButton
         tooltip={item.label}
         isActive={isActive}
-        render={<Link to={generatePath(item.path, { alias })} />}
+        render={<Link to={generatePath(item.path, params)} />}
       >
         <Icon />
         <span>{item.label}</span>
@@ -45,40 +51,95 @@ const NavLinkItem = ({ item }: { item: NavItem }) => {
 
 const NavGroup = ({
   label,
-  items,
+  children,
 }: {
-  label: string;
-  items: readonly NavItem[];
+  label?: string;
+  children: ReactNode;
 }) => (
   <SidebarGroup>
-    {/* Collapsed, the label fades and slides up over the previous group's
-        items; without this it swallows their clicks. */}
-    <SidebarGroupLabel className='group-data-[collapsible=icon]:pointer-events-none'>
-      {label}
-    </SidebarGroupLabel>
+    {label ? (
+      // Collapsed, the label fades and slides up over the previous group's
+      // items; without this it swallows their clicks.
+      <SidebarGroupLabel className='group-data-[collapsible=icon]:pointer-events-none'>
+        {label}
+      </SidebarGroupLabel>
+    ) : null}
     <SidebarGroupContent>
-      <SidebarMenu>
-        {items.map(item => (
-          <NavLinkItem key={item.path} item={item} />
-        ))}
-      </SidebarMenu>
+      <SidebarMenu>{children}</SidebarMenu>
     </SidebarGroupContent>
   </SidebarGroup>
 );
 
-/** Laid out after shadcn's `sidebar-07` block: collapses to icons. */
-export const AppSidebar = () => (
-  <Sidebar collapsible='icon'>
-    <SidebarHeader>
-      <WorkspaceSwitcher />
-    </SidebarHeader>
-    <SidebarContent>
-      <NavGroup label='Work' items={WORK_NAV} />
-      <NavGroup label='AI team' items={AI_TEAM_NAV} />
-      <NavGroup label='Settings' items={SETTINGS_NAV} />
-    </SidebarContent>
-    <SidebarFooter>
-      <NavUser />
-    </SidebarFooter>
-  </Sidebar>
+const NavItems = ({
+  items,
+  params,
+}: {
+  items: readonly NavItem[];
+  params: RouteParams;
+}) =>
+  items.map(item => (
+    <NavLinkItem key={item.path} item={item} params={params} />
+  ));
+
+const WorkspaceMenu = ({ alias }: { alias: string }) => (
+  <>
+    <NavGroup>
+      <NavItems items={WORKSPACE_NAV} params={{ alias }} />
+    </NavGroup>
+    <NavGroup label='Settings'>
+      <NavItems items={SETTINGS_NAV} params={{ alias }} />
+    </NavGroup>
+  </>
 );
+
+/** The open project's sections, with a way back to the project list. */
+const ProjectMenu = ({
+  alias,
+  projectId,
+}: {
+  alias: string;
+  projectId: string;
+}) => (
+  <NavGroup>
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        tooltip='All projects'
+        className='text-muted-foreground'
+        render={
+          <Link to={generatePath(ROUTES.WORKSPACE.PROJECTS, { alias })} />
+        }
+      >
+        <ArrowLeft />
+        <span>All projects</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+    <NavItems items={PROJECT_NAV} params={{ alias, projectId }} />
+  </NavGroup>
+);
+
+/**
+ * Under the top bar; collapses to icons. Inside a project it shows only the
+ * project's sections: the top bar already names the workspace and project.
+ */
+export const AppSidebar = () => {
+  const { alias } = useCurrentWorkspace();
+  const projectId = useMatch({
+    path: ROUTES.WORKSPACE.PROJECT.ROOT,
+    end: false,
+  })?.params.projectId;
+
+  return (
+    <Sidebar
+      collapsible='icon'
+      className='top-(--header-height) h-[calc(100svh-var(--header-height))]!'
+    >
+      <SidebarContent>
+        {projectId ? (
+          <ProjectMenu alias={alias} projectId={projectId} />
+        ) : (
+          <WorkspaceMenu alias={alias} />
+        )}
+      </SidebarContent>
+    </Sidebar>
+  );
+};

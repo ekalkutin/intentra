@@ -20,8 +20,8 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/shared/ui/item';
+import { SettingsTab } from '@/shared/ui/settings';
 import { Skeleton } from '@/shared/ui/skeleton';
-import { PageHeader } from '@/widgets/app-shell';
 
 const AgentItem = ({ profile }: { profile: AgentProfile }) => {
   const orchestrator = isOrchestrator(profile);
@@ -56,7 +56,7 @@ const AgentItem = ({ profile }: { profile: AgentProfile }) => {
   );
 };
 
-export const AgentsPage = () => {
+export const WorkspaceAgentsTab = () => {
   const workspace = useCurrentWorkspace();
   const { data, loading } = useQuery(AGENT_PROFILES_QUERY, {
     variables: { workspaceId: workspace.id },
@@ -64,8 +64,10 @@ export const AgentsPage = () => {
   const profiles = data?.agentProfiles ?? [];
 
   return (
-    <>
-      <PageHeader title='Agents'>
+    <SettingsTab
+      title='Agents'
+      description='Shared by every project. The orchestrator answers in the chat and delegates to the other agents by their descriptions.'
+      actions={
         <AgentProfileDialog
           trigger={
             <Button size='sm'>
@@ -74,22 +76,17 @@ export const AgentsPage = () => {
             </Button>
           }
         />
-      </PageHeader>
-      <div className='mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 pb-8'>
-        <p className='text-sm text-muted-foreground'>
-          The orchestrator answers in the chat and delegates to the other agents
-          by their descriptions.
-        </p>
-        {loading && !data ? (
-          <Skeleton className='h-40 w-full rounded-xl' />
-        ) : (
-          <ItemGroup className='gap-3'>
-            {profiles.map(profile => (
-              <AgentItem key={profile.id} profile={profile} />
-            ))}
-          </ItemGroup>
-        )}
-      </div>
-    </>
+      }
+    >
+      {loading && !data ? (
+        <Skeleton className='h-40 w-full rounded-xl' />
+      ) : (
+        <ItemGroup className='gap-3'>
+          {profiles.map(profile => (
+            <AgentItem key={profile.id} profile={profile} />
+          ))}
+        </ItemGroup>
+      )}
+    </SettingsTab>
   );
 };
