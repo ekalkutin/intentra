@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 
 import { IamApi } from '@intentra/contracts/iam';
 
@@ -8,7 +9,7 @@ import { ADAPTERS } from './infrastructure/adapters/index.js';
 import { DatabaseModule } from './infrastructure/database/index.js';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, JwtModule.register({})],
   providers: [...APPLICATION_SERVICES, ...ADAPTERS],
   exports: [IamApi],
 })

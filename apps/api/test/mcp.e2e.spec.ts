@@ -27,6 +27,8 @@ describe('POST /api/mcp', () => {
             IamModule.register({
               accessTokenSecret: 'test-access-secret',
               refreshTokenSecret: 'test-refresh-secret',
+              accessTokenTtlSeconds: 900,
+              refreshTokenTtlSeconds: 604800,
             }),
             WorkspaceModule.register({}),
             AgentsModule.register({}),

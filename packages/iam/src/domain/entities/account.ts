@@ -28,6 +28,13 @@ export class Account extends Aggregate<AccountId> {
 
     return account;
   }
+
+  public static restore(props: AccountRestoreProps): Account {
+    return new Account(new AccountId(props.id), {
+      email: new Email(props.email),
+      passwordHash: props.passwordHash,
+    });
+  }
 }
 
 type AccountState = {
@@ -35,6 +42,11 @@ type AccountState = {
   readonly passwordHash: string;
 };
 type AccountRegisterProps = {
+  readonly email: string;
+  readonly passwordHash: string;
+};
+type AccountRestoreProps = {
+  readonly id: string;
   readonly email: string;
   readonly passwordHash: string;
 };

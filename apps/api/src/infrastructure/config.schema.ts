@@ -6,6 +6,16 @@ export const EnvironmentSchema = z
     DB_URI: z.url(),
     IAM_ACCESS_TOKEN_SECRET: z.string().min(32),
     IAM_REFRESH_TOKEN_SECRET: z.string().min(32),
+    IAM_ACCESS_TOKEN_TTL_SECONDS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(900),
+    IAM_REFRESH_TOKEN_TTL_SECONDS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(604800),
   })
   .refine(env => env.IAM_ACCESS_TOKEN_SECRET !== env.IAM_REFRESH_TOKEN_SECRET, {
     message: 'IAM_ACCESS_TOKEN_SECRET and IAM_REFRESH_TOKEN_SECRET must differ',
@@ -16,6 +26,8 @@ export const EnvironmentSchema = z
     iam: {
       accessTokenSecret: env.IAM_ACCESS_TOKEN_SECRET,
       refreshTokenSecret: env.IAM_REFRESH_TOKEN_SECRET,
+      accessTokenTtlSeconds: env.IAM_ACCESS_TOKEN_TTL_SECONDS,
+      refreshTokenTtlSeconds: env.IAM_REFRESH_TOKEN_TTL_SECONDS,
     },
   }));
 
