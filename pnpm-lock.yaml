@@ -252,6 +252,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@intentra/agents':
+        specifier: workspace:*
+        version: link:../../packages/agents
       '@intentra/gateway':
         specifier: workspace:*
         version: link:../../libs/gateway
@@ -347,7 +350,27 @@ importers:
 
   libs/shared-kernel: {}
 
-  packages/agents: {}
+  packages/agents:
+    dependencies:
+      '@intentra/contracts':
+        specifier: workspace:*
+        version: link:../../libs/contracts
+      '@intentra/shared-kernel':
+        specifier: workspace:*
+        version: link:../../libs/shared-kernel
+      '@nestjs/common':
+        specifier: catalog:nestjs12
+        version: 12.1.1(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0)
+      '@nestjs/mongoose':
+        specifier: catalog:nestjs12
+        version: 12.0.0(@nestjs/common@12.1.1(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0))(@nestjs/core@12.1.1)(mongoose@9.10.2)(rxjs@7.8.2)
+      mongoose:
+        specifier: 'catalog:'
+        version: 9.10.2
+    devDependencies:
+      '@intentra/platform-testing':
+        specifier: workspace:*
+        version: link:../../libs/platform/testing
 
   packages/iam:
     dependencies:

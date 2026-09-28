@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { AgentsModule } from '@intentra/agents';
 import { GatewayModule } from '@intentra/gateway';
 import { IamModule, type IamModuleOptions } from '@intentra/iam';
 import { WorkspaceModule } from '@intentra/workspace';
@@ -21,6 +22,8 @@ const iam = IamModule.registerAsync({
 
 const workspace = WorkspaceModule.register({});
 
+const agents = AgentsModule.register({});
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -36,7 +39,7 @@ const workspace = WorkspaceModule.register({});
       }),
       inject: [ConfigService],
     }),
-    GatewayModule.register({ contexts: [iam, workspace] }),
+    GatewayModule.register({ contexts: [iam, workspace, agents] }),
   ],
 })
 export class ApiModule {}

@@ -21,6 +21,10 @@
       "types": "./build/iam/index.d.ts",
       "import": "./build/iam/index.js"
     },
+    "./agents": {
+      "types": "./build/agents/index.d.ts",
+      "import": "./build/agents/index.js"
+    },
     "./workspace": {
       "types": "./build/workspace/index.d.ts",
       "import": "./build/workspace/index.js"
