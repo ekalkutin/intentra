@@ -1,0 +1,51 @@
+{
+  "name": "@intentra/platform-testing",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js"
+    },
+    "./global-setup": {
+      "types": "./build/database/global-setup.d.ts",
+      "import": "./build/database/global-setup.js"
+    }
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@nestjs/platform-express": "catalog:nestjs12",
+    "@nestjs/testing": "catalog:nestjs12",
+    "@types/supertest": "^7.2.1",
+    "mongodb-memory-server": "^11.3.0",
+    "reflect-metadata": "catalog:nestjs12",
+    "supertest": "^7.3.0"
+  },
+  "devDependencies": {
+    "@nestjs/common": "catalog:nestjs12",
+    "@nestjs/core": "catalog:nestjs12",
+    "@nestjs/mongoose": "catalog:nestjs12",
+    "mongoose": "catalog:",
+    "rxjs": "catalog:nestjs12",
+    "vitest": "catalog:tooling"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "catalog:nestjs12",
+    "@nestjs/core": "catalog:nestjs12",
+    "@nestjs/mongoose": "catalog:nestjs12",
+    "mongoose": "catalog:",
+    "rxjs": "catalog:nestjs12",
+    "vitest": "catalog:tooling"
+  }
+}

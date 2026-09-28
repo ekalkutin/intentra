@@ -13,13 +13,6 @@ export class AuthService implements AuthApi {
   ) {}
 
   public async register(data: RegisterAccountDto): Promise<void> {
-    const accountExists = await this.accountRepository.existsByEmail(
-      data.email,
-    );
-    if (accountExists) {
-      throw new Error('An account with this email already exists');
-    }
-
     const passwordHash = await this.passwordHasher.hash(data.password);
     const account = Account.register({ email: data.email, passwordHash });
 

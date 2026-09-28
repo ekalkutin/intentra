@@ -119,6 +119,28 @@
       }
     },
     {
+      "files": ["packages/**/*.spec.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@intentra/**",
+                  "!@intentra/shared-kernel",
+                  "!@intentra/contracts",
+                  "!@intentra/contracts/**",
+                  "!@intentra/platform-testing"
+                ],
+                "message": "A context may depend only on contracts and the shared kernel; its tests may also use the platform testing harness. Contexts integrate through published events, not through each other's packages."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "files": ["packages/*/src/**/domain/**/*.ts"],
       "rules": {
         "no-restricted-imports": [
@@ -162,6 +184,32 @@
                   "!@intentra/contracts/**"
                 ],
                 "message": "A context may depend only on contracts and the shared kernel. Contexts integrate through published events, not through each other's packages."
+              },
+              {
+                "group": ["**/infrastructure/**", "**/presentation/**"],
+                "message": "The application layer declares ports; it does not reach for the adapters that implement them. The module wires them together."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["packages/*/src/**/application/**/*.spec.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@intentra/**",
+                  "!@intentra/shared-kernel",
+                  "!@intentra/contracts",
+                  "!@intentra/contracts/**",
+                  "!@intentra/platform-testing"
+                ],
+                "message": "A context may depend only on contracts and the shared kernel; its tests may also use the platform testing harness. Contexts integrate through published events, not through each other's packages."
               },
               {
                 "group": ["**/infrastructure/**", "**/presentation/**"],

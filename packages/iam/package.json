@@ -30,5 +30,8 @@
     "@nestjs/jwt": "catalog:nestjs12",
     "@nestjs/mongoose": "catalog:nestjs12",
     "mongoose": "catalog:"
+  },
+  "devDependencies": {
+    "@intentra/platform-testing": "workspace:*"
   }
 }

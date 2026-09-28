@@ -1,8 +1,10 @@
 import {
   Module,
+  StandardSchemaValidationPipe,
   type DynamicModule,
   type ModuleMetadata,
 } from '@nestjs/common';
+import { APP_PIPE } from '@nestjs/core';
 
 import { AuthController } from './iam/auth.controller.js';
 
@@ -17,6 +19,9 @@ export class RestModule {
       module: RestModule,
       imports: [...contexts],
       controllers: [AuthController],
+      providers: [
+        { provide: APP_PIPE, useClass: StandardSchemaValidationPipe },
+      ],
     };
   }
 }

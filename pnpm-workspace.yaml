@@ -2,6 +2,7 @@ packages:
   - "apps/*"
   - "packages/*"
   - "libs/*"
+  - "libs/platform/*"
 
 catalog:
   zod: "^4.6.5"
@@ -30,31 +31,33 @@ allowBuilds:
   "@apollo/protobufjs": true
   "@nestjs/core": true
   esbuild: true
+  mongodb-memory-server: true
   nx: true
 
 minimumReleaseAgeExclude:
-  - '@ai-sdk/gateway@4.0.96'
+  - "@ai-sdk/gateway@4.0.96"
   - ai@7.0.118
-  - '@oxlint/binding-android-arm-eabi@1.86.0'
-  - '@oxlint/binding-android-arm64@1.86.0'
-  - '@oxlint/binding-darwin-arm64@1.86.0'
-  - '@oxlint/binding-darwin-x64@1.86.0'
-  - '@oxlint/binding-freebsd-x64@1.86.0'
-  - '@oxlint/binding-linux-arm-gnueabihf@1.86.0'
-  - '@oxlint/binding-linux-arm-musleabihf@1.86.0'
-  - '@oxlint/binding-linux-arm64-gnu@1.86.0'
-  - '@oxlint/binding-linux-arm64-musl@1.86.0'
-  - '@oxlint/binding-linux-ppc64-gnu@1.86.0'
-  - '@oxlint/binding-linux-riscv64-gnu@1.86.0'
-  - '@oxlint/binding-linux-riscv64-musl@1.86.0'
-  - '@oxlint/binding-linux-s390x-gnu@1.86.0'
-  - '@oxlint/binding-linux-x64-gnu@1.86.0'
-  - '@oxlint/binding-linux-x64-musl@1.86.0'
-  - '@oxlint/binding-openharmony-arm64@1.86.0'
-  - '@oxlint/binding-win32-arm64-msvc@1.86.0'
-  - '@oxlint/binding-win32-ia32-msvc@1.86.0'
-  - '@oxlint/binding-win32-x64-msvc@1.86.0'
+  - "@oxlint/binding-android-arm-eabi@1.86.0"
+  - "@oxlint/binding-android-arm64@1.86.0"
+  - "@oxlint/binding-darwin-arm64@1.86.0"
+  - "@oxlint/binding-darwin-x64@1.86.0"
+  - "@oxlint/binding-freebsd-x64@1.86.0"
+  - "@oxlint/binding-linux-arm-gnueabihf@1.86.0"
+  - "@oxlint/binding-linux-arm-musleabihf@1.86.0"
+  - "@oxlint/binding-linux-arm64-gnu@1.86.0"
+  - "@oxlint/binding-linux-arm64-musl@1.86.0"
+  - "@oxlint/binding-linux-ppc64-gnu@1.86.0"
+  - "@oxlint/binding-linux-riscv64-gnu@1.86.0"
+  - "@oxlint/binding-linux-riscv64-musl@1.86.0"
+  - "@oxlint/binding-linux-s390x-gnu@1.86.0"
+  - "@oxlint/binding-linux-x64-gnu@1.86.0"
+  - "@oxlint/binding-linux-x64-musl@1.86.0"
+  - "@oxlint/binding-openharmony-arm64@1.86.0"
+  - "@oxlint/binding-win32-arm64-msvc@1.86.0"
+  - "@oxlint/binding-win32-ia32-msvc@1.86.0"
+  - "@oxlint/binding-win32-x64-msvc@1.86.0"
   - oxlint@1.86.0
-  - '@nestjs/common@12.1.1'
-  - '@nestjs/core@12.1.1'
-  - '@nestjs/platform-express@12.1.1'
+  - "@nestjs/common@12.1.1"
+  - "@nestjs/core@12.1.1"
+  - "@nestjs/platform-express@12.1.1"
+  - '@nestjs/testing@12.1.1'

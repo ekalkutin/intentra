@@ -1,4 +1,3 @@
-import { StandardSchemaValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -9,7 +8,6 @@ import type { Variables } from './infrastructure/config.schema.js';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(ApiModule, {});
 
-  app.useGlobalPipes(new StandardSchemaValidationPipe());
   app.enableCors();
   app.useBodyParser('json', { limit: '1mb' });
 

@@ -1,19 +1,42 @@
 import { Injectable, Provider } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { mongo, type Model } from 'mongoose';
 
-import { AccountRepository } from '../../../application/ports/outbound/account-repository.port.js';
-import { Account } from '../../../domain/entities/account.js';
+import { AccountAlreadyExistsException } from '../../../application/exceptions/index.js';
+import { AccountRepository } from '../../../application/ports/outbound/index.js';
+import { Account } from '../../../domain/entities/index.js';
+import { AccountModel } from '../../database/index.js';
+
+const DUPLICATE_KEY_ERROR_CODE = 11000;
 
 @Injectable()
 export class AccountRepositoryAdapter implements AccountRepository {
-  constructor() {}
+  constructor(
+    @InjectModel(AccountModel.name)
+    private readonly accountModel: Model<AccountModel>,
+  ) {}
 
   public async save(account: Account): Promise<void> {
-    void account;
-  }
-
-  public async existsByEmail(email: string): Promise<boolean> {
-    void email;
-    return true;
+    try {
+      await this.accountModel
+        .replaceOne(
+          { _id: account.id.value },
+          {
+            email: account.email,
+            passwordHash: account.passwordHash,
+          },
+          { upsert: true },
+        )
+        .exec();
+    } catch (error) {
+      if (
+        error instanceof mongo.MongoServerError &&
+        error.code === DUPLICATE_KEY_ERROR_CODE
+      ) {
+        throw new AccountAlreadyExistsException();
+      }
+      throw error;
+    }
   }
 }
 
