@@ -22,7 +22,7 @@ export class AccountRepositoryAdapter implements AccountRepository {
         .replaceOne(
           { _id: account.id.value },
           {
-            email: account.email,
+            email: account.email.value,
             passwordHash: account.passwordHash,
           },
           { upsert: true },

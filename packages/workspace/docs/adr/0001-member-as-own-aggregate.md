@@ -11,5 +11,5 @@ Member is a separate aggregate that refers to its Workspace and its Account by i
 ## Consequences
 
 - The Owner is also a Member, so they appear in the Member list and can work in Projects.
-- Rules that span aggregates are checked in the application layer: ownership can only be transferred to an Active Member of the same Workspace, and the Member who owns the Workspace cannot leave or be removed.
-- Creating a Workspace also creates its first Member. That is two aggregates in one operation.
+- Rules that span a Workspace and a Member live in domain services, not in either aggregate. `OwnershipTransferService` allows a Transfer of Ownership only to an Active Member of the same Workspace, and the Member who owns the Workspace cannot leave or be removed.
+- Creating a Workspace also creates its Owner's Member: two aggregates in one operation, done by `WorkspaceCreationService`.

@@ -1,5 +1,9 @@
 import { randomUUID } from 'node:crypto';
 
+import { InvalidEntityIdException } from '../../exceptions/index.js';
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export abstract class EntityId {
   readonly #value: string;
 
@@ -10,8 +14,8 @@ export abstract class EntityId {
   }
 
   protected validate(value: string): void {
-    if (!value) {
-      throw new Error('EntityId cannot be empty');
+    if (!UUID.test(value)) {
+      throw new InvalidEntityIdException();
     }
   }
 
