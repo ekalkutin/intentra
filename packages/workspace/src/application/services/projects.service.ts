@@ -21,6 +21,7 @@ import {
 import { toProjectDto } from '../mappers/index.js';
 import {
   ProjectRepository,
+  ProjectRoleAssignmentRepository,
   WorkspaceRepository,
 } from '../ports/outbound/index.js';
 
@@ -34,6 +35,7 @@ export class ProjectsService implements ProjectsApi {
     private readonly accessResolver: AccessResolver,
     private readonly workspaceRepository: WorkspaceRepository,
     private readonly projectRepository: ProjectRepository,
+    private readonly projectRoleAssignmentRepository: ProjectRoleAssignmentRepository,
   ) {}
 
   public async create(
@@ -48,11 +50,15 @@ export class ProjectsService implements ProjectsApi {
       throw new WorkspaceNotFoundException();
     }
 
-    const project = this.#projectCreationService.create(workspace, member, {
-      name: data.name,
-      slug: data.slug,
+    const { project, assignment } = this.#projectCreationService.create(
+      workspace,
+      member,
+      { name: data.name, slug: data.slug },
+    );
+    await this.unitOfWork.run(async () => {
+      await this.projectRepository.save(project);
+      await this.projectRoleAssignmentRepository.save(assignment);
     });
-    await this.unitOfWork.run(() => this.projectRepository.save(project));
 
     return toProjectDto(project);
   }
@@ -95,6 +101,9 @@ export class ProjectsService implements ProjectsApi {
           slug: data.slug,
         },
       );
+      await this.projectRoleAssignmentRepository.deleteMany({
+        projectId: project.id,
+      });
       await this.projectRepository.delete(project.id);
     });
   }

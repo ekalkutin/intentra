@@ -7,6 +7,11 @@ export {
   type MemberQueryProps,
 } from './member-repository.port.js';
 export {
+  ProjectRoleAssignmentRepository,
+  type ProjectRoleAssignmentDeleteProps,
+  type ProjectRoleAssignmentQueryProps,
+} from './project-role-assignment-repository.port.js';
+export {
   ProjectRepository,
   type ProjectQueryProps,
 } from './project-repository.port.js';

@@ -1,16 +1,23 @@
-import { Member, Project, Workspace } from '../entities/index.js';
+import {
+  Member,
+  Project,
+  ProjectRoleAssignment,
+  Workspace,
+} from '../entities/index.js';
 import {
   MemberNotActiveException,
   MemberNotInWorkspaceException,
   ProjectCreationForbiddenException,
 } from '../exceptions/index.js';
+import { ProjectRole } from '../value-objects/index.js';
 
 export class ProjectCreationService {
+  /** The creator becomes the new Project's Maintainer. */
   public create(
     workspace: Workspace,
     creator: Member,
     props: ProjectCreationProps,
-  ): Project {
+  ): ProjectCreation {
     if (!creator.belongsTo(workspace.id)) {
       throw new MemberNotInWorkspaceException();
     }
@@ -21,16 +28,28 @@ export class ProjectCreationService {
       throw new ProjectCreationForbiddenException();
     }
 
-    return Project.create({
+    const project = Project.create({
       workspaceId: workspace.id.value,
       name: props.name,
       slug: props.slug,
       createdBy: creator.id.value,
     });
+    const assignment = ProjectRoleAssignment.create({
+      workspaceId: workspace.id.value,
+      projectId: project.id.value,
+      memberId: creator.id.value,
+      role: ProjectRole.Maintainer.value,
+    });
+
+    return { project, assignment };
   }
 }
 
 type ProjectCreationProps = {
   readonly name: string;
   readonly slug: string;
+};
+type ProjectCreation = {
+  readonly project: Project;
+  readonly assignment: ProjectRoleAssignment;
 };

@@ -3,6 +3,8 @@ export { InvitationStatus } from './invitation-status.vo.js';
 export { MemberId } from './member-id.vo.js';
 export { MemberStatus } from './member-status.vo.js';
 export { ProjectName } from './project-name.vo.js';
+export { ProjectRoleAssignmentId } from './project-role-assignment-id.vo.js';
+export { ProjectRole } from './project-role.vo.js';
 export { ProjectSlug } from './project-slug.vo.js';
 export { Role } from './role.vo.js';
 export { WorkspaceName } from './workspace-name.vo.js';

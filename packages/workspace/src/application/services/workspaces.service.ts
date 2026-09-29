@@ -21,6 +21,7 @@ import {
   InvitationRepository,
   MemberRepository,
   ProjectRepository,
+  ProjectRoleAssignmentRepository,
   WorkspaceRepository,
 } from '../ports/outbound/index.js';
 
@@ -36,6 +37,7 @@ export class WorkspacesService implements WorkspacesApi {
     private readonly memberRepository: MemberRepository,
     private readonly invitationRepository: InvitationRepository,
     private readonly projectRepository: ProjectRepository,
+    private readonly projectRoleAssignmentRepository: ProjectRoleAssignmentRepository,
   ) {}
 
   public async create(
@@ -85,6 +87,9 @@ export class WorkspacesService implements WorkspacesApi {
 
       this.#workspaceDeletionService.ensureDeletable(workspace, owner, {
         slug: data.slug,
+      });
+      await this.projectRoleAssignmentRepository.deleteMany({
+        workspaceId: id,
       });
       await this.projectRepository.deleteMany({ workspaceId: id });
       await this.invitationRepository.deleteMany({ workspaceId: id });

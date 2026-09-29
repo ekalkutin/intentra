@@ -18,6 +18,16 @@ export {
 } from './members/member.dto.js';
 export { MembersApi } from './members/members.api.js';
 export {
+  ChangeProjectRoleDtoSchema,
+  type ChangeProjectRoleDto,
+} from './project-roles/change-project-role.dto.js';
+export {
+  ProjectRoleDtoSchema,
+  type MemberProjectRoleDto,
+  type ProjectRoleDto,
+} from './project-roles/member-project-role.dto.js';
+export { ProjectRolesApi } from './project-roles/project-roles.api.js';
+export {
   CreateProjectDtoSchema,
   type CreateProjectDto,
 } from './projects/create-project.dto.js';

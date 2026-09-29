@@ -8,7 +8,7 @@ import {
   MemberNotInWorkspaceException,
   ProjectCreationForbiddenException,
 } from '../exceptions/index.js';
-import { Role } from '../value-objects/index.js';
+import { ProjectRole, Role } from '../value-objects/index.js';
 
 import { ProjectCreationService } from './project-creation.service.js';
 import { WorkspaceCreationService } from './workspace-creation.service.js';
@@ -39,10 +39,13 @@ describe('ProjectCreationService', () => {
     const { workspace, owner } = createWorkspace();
 
     // Act
-    const project = service.create(workspace, owner, props);
+    const { project, assignment } = service.create(workspace, owner, props);
 
     // Assert
     expect(project.workspaceId.equals(workspace.id)).toBe(true);
+    expect(assignment.projectId.equals(project.id)).toBe(true);
+    expect(assignment.memberId.equals(owner.id)).toBe(true);
+    expect(assignment.role).toBe(ProjectRole.Maintainer);
     expect(project.createdBy.equals(owner.id)).toBe(true);
     expect(project.name.value).toBe('Billing');
     expect(project.slug.value).toBe('billing');
@@ -55,7 +58,7 @@ describe('ProjectCreationService', () => {
     manager.changeRole(Role.Manager);
 
     // Act
-    const project = service.create(workspace, manager, props);
+    const { project } = service.create(workspace, manager, props);
 
     // Assert
     expect(project.isCreatedBy(manager.id)).toBe(true);
