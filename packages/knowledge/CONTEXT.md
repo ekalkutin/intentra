@@ -9,7 +9,7 @@ One piece of what is known about a Project, such as a Term, a Business Rule or a
 _Avoid_: Artifact, Entry, Record, Fact
 
 **Knowledge Key**:
-The short, human-readable name of a Knowledge Item within its Project, made of its Kind's prefix and a number, such as `REQ-12` or `BR-4`. It is given when the Knowledge Item is recorded, even as a Draft, and never changes or is reused, so gaps are normal. A Supersession gets a new Key: `REQ-12` superseded by `REQ-31`.
+The short, human-readable name of a Knowledge Item within its Project, made of its Kind's prefix and a number, such as `REQ-12` or `BR-4`. Each Kind is numbered on its own within the Project: `REQ-1`, `REQ-2`, `TERM-1`. It is given when the Knowledge Item is recorded, even as a Draft, and never changes or is reused, so gaps are normal. A Supersession gets a new Key: `REQ-12` superseded by `REQ-31`.
 _Avoid_: ID, Number, Ticket, Code
 
 **Kind**:
