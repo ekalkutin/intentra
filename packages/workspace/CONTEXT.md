@@ -41,3 +41,7 @@ What a Member is allowed to do inside a Workspace's Projects. For now the only R
 **Contributor**:
 A Role that works inside the Workspace's Projects but manages neither the Workspace nor its Projects.
 _Avoid_: Member (as a role name), Editor, User
+
+**Personal Access Token**:
+A secret a Member creates so that an external agent (Claude Code, Codex, Cursor) can work in the Workspace over MCP on that Member's behalf. It belongs to the Member and works only in that Workspace; to work in several Workspaces an agent is given one Personal Access Token per Workspace. It gives access to every Project in the Workspace. It has one of three levels, chosen when it is created: read only; read and record Drafts; or read, record Drafts and approve, reject, supersede or retire on the Member's behalf. No level lets an agent manage the Workspace (its Members, Invitations, Projects or settings). An agent using it can never do more than its Member may do. It expires after the period chosen when it is created (30 days, 90 days by default, a year, or never) and can be revoked at any time by its Member or by the Owner. The Owner sees every Personal Access Token in the Workspace (whose it is, its name, level, expiry and last use), but never its secret. It also stops working when its Member leaves or is removed, and when the Workspace is deleted.
+_Avoid_: Access Token (that is IAM's sign-in JWT), API key, Agent token. PAT is fine as a short form
