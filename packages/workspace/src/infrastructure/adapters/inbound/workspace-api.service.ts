@@ -4,6 +4,7 @@ import type { WorkspaceApi } from '@intentra/contracts/workspace';
 
 import {
   InvitationsService,
+  MembersService,
   ProjectsService,
   WorkspacesService,
 } from '../../../application/services/index.js';
@@ -17,5 +18,7 @@ export class WorkspaceApiService implements WorkspaceApi {
     public readonly projects: ProjectsService,
     @Inject(InvitationsService)
     public readonly invitations: InvitationsService,
+    @Inject(MembersService)
+    public readonly members: MembersService,
   ) {}
 }

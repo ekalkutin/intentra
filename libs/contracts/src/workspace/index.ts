@@ -7,6 +7,8 @@ export {
   type InvitationStatusDto,
 } from './invitations/invitation.dto.js';
 export { InvitationsApi } from './invitations/invitations.api.js';
+export { type MemberDto, type RoleDto } from './members/member.dto.js';
+export { MembersApi } from './members/members.api.js';
 export {
   CreateProjectDtoSchema,
   type CreateProjectDto,

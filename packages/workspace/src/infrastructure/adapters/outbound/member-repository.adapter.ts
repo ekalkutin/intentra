@@ -48,6 +48,7 @@ export class MemberRepositoryAdapter implements MemberRepository {
   public async findMany(props: MemberQueryProps): Promise<Member[]> {
     const documents = await this.memberModel
       .find(this.toFilter(props))
+      .sort({ email: 1 })
       .session(this.unitOfWork.session)
       .lean()
       .exec();
