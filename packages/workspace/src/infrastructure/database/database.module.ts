@@ -4,6 +4,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   MemberModel,
   MemberSchema,
+  ProjectModel,
+  ProjectSchema,
   WorkspaceModel,
   WorkspaceSchema,
 } from './schemas/index.js';
@@ -13,6 +15,7 @@ import {
     MongooseModule.forFeature([
       { name: WorkspaceModel.name, schema: WorkspaceSchema },
       { name: MemberModel.name, schema: MemberSchema },
+      { name: ProjectModel.name, schema: ProjectSchema },
     ]),
   ],
   exports: [MongooseModule],

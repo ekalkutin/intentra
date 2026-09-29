@@ -49,14 +49,30 @@ export class WorkspaceRepositoryAdapter implements WorkspaceRepository {
     await this.workspaceModel.deleteOne({ _id: id.value }).exec();
   }
 
+  public async findOne(props: WorkspaceQueryProps): Promise<Workspace | null> {
+    const document = await this.workspaceModel
+      .findOne(this.toFilter(props))
+      .lean()
+      .exec();
+
+    return document && this.toDomain(document);
+  }
+
   public async findMany(props: WorkspaceQueryProps): Promise<Workspace[]> {
     const documents = await this.workspaceModel
-      .find({ _id: { $in: props.ids.map(id => id.value) } })
+      .find(this.toFilter(props))
       .sort({ name: 1 })
       .lean()
       .exec();
 
     return documents.map(document => this.toDomain(document));
+  }
+
+  private toFilter(props: WorkspaceQueryProps) {
+    return {
+      ...(props.id && { _id: props.id.value }),
+      ...(props.ids && { _id: { $in: props.ids.map(id => id.value) } }),
+    };
   }
 
   private toDomain(document: WorkspaceModel): Workspace {

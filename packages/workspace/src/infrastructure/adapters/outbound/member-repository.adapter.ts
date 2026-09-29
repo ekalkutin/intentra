@@ -31,16 +31,30 @@ export class MemberRepositoryAdapter implements MemberRepository {
       .exec();
   }
 
+  public async findOne(props: MemberQueryProps): Promise<Member | null> {
+    const document = await this.memberModel
+      .findOne(this.toFilter(props))
+      .lean()
+      .exec();
+
+    return document && this.toDomain(document);
+  }
+
   public async findMany(props: MemberQueryProps): Promise<Member[]> {
     const documents = await this.memberModel
-      .find({
-        accountId: props.accountId.value,
-        status: props.status.value,
-      })
+      .find(this.toFilter(props))
       .lean()
       .exec();
 
     return documents.map(document => this.toDomain(document));
+  }
+
+  private toFilter(props: MemberQueryProps) {
+    return {
+      ...(props.workspaceId && { workspaceId: props.workspaceId.value }),
+      ...(props.accountId && { accountId: props.accountId.value }),
+      ...(props.status && { status: props.status.value }),
+    };
   }
 
   private toDomain(document: MemberModel): Member {
