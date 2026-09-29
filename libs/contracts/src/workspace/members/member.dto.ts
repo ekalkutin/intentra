@@ -1,8 +1,12 @@
-export type RoleDto = 'contributor';
+import { z } from 'zod';
+
+export const RoleDtoSchema = z.enum(['owner']);
+
+export type RoleDto = z.infer<typeof RoleDtoSchema>;
 
 export type MemberDto = {
   readonly id: string;
   readonly email: string;
-  readonly role: RoleDto;
-  readonly isOwner: boolean;
+  /** Null for a Member without a Role. */
+  readonly role: RoleDto | null;
 };

@@ -12,7 +12,7 @@ export class Member extends Aggregate<MemberId> {
   readonly #workspaceId: WorkspaceId;
   readonly #accountId: AccountId;
   readonly #email: Email;
-  #role: Role;
+  #role: Role | null;
   #status: MemberStatus;
 
   private constructor(id: MemberId, state: MemberState) {
@@ -36,7 +36,8 @@ export class Member extends Aggregate<MemberId> {
     return this.#email;
   }
 
-  get role(): Role {
+  /** Null for a Member without a Role. */
+  get role(): Role | null {
     return this.#role;
   }
 
@@ -49,17 +50,17 @@ export class Member extends Aggregate<MemberId> {
       workspaceId: new WorkspaceId(props.workspaceId),
       accountId: new AccountId(props.accountId),
       email: new Email(props.email),
-      role: Role.Contributor,
+      role: null,
       status: MemberStatus.Active,
     });
   }
 
   public static createOwner(props: MemberCreateOwnerProps): Member {
-    return new Member(new MemberId(props.id), {
+    return new Member(new MemberId(), {
       workspaceId: new WorkspaceId(props.workspaceId),
       accountId: new AccountId(props.accountId),
       email: new Email(props.email),
-      role: Role.Contributor,
+      role: Role.Owner,
       status: MemberStatus.Active,
     });
   }
@@ -69,7 +70,7 @@ export class Member extends Aggregate<MemberId> {
       workspaceId: new WorkspaceId(props.workspaceId),
       accountId: new AccountId(props.accountId),
       email: new Email(props.email),
-      role: Role.from(props.role),
+      role: props.role === null ? null : Role.from(props.role),
       status: MemberStatus.from(props.status),
     });
   }
@@ -78,12 +79,26 @@ export class Member extends Aggregate<MemberId> {
     return this.#status.equals(MemberStatus.Active);
   }
 
+  public isOwner(): boolean {
+    return this.#role?.equals(Role.Owner) ?? false;
+  }
+
   public belongsTo(workspaceId: WorkspaceId): boolean {
     return this.#workspaceId.equals(workspaceId);
   }
 
+  /**
+   * Checks that need the Workspace's other Members, such as keeping at least
+   * one Owner, live in domain services, so go through them.
+   */
+  public changeRole(role: Role | null): void {
+    this.#role = role;
+  }
+
+  /** A Removed Member keeps no Role. */
   public remove(): void {
     this.#status = MemberStatus.Removed;
+    this.#role = null;
   }
 
   public rejoin(): void {
@@ -98,7 +113,7 @@ type MemberState = {
   readonly workspaceId: WorkspaceId;
   readonly accountId: AccountId;
   readonly email: Email;
-  readonly role: Role;
+  readonly role: Role | null;
   readonly status: MemberStatus;
 };
 type MemberJoinProps = {
@@ -107,7 +122,6 @@ type MemberJoinProps = {
   readonly email: string;
 };
 type MemberCreateOwnerProps = {
-  readonly id: string;
   readonly workspaceId: string;
   readonly accountId: string;
   readonly email: string;
@@ -117,6 +131,6 @@ type MemberRestoreProps = {
   readonly workspaceId: string;
   readonly accountId: string;
   readonly email: string;
-  readonly role: string;
+  readonly role: string | null;
   readonly status: string;
 };

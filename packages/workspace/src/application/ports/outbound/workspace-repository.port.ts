@@ -10,6 +10,7 @@ export type WorkspaceQueryProps = {
 export abstract class WorkspaceRepository {
   abstract save(workspace: Workspace): Promise<void>;
   abstract delete(id: WorkspaceId): Promise<void>;
+  abstract lock(id: WorkspaceId): Promise<void>;
   abstract findOne(props: WorkspaceQueryProps): Promise<Workspace | null>;
   abstract findMany(props: WorkspaceQueryProps): Promise<Workspace[]>;
 }

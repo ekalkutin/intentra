@@ -14,8 +14,8 @@ export class MemberModel {
   @Prop({ type: String, required: true })
   readonly email: string;
 
-  @Prop({ type: String, required: true })
-  readonly role: string;
+  @Prop({ type: String, default: null })
+  readonly role: string | null;
 
   @Prop({ type: String, required: true })
   readonly status: string;

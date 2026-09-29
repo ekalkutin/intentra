@@ -4,41 +4,26 @@ import {
   InvalidWorkspaceNameException,
   InvalidWorkspaceSlugException,
 } from '../exceptions/index.js';
-import { MemberId } from '../value-objects/index.js';
 
 import { Workspace } from './workspace.aggregate.js';
 
-function createWorkspace(ownerId = new MemberId()): Workspace {
-  return Workspace.create({
-    name: 'Acme Corp',
-    slug: 'acme-corp',
-    ownerId: ownerId.value,
-  });
-}
-
 describe('Workspace', () => {
   describe('create', () => {
-    it('is owned by the given Member', () => {
-      // Arrange
-      const ownerId = new MemberId();
-
+    it('takes the given name and slug', () => {
       // Act
-      const workspace = createWorkspace(ownerId);
+      const workspace = Workspace.create({
+        name: 'Acme Corp',
+        slug: 'acme-corp',
+      });
 
       // Assert
       expect(workspace.name.value).toBe('Acme Corp');
       expect(workspace.slug.value).toBe('acme-corp');
-      expect(workspace.isOwnedBy(ownerId)).toBe(true);
     });
 
     it('rejects an invalid name', () => {
       // Act
-      const creating = () =>
-        Workspace.create({
-          name: ' ',
-          slug: 'acme',
-          ownerId: new MemberId().value,
-        });
+      const creating = () => Workspace.create({ name: ' ', slug: 'acme' });
 
       // Assert
       expect(creating).toThrow(InvalidWorkspaceNameException);
@@ -47,11 +32,7 @@ describe('Workspace', () => {
     it('rejects an invalid slug', () => {
       // Act
       const creating = () =>
-        Workspace.create({
-          name: 'Acme',
-          slug: 'Acme Corp',
-          ownerId: new MemberId().value,
-        });
+        Workspace.create({ name: 'Acme', slug: 'Acme Corp' });
 
       // Assert
       expect(creating).toThrow(InvalidWorkspaceSlugException);

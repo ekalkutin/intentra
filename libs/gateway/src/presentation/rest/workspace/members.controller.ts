@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -7,11 +8,17 @@ import {
   Inject,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 
 import type { Actor } from '@intentra/contracts/iam';
-import { WorkspaceApi, type MemberDto } from '@intentra/contracts/workspace';
+import {
+  ChangeRoleDtoSchema,
+  WorkspaceApi,
+  type ChangeRoleDto,
+  type MemberDto,
+} from '@intentra/contracts/workspace';
 
 import { ActorGuard, CurrentActor } from '../auth/index.js';
 
@@ -36,6 +43,21 @@ export class MembersController {
     @Param('memberId') memberId: string,
   ): Promise<void> {
     return this.workspace.members.remove(actor, workspaceId, memberId);
+  }
+
+  @Put('members/:memberId/role')
+  public async changeRole(
+    @CurrentActor() actor: Actor,
+    @Param('workspaceId') workspaceId: string,
+    @Param('memberId') memberId: string,
+    @Body({ schema: ChangeRoleDtoSchema }) data: ChangeRoleDto,
+  ): Promise<MemberDto> {
+    return this.workspace.members.changeRole(
+      actor,
+      workspaceId,
+      memberId,
+      data,
+    );
   }
 
   @Post('leave')

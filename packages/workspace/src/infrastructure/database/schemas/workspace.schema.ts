@@ -11,8 +11,9 @@ export class WorkspaceModel {
   @Prop({ type: String, required: true, unique: true })
   readonly slug: string;
 
-  @Prop({ type: String, required: true })
-  readonly ownerId: string;
+  /** Bumped by `WorkspaceRepository.lock`; carries no meaning of its own. */
+  @Prop({ type: Number, default: 0 })
+  readonly lockVersion: number;
 }
 
 export const WorkspaceSchema = SchemaFactory.createForClass(WorkspaceModel);

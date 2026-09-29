@@ -1,9 +1,10 @@
 import { UnknownRoleException } from '../exceptions/index.js';
 
+/** What a Member may do in the Workspace beyond being a Member; a Member may have none. */
 export class Role {
-  public static readonly Contributor = new Role('contributor');
+  public static readonly Owner = new Role('owner');
 
-  static readonly #all: readonly Role[] = [Role.Contributor];
+  static readonly #all: readonly Role[] = [Role.Owner];
 
   readonly #value: string;
 

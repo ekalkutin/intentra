@@ -31,7 +31,6 @@ export class WorkspaceRepositoryAdapter implements WorkspaceRepository {
           {
             name: workspace.name.value,
             slug: workspace.slug.value,
-            ownerId: workspace.ownerId.value,
           },
           { upsert: true, session: this.unitOfWork.requireSession() },
         )
@@ -50,6 +49,13 @@ export class WorkspaceRepositoryAdapter implements WorkspaceRepository {
   public async delete(id: WorkspaceId): Promise<void> {
     await this.workspaceModel
       .deleteOne({ _id: id.value })
+      .session(this.unitOfWork.requireSession())
+      .exec();
+  }
+
+  public async lock(id: WorkspaceId): Promise<void> {
+    await this.workspaceModel
+      .updateOne({ _id: id.value }, { $inc: { lockVersion: 1 } })
       .session(this.unitOfWork.requireSession())
       .exec();
   }
@@ -87,7 +93,6 @@ export class WorkspaceRepositoryAdapter implements WorkspaceRepository {
       id: document._id,
       name: document.name,
       slug: document.slug,
-      ownerId: document.ownerId,
     });
   }
 }

@@ -22,9 +22,9 @@ Where we stopped on 2026-09-29. Glossary: `CONTEXT-MAP.md`, `packages/iam/CONTEX
 
 Decided on 2026-09-29, see `packages/workspace/CONTEXT.md` and `packages/workspace/docs/adr/0002-owner-is-a-role.md`.
 
-- [ ] **Owner as a Role on Member.** Drop the owner field from Workspace; `Role` = Owner | Manager | none (remove `Role.Contributor`). Creating a Workspace makes its first Member an Owner. "At least one Owner": the last Owner cannot leave, be removed or lose the Role; every Owner-changing write also writes the Workspace document in the same `UnitOfWork` so concurrent changes conflict. Rework every "is owner" check (`AccessResolver`, Invitations, Projects, Member removal, Workspace deletion)
-- [ ] **Change a Member's Role** (any Owner, any Active Member, own Role included). Replaces `OwnershipTransferService` and `POST /transfer-ownership`
-- [ ] **Manager**: Owner or Manager creates a Project; Owner deletes any Project, Manager only the ones they created
+- [x] **Owner as a Role on Member.** `Role` = Owner or none (`Member.role` is null), `Workspace.ownerId` removed, `MemberDto.role` replaces `isOwner`. Several Owners allowed; the last one cannot leave or be removed (409 `LAST_OWNER_CANNOT_LEAVE`). Owner-changing writes call `WorkspaceRepository.lock` in the same `UnitOfWork`.
+- [x] **Change a Member's Role**: `PUT /api/workspaces/:workspaceId/members/:memberId/role` with `{ role: 'owner' | null }` (any Owner, any Active Member, own Role included; 409 `LAST_OWNER_CANNOT_STEP_DOWN`). `RoleChangeService` replaced `OwnershipTransferService`; `POST /transfer-ownership` is gone
+- [ ] **Manager**: add `Role.Manager`; Owner or Manager creates a Project; Owner deletes any Project, Manager only the ones they created
 - [ ] **Project Roles** Viewer / Contributor / Maintainer, Viewer by default. The creator becomes Maintainer; an Owner is Maintainer everywhere, unchangeable. Owner or the Project's Maintainer gives and takes them. Removing a Member drops its Role and Project Roles
 - [ ] **Personal Access Token** in the Workspace context: create / list own / revoke (Member), list all / revoke any (Owner); level Viewer / Contributor / Maintainer; expiry 30 / 90 (default) / 365 days / never; last use; secret shown once. MCP handler authenticates by PAT and puts the Actor and the effective level into the tools' request context (see `docs/notes/mastra-request-context-schema.md`)
 

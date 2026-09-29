@@ -5,10 +5,11 @@ export { InvalidWorkspaceNameException } from './invalid-workspace-name.exceptio
 export { InvalidWorkspaceSlugException } from './invalid-workspace-slug.exception.js';
 export { InvitationExpiredException } from './invitation-expired.exception.js';
 export { InvitationNotPendingException } from './invitation-not-pending.exception.js';
+export { LastOwnerCannotLeaveException } from './last-owner-cannot-leave.exception.js';
+export { LastOwnerCannotStepDownException } from './last-owner-cannot-step-down.exception.js';
 export { MemberNotActiveException } from './member-not-active.exception.js';
 export { MemberNotInWorkspaceException } from './member-not-in-workspace.exception.js';
 export { NotWorkspaceOwnerException } from './not-workspace-owner.exception.js';
-export { OwnerCannotLeaveException } from './owner-cannot-leave.exception.js';
 export { ProjectSlugMismatchException } from './project-slug-mismatch.exception.js';
 export { UnknownInvitationStatusException } from './unknown-invitation-status.exception.js';
 export { UnknownMemberStatusException } from './unknown-member-status.exception.js';

@@ -22,7 +22,7 @@ describe('WorkspaceCreationService', () => {
     });
 
     // Assert
-    expect(workspace.isOwnedBy(owner.id)).toBe(true);
+    expect(owner.isOwner()).toBe(true);
     expect(owner.belongsTo(workspace.id)).toBe(true);
     expect(owner.accountId.equals(accountId)).toBe(true);
     expect(owner.isActive()).toBe(true);

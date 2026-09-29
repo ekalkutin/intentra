@@ -4,11 +4,12 @@ import { AccountId, WorkspaceId } from '@intentra/shared-kernel';
 
 import { Member, Workspace } from '../entities/index.js';
 import {
+  LastOwnerCannotLeaveException,
   MemberNotActiveException,
   MemberNotInWorkspaceException,
   NotWorkspaceOwnerException,
-  OwnerCannotLeaveException,
 } from '../exceptions/index.js';
+import { Role } from '../value-objects/index.js';
 
 import { MemberRemovalService } from './member-removal.service.js';
 import { WorkspaceCreationService } from './workspace-creation.service.js';
@@ -30,44 +31,66 @@ function joinMember(workspaceId: WorkspaceId): Member {
   });
 }
 
+function joinOwner(workspaceId: WorkspaceId): Member {
+  const member = joinMember(workspaceId);
+  member.changeRole(Role.Owner);
+
+  return member;
+}
+
 describe('MemberRemovalService', () => {
   const service = new MemberRemovalService();
 
   describe('remove', () => {
-    it('lets the Owner remove a Member', () => {
+    it('lets an Owner remove a Member', () => {
       // Arrange
       const { workspace, owner } = createWorkspace();
       const member = joinMember(workspace.id);
 
       // Act
-      service.remove(workspace, owner, member);
+      service.remove(workspace, owner, member, { owners: [owner] });
 
       // Assert
       expect(member.isActive()).toBe(false);
     });
 
-    it('rejects a Contributor', () => {
+    it('lets an Owner remove another Owner', () => {
       // Arrange
-      const { workspace } = createWorkspace();
-      const contributor = joinMember(workspace.id);
+      const { workspace, owner } = createWorkspace();
+      const other = joinOwner(workspace.id);
+
+      // Act
+      service.remove(workspace, owner, other, { owners: [owner, other] });
+
+      // Assert
+      expect(other.isActive()).toBe(false);
+      expect(other.role).toBeNull();
+    });
+
+    it('rejects a Member without a Role', () => {
+      // Arrange
+      const { workspace, owner } = createWorkspace();
+      const remover = joinMember(workspace.id);
       const member = joinMember(workspace.id);
 
       // Act
-      const removing = () => service.remove(workspace, contributor, member);
+      const removing = () =>
+        service.remove(workspace, remover, member, { owners: [owner] });
 
       // Assert
       expect(removing).toThrow(NotWorkspaceOwnerException);
     });
 
-    it('does not remove the Owner', () => {
+    it('does not remove the last Owner', () => {
       // Arrange
       const { workspace, owner } = createWorkspace();
 
       // Act
-      const removing = () => service.remove(workspace, owner, owner);
+      const removing = () =>
+        service.remove(workspace, owner, owner, { owners: [owner] });
 
       // Assert
-      expect(removing).toThrow(OwnerCannotLeaveException);
+      expect(removing).toThrow(LastOwnerCannotLeaveException);
     });
 
     it('does not remove a Member of another Workspace', () => {
@@ -76,7 +99,8 @@ describe('MemberRemovalService', () => {
       const stranger = joinMember(new WorkspaceId());
 
       // Act
-      const removing = () => service.remove(workspace, owner, stranger);
+      const removing = () =>
+        service.remove(workspace, owner, stranger, { owners: [owner] });
 
       // Assert
       expect(removing).toThrow(MemberNotInWorkspaceException);
@@ -89,7 +113,8 @@ describe('MemberRemovalService', () => {
       member.remove();
 
       // Act
-      const removing = () => service.remove(workspace, owner, member);
+      const removing = () =>
+        service.remove(workspace, owner, member, { owners: [owner] });
 
       // Assert
       expect(removing).toThrow(MemberNotActiveException);
@@ -99,25 +124,38 @@ describe('MemberRemovalService', () => {
   describe('leave', () => {
     it('lets a Member leave', () => {
       // Arrange
-      const { workspace } = createWorkspace();
+      const { workspace, owner } = createWorkspace();
       const member = joinMember(workspace.id);
 
       // Act
-      service.leave(workspace, member);
+      service.leave(workspace, member, { owners: [owner] });
 
       // Assert
       expect(member.isActive()).toBe(false);
     });
 
-    it('does not let the Owner leave', () => {
+    it('lets an Owner leave while another Owner stays', () => {
+      // Arrange
+      const { workspace, owner } = createWorkspace();
+      const other = joinOwner(workspace.id);
+
+      // Act
+      service.leave(workspace, owner, { owners: [owner, other] });
+
+      // Assert
+      expect(owner.isActive()).toBe(false);
+    });
+
+    it('does not let the last Owner leave', () => {
       // Arrange
       const { workspace, owner } = createWorkspace();
 
       // Act
-      const leaving = () => service.leave(workspace, owner);
+      const leaving = () =>
+        service.leave(workspace, owner, { owners: [owner] });
 
       // Assert
-      expect(leaving).toThrow(OwnerCannotLeaveException);
+      expect(leaving).toThrow(LastOwnerCannotLeaveException);
     });
   });
 });

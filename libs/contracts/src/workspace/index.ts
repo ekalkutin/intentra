@@ -7,7 +7,15 @@ export {
   type InvitationStatusDto,
 } from './invitations/invitation.dto.js';
 export { InvitationsApi } from './invitations/invitations.api.js';
-export { type MemberDto, type RoleDto } from './members/member.dto.js';
+export {
+  ChangeRoleDtoSchema,
+  type ChangeRoleDto,
+} from './members/change-role.dto.js';
+export {
+  RoleDtoSchema,
+  type MemberDto,
+  type RoleDto,
+} from './members/member.dto.js';
 export { MembersApi } from './members/members.api.js';
 export {
   CreateProjectDtoSchema,
@@ -28,9 +36,5 @@ export {
   DeleteWorkspaceDtoSchema,
   type DeleteWorkspaceDto,
 } from './workspaces/delete-workspace.dto.js';
-export {
-  TransferOwnershipDtoSchema,
-  type TransferOwnershipDto,
-} from './workspaces/transfer-ownership.dto.js';
 export { type WorkspaceDto } from './workspaces/workspace.dto.js';
 export { WorkspacesApi } from './workspaces/workspaces.api.js';

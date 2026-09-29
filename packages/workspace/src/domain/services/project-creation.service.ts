@@ -17,7 +17,7 @@ export class ProjectCreationService {
     if (!creator.isActive()) {
       throw new MemberNotActiveException();
     }
-    if (!workspace.isOwnedBy(creator.id)) {
+    if (!creator.isOwner()) {
       throw new NotWorkspaceOwnerException();
     }
 

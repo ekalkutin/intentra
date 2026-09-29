@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { AccountId, WorkspaceId } from '@intentra/shared-kernel';
 
 import { AlreadyWorkspaceMemberException } from '../exceptions/index.js';
-import { MemberId, MemberStatus, Role } from '../value-objects/index.js';
+import { MemberStatus, Role } from '../value-objects/index.js';
 
 import { Member } from './member.aggregate.js';
 
@@ -18,7 +18,7 @@ describe('Member', () => {
     });
   }
 
-  it('joins as an active Contributor', () => {
+  it('joins as an active Member without a Role', () => {
     // Arrange
     const accountId = new AccountId();
 
@@ -30,28 +30,49 @@ describe('Member', () => {
     });
 
     // Assert
-    expect(member.role).toBe(Role.Contributor);
+    expect(member.role).toBeNull();
+    expect(member.isOwner()).toBe(false);
     expect(member.isActive()).toBe(true);
     expect(member.belongsTo(workspaceId)).toBe(true);
     expect(member.accountId.equals(accountId)).toBe(true);
   });
 
-  it('creates the Owner with the id the Workspace already refers to', () => {
-    // Arrange
-    const id = new MemberId();
-
+  it('creates an active Owner', () => {
     // Act
     const owner = Member.createOwner({
-      id: id.value,
       workspaceId: workspaceId.value,
       accountId: new AccountId().value,
       email: 'member@example.com',
     });
 
     // Assert
-    expect(owner.id.equals(id)).toBe(true);
-    expect(owner.role).toBe(Role.Contributor);
+    expect(owner.role).toBe(Role.Owner);
+    expect(owner.isOwner()).toBe(true);
     expect(owner.isActive()).toBe(true);
+  });
+
+  it('changes its Role', () => {
+    // Arrange
+    const member = join();
+
+    // Act
+    member.changeRole(Role.Owner);
+
+    // Assert
+    expect(member.isOwner()).toBe(true);
+  });
+
+  it('loses its Role once removed and rejoins without one', () => {
+    // Arrange
+    const member = join();
+    member.changeRole(Role.Owner);
+
+    // Act
+    member.remove();
+    member.rejoin();
+
+    // Assert
+    expect(member.role).toBeNull();
   });
 
   it('does not belong to another workspace', () => {

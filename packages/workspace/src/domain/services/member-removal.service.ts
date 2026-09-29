@@ -1,28 +1,41 @@
 import { Member, Workspace } from '../entities/index.js';
 import {
+  LastOwnerCannotLeaveException,
   MemberNotActiveException,
   MemberNotInWorkspaceException,
   NotWorkspaceOwnerException,
-  OwnerCannotLeaveException,
 } from '../exceptions/index.js';
 
 export class MemberRemovalService {
-  /** The Owner removes another Member. */
-  public remove(workspace: Workspace, owner: Member, member: Member): void {
-    this.ensureActiveIn(workspace, owner);
-    if (!workspace.isOwnedBy(owner.id)) {
+  /** An Owner removes a Member, another Owner included. */
+  public remove(
+    workspace: Workspace,
+    remover: Member,
+    member: Member,
+    props: MemberRemovalProps,
+  ): void {
+    this.ensureActiveIn(workspace, remover);
+    if (!remover.isOwner()) {
       throw new NotWorkspaceOwnerException();
     }
-    this.leave(workspace, member);
+    this.leave(workspace, member, props);
   }
 
   /** A Member leaves on their own. */
-  public leave(workspace: Workspace, member: Member): void {
+  public leave(
+    workspace: Workspace,
+    member: Member,
+    props: MemberRemovalProps,
+  ): void {
     this.ensureActiveIn(workspace, member);
-    if (workspace.isOwnedBy(member.id)) {
-      throw new OwnerCannotLeaveException();
+    if (member.isOwner() && !this.hasAnotherOwner(member, props.owners)) {
+      throw new LastOwnerCannotLeaveException();
     }
     member.remove();
+  }
+
+  private hasAnotherOwner(member: Member, owners: readonly Member[]): boolean {
+    return owners.some(owner => !owner.id.equals(member.id));
   }
 
   private ensureActiveIn(workspace: Workspace, member: Member): void {
@@ -34,3 +47,8 @@ export class MemberRemovalService {
     }
   }
 }
+
+type MemberRemovalProps = {
+  /** The Workspace's Active Owners as they are now. */
+  readonly owners: readonly Member[];
+};

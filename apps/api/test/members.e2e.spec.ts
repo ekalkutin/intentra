@@ -85,6 +85,20 @@ describe('/api/workspaces/:workspaceId/members', () => {
     return member;
   }
 
+  async function findMember(
+    authorization: string,
+    workspaceId: string,
+    email: string,
+  ): Promise<{ id: string }> {
+    const response = await app
+      .request()
+      .get(membersPath(workspaceId))
+      .set('Authorization', authorization)
+      .expect(HttpStatus.OK);
+
+    return response.body.find((m: { email: string }) => m.email === email);
+  }
+
   it('shows a Member who joined by Invitation', async () => {
     // Arrange
     const owner = await signIn('ada@example.com');
@@ -102,8 +116,8 @@ describe('/api/workspaces/:workspaceId/members', () => {
       .expect(HttpStatus.OK)
       .expect(res =>
         expect(res.body).toEqual([
-          expect.objectContaining({ email: 'ada@example.com', isOwner: true }),
-          expect.objectContaining({ email: 'bob@example.com', isOwner: false }),
+          expect.objectContaining({ email: 'ada@example.com', role: 'owner' }),
+          expect.objectContaining({ email: 'bob@example.com', role: null }),
         ]),
       );
   });
@@ -176,7 +190,7 @@ describe('/api/workspaces/:workspaceId/members', () => {
       .expect(res => expect(res.body).toEqual([]));
   });
 
-  it('does not let the Owner leave', async () => {
+  it('does not let the last Owner leave', async () => {
     // Arrange
     const owner = await signIn('ada@example.com');
     const workspaceId = await createWorkspace(owner);
@@ -190,28 +204,82 @@ describe('/api/workspaces/:workspaceId/members', () => {
     // Assert
     await response
       .expect(HttpStatus.CONFLICT)
-      .expect(res => expect(res.body.code).toBe('OWNER_CANNOT_LEAVE'));
+      .expect(res => expect(res.body.code).toBe('LAST_OWNER_CANNOT_LEAVE'));
   });
 
-  it('lets the former Owner leave after handing the Workspace over', async () => {
+  it('lets an Owner make another Member an Owner', async () => {
     // Arrange
     const owner = await signIn('ada@example.com');
     const workspaceId = await createWorkspace(owner);
     await join(owner, workspaceId, 'bob@example.com');
-    const members = await app
+    const bob = await findMember(owner, workspaceId, 'bob@example.com');
+
+    // Act
+    const response = app
       .request()
-      .get(membersPath(workspaceId))
+      .put(`${membersPath(workspaceId)}/${bob.id}/role`)
       .set('Authorization', owner)
-      .expect(HttpStatus.OK);
-    const bob = members.body.find(
-      (m: { email: string }) => m.email === 'bob@example.com',
+      .send({ role: 'owner' });
+
+    // Assert
+    await response.expect(HttpStatus.OK).expect(res =>
+      expect(res.body).toEqual({
+        id: bob.id,
+        email: 'bob@example.com',
+        role: 'owner',
+      }),
     );
+  });
+
+  it('rejects an unknown Role', async () => {
+    // Arrange
+    const owner = await signIn('ada@example.com');
+    const workspaceId = await createWorkspace(owner);
+    await join(owner, workspaceId, 'bob@example.com');
+    const bob = await findMember(owner, workspaceId, 'bob@example.com');
+
+    // Act
+    const response = app
+      .request()
+      .put(`${membersPath(workspaceId)}/${bob.id}/role`)
+      .set('Authorization', owner)
+      .send({ role: 'contributor' });
+
+    // Assert
+    await response.expect(HttpStatus.BAD_REQUEST);
+  });
+
+  it('does not let the last Owner step down', async () => {
+    // Arrange
+    const owner = await signIn('ada@example.com');
+    const workspaceId = await createWorkspace(owner);
+    const ada = await findMember(owner, workspaceId, 'ada@example.com');
+
+    // Act
+    const response = app
+      .request()
+      .put(`${membersPath(workspaceId)}/${ada.id}/role`)
+      .set('Authorization', owner)
+      .send({ role: null });
+
+    // Assert
+    await response
+      .expect(HttpStatus.CONFLICT)
+      .expect(res => expect(res.body.code).toBe('LAST_OWNER_CANNOT_STEP_DOWN'));
+  });
+
+  it('lets an Owner leave once another Member is an Owner', async () => {
+    // Arrange
+    const owner = await signIn('ada@example.com');
+    const workspaceId = await createWorkspace(owner);
+    await join(owner, workspaceId, 'bob@example.com');
+    const bob = await findMember(owner, workspaceId, 'bob@example.com');
     await app
       .request()
-      .post(`${WORKSPACES_PATH}/${workspaceId}/transfer-ownership`)
+      .put(`${membersPath(workspaceId)}/${bob.id}/role`)
       .set('Authorization', owner)
-      .send({ memberId: bob.id })
-      .expect(HttpStatus.NO_CONTENT);
+      .send({ role: 'owner' })
+      .expect(HttpStatus.OK);
 
     // Act
     const response = app

@@ -85,8 +85,8 @@ export class InvitationsService implements InvitationsApi {
   ): Promise<InvitationDto[]> {
     const id = new WorkspaceId(workspaceId);
     const member = await this.accessResolver.resolve(actor, id);
+    this.ensureOwner(member);
     const workspace = await this.getWorkspace(id);
-    this.ensureOwner(workspace, member);
 
     const invitations = await this.invitationRepository.findMany({
       workspaceId: id,
@@ -106,8 +106,8 @@ export class InvitationsService implements InvitationsApi {
     const member = await this.accessResolver.resolve(actor, id);
 
     return this.unitOfWork.run(async () => {
+      this.ensureOwner(member);
       const workspace = await this.getWorkspace(id);
-      this.ensureOwner(workspace, member);
       const invitation = await this.invitationRepository.findOne({
         id: new InvitationId(invitationId),
         workspaceId: id,
@@ -214,8 +214,8 @@ export class InvitationsService implements InvitationsApi {
     return workspace;
   }
 
-  private ensureOwner(workspace: Workspace, member: Member): void {
-    if (!workspace.isOwnedBy(member.id)) {
+  private ensureOwner(member: Member): void {
+    if (!member.isOwner()) {
       throw new NotWorkspaceOwnerException();
     }
   }

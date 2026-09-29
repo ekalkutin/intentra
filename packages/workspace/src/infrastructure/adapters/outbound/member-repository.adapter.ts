@@ -28,7 +28,7 @@ export class MemberRepositoryAdapter implements MemberRepository {
           workspaceId: member.workspaceId.value,
           accountId: member.accountId.value,
           email: member.email.value,
-          role: member.role.value,
+          role: member.role?.value ?? null,
           status: member.status.value,
         },
         { upsert: true, session: this.unitOfWork.requireSession() },
@@ -73,6 +73,7 @@ export class MemberRepositoryAdapter implements MemberRepository {
       ...(props.accountId && { accountId: props.accountId.value }),
       ...(props.email && { email: props.email.value }),
       ...(props.status && { status: props.status.value }),
+      ...(props.role && { role: props.role.value }),
     };
   }
 

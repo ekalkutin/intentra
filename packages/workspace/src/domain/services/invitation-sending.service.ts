@@ -18,7 +18,7 @@ export class InvitationSendingService {
     if (!inviter.isActive()) {
       throw new MemberNotActiveException();
     }
-    if (!workspace.isOwnedBy(inviter.id)) {
+    if (!inviter.isOwner()) {
       throw new NotWorkspaceOwnerException();
     }
     if (props.invitee?.isActive()) {

@@ -2,7 +2,6 @@ import type { Actor } from '../../iam/index.js';
 
 import type { CreateWorkspaceDto } from './create-workspace.dto.js';
 import type { DeleteWorkspaceDto } from './delete-workspace.dto.js';
-import type { TransferOwnershipDto } from './transfer-ownership.dto.js';
 import type { WorkspaceDto } from './workspace.dto.js';
 
 export abstract class WorkspacesApi {
@@ -17,11 +16,5 @@ export abstract class WorkspacesApi {
     actor: Actor,
     workspaceId: string,
     data: DeleteWorkspaceDto,
-  ): Promise<void>;
-
-  abstract transferOwnership(
-    actor: Actor,
-    workspaceId: string,
-    data: TransferOwnershipDto,
   ): Promise<void>;
 }

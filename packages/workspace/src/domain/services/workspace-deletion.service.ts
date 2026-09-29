@@ -6,7 +6,7 @@ import {
   WorkspaceSlugMismatchException,
 } from '../exceptions/index.js';
 
-/** Deletion cannot be undone: only the Owner, and only after typing the slug. */
+/** Deletion cannot be undone: only an Owner, and only after typing the slug. */
 export class WorkspaceDeletionService {
   public ensureDeletable(
     workspace: Workspace,
@@ -19,7 +19,7 @@ export class WorkspaceDeletionService {
     if (!owner.isActive()) {
       throw new MemberNotActiveException();
     }
-    if (!workspace.isOwnedBy(owner.id)) {
+    if (!owner.isOwner()) {
       throw new NotWorkspaceOwnerException();
     }
     if (workspace.slug.value !== props.slug) {
@@ -29,6 +29,6 @@ export class WorkspaceDeletionService {
 }
 
 type WorkspaceDeletionProps = {
-  /** Typed by the Owner to confirm. */
+  /** Typed by an Owner to confirm. */
   readonly slug: string;
 };

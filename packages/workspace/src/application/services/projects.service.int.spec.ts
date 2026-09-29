@@ -48,16 +48,16 @@ describe('ProjectsService integration', () => {
     return workspace.id;
   }
 
-  async function addContributor(workspaceId: string): Promise<Actor> {
-    const contributor = actor();
+  async function addMember(workspaceId: string): Promise<Actor> {
+    const joiner = actor();
     const member = Member.join({
       workspaceId,
-      accountId: contributor.accountId,
-      email: contributor.email,
+      accountId: joiner.accountId,
+      email: joiner.email,
     });
     await app.get(UnitOfWork).run(() => app.get(MemberRepository).save(member));
 
-    return contributor;
+    return joiner;
   }
 
   describe('create', () => {
@@ -79,15 +79,15 @@ describe('ProjectsService integration', () => {
       });
     });
 
-    it('rejects a Contributor', async () => {
+    it('rejects a Member without a Role', async () => {
       // Arrange
       const workspaceId = await createWorkspace(actor());
-      const contributor = await addContributor(workspaceId);
+      const member = await addMember(workspaceId);
 
       // Act
       const creation = app
         .get(ProjectsService)
-        .create(contributor, workspaceId, { name: 'Billing', slug: 'billing' });
+        .create(member, workspaceId, { name: 'Billing', slug: 'billing' });
 
       // Assert
       await expect(creation).rejects.toBeInstanceOf(NotWorkspaceOwnerException);
@@ -156,13 +156,13 @@ describe('ProjectsService integration', () => {
       // Arrange
       const owner = actor();
       const workspaceId = await createWorkspace(owner);
-      const contributor = await addContributor(workspaceId);
+      const member = await addMember(workspaceId);
       const service = app.get(ProjectsService);
       await service.create(owner, workspaceId, { name: 'Web', slug: 'web' });
       await service.create(owner, workspaceId, { name: 'API', slug: 'api' });
 
       // Act
-      const projects = await service.list(contributor, workspaceId);
+      const projects = await service.list(member, workspaceId);
 
       // Assert
       expect(projects.map(project => project.slug)).toEqual(['api', 'web']);
