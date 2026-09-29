@@ -227,7 +227,10 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
 
     // Assert
     expect(edited.status).toBe(HttpStatus.OK);
-    expect(read.body).toEqual(edited.body);
+    expect(read.body).toEqual({
+      ...edited.body,
+      dependencyNeedsReview: false,
+    });
     expect(read.body).toMatchObject({
       title: 'Report export',
       fields: { statement: 'Export a report to PDF' },
@@ -429,6 +432,85 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
       .set('Authorization', ada)
       .expect(HttpStatus.OK);
     expect(listed.body.total).toBe(2);
+  });
+
+  it('approves Drafts together and marks what rests on a replaced item', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    for (const body of [
+      requirement,
+      {
+        ...requirement,
+        title: 'Export button',
+        fields: { statement: 'A button exports the report' },
+        links: [{ type: 'depends-on', key: 'REQ-1' }],
+      },
+    ]) {
+      await app
+        .request()
+        .post(path)
+        .set('Authorization', ada)
+        .send(body)
+        .expect(HttpStatus.CREATED);
+    }
+    const cascade = await app
+      .request()
+      .get(`${path}/REQ-2/dependencies`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+
+    // Act
+    const approved = await app
+      .request()
+      .post(`${path}/approve`)
+      .set('Authorization', ada)
+      .send({
+        items: cascade.body.items.map(
+          ({ key, version }: { key: string; version: number }) => ({
+            key,
+            version,
+          }),
+        ),
+      });
+
+    // Assert
+    expect(approved.status).toBe(HttpStatus.OK);
+    expect(approved.body).toHaveLength(2);
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send({
+        ...requirement,
+        supersedes: 'REQ-1',
+        fields: { statement: 'Export a report to PDF and CSV' },
+      })
+      .expect(HttpStatus.CREATED);
+    await app
+      .request()
+      .post(`${path}/REQ-3/approve`)
+      .set('Authorization', ada)
+      .send({ version: 1 })
+      .expect(HttpStatus.OK);
+    const marked = await app
+      .request()
+      .get(`${path}/REQ-2`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(marked.body).toMatchObject({
+      needsReview: true,
+      reviewCauses: ['REQ-1'],
+    });
+    const confirmed = await app
+      .request()
+      .post(`${path}/REQ-2/confirm`)
+      .set('Authorization', ada)
+      .send({ version: marked.body.version })
+      .expect(HttpStatus.OK);
+    expect(confirmed.body).toMatchObject({
+      needsReview: false,
+      links: [{ type: 'depends-on', key: 'REQ-3' }],
+    });
   });
 
   it('rejects a malformed Knowledge Key', async () => {

@@ -15,6 +15,8 @@ export { KnowledgeItemId } from './knowledge-item-id.vo.js';
 export { KnowledgeItemVersion } from './knowledge-item-version.vo.js';
 export { KnowledgeKey } from './knowledge-key.vo.js';
 export { KnowledgeKind } from './knowledge-kind.vo.js';
+export { KnowledgeLinkType } from './knowledge-link-type.vo.js';
+export { KnowledgeLink, type KnowledgeLinkProps } from './knowledge-link.vo.js';
 export { KnowledgeSource } from './knowledge-source.vo.js';
 export { KnowledgeStatus } from './knowledge-status.vo.js';
 export { KnowledgeText } from './knowledge-text.vo.js';

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { KNOWLEDGE_FIELDS_DTO_SCHEMAS } from './knowledge-fields.dto.js';
+import { KnowledgeLinkDtoSchema } from './knowledge-link.dto.js';
 
 const frame = {
   title: z.string(),
@@ -11,6 +12,8 @@ const frame = {
    * approving it is then a Supersession.
    */
   supersedes: z.string().nullable().default(null),
+  /** To Approved or Draft items only; a `depends-on` Draft target must be approved together. */
+  links: z.array(KnowledgeLinkDtoSchema).default([]),
 };
 
 function recording<K extends keyof typeof KNOWLEDGE_FIELDS_DTO_SCHEMAS>(

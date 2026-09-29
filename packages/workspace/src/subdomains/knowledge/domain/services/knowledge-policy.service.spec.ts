@@ -50,6 +50,7 @@ describe('KnowledgePolicyService', () => {
       }),
       authorId: new MemberId().value,
       supersedes: null,
+      links: [],
     });
 
     // Act

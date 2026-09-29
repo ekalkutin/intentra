@@ -66,6 +66,7 @@ function term(title: string): RecordKnowledgeItemDto {
     title,
     rationale: null,
     supersedes: null,
+    links: [],
     fields: {
       definition: `What ${title} means`,
       sort: null,
@@ -79,6 +80,7 @@ const requirement: RecordKnowledgeItemDto = {
   title: 'PDF export',
   rationale: 'Ada: "customers print reports"',
   supersedes: null,
+  links: [],
   fields: {
     statement: 'Export a report to PDF',
     type: 'functional',
@@ -92,6 +94,7 @@ const decision: RecordKnowledgeItemDto = {
   title: 'MongoDB',
   rationale: null,
   supersedes: null,
+  links: [],
   fields: {
     decision: 'Store data in MongoDB',
     area: 'architecture',
@@ -105,6 +108,7 @@ const productOverview = (summary: string): RecordKnowledgeItemDto => ({
   title: 'Intentra',
   rationale: null,
   supersedes: null,
+  links: [],
   fields: { summary, problem: null, audience: null, value: null },
 });
 
@@ -224,6 +228,11 @@ describe('KnowledgeService integration', () => {
         retiredBy: null,
         retiredAt: null,
         retirementReason: null,
+        links: [],
+        answeredBy: [],
+        needsReview: false,
+        reviewCauses: [],
+        dependencyNeedsReview: null,
         version: 1,
         access: {
           canEdit: true,
@@ -232,6 +241,7 @@ describe('KnowledgeService integration', () => {
           canReject: true,
           canRecordReplacement: false,
           canRetire: false,
+          canConfirm: false,
         },
       });
     });
@@ -398,6 +408,7 @@ describe('KnowledgeService integration', () => {
       // Assert
       expect(item).toEqual({
         ...recorded,
+        dependencyNeedsReview: false,
         access: {
           canEdit: false,
           canDelete: false,
@@ -405,6 +416,7 @@ describe('KnowledgeService integration', () => {
           canReject: false,
           canRecordReplacement: false,
           canRetire: false,
+          canConfirm: false,
         },
       });
     });
@@ -468,7 +480,7 @@ describe('KnowledgeService integration', () => {
       const item = await app
         .get(KnowledgeService)
         .get(person(bob), workspaceId, projectId, 'REQ-1');
-      expect(item).toEqual(edited);
+      expect(item).toEqual({ ...edited, dependencyNeedsReview: false });
     });
 
     it('refuses a change made on an older version, losing no edit', async () => {
@@ -813,7 +825,7 @@ describe('KnowledgeService integration', () => {
         projectId,
         'REQ-1',
       );
-      expect(read).toEqual(rejected);
+      expect(read).toEqual({ ...rejected, dependencyNeedsReview: false });
     });
   });
 
@@ -843,6 +855,7 @@ describe('KnowledgeService integration', () => {
         title: 'Report export',
         rationale: null,
         supersedes: 'REQ-1',
+        links: [],
         fields: {
           statement,
           type: 'functional',

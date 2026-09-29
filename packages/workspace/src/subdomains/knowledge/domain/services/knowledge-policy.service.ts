@@ -54,6 +54,16 @@ export class KnowledgePolicyService {
     return projectRole.equals(ProjectRole.Maintainer);
   }
 
+  /**
+   * Confirming that a marked item still holds: for a Draft, anyone who may
+   * edit it; for an Approved item, which it re-affirms as true, a Maintainer.
+   */
+  public canConfirm(projectRole: ProjectRole, item: KnowledgeItem): boolean {
+    return item.isApproved()
+      ? projectRole.equals(ProjectRole.Maintainer)
+      : this.#canWrite(projectRole);
+  }
+
   #canWrite(projectRole: ProjectRole): boolean {
     return (
       projectRole.equals(ProjectRole.Contributor) ||

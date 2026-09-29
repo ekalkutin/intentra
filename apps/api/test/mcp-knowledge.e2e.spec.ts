@@ -185,10 +185,9 @@ describe('Knowledge tools over MCP', () => {
     await callTool('record_requirement', { projectId, ...requirement });
 
     // Act
-    const result = await callTool('approve_knowledge_item', {
+    const result = await callTool('approve_knowledge_items', {
       projectId,
-      key: 'REQ-1',
-      version: 1,
+      items: [{ key: 'REQ-1', version: 1 }],
     });
 
     // Assert
@@ -252,6 +251,38 @@ describe('Knowledge tools over MCP', () => {
     expect(result.content[0]?.text).toMatch(
       /^KNOWLEDGE_RETIREMENT_FORBIDDEN: /,
     );
+  });
+
+  it('shows the cascade of what a Draft depends on', async () => {
+    // Arrange
+    await callTool('record_persona', {
+      projectId,
+      title: 'Bookkeeper',
+      rationale: 'Ada: "our bookkeepers pay the invoices"',
+      fields: { profile: 'Pays the invoices' },
+    });
+    await callTool('record_scenario', {
+      projectId,
+      title: 'Pay an invoice',
+      rationale: 'Ada: "they pay from the list"',
+      fields: { expectedResult: 'The invoice is paid' },
+      links: [{ type: 'depends-on', key: 'PER-1' }],
+    });
+
+    // Act
+    const result = await callTool('get_knowledge_dependencies', {
+      projectId,
+      key: 'SC-1',
+    });
+
+    // Assert
+    expect(result.structuredContent).toEqual({
+      items: [
+        expect.objectContaining({ key: 'SC-1', status: 'draft' }),
+        expect.objectContaining({ key: 'PER-1', status: 'draft' }),
+      ],
+      links: [{ from: 'SC-1', to: 'PER-1' }],
+    });
   });
 
   it('deletes a Draft recorded by mistake', async () => {

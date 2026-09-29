@@ -17,6 +17,13 @@ export const ListKnowledgeItemsDtoSchema = z.object({
       z.array(KnowledgeStatusDtoSchema).min(1),
     )
     .optional(),
+  /** Only items marked Needs Review (`true`) or only unmarked ones (`false`). */
+  needsReview: z
+    .preprocess(
+      value => (value === 'true' ? true : value === 'false' ? false : value),
+      z.boolean(),
+    )
+    .optional(),
   take: z.coerce.number().int().min(1).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
 });

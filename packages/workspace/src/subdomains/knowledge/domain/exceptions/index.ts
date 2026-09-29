@@ -1,3 +1,4 @@
+export { DependenciesNotApprovedException } from './dependencies-not-approved.exception.js';
 export { DraftApprovalForbiddenException } from './draft-approval-forbidden.exception.js';
 export { DraftDeletionForbiddenException } from './draft-deletion-forbidden.exception.js';
 export { DraftEditingForbiddenException } from './draft-editing-forbidden.exception.js';
@@ -6,15 +7,22 @@ export { InvalidKnowledgeFieldsException } from './invalid-knowledge-fields.exce
 export { InvalidKnowledgeItemVersionException } from './invalid-knowledge-item-version.exception.js';
 export { InvalidKnowledgeKeyException } from './invalid-knowledge-key.exception.js';
 export { InvalidKnowledgeTitleException } from './invalid-knowledge-title.exception.js';
+export { InvalidLinkException } from './invalid-link.exception.js';
 export { InvalidRationaleException } from './invalid-rationale.exception.js';
 export { InvalidRejectionReasonException } from './invalid-rejection-reason.exception.js';
 export { InvalidRetirementReasonException } from './invalid-retirement-reason.exception.js';
+export { KnowledgeConfirmationForbiddenException } from './knowledge-confirmation-forbidden.exception.js';
 export { KnowledgeItemChangedException } from './knowledge-item-changed.exception.js';
+export { KnowledgeItemLinkedException } from './knowledge-item-linked.exception.js';
+export { KnowledgeItemNeedsReviewException } from './knowledge-item-needs-review.exception.js';
 export { KnowledgeItemNotApprovedException } from './knowledge-item-not-approved.exception.js';
 export { KnowledgeItemNotDraftException } from './knowledge-item-not-draft.exception.js';
+export { KnowledgeItemNotMarkedException } from './knowledge-item-not-marked.exception.js';
 export { KnowledgeKindMismatchException } from './knowledge-kind-mismatch.exception.js';
 export { KnowledgeRecordingForbiddenException } from './knowledge-recording-forbidden.exception.js';
 export { KnowledgeRetirementForbiddenException } from './knowledge-retirement-forbidden.exception.js';
+export { LinkTargetNotCurrentException } from './link-target-not-current.exception.js';
+export { LinkTargetNotFoundException } from './link-target-not-found.exception.js';
 export { ProductOverviewAlreadyApprovedException } from './product-overview-already-approved.exception.js';
 export { RationaleRequiredException } from './rationale-required.exception.js';
 export { SupersededItemNotApprovedException } from './superseded-item-not-approved.exception.js';

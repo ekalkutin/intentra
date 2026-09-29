@@ -3,11 +3,14 @@ import type { CallerDto } from '../access/caller.dto.js';
 import type { EditKnowledgeItemDto } from './edit-knowledge-item.dto.js';
 import type {
   ApproveKnowledgeItemDto,
+  ApproveKnowledgeItemsDto,
+  ConfirmKnowledgeItemDto,
   DeleteKnowledgeItemDto,
   RejectKnowledgeItemDto,
   RetireKnowledgeItemDto,
 } from './knowledge-item-change.dto.js';
 import type {
+  KnowledgeDependenciesDto,
   KnowledgeItemDto,
   KnowledgeItemPageDto,
 } from './knowledge-item.dto.js';
@@ -67,7 +70,20 @@ export abstract class KnowledgeApi {
     data: DeleteKnowledgeItemDto,
   ): Promise<void>;
 
-  /** Approving a Draft that `supersedes` an item also makes that item Obsolete. */
+  /** Everything the item reaches along `depends-on`, to review before approving it. */
+  abstract dependencies(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    key: string,
+  ): Promise<KnowledgeDependenciesDto>;
+
+  /**
+   * Approving a Draft that `supersedes` an item also makes that item Obsolete.
+   * Every `depends-on` target must be Approved already (409
+   * `DEPENDENCIES_NOT_APPROVED` otherwise); approve Drafts together with
+   * `approveTogether`.
+   */
   abstract approve(
     caller: CallerDto,
     workspaceId: string,
@@ -91,5 +107,27 @@ export abstract class KnowledgeApi {
     projectId: string,
     key: string,
     data: RetireKnowledgeItemDto,
+  ): Promise<KnowledgeItemDto>;
+
+  /** Approves Drafts together, all or nothing, such as an item and the Drafts it depends on. */
+  abstract approveTogether(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    data: ApproveKnowledgeItemsDto,
+  ): Promise<KnowledgeItemDto[]>;
+
+  /**
+   * Confirms that an item marked Needs Review still holds: its Links to the
+   * changed targets move onto their replacements, or away if there is none.
+   * Contributors and Maintainers confirm a Draft; only Maintainers an
+   * Approved item.
+   */
+  abstract confirm(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    key: string,
+    data: ConfirmKnowledgeItemDto,
   ): Promise<KnowledgeItemDto>;
 }

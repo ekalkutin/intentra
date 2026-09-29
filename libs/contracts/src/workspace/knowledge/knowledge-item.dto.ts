@@ -4,6 +4,7 @@ import type {
   KnowledgeSourceDto,
   KnowledgeStatusDto,
 } from './knowledge-kind.dto.js';
+import type { KnowledgeLinkDto } from './knowledge-link.dto.js';
 
 /** What the calling Member may do with this Knowledge Item right now (docs/adr/0002-client-shows-the-policy-verdict.md). */
 export type KnowledgeItemAccessDto = {
@@ -14,6 +15,8 @@ export type KnowledgeItemAccessDto = {
   /** May record a Draft replacing this Approved item; approving it stays a Maintainer's. */
   readonly canRecordReplacement: boolean;
   readonly canRetire: boolean;
+  /** May confirm, while it is marked Needs Review, that it still holds. */
+  readonly canConfirm: boolean;
 };
 
 /** What the calling Member may do with a Project's knowledge as a whole. */
@@ -64,6 +67,18 @@ type KnowledgeItemFrameDto = {
   readonly retiredAt: string | null;
   /** Null unless retired with a reason. */
   readonly retirementReason: string | null;
+  readonly links: KnowledgeLinkDto[];
+  /** For an Open Question: the Approved items that answer it; empty while it is open. */
+  readonly answeredBy: string[];
+  /** Something it depends on or is justified by has changed: check that it still holds. */
+  readonly needsReview: boolean;
+  /** The Knowledge Keys of the targets whose change marked it. */
+  readonly reviewCauses: string[];
+  /**
+   * Whether anything further down its `depends-on` cascade is marked Needs
+   * Review. Computed when reading one item; null in lists.
+   */
+  readonly dependencyNeedsReview: boolean | null;
   /** Raised by every change; every write sends back the one the client saw. */
   readonly version: number;
   readonly access: KnowledgeItemAccessDto;
@@ -81,4 +96,25 @@ export type KnowledgeItemPageDto = {
   /** How many Knowledge Items match, across every page. */
   readonly total: number;
   readonly access: KnowledgeAccessDto;
+};
+
+/** One item of a dependency cascade. */
+export type KnowledgeDependencyDto = {
+  readonly key: string;
+  readonly kind: KnowledgeKindDto;
+  readonly title: string;
+  readonly mainField: string;
+  readonly status: KnowledgeStatusDto;
+  readonly needsReview: boolean;
+  readonly version: number;
+  readonly access: KnowledgeItemAccessDto;
+};
+
+/**
+ * Everything a Knowledge Item reaches along `depends-on`, at any depth, the
+ * item itself first, each once; and the `depends-on` Links between them.
+ */
+export type KnowledgeDependenciesDto = {
+  readonly items: KnowledgeDependencyDto[];
+  readonly links: { readonly from: string; readonly to: string }[];
 };

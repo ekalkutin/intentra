@@ -13,6 +13,7 @@ import { toolContextSchema } from '../../tool-context.js';
 import {
   keySchema,
   knowledgeItemSchema,
+  linksSchema,
   projectIdSchema,
   versionSchema,
 } from './knowledge-item.schema.js';
@@ -112,6 +113,7 @@ function createRecordTool(spec: KindSpec) {
         .describe(
           `The Knowledge Key of the Approved ${spec.noun} this one replaces, with the changes made; approving it makes the old one Obsolete.`,
         ),
+      links: linksSchema.default([]),
     }),
     outputSchema: knowledgeItemSchema,
     requestContextSchema: toolContextSchema,
@@ -130,7 +132,7 @@ function createRecordTool(spec: KindSpec) {
 function createEditTool(spec: KindSpec) {
   return createTool({
     id: `edit_${toolName(spec.kind)}`,
-    description: `Edits a Draft ${spec.noun}. What is left out stays as it is; fields, when given, replace all of them. Read it with get_knowledge_item first and send back its version. Only a Draft can be edited.`,
+    description: `Edits a Draft ${spec.noun}. What is left out stays as it is; fields, when given, replace all of them. Read it with get_knowledge_item first and send back its version. Only a Draft can be edited. Editing clears Needs Review only where it no longer links to what changed.`,
     inputSchema: z.object({
       projectId: projectIdSchema,
       key: keySchema,
@@ -138,6 +140,7 @@ function createEditTool(spec: KindSpec) {
       title: z.string().optional(),
       rationale: z.string().optional(),
       fields: KNOWLEDGE_FIELDS_DTO_SCHEMAS[spec.kind].optional(),
+      links: linksSchema.optional().describe('Replaces all of its Links.'),
     }),
     outputSchema: knowledgeItemSchema,
     requestContextSchema: toolContextSchema,

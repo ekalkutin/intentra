@@ -58,6 +58,8 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
           retiredBy: item.retiredBy?.value ?? null,
           retiredAt: item.retiredAt && toDate(item.retiredAt),
           retirementReason: item.retirementReason?.value ?? null,
+          links: item.links.map(link => link.toProps()),
+          reviewCauses: item.reviewCauses.map(cause => cause.value),
           version: item.version.value,
         },
         { upsert: true, session: this.unitOfWork.requireSession() },
@@ -79,13 +81,18 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
 
   public async findMany(
     props: KnowledgeItemQueryProps,
-    page: KnowledgeItemPage,
+    page?: KnowledgeItemPage,
   ): Promise<KnowledgeItem[]> {
-    const documents = await this.knowledgeItemModel
+    if (matchesNothing(props)) {
+      return [];
+    }
+    let query = this.knowledgeItemModel
       .find(this.toFilter(props))
-      .sort({ kind: 1, number: 1 })
-      .skip(page.offset)
-      .limit(page.take)
+      .sort({ kind: 1, number: 1 });
+    if (page) {
+      query = query.skip(page.offset).limit(page.take);
+    }
+    const documents = await query
       .session(this.unitOfWork.session)
       .lean()
       .exec();
@@ -93,7 +100,11 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
     return documents.map(document => this.toDomain(document));
   }
 
-  public count(props: KnowledgeItemQueryProps): Promise<number> {
+  public async count(props: KnowledgeItemQueryProps): Promise<number> {
+    if (matchesNothing(props)) {
+      return 0;
+    }
+
     return this.knowledgeItemModel
       .countDocuments(this.toFilter(props))
       .session(this.unitOfWork.session)
@@ -128,6 +139,26 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
       ...(props.statuses && {
         status: { $in: props.statuses.map(status => status.value) },
       }),
+      ...(props.keys && {
+        $or: props.keys.map(key => ({
+          kind: key.kind.value,
+          number: key.number,
+        })),
+      }),
+      ...(props.linkingTo && {
+        links: {
+          $elemMatch: {
+            key: { $in: props.linkingTo.keys.map(key => key.value) },
+            ...(props.linkingTo.types && {
+              type: { $in: props.linkingTo.types.map(type => type.value) },
+            }),
+          },
+        },
+      }),
+      ...(props.needsReview === true && {
+        'reviewCauses.0': { $exists: true },
+      }),
+      ...(props.needsReview === false && { reviewCauses: { $size: 0 } }),
     };
   }
 
@@ -162,9 +193,16 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
       retiredBy: document.retiredBy,
       retiredAt: document.retiredAt && toInstant(document.retiredAt),
       retirementReason: document.retirementReason,
+      links: document.links,
+      reviewCauses: document.reviewCauses,
       version: document.version,
     });
   }
+}
+
+/** Asked for none of no keys: an empty `$or` is not a valid filter. */
+function matchesNothing(props: KnowledgeItemQueryProps): boolean {
+  return props.keys?.length === 0 || props.linkingTo?.keys.length === 0;
 }
 
 function toDate(instant: Temporal.Instant): Date {

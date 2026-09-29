@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   KNOWLEDGE_FIELDS_DTO_SCHEMAS,
   KnowledgeKindDtoSchema,
+  KnowledgeLinkDtoSchema,
   KnowledgeSourceDtoSchema,
   KnowledgeStatusDtoSchema,
 } from '@intentra/contracts/workspace';
@@ -72,6 +73,24 @@ export const knowledgeItemSchema = z.object({
   retiredBy: z.string().nullable(),
   retiredAt: z.string().nullable(),
   retirementReason: z.string().nullable(),
+  links: z.array(KnowledgeLinkDtoSchema),
+  answeredBy: z
+    .array(z.string())
+    .describe('For an Open Question: the Approved items that answer it.'),
+  needsReview: z
+    .boolean()
+    .describe(
+      'Something it depends on or is justified by has changed: it may no longer be true.',
+    ),
+  reviewCauses: z
+    .array(z.string())
+    .describe('The Knowledge Keys of what changed.'),
+  dependencyNeedsReview: z
+    .boolean()
+    .nullable()
+    .describe(
+      'Something further down what it depends on is under review: treat it with care.',
+    ),
   version: z
     .number()
     .describe(
@@ -85,6 +104,7 @@ export const knowledgeItemSchema = z.object({
       canReject: z.boolean(),
       canRecordReplacement: z.boolean(),
       canRetire: z.boolean(),
+      canConfirm: z.boolean(),
     })
     .describe('What you may do with it right now.'),
 });
@@ -103,4 +123,10 @@ export const versionSchema = z
   .min(1)
   .describe(
     'The version you last read; the change is refused if it has changed since.',
+  );
+
+export const linksSchema = z
+  .array(KnowledgeLinkDtoSchema)
+  .describe(
+    'Links to other items, Draft or Approved: depends-on (it holds only while the target holds; a Scenario depends on the Persona who performs it), uses-term (a Term), justified-by (a Decision), answers (an Open Question), conflicts-with.',
   );

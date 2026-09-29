@@ -22,6 +22,10 @@ export const listKnowledgeTool = createTool({
       .min(1)
       .default([KnowledgeStatusDtoSchema.enum.approved])
       .describe('Any of these statuses.'),
+    needsReview: z
+      .boolean()
+      .optional()
+      .describe('Only items marked Needs Review (true) or only unmarked ones.'),
     take: z.number().int().min(1).max(200).default(50),
     offset: z.number().int().min(0).default(0),
   }),
@@ -33,6 +37,7 @@ export const listKnowledgeTool = createTool({
         title: z.string(),
         mainField: z.string(),
         status: KnowledgeStatusDtoSchema,
+        needsReview: z.boolean(),
         version: z.number(),
       }),
     ),
@@ -55,12 +60,13 @@ export const listKnowledgeTool = createTool({
 
     return {
       items: page.items.map(
-        ({ key, kind, title, mainField, status, version }) => ({
+        ({ key, kind, title, mainField, status, needsReview, version }) => ({
           key,
           kind,
           title,
           mainField,
           status,
+          needsReview,
           version,
         }),
       ),

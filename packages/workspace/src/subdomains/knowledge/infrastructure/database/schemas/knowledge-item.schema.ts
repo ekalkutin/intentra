@@ -4,6 +4,7 @@ import {
   KnowledgeKind,
   KnowledgeStatus,
   type KnowledgeFields,
+  type KnowledgeLinkProps,
 } from '../../../domain/value-objects/index.js';
 
 @Schema({ collection: 'knowledge_items' })
@@ -89,6 +90,16 @@ export class KnowledgeItemModel {
   @Prop({ type: String, default: null })
   readonly retirementReason: string | null;
 
+  @Prop({
+    type: [{ _id: false, type: { type: String }, key: { type: String } }],
+    default: [],
+  })
+  readonly links: KnowledgeLinkProps[];
+
+  /** The Knowledge Keys of the targets whose change marked it Needs Review. */
+  @Prop({ type: [String], default: [] })
+  readonly reviewCauses: string[];
+
   @Prop({ type: Number, required: true })
   readonly version: number;
 }
@@ -101,6 +112,9 @@ KnowledgeItemSchema.index(
   { projectId: 1, kind: 1, number: 1 },
   { unique: true },
 );
+
+/** Finds the items linking to one, to mark them or to keep it from being deleted. */
+KnowledgeItemSchema.index({ projectId: 1, 'links.key': 1 });
 
 /** A Project has one Approved Product Overview, even when two approvals race. */
 KnowledgeItemSchema.index(

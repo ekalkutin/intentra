@@ -32,3 +32,18 @@ export const RetireKnowledgeItemDtoSchema = z.object({
 export type RetireKnowledgeItemDto = z.infer<
   typeof RetireKnowledgeItemDtoSchema
 >;
+
+export const ApproveKnowledgeItemsDtoSchema = z.object({
+  /** Approved together, all or nothing; each Knowledge Key with the version the client saw. */
+  items: z.array(z.object({ key: z.string(), version })).min(1),
+});
+
+export type ApproveKnowledgeItemsDto = z.infer<
+  typeof ApproveKnowledgeItemsDtoSchema
+>;
+
+export const ConfirmKnowledgeItemDtoSchema = z.object({ version });
+
+export type ConfirmKnowledgeItemDto = z.infer<
+  typeof ConfirmKnowledgeItemDtoSchema
+>;

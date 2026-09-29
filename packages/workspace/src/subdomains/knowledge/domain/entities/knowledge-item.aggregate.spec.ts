@@ -39,6 +39,7 @@ function recordTerm(authorId = new MemberId()): KnowledgeItem {
     content: term('An offer to join a Workspace'),
     authorId: authorId.value,
     supersedes: null,
+    links: [],
   });
 }
 
@@ -75,6 +76,7 @@ describe('KnowledgeItem', () => {
           content: term('An offer to join a Workspace'),
           authorId: new MemberId().value,
           supersedes: null,
+          links: [],
         });
 
       // Assert
@@ -94,6 +96,7 @@ describe('KnowledgeItem', () => {
           content: term('An offer to join a Workspace'),
           authorId: new MemberId().value,
           supersedes: null,
+          links: [],
         });
 
       // Assert
@@ -278,6 +281,7 @@ describe('KnowledgeItem', () => {
           content: term('An offer to join a Workspace'),
           authorId: new MemberId().value,
           supersedes: KnowledgeKey.parse('REQ-1'),
+          links: [],
         });
 
       // Assert

@@ -15,6 +15,8 @@ import {
 
 import {
   ApproveKnowledgeItemDtoSchema,
+  ApproveKnowledgeItemsDtoSchema,
+  ConfirmKnowledgeItemDtoSchema,
   DeleteKnowledgeItemDtoSchema,
   EditKnowledgeItemDtoSchema,
   ListKnowledgeItemsDtoSchema,
@@ -23,9 +25,12 @@ import {
   RetireKnowledgeItemDtoSchema,
   WorkspaceApi,
   type ApproveKnowledgeItemDto,
+  type ApproveKnowledgeItemsDto,
   type CallerDto,
+  type ConfirmKnowledgeItemDto,
   type DeleteKnowledgeItemDto,
   type EditKnowledgeItemDto,
+  type KnowledgeDependenciesDto,
   type KnowledgeItemDto,
   type KnowledgeItemPageDto,
   type ListKnowledgeItemsDto,
@@ -66,6 +71,38 @@ export class KnowledgeController {
     query: ListKnowledgeItemsDto,
   ): Promise<KnowledgeItemPageDto> {
     return this.workspace.knowledge.list(caller, workspaceId, projectId, query);
+  }
+
+  @Post('approve')
+  @HttpCode(HttpStatus.OK)
+  public async approveTogether(
+    @CurrentCaller() caller: CallerDto,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Body({ schema: ApproveKnowledgeItemsDtoSchema })
+    data: ApproveKnowledgeItemsDto,
+  ): Promise<KnowledgeItemDto[]> {
+    return this.workspace.knowledge.approveTogether(
+      caller,
+      workspaceId,
+      projectId,
+      data,
+    );
+  }
+
+  @Get(':key/dependencies')
+  public async dependencies(
+    @CurrentCaller() caller: CallerDto,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Param('key') key: string,
+  ): Promise<KnowledgeDependenciesDto> {
+    return this.workspace.knowledge.dependencies(
+      caller,
+      workspaceId,
+      projectId,
+      key,
+    );
   }
 
   @Get(':key')
@@ -163,6 +200,25 @@ export class KnowledgeController {
     data: RetireKnowledgeItemDto,
   ): Promise<KnowledgeItemDto> {
     return this.workspace.knowledge.retire(
+      caller,
+      workspaceId,
+      projectId,
+      key,
+      data,
+    );
+  }
+
+  @Post(':key/confirm')
+  @HttpCode(HttpStatus.OK)
+  public async confirm(
+    @CurrentCaller() caller: CallerDto,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Param('key') key: string,
+    @Body({ schema: ConfirmKnowledgeItemDtoSchema })
+    data: ConfirmKnowledgeItemDto,
+  ): Promise<KnowledgeItemDto> {
+    return this.workspace.knowledge.confirm(
       caller,
       workspaceId,
       projectId,

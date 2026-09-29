@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { KNOWLEDGE_FIELDS_DTO_SCHEMAS } from './knowledge-fields.dto.js';
+import { KnowledgeLinkDtoSchema } from './knowledge-link.dto.js';
 
 const frame = {
   /** The version the client last saw (409 `KNOWLEDGE_ITEM_CHANGED` if it is not the current one). */
@@ -8,6 +9,8 @@ const frame = {
   title: z.string().optional(),
   /** Null clears it. */
   rationale: z.string().nullable().optional(),
+  /** Replaces all of its Links when given. */
+  links: z.array(KnowledgeLinkDtoSchema).optional(),
 };
 
 function editing<K extends keyof typeof KNOWLEDGE_FIELDS_DTO_SCHEMAS>(kind: K) {
@@ -19,8 +22,8 @@ function editing<K extends keyof typeof KNOWLEDGE_FIELDS_DTO_SCHEMAS>(kind: K) {
 }
 
 /**
- * Changes a Draft; what is left out stays as it is, and `fields` replaces all
- * of them. `kind` must be the Draft's own Kind, which never changes
+ * Changes a Draft; what is left out stays as it is, and `fields` or `links`
+ * replace all of theirs. `kind` must be the Draft's own Kind, which never changes
  * (400 `KNOWLEDGE_KIND_MISMATCH`).
  */
 export const EditKnowledgeItemDtoSchema = z.discriminatedUnion('kind', [

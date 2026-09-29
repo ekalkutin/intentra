@@ -45,16 +45,22 @@ export {
 } from './knowledge/knowledge-fields.dto.js';
 export {
   ApproveKnowledgeItemDtoSchema,
+  ApproveKnowledgeItemsDtoSchema,
+  ConfirmKnowledgeItemDtoSchema,
   DeleteKnowledgeItemDtoSchema,
   RejectKnowledgeItemDtoSchema,
   RetireKnowledgeItemDtoSchema,
   type ApproveKnowledgeItemDto,
+  type ApproveKnowledgeItemsDto,
+  type ConfirmKnowledgeItemDto,
   type DeleteKnowledgeItemDto,
   type RejectKnowledgeItemDto,
   type RetireKnowledgeItemDto,
 } from './knowledge/knowledge-item-change.dto.js';
 export {
   type KnowledgeAccessDto,
+  type KnowledgeDependenciesDto,
+  type KnowledgeDependencyDto,
   type KnowledgeItemAccessDto,
   type KnowledgeItemDto,
   type KnowledgeItemPageDto,
@@ -68,6 +74,12 @@ export {
   type KnowledgeStatusDto,
 } from './knowledge/knowledge-kind.dto.js';
 export { KnowledgeApi } from './knowledge/knowledge.api.js';
+export {
+  KnowledgeLinkDtoSchema,
+  KnowledgeLinkTypeDtoSchema,
+  type KnowledgeLinkDto,
+  type KnowledgeLinkTypeDto,
+} from './knowledge/knowledge-link.dto.js';
 export {
   ListKnowledgeItemsDtoSchema,
   type ListKnowledgeItemsDto,

@@ -5,6 +5,7 @@ import type {
   KnowledgeItemId,
   KnowledgeKey,
   KnowledgeKind,
+  KnowledgeLinkType,
   KnowledgeStatus,
 } from '../../../domain/value-objects/index.js';
 import { KnowledgeItemNotFoundException } from '../../exceptions/index.js';
@@ -15,6 +16,15 @@ export type KnowledgeItemQueryProps = {
   readonly kind?: KnowledgeKind;
   /** Any of these; every status when left out. */
   readonly statuses?: readonly KnowledgeStatus[];
+  /** Any of these Knowledge Keys; none when empty. */
+  readonly keys?: readonly KnowledgeKey[];
+  /** Items with a Link to any of these keys, of any of these types (any type when left out). */
+  readonly linkingTo?: {
+    readonly keys: readonly KnowledgeKey[];
+    readonly types?: readonly KnowledgeLinkType[];
+  };
+  /** Only items marked Needs Review (true) or only unmarked ones (false). */
+  readonly needsReview?: boolean;
 };
 
 export type KnowledgeItemPage = {
@@ -31,10 +41,10 @@ export abstract class KnowledgeItemRepository {
   abstract findOne(
     props: KnowledgeItemQueryProps,
   ): Promise<KnowledgeItem | null>;
-  /** Sorted by Kind, then by the Knowledge Key's number. */
+  /** Sorted by Kind, then by the Knowledge Key's number; every match without a page. */
   abstract findMany(
     props: KnowledgeItemQueryProps,
-    page: KnowledgeItemPage,
+    page?: KnowledgeItemPage,
   ): Promise<KnowledgeItem[]>;
   abstract count(props: KnowledgeItemQueryProps): Promise<number>;
   abstract delete(id: KnowledgeItemId): Promise<void>;

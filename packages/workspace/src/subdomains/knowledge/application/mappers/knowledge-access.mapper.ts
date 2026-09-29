@@ -35,6 +35,9 @@ export function toKnowledgeItemAccessDto(
       approved &&
       knowledgePolicyService.canRecordReplacement(projectRole, item),
     canRetire: approved && knowledgePolicyService.canRetire(projectRole, item),
+    canConfirm:
+      item.needsReview() &&
+      knowledgePolicyService.canConfirm(projectRole, item),
   };
 }
 

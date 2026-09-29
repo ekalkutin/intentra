@@ -2,9 +2,12 @@ import { Aggregate, ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 
 import { MemberId } from '../../../tenancy/index.js';
 import {
+  InvalidLinkException,
   KnowledgeItemChangedException,
+  KnowledgeItemNeedsReviewException,
   KnowledgeItemNotApprovedException,
   KnowledgeItemNotDraftException,
+  KnowledgeItemNotMarkedException,
   KnowledgeKindMismatchException,
   RationaleRequiredException,
   SupersededItemNotApprovedException,
@@ -14,6 +17,8 @@ import {
   KnowledgeItemVersion,
   KnowledgeKey,
   KnowledgeKind,
+  KnowledgeLink,
+  KnowledgeLinkType,
   KnowledgeSource,
   KnowledgeStatus,
   KnowledgeTitle,
@@ -21,6 +26,7 @@ import {
   RejectionReason,
   RetirementReason,
   type KnowledgeContent,
+  type KnowledgeLinkProps,
 } from '../value-objects/index.js';
 
 /**
@@ -54,6 +60,8 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   #retiredBy: MemberId | null;
   #retiredAt: Temporal.Instant | null;
   #retirementReason: RetirementReason | null;
+  #links: readonly KnowledgeLink[];
+  #reviewCauses: readonly KnowledgeKey[];
   #version: KnowledgeItemVersion;
 
   private constructor(id: KnowledgeItemId, state: KnowledgeItemState) {
@@ -82,6 +90,8 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     this.#retiredBy = state.retiredBy;
     this.#retiredAt = state.retiredAt;
     this.#retirementReason = state.retirementReason;
+    this.#links = state.links;
+    this.#reviewCauses = state.reviewCauses;
     this.#version = state.version;
   }
 
@@ -200,8 +210,35 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     return this.#retirementReason;
   }
 
+  get links(): readonly KnowledgeLink[] {
+    return this.#links;
+  }
+
+  /** The targets whose change marked it Needs Review; empty when it is not marked. */
+  get reviewCauses(): readonly KnowledgeKey[] {
+    return this.#reviewCauses;
+  }
+
   get version(): KnowledgeItemVersion {
     return this.#version;
+  }
+
+  public needsReview(): boolean {
+    return this.#reviewCauses.length > 0;
+  }
+
+  /** The targets of its `depends on` Links, which must be Approved before it is. */
+  public dependencies(): readonly KnowledgeKey[] {
+    return this.#links
+      .filter(link => link.type.equals(KnowledgeLinkType.DependsOn))
+      .map(link => link.target);
+  }
+
+  /** Whether a change of the given item puts this one in question. */
+  public restsOn(key: KnowledgeKey): boolean {
+    return this.#links.some(
+      link => link.type.marksForReview() && link.target.equals(key),
+    );
   }
 
   public isDraft(): boolean {
@@ -220,11 +257,13 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     if (props.supersedes && !props.supersedes.kind.equals(props.content.kind)) {
       throw new KnowledgeKindMismatchException();
     }
+    const key = new KnowledgeKey(props.content.kind, props.number);
+    ensureValidLinks(key, props.links);
 
     return new KnowledgeItem(new KnowledgeItemId(), {
       workspaceId: new WorkspaceId(props.workspaceId),
       projectId: new ProjectId(props.projectId),
-      key: new KnowledgeKey(props.content.kind, props.number),
+      key,
       title: new KnowledgeTitle(props.title),
       status: KnowledgeStatus.Draft,
       source: props.source,
@@ -247,6 +286,8 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
       retiredBy: null,
       retiredAt: null,
       retirementReason: null,
+      links: props.links,
+      reviewCauses: [],
       version: KnowledgeItemVersion.First,
     });
   }
@@ -283,6 +324,8 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
       retiredBy: toMemberId(props.retiredBy),
       retiredAt: props.retiredAt,
       retirementReason: RetirementReason.optional(props.retirementReason),
+      links: props.links.map(link => KnowledgeLink.from(link)),
+      reviewCauses: props.reviewCauses.map(cause => KnowledgeKey.parse(cause)),
       version: new KnowledgeItemVersion(props.version),
     });
   }
@@ -310,6 +353,14 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     if (changes.content) {
       this.#content = changes.content;
     }
+    if (changes.links) {
+      ensureValidLinks(this.#key, changes.links);
+      this.#links = changes.links;
+      // Editing clears the mark only where it no longer rests on what changed.
+      this.#reviewCauses = this.#reviewCauses.filter(cause =>
+        this.restsOn(cause),
+      );
+    }
     this.#lastEditedBy = editorId;
     this.#lastEditedAt = Temporal.Now.instant();
     this.#version = this.#version.next();
@@ -321,6 +372,9 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     seenVersion: KnowledgeItemVersion,
   ): void {
     this.#ensureChangeable(seenVersion);
+    if (this.needsReview()) {
+      throw new KnowledgeItemNeedsReviewException();
+    }
     this.#status = KnowledgeStatus.Approved;
     this.#approvedBy = approverId;
     this.#approvedAt = Temporal.Now.instant();
@@ -338,6 +392,7 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     this.#rejectedBy = rejecterId;
     this.#rejectedAt = Temporal.Now.instant();
     this.#rejectionReason = RejectionReason.optional(reason);
+    this.#reviewCauses = [];
     this.#version = this.#version.next();
   }
 
@@ -358,6 +413,7 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     this.#supersededBy = approverId;
     this.#supersededAt = Temporal.Now.instant();
     this.#supersededByKey = replacementKey;
+    this.#reviewCauses = [];
     this.#version = this.#version.next();
   }
 
@@ -375,6 +431,50 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     this.#retiredBy = retirerId;
     this.#retiredAt = Temporal.Now.instant();
     this.#retirementReason = RetirementReason.optional(reason);
+    this.#reviewCauses = [];
+    this.#version = this.#version.next();
+  }
+
+  /**
+   * Something it depends on or is justified by was rejected, superseded or
+   * retired. Only a Draft or an Approved item is marked; Rejected and Obsolete
+   * ones are no longer part of the knowledge.
+   */
+  public markForReview(cause: KnowledgeKey): void {
+    const current = this.isDraft() || this.isApproved();
+    if (!current || this.#reviewCauses.some(marked => marked.equals(cause))) {
+      return;
+    }
+    this.#reviewCauses = [...this.#reviewCauses, cause];
+    this.#version = this.#version.next();
+  }
+
+  /**
+   * A person has checked that it still holds on what its changed targets
+   * became: its Links to them move onto their replacements, or away if there
+   * is none. The one change an Approved item's Links ever get.
+   */
+  public confirm(
+    seenVersion: KnowledgeItemVersion,
+    replacementOf: (cause: KnowledgeKey) => KnowledgeKey | null,
+  ): void {
+    if (!this.needsReview()) {
+      throw new KnowledgeItemNotMarkedException();
+    }
+    this.#ensureSeen(seenVersion);
+    const links: KnowledgeLink[] = [];
+    for (const link of this.#links) {
+      const caused = this.#reviewCauses.some(cause =>
+        cause.equals(link.target),
+      );
+      const replacement = caused ? replacementOf(link.target) : link.target;
+      const moved = replacement && link.aimedAt(replacement);
+      if (moved && !links.some(kept => kept.equals(moved))) {
+        links.push(moved);
+      }
+    }
+    this.#links = links;
+    this.#reviewCauses = [];
     this.#version = this.#version.next();
   }
 
@@ -398,6 +498,21 @@ function toMemberId(value: string | null): MemberId | null {
 
 function toKey(value: string | null): KnowledgeKey | null {
   return value === null ? null : KnowledgeKey.parse(value);
+}
+
+/** A Link leads to another item, and each Link is there once. */
+function ensureValidLinks(
+  key: KnowledgeKey,
+  links: readonly KnowledgeLink[],
+): void {
+  const valid = links.every(
+    (link, index) =>
+      !link.target.equals(key) &&
+      links.findIndex(other => other.equals(link)) === index,
+  );
+  if (!valid) {
+    throw new InvalidLinkException();
+  }
 }
 
 type KnowledgeItemState = {
@@ -425,6 +540,8 @@ type KnowledgeItemState = {
   readonly retiredBy: MemberId | null;
   readonly retiredAt: Temporal.Instant | null;
   readonly retirementReason: RetirementReason | null;
+  readonly links: readonly KnowledgeLink[];
+  readonly reviewCauses: readonly KnowledgeKey[];
   readonly version: KnowledgeItemVersion;
 };
 type KnowledgeItemRecordProps = {
@@ -439,6 +556,7 @@ type KnowledgeItemRecordProps = {
   readonly authorId: string;
   /** The Approved item of the same Kind it replaces once approved, if any. */
   readonly supersedes: KnowledgeKey | null;
+  readonly links: readonly KnowledgeLink[];
 };
 type KnowledgeItemRestoreProps = {
   readonly id: string;
@@ -467,6 +585,8 @@ type KnowledgeItemRestoreProps = {
   readonly retiredBy: string | null;
   readonly retiredAt: Temporal.Instant | null;
   readonly retirementReason: string | null;
+  readonly links: readonly KnowledgeLinkProps[];
+  readonly reviewCauses: readonly string[];
   readonly version: number;
 };
 /** What to change; a field left out stays as it is, a null rationale clears it. */
@@ -474,4 +594,6 @@ export type KnowledgeItemChanges = {
   readonly title?: string;
   readonly rationale?: string | null;
   readonly content?: KnowledgeContent;
+  /** Replaces all of its Links. */
+  readonly links?: readonly KnowledgeLink[];
 };
