@@ -19,50 +19,67 @@ function createWorkspace(ownerId = new MemberId()): Workspace {
 describe('Workspace', () => {
   describe('create', () => {
     it('is owned by the given Member', () => {
+      // Arrange
       const ownerId = new MemberId();
 
+      // Act
       const workspace = createWorkspace(ownerId);
 
+      // Assert
       expect(workspace.name.value).toBe('Acme Corp');
       expect(workspace.slug.value).toBe('acme-corp');
       expect(workspace.isOwnedBy(ownerId)).toBe(true);
     });
 
     it('rejects an invalid name', () => {
-      expect(() =>
+      // Act
+      const creating = () =>
         Workspace.create({
           name: ' ',
           slug: 'acme',
           ownerId: new MemberId().value,
-        }),
-      ).toThrow(InvalidWorkspaceNameException);
+        });
+
+      // Assert
+      expect(creating).toThrow(InvalidWorkspaceNameException);
     });
 
     it('rejects an invalid slug', () => {
-      expect(() =>
+      // Act
+      const creating = () =>
         Workspace.create({
           name: 'Acme',
           slug: 'Acme Corp',
           ownerId: new MemberId().value,
-        }),
-      ).toThrow(InvalidWorkspaceSlugException);
+        });
+
+      // Assert
+      expect(creating).toThrow(InvalidWorkspaceSlugException);
     });
   });
 
   describe('rename', () => {
     it('changes the name but keeps the slug', () => {
+      // Arrange
       const workspace = createWorkspace();
 
+      // Act
       workspace.rename('Acme Industries');
 
+      // Assert
       expect(workspace.name.value).toBe('Acme Industries');
       expect(workspace.slug.value).toBe('acme-corp');
     });
 
     it('rejects an invalid name', () => {
+      // Arrange
       const workspace = createWorkspace();
 
-      expect(() => workspace.rename('')).toThrow(InvalidWorkspaceNameException);
+      // Act
+      const renaming = () => workspace.rename('');
+
+      // Assert
+      expect(renaming).toThrow(InvalidWorkspaceNameException);
     });
   });
 });

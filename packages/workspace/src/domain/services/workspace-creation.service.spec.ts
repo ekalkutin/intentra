@@ -10,14 +10,18 @@ describe('WorkspaceCreationService', () => {
   const service = new WorkspaceCreationService();
 
   it('makes the creating Account the Owner of the new Workspace', () => {
+    // Arrange
     const accountId = new AccountId();
 
+    // Act
     const { workspace, owner } = service.create({
       name: 'Acme Corp',
       slug: 'acme-corp',
       accountId: accountId.value,
+      email: 'member@example.com',
     });
 
+    // Assert
     expect(workspace.isOwnedBy(owner.id)).toBe(true);
     expect(owner.belongsTo(workspace.id)).toBe(true);
     expect(owner.accountId.equals(accountId)).toBe(true);
@@ -25,12 +29,16 @@ describe('WorkspaceCreationService', () => {
   });
 
   it('rejects an invalid Workspace', () => {
-    expect(() =>
+    // Act
+    const creating = () =>
       service.create({
         name: 'Acme Corp',
         slug: 'Acme Corp',
         accountId: new AccountId().value,
-      }),
-    ).toThrow(InvalidWorkspaceSlugException);
+        email: 'member@example.com',
+      });
+
+    // Assert
+    expect(creating).toThrow(InvalidWorkspaceSlugException);
   });
 });

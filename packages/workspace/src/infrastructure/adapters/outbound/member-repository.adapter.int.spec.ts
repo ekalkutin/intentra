@@ -22,6 +22,7 @@ describe('MemberRepositoryAdapter integration', () => {
     const member = Member.join({
       workspaceId: new WorkspaceId().value,
       accountId: new AccountId().value,
+      email: 'member@example.com',
     });
 
     // Act

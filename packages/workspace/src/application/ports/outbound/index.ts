@@ -1,4 +1,8 @@
 export {
+  InvitationRepository,
+  type InvitationQueryProps,
+} from './invitation-repository.port.js';
+export {
   MemberRepository,
   type MemberQueryProps,
 } from './member-repository.port.js';

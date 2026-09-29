@@ -12,3 +12,4 @@
 - **Configurable Project permissions.** MVP: only an Owner creates, renames and deletes Projects. Later: a dedicated permission that lets a Member create Projects and delete the ones they created.
 - **Permissions model.** MVP: the only Role is Contributor, and ownership is a property of the Workspace. Next step: fixed Roles that each carry a set of permissions. Custom Roles per Workspace only if customers ask for them.
 - **Slug availability check.** MVP: the client submits the Workspace and, on `WORKSPACE_SLUG_TAKEN` (409), retries with the next suffix (`acme-corp-2`). Later: a query that tells whether a slug is free, likely as a GraphQL field.
+- **Member email sync.** A Member keeps a copy of its Account's email, taken from the Actor on joining. IAM cannot change an email yet; once it can, Workspace should update the copy from an IAM event.

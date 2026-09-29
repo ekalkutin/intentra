@@ -1,4 +1,4 @@
-import { DomainException } from '@intentra/shared-kernel';
+import { DomainException } from './domain.exception.js';
 
 export class InvalidEmailException extends DomainException<'INVALID_EMAIL'> {
   constructor() {

@@ -26,6 +26,7 @@ export class MemberRepositoryAdapter implements MemberRepository {
         {
           workspaceId: member.workspaceId.value,
           accountId: member.accountId.value,
+          email: member.email.value,
           role: member.role.value,
           status: member.status.value,
         },
@@ -58,6 +59,7 @@ export class MemberRepositoryAdapter implements MemberRepository {
     return {
       ...(props.workspaceId && { workspaceId: props.workspaceId.value }),
       ...(props.accountId && { accountId: props.accountId.value }),
+      ...(props.email && { email: props.email.value }),
       ...(props.status && { status: props.status.value }),
     };
   }
@@ -67,6 +69,7 @@ export class MemberRepositoryAdapter implements MemberRepository {
       id: document._id,
       workspaceId: document.workspaceId,
       accountId: document.accountId,
+      email: document.email,
       role: document.role,
       status: document.status,
     });

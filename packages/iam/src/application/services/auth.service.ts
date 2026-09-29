@@ -8,10 +8,9 @@ import type {
   SignInDto,
   TokenPair,
 } from '@intentra/contracts/iam';
-import { AccountId, UnitOfWork } from '@intentra/shared-kernel';
+import { AccountId, Email, UnitOfWork } from '@intentra/shared-kernel';
 
 import { Account } from '../../domain/entities/index.js';
-import { Email } from '../../domain/value-objects/index.js';
 import {
   InvalidCredentialsException,
   InvalidRefreshTokenException,

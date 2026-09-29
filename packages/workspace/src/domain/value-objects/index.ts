@@ -1,3 +1,5 @@
+export { InvitationId } from './invitation-id.vo.js';
+export { InvitationStatus } from './invitation-status.vo.js';
 export { MemberId } from './member-id.vo.js';
 export { MemberStatus } from './member-status.vo.js';
 export { ProjectName } from './project-name.vo.js';

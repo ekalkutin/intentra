@@ -44,6 +44,7 @@ describe('ProjectsService integration', () => {
     const member = Member.join({
       workspaceId,
       accountId: contributor.accountId,
+      email: contributor.email,
     });
     await app.get(UnitOfWork).run(() => app.get(MemberRepository).save(member));
 

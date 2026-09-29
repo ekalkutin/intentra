@@ -16,6 +16,7 @@ function createWorkspace(): { workspace: Workspace; owner: Member } {
     name: 'Acme Corp',
     slug: 'acme-corp',
     accountId: new AccountId().value,
+    email: 'member@example.com',
   });
 }
 
@@ -23,6 +24,7 @@ function joinMember(workspaceId: WorkspaceId): Member {
   return Member.join({
     workspaceId: workspaceId.value,
     accountId: new AccountId().value,
+    email: 'member@example.com',
   });
 }
 
@@ -30,33 +32,42 @@ describe('OwnershipTransferService', () => {
   const service = new OwnershipTransferService();
 
   it('hands ownership to another active Member', () => {
+    // Arrange
     const { workspace, owner } = createWorkspace();
     const contributor = joinMember(workspace.id);
 
+    // Act
     service.transfer(workspace, contributor);
 
+    // Assert
     expect(workspace.isOwnedBy(contributor.id)).toBe(true);
     expect(workspace.isOwnedBy(owner.id)).toBe(false);
   });
 
   it('rejects a Member of another workspace', () => {
+    // Arrange
     const { workspace, owner } = createWorkspace();
     const stranger = joinMember(new WorkspaceId());
 
-    expect(() => service.transfer(workspace, stranger)).toThrow(
-      MemberNotInWorkspaceException,
-    );
+    // Act
+    const transferring = () => service.transfer(workspace, stranger);
+
+    // Assert
+    expect(transferring).toThrow(MemberNotInWorkspaceException);
     expect(workspace.isOwnedBy(owner.id)).toBe(true);
   });
 
   it('rejects a removed Member', () => {
+    // Arrange
     const { workspace, owner } = createWorkspace();
     const former = joinMember(workspace.id);
     former.remove();
 
-    expect(() => service.transfer(workspace, former)).toThrow(
-      MemberNotActiveException,
-    );
+    // Act
+    const transferring = () => service.transfer(workspace, former);
+
+    // Assert
+    expect(transferring).toThrow(MemberNotActiveException);
     expect(workspace.isOwnedBy(owner.id)).toBe(true);
   });
 });

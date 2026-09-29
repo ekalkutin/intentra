@@ -8,13 +8,19 @@ describe('MemberStatus', () => {
   it.each([MemberStatus.Active, MemberStatus.Removed])(
     'reads $value back into the same instance',
     status => {
-      expect(MemberStatus.from(status.value)).toBe(status);
+      // Act
+      const read = MemberStatus.from(status.value);
+
+      // Assert
+      expect(read).toBe(status);
     },
   );
 
   it('rejects an unknown value', () => {
-    expect(() => MemberStatus.from('banned')).toThrow(
-      UnknownMemberStatusException,
-    );
+    // Act
+    const reading = () => MemberStatus.from('banned');
+
+    // Assert
+    expect(reading).toThrow(UnknownMemberStatusException);
   });
 });

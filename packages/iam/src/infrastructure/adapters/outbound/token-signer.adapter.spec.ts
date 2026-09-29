@@ -16,52 +16,82 @@ describe('TokenSignerAdapter', () => {
   const claims = { accountId: new AccountId().value, email: 'ada@example.com' };
 
   it('reads back the claims of an access token', async () => {
+    // Arrange
     const token = await signer.signAccessToken(claims);
 
-    await expect(signer.verifyAccessToken(token)).resolves.toEqual(claims);
+    // Act
+    const verified = await signer.verifyAccessToken(token);
+
+    // Assert
+    expect(verified).toEqual(claims);
   });
 
   it('reads back the Account of a refresh token', async () => {
+    // Arrange
     const token = await signer.signRefreshToken({
       accountId: claims.accountId,
     });
 
-    await expect(signer.verifyRefreshToken(token)).resolves.toEqual({
-      accountId: claims.accountId,
-    });
+    // Act
+    const verified = await signer.verifyRefreshToken(token);
+
+    // Assert
+    expect(verified).toEqual({ accountId: claims.accountId });
   });
 
   it('does not accept a refresh token as an access token, nor the other way round', async () => {
+    // Arrange
     const accessToken = await signer.signAccessToken(claims);
     const refreshToken = await signer.signRefreshToken({
       accountId: claims.accountId,
     });
 
-    await expect(signer.verifyAccessToken(refreshToken)).resolves.toBeNull();
-    await expect(signer.verifyRefreshToken(accessToken)).resolves.toBeNull();
+    // Act
+    const [refreshAsAccess, accessAsRefresh] = await Promise.all([
+      signer.verifyAccessToken(refreshToken),
+      signer.verifyRefreshToken(accessToken),
+    ]);
+
+    // Assert
+    expect(refreshAsAccess).toBeNull();
+    expect(accessAsRefresh).toBeNull();
   });
 
   it('rejects a token signed with another secret', async () => {
+    // Arrange
     const forger = new TokenSignerAdapter(new JwtService(), {
       ...options,
       accessTokenSecret: 'another-secret',
     });
     const token = await forger.signAccessToken(claims);
 
-    await expect(signer.verifyAccessToken(token)).resolves.toBeNull();
+    // Act
+    const verified = await signer.verifyAccessToken(token);
+
+    // Assert
+    expect(verified).toBeNull();
   });
 
   it('rejects an expired token', async () => {
+    // Arrange
     const expiring = new TokenSignerAdapter(new JwtService(), {
       ...options,
       accessTokenTtlSeconds: -1,
     });
     const token = await expiring.signAccessToken(claims);
 
-    await expect(signer.verifyAccessToken(token)).resolves.toBeNull();
+    // Act
+    const verified = await signer.verifyAccessToken(token);
+
+    // Assert
+    expect(verified).toBeNull();
   });
 
   it('rejects garbage', async () => {
-    await expect(signer.verifyAccessToken('not-a-jwt')).resolves.toBeNull();
+    // Act
+    const verified = await signer.verifyAccessToken('not-a-jwt');
+
+    // Assert
+    expect(verified).toBeNull();
   });
 });

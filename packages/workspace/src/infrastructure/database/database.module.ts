@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import {
+  InvitationModel,
+  InvitationSchema,
   MemberModel,
   MemberSchema,
   ProjectModel,
@@ -16,6 +18,7 @@ import {
       { name: WorkspaceModel.name, schema: WorkspaceSchema },
       { name: MemberModel.name, schema: MemberSchema },
       { name: ProjectModel.name, schema: ProjectSchema },
+      { name: InvitationModel.name, schema: InvitationSchema },
     ]),
   ],
   exports: [MongooseModule],

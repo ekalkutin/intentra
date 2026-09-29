@@ -8,7 +8,11 @@ describe('WorkspaceSlug', () => {
   it.each(['acme', 'acme-corp', 'acme-corp-2', 'a1b', 'a'.repeat(15)])(
     'accepts %j',
     value => {
-      expect(new WorkspaceSlug(value).value).toBe(value);
+      // Act
+      const slug = new WorkspaceSlug(value);
+
+      // Assert
+      expect(slug.value).toBe(value);
     },
   );
 
@@ -22,8 +26,10 @@ describe('WorkspaceSlug', () => {
     'acme--corp',
     'acme_corp',
   ])('rejects %j', value => {
-    expect(() => new WorkspaceSlug(value)).toThrow(
-      InvalidWorkspaceSlugException,
-    );
+    // Act
+    const creating = () => new WorkspaceSlug(value);
+
+    // Assert
+    expect(creating).toThrow(InvalidWorkspaceSlugException);
   });
 });

@@ -6,10 +6,18 @@ import { ProjectName } from './project-name.vo.js';
 
 describe('ProjectName', () => {
   it('trims surrounding spaces', () => {
-    expect(new ProjectName('  Billing  ').value).toBe('Billing');
+    // Act
+    const name = new ProjectName('  Billing  ');
+
+    // Assert
+    expect(name.value).toBe('Billing');
   });
 
   it.each(['', '   ', 'a'.repeat(101)])('rejects %j', value => {
-    expect(() => new ProjectName(value)).toThrow(InvalidProjectNameException);
+    // Act
+    const creating = () => new ProjectName(value);
+
+    // Assert
+    expect(creating).toThrow(InvalidProjectNameException);
   });
 });

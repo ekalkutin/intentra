@@ -7,13 +7,25 @@ describe('PasswordHasherAdapter', () => {
   const password = 'correct-horse-battery-staple';
 
   it('does not store the password as is', async () => {
-    await expect(hasher.hash(password)).resolves.not.toContain(password);
+    // Act
+    const hash = await hasher.hash(password);
+
+    // Assert
+    expect(hash).not.toContain(password);
   });
 
   it('accepts the right password and rejects a wrong one', async () => {
+    // Arrange
     const hash = await hasher.hash(password);
 
-    await expect(hasher.compare(password, hash)).resolves.toBe(true);
-    await expect(hasher.compare('wrong-password', hash)).resolves.toBe(false);
+    // Act
+    const [rightMatches, wrongMatches] = await Promise.all([
+      hasher.compare(password, hash),
+      hasher.compare('wrong-password', hash),
+    ]);
+
+    // Assert
+    expect(rightMatches).toBe(true);
+    expect(wrongMatches).toBe(false);
   });
 });

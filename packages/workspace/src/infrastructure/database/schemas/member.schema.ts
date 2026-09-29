@@ -12,6 +12,9 @@ export class MemberModel {
   readonly accountId: string;
 
   @Prop({ type: String, required: true })
+  readonly email: string;
+
+  @Prop({ type: String, required: true })
   readonly role: string;
 
   @Prop({ type: String, required: true })
@@ -22,3 +25,4 @@ export const MemberSchema = SchemaFactory.createForClass(MemberModel);
 
 /** An Account is at most one Member of a Workspace. */
 MemberSchema.index({ workspaceId: 1, accountId: 1 }, { unique: true });
+MemberSchema.index({ workspaceId: 1, email: 1 });

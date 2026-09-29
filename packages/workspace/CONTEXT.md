@@ -13,11 +13,11 @@ A short, globally unique, human-readable handle of a Workspace used in its addre
 _Avoid_: Handle, Alias, Subdomain
 
 **Member**:
-An Account's participation in a specific Workspace, with its own role and status. One Account can be a different Member in each Workspace it belongs to. A Member is Active or Removed; a Removed Member keeps its history but has no access.
+An Account's participation in a specific Workspace, with its own role and status. One Account can be a different Member in each Workspace it belongs to. A Member is Active or Removed; a Removed Member keeps its history but has no access. An Account is at most one Member per Workspace: a Removed Member who accepts a new Invitation becomes Active again.
 _Avoid_: User, Participant, Collaborator
 
 **Invitation**:
-The Owner's offer for someone to join a Workspace as a Contributor. It is addressed to an email, and only an Account with that same email can accept it. On acceptance the invitee becomes a Member. An Invitation is Pending until it is Accepted, Revoked by the Owner, Expired after 7 days, or replaced by a newer Invitation to the same email.
+The Owner's offer for someone to join a Workspace as a Contributor. It is addressed to an email, and only an Account with that same email can accept it. On acceptance the invitee becomes a Member. An Invitation is Pending until it is Accepted or Declined by the invitee, Revoked by the Owner, Expired after 7 days, or replaced by a newer Invitation to the same email.
 _Avoid_: Invite link, Join request
 
 **Project**:

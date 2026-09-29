@@ -1,4 +1,13 @@
 export {
+  CreateInvitationDtoSchema,
+  type CreateInvitationDto,
+} from './invitations/create-invitation.dto.js';
+export {
+  type InvitationDto,
+  type InvitationStatusDto,
+} from './invitations/invitation.dto.js';
+export { InvitationsApi } from './invitations/invitations.api.js';
+export {
   CreateProjectDtoSchema,
   type CreateProjectDto,
 } from './projects/create-project.dto.js';

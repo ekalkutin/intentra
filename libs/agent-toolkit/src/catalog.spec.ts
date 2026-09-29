@@ -7,7 +7,11 @@ describe.each([
   ['AGENT_TOOLS', AGENT_TOOLS],
 ])('%s', (_name, tools) => {
   it('keys every tool by its snake_case id', () => {
-    for (const [key, tool] of Object.entries(tools)) {
+    // Act
+    const entries = Object.entries(tools);
+
+    // Assert
+    for (const [key, tool] of entries) {
       expect(key).toBe(tool.id);
       expect(tool.id).toMatch(/^[a-z]+(_[a-z]+)*$/);
     }
@@ -16,23 +20,31 @@ describe.each([
 
 describe.each(Object.values(MCP_TOOLS))('MCP tool $id', tool => {
   it('has input and output schemas', () => {
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.outputSchema).toBeDefined();
+    // Act
+    const { inputSchema, outputSchema } = tool;
+
+    // Assert
+    expect(inputSchema).toBeDefined();
+    expect(outputSchema).toBeDefined();
   });
 
   // MCP carries a structured result only as an object: wrap lists.
   it('returns an object', () => {
+    // Act
     const output = tool.outputSchema?.['~standard'].jsonSchema.output({
       target: 'draft-2020-12',
     });
 
+    // Assert
     expect(output?.type).toBe('object');
   });
 
   // Clients rely on the hints to ask the person before a write.
   it('states whether it changes data', () => {
+    // Act
     const annotations = tool.mcp?.annotations;
 
+    // Assert
     expect(typeof annotations?.readOnlyHint).toBe('boolean');
     expect(annotations?.readOnlyHint && annotations.destructiveHint).not.toBe(
       true,

@@ -1,6 +1,4 @@
-import { AccountId, Aggregate } from '@intentra/shared-kernel';
-
-import { Email } from '../value-objects/index.js';
+import { AccountId, Aggregate, Email } from '@intentra/shared-kernel';
 
 export class Account extends Aggregate<AccountId> {
   #email: Email;

@@ -10,10 +10,10 @@ Where we stopped on 2026-09-29. Glossary: `CONTEXT-MAP.md`, `packages/iam/CONTEX
 - [x] `POST` / `GET /api/workspaces/:workspaceId/projects` (Owner only creates; outsiders get 404)
 - [x] `AccessResolver` for Workspace-scoped use cases
 - [x] `UnitOfWork` (MongoDB replica set + transactions): every write runs inside `UnitOfWork.run`, a write outside it throws `NoUnitOfWorkException`
+- [x] **Invitation**: Owner invites / lists / revokes (`/api/workspaces/:workspaceId/invitations`); invitee lists, opens, accepts, declines (`/api/invitations`). A Member keeps a copy of its Account's email; `Email` VO moved to shared-kernel
 
 ## Next, in this order
 
-- [ ] **Invitation**: Owner invites an email as Contributor; only the Account with that email accepts; Pending → Accepted / Revoked / Expired (7 days); a new Invitation to the same email revokes the old one; cannot invite an existing Member; the Owner copies the link by hand (no email sending). Accepting changes two aggregates: one `UnitOfWork.run`.
 - [ ] **List Members** of a Workspace
 - [ ] **Remove a Member** (Owner) and **leave a Workspace** (any Member). The Owner can neither leave nor be removed: a domain service, since it spans Workspace and Member.
 - [ ] **Rename a Workspace** (`workspace.rename` exists, no use case yet)

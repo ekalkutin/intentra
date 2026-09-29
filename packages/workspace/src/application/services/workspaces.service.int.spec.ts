@@ -125,6 +125,7 @@ describe('WorkspacesService integration', () => {
       const member = Member.join({
         workspaceId: workspace.id,
         accountId: bob.accountId,
+        email: bob.email,
       });
       member.remove();
       await app

@@ -6,10 +6,21 @@ import { Role } from './role.vo.js';
 
 describe('Role', () => {
   it('reads a known value back into the same instance', () => {
-    expect(Role.from(Role.Contributor.value)).toBe(Role.Contributor);
+    // Arrange
+    const value = Role.Contributor.value;
+
+    // Act
+    const role = Role.from(value);
+
+    // Assert
+    expect(role).toBe(Role.Contributor);
   });
 
   it('rejects an unknown value', () => {
-    expect(() => Role.from('owner')).toThrow(UnknownRoleException);
+    // Act
+    const reading = () => Role.from('owner');
+
+    // Assert
+    expect(reading).toThrow(UnknownRoleException);
   });
 });

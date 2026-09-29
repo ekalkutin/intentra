@@ -1,4 +1,4 @@
-import type { AccountId, WorkspaceId } from '@intentra/shared-kernel';
+import type { AccountId, Email, WorkspaceId } from '@intentra/shared-kernel';
 
 import { Member } from '../../../domain/entities/index.js';
 import type { MemberStatus } from '../../../domain/value-objects/index.js';
@@ -6,6 +6,7 @@ import type { MemberStatus } from '../../../domain/value-objects/index.js';
 export type MemberQueryProps = {
   readonly workspaceId?: WorkspaceId;
   readonly accountId?: AccountId;
+  readonly email?: Email;
   readonly status?: MemberStatus;
 };
 

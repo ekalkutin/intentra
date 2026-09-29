@@ -5,11 +5,13 @@ import { echoTool } from './echo.tool.js';
 
 describe('echo', () => {
   it('returns the given message', async () => {
-    const result = await echoTool.execute?.(
-      { message: 'hello' },
-      { observe: noopObserve },
-    );
+    // Arrange
+    const input = { message: 'hello' };
 
+    // Act
+    const result = await echoTool.execute?.(input, { observe: noopObserve });
+
+    // Assert
     expect(result).toEqual({ message: 'hello' });
   });
 });

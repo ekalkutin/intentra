@@ -1,8 +1,8 @@
-import { InvalidEmailException } from '../exceptions/index.js';
+import { InvalidEmailException } from '../../exceptions/index.js';
 
 const SHAPE = /^[^\s@]+@[^\s@]+$/;
 
-/** Stored lower-case, so one address cannot sign up twice in another case. */
+/** Stored lower-case, so one address is the same in any case. */
 export class Email {
   readonly #value: string;
 
@@ -16,5 +16,9 @@ export class Email {
 
   public get value(): string {
     return this.#value;
+  }
+
+  public equals(other: Email): boolean {
+    return other.value === this.#value;
   }
 }

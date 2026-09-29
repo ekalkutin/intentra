@@ -1,9 +1,13 @@
+export { AlreadyWorkspaceMemberException } from './already-workspace-member.exception.js';
 export { InvalidProjectNameException } from './invalid-project-name.exception.js';
 export { InvalidProjectSlugException } from './invalid-project-slug.exception.js';
 export { InvalidWorkspaceNameException } from './invalid-workspace-name.exception.js';
 export { InvalidWorkspaceSlugException } from './invalid-workspace-slug.exception.js';
+export { InvitationExpiredException } from './invitation-expired.exception.js';
+export { InvitationNotPendingException } from './invitation-not-pending.exception.js';
 export { MemberNotActiveException } from './member-not-active.exception.js';
 export { MemberNotInWorkspaceException } from './member-not-in-workspace.exception.js';
 export { NotWorkspaceOwnerException } from './not-workspace-owner.exception.js';
+export { UnknownInvitationStatusException } from './unknown-invitation-status.exception.js';
 export { UnknownMemberStatusException } from './unknown-member-status.exception.js';
 export { UnknownRoleException } from './unknown-role.exception.js';

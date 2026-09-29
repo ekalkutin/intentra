@@ -17,6 +17,7 @@ function createWorkspace(): { workspace: Workspace; owner: Member } {
     name: 'Acme Corp',
     slug: 'acme-corp',
     accountId: new AccountId().value,
+    email: 'member@example.com',
   });
 }
 
@@ -24,6 +25,7 @@ function joinMember(workspaceId: WorkspaceId): Member {
   return Member.join({
     workspaceId: workspaceId.value,
     accountId: new AccountId().value,
+    email: 'member@example.com',
   });
 }
 
@@ -32,10 +34,13 @@ describe('ProjectCreationService', () => {
   const props = { name: 'Billing', slug: 'billing' };
 
   it('lets the Owner create a Project in the Workspace', () => {
+    // Arrange
     const { workspace, owner } = createWorkspace();
 
+    // Act
     const project = service.create(workspace, owner, props);
 
+    // Assert
     expect(project.workspaceId.equals(workspace.id)).toBe(true);
     expect(project.createdBy.equals(owner.id)).toBe(true);
     expect(project.name.value).toBe('Billing');
@@ -43,29 +48,38 @@ describe('ProjectCreationService', () => {
   });
 
   it('rejects a Contributor', () => {
+    // Arrange
     const { workspace } = createWorkspace();
     const contributor = joinMember(workspace.id);
 
-    expect(() => service.create(workspace, contributor, props)).toThrow(
-      NotWorkspaceOwnerException,
-    );
+    // Act
+    const creating = () => service.create(workspace, contributor, props);
+
+    // Assert
+    expect(creating).toThrow(NotWorkspaceOwnerException);
   });
 
   it('rejects a Member of another workspace', () => {
+    // Arrange
     const { workspace } = createWorkspace();
     const stranger = joinMember(new WorkspaceId());
 
-    expect(() => service.create(workspace, stranger, props)).toThrow(
-      MemberNotInWorkspaceException,
-    );
+    // Act
+    const creating = () => service.create(workspace, stranger, props);
+
+    // Assert
+    expect(creating).toThrow(MemberNotInWorkspaceException);
   });
 
   it('rejects a removed Member', () => {
+    // Arrange
     const { workspace, owner } = createWorkspace();
     owner.remove();
 
-    expect(() => service.create(workspace, owner, props)).toThrow(
-      MemberNotActiveException,
-    );
+    // Act
+    const creating = () => service.create(workspace, owner, props);
+
+    // Assert
+    expect(creating).toThrow(MemberNotActiveException);
   });
 });

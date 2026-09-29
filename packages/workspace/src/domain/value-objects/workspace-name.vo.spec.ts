@@ -6,16 +6,29 @@ import { WorkspaceName } from './workspace-name.vo.js';
 
 describe('WorkspaceName', () => {
   it('trims surrounding spaces', () => {
-    expect(new WorkspaceName('  Acme Corp  ').value).toBe('Acme Corp');
+    // Act
+    const name = new WorkspaceName('  Acme Corp  ');
+
+    // Assert
+    expect(name.value).toBe('Acme Corp');
   });
 
   it('accepts 100 characters', () => {
-    expect(new WorkspaceName('a'.repeat(100)).value).toHaveLength(100);
+    // Arrange
+    const value = 'a'.repeat(100);
+
+    // Act
+    const name = new WorkspaceName(value);
+
+    // Assert
+    expect(name.value).toHaveLength(100);
   });
 
   it.each(['', '   ', 'a'.repeat(101)])('rejects %j', value => {
-    expect(() => new WorkspaceName(value)).toThrow(
-      InvalidWorkspaceNameException,
-    );
+    // Act
+    const creating = () => new WorkspaceName(value);
+
+    // Assert
+    expect(creating).toThrow(InvalidWorkspaceNameException);
   });
 });

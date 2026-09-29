@@ -1,7 +1,6 @@
-import type { AccountId } from '@intentra/shared-kernel';
+import type { AccountId, Email } from '@intentra/shared-kernel';
 
 import { Account } from '../../../domain/entities/index.js';
-import type { Email } from '../../../domain/value-objects/index.js';
 
 export type AccountQueryProps =
   { readonly id: AccountId } | { readonly email: Email };
