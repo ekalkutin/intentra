@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import type { Actor } from '@intentra/contracts/iam';
 import type {
   ApproveKnowledgeItemDto,
+  CallerDto,
   DeleteKnowledgeItemDto,
   EditKnowledgeItemDto,
   KnowledgeApi,
@@ -31,6 +31,7 @@ import {
   KnowledgeItemVersion,
   KnowledgeKey,
   KnowledgeKind,
+  KnowledgeSource,
   KnowledgeStatus,
 } from '../../domain/value-objects/index.js';
 import {
@@ -66,14 +67,14 @@ export class KnowledgeService implements KnowledgeApi {
   ) {}
 
   public async record(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     data: RecordKnowledgeItemDto,
   ): Promise<KnowledgeItemDto> {
     return this.unitOfWork.run(async () => {
       const { member, project, projectRole } = await this.resolve(
-        actor,
+        caller,
         workspaceId,
         projectId,
       );
@@ -88,7 +89,15 @@ export class KnowledgeService implements KnowledgeApi {
         project,
         member,
         projectRole,
-        { number, title: data.title, rationale: data.rationale, content },
+        {
+          source: caller.agent
+            ? KnowledgeSource.ExternalAgent
+            : KnowledgeSource.Manual,
+          number,
+          title: data.title,
+          rationale: data.rationale,
+          content,
+        },
       );
       await this.knowledgeItemRepository.save(item);
 
@@ -97,21 +106,21 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   public async list(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     query: ListKnowledgeItemsDto,
   ): Promise<KnowledgeItemPageDto> {
     const { project, projectRole } = await this.resolve(
-      actor,
+      caller,
       workspaceId,
       projectId,
     );
     const props = {
       projectId: project.id,
       ...(query.kind && { kind: KnowledgeKind.from(query.kind) }),
-      statuses: query.status
-        ? [KnowledgeStatus.from(query.status)]
+      statuses: query.statuses
+        ? query.statuses.map(status => KnowledgeStatus.from(status))
         : LISTED_BY_DEFAULT,
     };
 
@@ -129,13 +138,13 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   public async get(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     key: string,
   ): Promise<KnowledgeItemDto> {
     const { project, projectRole } = await this.resolve(
-      actor,
+      caller,
       workspaceId,
       projectId,
     );
@@ -145,7 +154,7 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   public async edit(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     key: string,
@@ -153,7 +162,7 @@ export class KnowledgeService implements KnowledgeApi {
   ): Promise<KnowledgeItemDto> {
     return this.unitOfWork.run(async () => {
       const { member, project, projectRole } = await this.resolve(
-        actor,
+        caller,
         workspaceId,
         projectId,
       );
@@ -180,7 +189,7 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   public async delete(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     key: string,
@@ -188,7 +197,7 @@ export class KnowledgeService implements KnowledgeApi {
   ): Promise<void> {
     await this.unitOfWork.run(async () => {
       const { project, projectRole } = await this.resolve(
-        actor,
+        caller,
         workspaceId,
         projectId,
       );
@@ -204,7 +213,7 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   public async approve(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     key: string,
@@ -212,7 +221,7 @@ export class KnowledgeService implements KnowledgeApi {
   ): Promise<KnowledgeItemDto> {
     return this.unitOfWork.run(async () => {
       const { member, project, projectRole } = await this.resolve(
-        actor,
+        caller,
         workspaceId,
         projectId,
       );
@@ -231,7 +240,7 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   public async reject(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     key: string,
@@ -239,7 +248,7 @@ export class KnowledgeService implements KnowledgeApi {
   ): Promise<KnowledgeItemDto> {
     return this.unitOfWork.run(async () => {
       const { member, project, projectRole } = await this.resolve(
-        actor,
+        caller,
         workspaceId,
         projectId,
       );
@@ -259,12 +268,12 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   private resolve(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
   ): Promise<ProjectMembership> {
     return this.accessResolver.resolveInProject(
-      actor,
+      caller,
       new WorkspaceId(workspaceId),
       new ProjectId(projectId),
     );

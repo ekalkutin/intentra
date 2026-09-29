@@ -4,7 +4,11 @@ import { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 
 import { MemberId, ProjectRole } from '../../../tenancy/index.js';
 import { KnowledgeItem } from '../entities/index.js';
-import { KnowledgeKind, TermContent } from '../value-objects/index.js';
+import {
+  KnowledgeKind,
+  KnowledgeSource,
+  TermContent,
+} from '../value-objects/index.js';
 
 import { KnowledgePolicyService } from './knowledge-policy.service.js';
 
@@ -35,6 +39,7 @@ describe('KnowledgePolicyService', () => {
     const item = KnowledgeItem.record({
       workspaceId: new WorkspaceId().value,
       projectId: new ProjectId().value,
+      source: KnowledgeSource.Manual,
       number: 1,
       title: 'Invitation',
       rationale: null,

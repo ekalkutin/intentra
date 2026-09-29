@@ -10,15 +10,15 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { MCP_TOOLS, type ToolApis } from '@intentra/agent-toolkit';
 import { IamApi } from '@intentra/contracts/iam';
-import { WorkspaceApi } from '@intentra/contracts/workspace';
+import { WorkspaceApi, type CallerDto } from '@intentra/contracts/workspace';
 
 import { readCaller } from './mcp-caller.js';
 import { registerMcpTools } from './mcp-tools.js';
 
 /**
  * Stateless MCP over Streamable HTTP: a fresh McpServer for every request,
- * offered the MCP tools with the published APIs and the caller, taken from
- * the Personal Access Token, in their request context.
+ * offered the MCP tools with the published APIs, the caller (an agent working
+ * for the token's Member) and the token's Workspace in their request context.
  */
 @Injectable()
 export class McpHandler {
@@ -32,9 +32,16 @@ export class McpHandler {
 
     this.#handle = toNodeHandler(
       createMcpHandler(({ authInfo }) => {
+        const caller = readCaller(authInfo);
         const requestContext = new RequestContext();
         requestContext.set('apis', apis);
-        requestContext.set('caller', readCaller(authInfo));
+        if (caller) {
+          requestContext.set('caller', {
+            actor: caller.actor,
+            agent: { level: caller.level },
+          } satisfies CallerDto);
+          requestContext.set('workspaceId', caller.workspaceId);
+        }
         const server = new McpServer({ name: 'intentra', version: '1.0.0' });
         registerMcpTools(server, MCP_TOOLS, requestContext);
         return server;

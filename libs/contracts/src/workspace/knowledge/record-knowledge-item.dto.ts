@@ -8,7 +8,7 @@ import {
 
 const frame = {
   title: z.string(),
-  /** What the Knowledge Item rests on; optional when entered by hand. */
+  /** What the Knowledge Item rests on; optional only when entered by hand. */
   rationale: z.string().nullable().default(null),
 };
 

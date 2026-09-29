@@ -8,6 +8,7 @@ import {
   KnowledgeItemChangedException,
   KnowledgeItemNotDraftException,
   KnowledgeKindMismatchException,
+  RationaleRequiredException,
 } from '../exceptions/index.js';
 import {
   DecisionContent,
@@ -28,6 +29,7 @@ function recordTerm(authorId = new MemberId()): KnowledgeItem {
   return KnowledgeItem.record({
     workspaceId: new WorkspaceId().value,
     projectId: new ProjectId().value,
+    source: KnowledgeSource.Manual,
     number: 3,
     title: 'Invitation',
     rationale: null,
@@ -56,12 +58,31 @@ describe('KnowledgeItem', () => {
       expect(item.version).toBe(KnowledgeItemVersion.First);
     });
 
+    it('needs a rationale when an agent records it', () => {
+      // Act
+      const recording = () =>
+        KnowledgeItem.record({
+          workspaceId: new WorkspaceId().value,
+          projectId: new ProjectId().value,
+          source: KnowledgeSource.ExternalAgent,
+          number: 1,
+          title: 'Invitation',
+          rationale: null,
+          content: term('An offer to join a Workspace'),
+          authorId: new MemberId().value,
+        });
+
+      // Assert
+      expect(recording).toThrow(RationaleRequiredException);
+    });
+
     it('rejects a blank title', () => {
       // Act
       const recording = () =>
         KnowledgeItem.record({
           workspaceId: new WorkspaceId().value,
           projectId: new ProjectId().value,
+          source: KnowledgeSource.Manual,
           number: 1,
           title: ' ',
           rationale: null,

@@ -12,6 +12,7 @@ export { KnowledgeItemChangedException } from './knowledge-item-changed.exceptio
 export { KnowledgeItemNotDraftException } from './knowledge-item-not-draft.exception.js';
 export { KnowledgeKindMismatchException } from './knowledge-kind-mismatch.exception.js';
 export { KnowledgeRecordingForbiddenException } from './knowledge-recording-forbidden.exception.js';
+export { RationaleRequiredException } from './rationale-required.exception.js';
 export { UnknownKnowledgeKindException } from './unknown-knowledge-kind.exception.js';
 export { UnknownKnowledgeSourceException } from './unknown-knowledge-source.exception.js';
 export { UnknownKnowledgeStatusException } from './unknown-knowledge-status.exception.js';

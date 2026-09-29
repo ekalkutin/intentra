@@ -339,7 +339,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
     const asked = await app
       .request()
       .get(path)
-      .query({ status: 'rejected' })
+      .query({ statuses: 'rejected' })
       .set('Authorization', bob)
       .expect(HttpStatus.OK);
     expect(asked.body.total).toBe(1);

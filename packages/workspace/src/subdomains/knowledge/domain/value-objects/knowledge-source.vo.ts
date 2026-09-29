@@ -1,10 +1,14 @@
 import { UnknownKnowledgeSourceException } from '../exceptions/index.js';
 
-/** Where a Knowledge Item came from; for now only entered by hand. Never changes. */
+/** Where a Knowledge Item came from. Never changes. */
 export class KnowledgeSource {
   public static readonly Manual = new KnowledgeSource('manual');
+  public static readonly ExternalAgent = new KnowledgeSource('external-agent');
 
-  static readonly #all: readonly KnowledgeSource[] = [KnowledgeSource.Manual];
+  static readonly #all: readonly KnowledgeSource[] = [
+    KnowledgeSource.Manual,
+    KnowledgeSource.ExternalAgent,
+  ];
 
   readonly #value: string;
 
@@ -29,5 +33,10 @@ export class KnowledgeSource {
 
   public equals(other: KnowledgeSource): boolean {
     return other.value === this.#value;
+  }
+
+  /** Unless entered by hand, a Knowledge Item always says what it rests on. */
+  public requiresRationale(): boolean {
+    return !this.equals(KnowledgeSource.Manual);
   }
 }

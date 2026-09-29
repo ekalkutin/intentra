@@ -1,4 +1,4 @@
-import type { Actor } from '../../iam/index.js';
+import type { CallerDto } from '../access/caller.dto.js';
 
 import type { EditKnowledgeItemDto } from './edit-knowledge-item.dto.js';
 import type {
@@ -16,14 +16,16 @@ import type { RecordKnowledgeItemDto } from './record-knowledge-item.dto.js';
 /**
  * A Project's knowledge. Contributors and Maintainers record, edit and delete
  * Drafts; only Maintainers approve and reject them (403 otherwise); every
- * Member reads. A Knowledge Item is addressed by its Knowledge Key, such as
+ * Member reads. An external agent may do what the lower of its token's level
+ * and the Member's Project Role allows, and what it records must carry a
+ * rationale. A Knowledge Item is addressed by its Knowledge Key, such as
  * `REQ-12`. Every change but a recording applies only to a Draft
  * (409 `KNOWLEDGE_ITEM_NOT_DRAFT`) and only to the version the client saw
  * (409 `KNOWLEDGE_ITEM_CHANGED`).
  */
 export abstract class KnowledgeApi {
   abstract record(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     data: RecordKnowledgeItemDto,
@@ -31,7 +33,7 @@ export abstract class KnowledgeApi {
 
   /** Sorted by Kind, then by the Knowledge Key's number. */
   abstract list(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     query: ListKnowledgeItemsDto,
@@ -39,14 +41,14 @@ export abstract class KnowledgeApi {
 
   /** Reads a Knowledge Item in any status, Rejected included. */
   abstract get(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     key: string,
   ): Promise<KnowledgeItemDto>;
 
   abstract edit(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     key: string,
@@ -55,7 +57,7 @@ export abstract class KnowledgeApi {
 
   /** Deletion: removes a Draft recorded by mistake, leaving no trace. */
   abstract delete(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     key: string,
@@ -63,7 +65,7 @@ export abstract class KnowledgeApi {
   ): Promise<void>;
 
   abstract approve(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     key: string,
@@ -71,7 +73,7 @@ export abstract class KnowledgeApi {
   ): Promise<KnowledgeItemDto>;
 
   abstract reject(
-    actor: Actor,
+    caller: CallerDto,
     workspaceId: string,
     projectId: string,
     key: string,

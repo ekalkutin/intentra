@@ -1,4 +1,5 @@
 export { AccessApi } from './access/access.api.js';
+export { type AgentDto, type CallerDto } from './access/caller.dto.js';
 export {
   type ProjectAccessDto,
   type WorkspaceAccessDto,
@@ -40,6 +41,7 @@ export {
 } from './knowledge/knowledge-item.dto.js';
 export {
   KnowledgeKindDtoSchema,
+  KnowledgeSourceDtoSchema,
   KnowledgeStatusDtoSchema,
   type KnowledgeKindDto,
   type KnowledgeSourceDto,

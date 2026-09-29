@@ -27,6 +27,7 @@ export function toKnowledgeItemDto(
     id: item.id.value,
     key: item.key.value,
     title: item.title.value,
+    mainField: item.content.mainField.value,
     status: item.status.value as KnowledgeStatusDto,
     source: item.source.value as KnowledgeSourceDto,
     rationale: item.rationale?.value ?? null,

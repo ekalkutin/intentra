@@ -1,9 +1,9 @@
 import type { RequestContext } from '@mastra/core/request-context';
 import { isValidationError, noopObserve, type Tool } from '@mastra/core/tools';
-import type { McpServer } from '@modelcontextprotocol/server';
+import type { CallToolResult, McpServer } from '@modelcontextprotocol/server';
 
-// oxlint-disable-next-line typescript/no-explicit-any -- tools differ in their schemas
-type McpTool = Tool<any, any, any, any>;
+// oxlint-disable-next-line typescript/no-explicit-any -- tools differ in their schemas and request contexts
+type McpTool = Tool<any, any, any, any, any, any, any>;
 
 type McpTools = Readonly<Record<string, McpTool>>;
 
@@ -30,15 +30,17 @@ export function registerMcpTools(
         annotations: tool.mcp?.annotations,
       },
       async input => {
-        const result = await execute(input, {
-          observe: noopObserve,
-          requestContext,
-        });
+        let result;
+        try {
+          result = await execute(input, {
+            observe: noopObserve,
+            requestContext,
+          });
+        } catch (error) {
+          return toErrorResult(error);
+        }
         if (isValidationError(result)) {
-          return {
-            content: [{ type: 'text', text: result.message }],
-            isError: true,
-          };
+          return errorResult(result.message);
         }
         return {
           content: [{ type: 'text', text: JSON.stringify(result) }],
@@ -47,4 +49,24 @@ export function registerMcpTools(
       },
     );
   }
+}
+
+/**
+ * An expected failure (it has a code, such as `KNOWLEDGE_ITEM_CHANGED`) goes
+ * back to the agent, so that it can act on it: read again, ask the person.
+ */
+function toErrorResult(error: unknown): CallToolResult {
+  if (
+    error instanceof Error &&
+    'code' in error &&
+    typeof error.code === 'string'
+  ) {
+    return errorResult(`${error.code}: ${error.message}`);
+  }
+
+  throw error;
+}
+
+function errorResult(text: string): CallToolResult {
+  return { content: [{ type: 'text', text }], isError: true };
 }

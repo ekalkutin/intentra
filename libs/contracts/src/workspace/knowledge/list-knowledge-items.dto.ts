@@ -7,8 +7,16 @@ import {
 
 export const ListKnowledgeItemsDtoSchema = z.object({
   kind: KnowledgeKindDtoSchema.optional(),
-  /** Without it, Drafts and Approved; Rejected only when asked for. */
-  status: KnowledgeStatusDtoSchema.optional(),
+  /**
+   * Any of these statuses; without it, Drafts and Approved (Rejected only
+   * when asked for). In a query string: `statuses=draft,approved`.
+   */
+  statuses: z
+    .preprocess(
+      value => (typeof value === 'string' ? value.split(',') : value),
+      z.array(KnowledgeStatusDtoSchema).min(1),
+    )
+    .optional(),
   take: z.coerce.number().int().min(1).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
 });

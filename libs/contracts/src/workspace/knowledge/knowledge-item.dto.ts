@@ -28,6 +28,8 @@ type KnowledgeItemFrameDto = {
   /** Such as `REQ-12`; addresses the Knowledge Item within its Project. */
   readonly key: string;
   readonly title: string;
+  /** The text of the Kind's main field, such as a Term's definition. */
+  readonly mainField: string;
   readonly status: KnowledgeStatusDto;
   readonly source: KnowledgeSourceDto;
   readonly rationale: string | null;

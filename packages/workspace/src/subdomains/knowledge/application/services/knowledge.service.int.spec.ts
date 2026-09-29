@@ -1,7 +1,11 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
-import type { RecordKnowledgeItemDto } from '@intentra/contracts/workspace';
+import type {
+  CallerDto,
+  ProjectRoleDto,
+  RecordKnowledgeItemDto,
+} from '@intentra/contracts/workspace';
 import { TestingApp } from '@intentra/platform-testing';
 import {
   AccountId,
@@ -28,6 +32,7 @@ import {
   KnowledgeItemNotDraftException,
   KnowledgeKindMismatchException,
   KnowledgeRecordingForbiddenException,
+  RationaleRequiredException,
 } from '../../domain/exceptions/index.js';
 import { KnowledgeKind } from '../../domain/value-objects/index.js';
 import { KnowledgeItemNotFoundException } from '../exceptions/index.js';
@@ -40,6 +45,14 @@ import { KnowledgeService } from './knowledge.service.js';
 
 function actor(email: string): Actor {
   return { accountId: new AccountId().value, email };
+}
+
+function person(actor: Actor): CallerDto {
+  return { actor, agent: null };
+}
+
+function agentOf(actor: Actor, level: ProjectRoleDto): CallerDto {
+  return { actor, agent: { level } };
 }
 
 function term(title: string): RecordKnowledgeItemDto {
@@ -144,16 +157,21 @@ describe('KnowledgeService integration', () => {
       const { workspaceId, projectId, ada, adaId } = await setUp();
       const knowledgeService = app.get(KnowledgeService);
       await knowledgeService.record(
-        ada,
+        person(ada),
         workspaceId,
         projectId,
         term('Invoice'),
       );
-      await knowledgeService.record(ada, workspaceId, projectId, requirement);
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        requirement,
+      );
 
       // Act
       const recorded = await knowledgeService.record(
-        ada,
+        person(ada),
         workspaceId,
         projectId,
         term('Payment'),
@@ -165,6 +183,7 @@ describe('KnowledgeService integration', () => {
         key: 'TERM-2',
         kind: 'term',
         title: 'Payment',
+        mainField: 'What Payment means',
         status: 'draft',
         source: 'manual',
         rationale: null,
@@ -201,7 +220,7 @@ describe('KnowledgeService integration', () => {
       // Act
       const recorded = await app
         .get(KnowledgeService)
-        .record(bob, workspaceId, projectId, requirement);
+        .record(person(bob), workspaceId, projectId, requirement);
 
       // Assert
       expect(recorded).toMatchObject({
@@ -218,7 +237,7 @@ describe('KnowledgeService integration', () => {
       // Act
       const recording = app
         .get(KnowledgeService)
-        .record(bob, workspaceId, projectId, term('Invoice'));
+        .record(person(bob), workspaceId, projectId, term('Invoice'));
 
       // Assert
       await expect(recording).rejects.toBeInstanceOf(
@@ -226,7 +245,7 @@ describe('KnowledgeService integration', () => {
       );
       const next = await app
         .get(KnowledgeService)
-        .record(ada, workspaceId, projectId, term('Invoice'));
+        .record(person(ada), workspaceId, projectId, term('Invoice'));
       expect(next.key).toBe('TERM-1');
     });
 
@@ -238,7 +257,7 @@ describe('KnowledgeService integration', () => {
       const recording = app
         .get(KnowledgeService)
         .record(
-          actor('eve@example.com'),
+          person(actor('eve@example.com')),
           workspaceId,
           projectId,
           term('Invoice'),
@@ -257,7 +276,12 @@ describe('KnowledgeService integration', () => {
       // Act
       const recording = app
         .get(KnowledgeService)
-        .record(ada, workspaceId, new ProjectId().value, term('Invoice'));
+        .record(
+          person(ada),
+          workspaceId,
+          new ProjectId().value,
+          term('Invoice'),
+        );
 
       // Assert
       await expect(recording).rejects.toMatchObject({
@@ -278,14 +302,24 @@ describe('KnowledgeService integration', () => {
         decision,
         term('C'),
       ]) {
-        await knowledgeService.record(ada, workspaceId, projectId, data);
+        await knowledgeService.record(
+          person(ada),
+          workspaceId,
+          projectId,
+          data,
+        );
       }
 
       // Act
-      const page = await knowledgeService.list(bob, workspaceId, projectId, {
-        take: 2,
-        offset: 1,
-      });
+      const page = await knowledgeService.list(
+        person(bob),
+        workspaceId,
+        projectId,
+        {
+          take: 2,
+          offset: 1,
+        },
+      );
 
       // Assert
       expect(page.total).toBe(5);
@@ -297,15 +331,25 @@ describe('KnowledgeService integration', () => {
       const { workspaceId, projectId, ada } = await setUp();
       const knowledgeService = app.get(KnowledgeService);
       for (const data of [term('A'), requirement, term('B')]) {
-        await knowledgeService.record(ada, workspaceId, projectId, data);
+        await knowledgeService.record(
+          person(ada),
+          workspaceId,
+          projectId,
+          data,
+        );
       }
 
       // Act
-      const page = await knowledgeService.list(ada, workspaceId, projectId, {
-        kind: 'term',
-        status: 'draft',
-        ...firstPage,
-      });
+      const page = await knowledgeService.list(
+        person(ada),
+        workspaceId,
+        projectId,
+        {
+          kind: 'term',
+          statuses: ['draft'],
+          ...firstPage,
+        },
+      );
 
       // Assert
       expect(page.total).toBe(2);
@@ -319,12 +363,12 @@ describe('KnowledgeService integration', () => {
       const { workspaceId, projectId, ada, bob } = await setUp();
       const recorded = await app
         .get(KnowledgeService)
-        .record(ada, workspaceId, projectId, decision);
+        .record(person(ada), workspaceId, projectId, decision);
 
       // Act
       const item = await app
         .get(KnowledgeService)
-        .get(bob, workspaceId, projectId, 'DEC-1');
+        .get(person(bob), workspaceId, projectId, 'DEC-1');
 
       // Assert
       expect(item).toEqual({
@@ -345,7 +389,7 @@ describe('KnowledgeService integration', () => {
       // Act
       const reading = app
         .get(KnowledgeService)
-        .get(ada, workspaceId, projectId, 'REQ-7');
+        .get(person(ada), workspaceId, projectId, 'REQ-7');
 
       // Assert
       await expect(reading).rejects.toBeInstanceOf(
@@ -362,12 +406,12 @@ describe('KnowledgeService integration', () => {
       );
       await app
         .get(KnowledgeService)
-        .record(ada, workspaceId, projectId, requirement);
+        .record(person(ada), workspaceId, projectId, requirement);
 
       // Act
       const edited = await app
         .get(KnowledgeService)
-        .edit(bob, workspaceId, projectId, 'REQ-1', {
+        .edit(person(bob), workspaceId, projectId, 'REQ-1', {
           kind: 'requirement',
           version: 1,
           rationale: null,
@@ -396,7 +440,7 @@ describe('KnowledgeService integration', () => {
       });
       const item = await app
         .get(KnowledgeService)
-        .get(bob, workspaceId, projectId, 'REQ-1');
+        .get(person(bob), workspaceId, projectId, 'REQ-1');
       expect(item).toEqual(edited);
     });
 
@@ -404,16 +448,27 @@ describe('KnowledgeService integration', () => {
       // Arrange
       const { workspaceId, projectId, ada } = await setUp();
       const knowledgeService = app.get(KnowledgeService);
-      await knowledgeService.record(ada, workspaceId, projectId, requirement);
-      await knowledgeService.edit(ada, workspaceId, projectId, 'REQ-1', {
-        kind: 'requirement',
-        version: 1,
-        title: 'Report export',
-      });
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        requirement,
+      );
+      await knowledgeService.edit(
+        person(ada),
+        workspaceId,
+        projectId,
+        'REQ-1',
+        {
+          kind: 'requirement',
+          version: 1,
+          title: 'Report export',
+        },
+      );
 
       // Act
       const editing = knowledgeService.edit(
-        ada,
+        person(ada),
         workspaceId,
         projectId,
         'REQ-1',
@@ -429,7 +484,7 @@ describe('KnowledgeService integration', () => {
         KnowledgeItemChangedException,
       );
       const item = await knowledgeService.get(
-        ada,
+        person(ada),
         workspaceId,
         projectId,
         'REQ-1',
@@ -442,12 +497,12 @@ describe('KnowledgeService integration', () => {
       const { workspaceId, projectId, ada } = await setUp();
       await app
         .get(KnowledgeService)
-        .record(ada, workspaceId, projectId, requirement);
+        .record(person(ada), workspaceId, projectId, requirement);
 
       // Act
       const editing = app
         .get(KnowledgeService)
-        .edit(ada, workspaceId, projectId, 'REQ-1', {
+        .edit(person(ada), workspaceId, projectId, 'REQ-1', {
           kind: 'term',
           version: 1,
           title: 'Export',
@@ -464,12 +519,12 @@ describe('KnowledgeService integration', () => {
       const { workspaceId, projectId, ada, bob } = await setUp();
       await app
         .get(KnowledgeService)
-        .record(ada, workspaceId, projectId, requirement);
+        .record(person(ada), workspaceId, projectId, requirement);
 
       // Act
       const editing = app
         .get(KnowledgeService)
-        .edit(bob, workspaceId, projectId, 'REQ-1', {
+        .edit(person(bob), workspaceId, projectId, 'REQ-1', {
           kind: 'requirement',
           version: 1,
           title: 'Export',
@@ -490,20 +545,26 @@ describe('KnowledgeService integration', () => {
       );
       const knowledgeService = app.get(KnowledgeService);
       await knowledgeService.record(
-        ada,
+        person(ada),
         workspaceId,
         projectId,
         term('Invoice'),
       );
 
       // Act
-      await knowledgeService.delete(bob, workspaceId, projectId, 'TERM-1', {
-        version: 1,
-      });
+      await knowledgeService.delete(
+        person(bob),
+        workspaceId,
+        projectId,
+        'TERM-1',
+        {
+          version: 1,
+        },
+      );
 
       // Assert
       const reading = knowledgeService.get(
-        ada,
+        person(ada),
         workspaceId,
         projectId,
         'TERM-1',
@@ -512,7 +573,7 @@ describe('KnowledgeService integration', () => {
         KnowledgeItemNotFoundException,
       );
       const next = await knowledgeService.record(
-        ada,
+        person(ada),
         workspaceId,
         projectId,
         term('Invoice'),
@@ -525,12 +586,12 @@ describe('KnowledgeService integration', () => {
       const { workspaceId, projectId, ada, bob } = await setUp();
       await app
         .get(KnowledgeService)
-        .record(ada, workspaceId, projectId, term('Invoice'));
+        .record(person(ada), workspaceId, projectId, term('Invoice'));
 
       // Act
       const deleting = app
         .get(KnowledgeService)
-        .delete(bob, workspaceId, projectId, 'TERM-1', { version: 1 });
+        .delete(person(bob), workspaceId, projectId, 'TERM-1', { version: 1 });
 
       // Assert
       await expect(deleting).rejects.toBeInstanceOf(
@@ -545,12 +606,12 @@ describe('KnowledgeService integration', () => {
       const { workspaceId, projectId, ada, adaId } = await setUp();
       await app
         .get(KnowledgeService)
-        .record(ada, workspaceId, projectId, requirement);
+        .record(person(ada), workspaceId, projectId, requirement);
 
       // Act
       const approved = await app
         .get(KnowledgeService)
-        .approve(ada, workspaceId, projectId, 'REQ-1', { version: 1 });
+        .approve(person(ada), workspaceId, projectId, 'REQ-1', { version: 1 });
 
       // Assert
       expect(approved).toMatchObject({
@@ -573,16 +634,27 @@ describe('KnowledgeService integration', () => {
         ProjectRole.Contributor,
       );
       const knowledgeService = app.get(KnowledgeService);
-      await knowledgeService.record(ada, workspaceId, projectId, requirement);
-      await knowledgeService.edit(bob, workspaceId, projectId, 'REQ-1', {
-        kind: 'requirement',
-        version: 1,
-        title: 'PDF and Excel export',
-      });
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        requirement,
+      );
+      await knowledgeService.edit(
+        person(bob),
+        workspaceId,
+        projectId,
+        'REQ-1',
+        {
+          kind: 'requirement',
+          version: 1,
+          title: 'PDF and Excel export',
+        },
+      );
 
       // Act
       const approving = knowledgeService.approve(
-        ada,
+        person(ada),
         workspaceId,
         projectId,
         'REQ-1',
@@ -602,12 +674,12 @@ describe('KnowledgeService integration', () => {
       );
       await app
         .get(KnowledgeService)
-        .record(bob, workspaceId, projectId, requirement);
+        .record(person(bob), workspaceId, projectId, requirement);
 
       // Act
       const approving = app
         .get(KnowledgeService)
-        .approve(bob, workspaceId, projectId, 'REQ-1', { version: 1 });
+        .approve(person(bob), workspaceId, projectId, 'REQ-1', { version: 1 });
 
       // Assert
       await expect(approving).rejects.toBeInstanceOf(
@@ -619,34 +691,41 @@ describe('KnowledgeService integration', () => {
       // Arrange
       const { workspaceId, projectId, ada } = await setUp();
       const knowledgeService = app.get(KnowledgeService);
-      await knowledgeService.record(ada, workspaceId, projectId, requirement);
-      await knowledgeService.approve(ada, workspaceId, projectId, 'REQ-1', {
-        version: 1,
-      });
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        requirement,
+      );
+      await knowledgeService.approve(
+        person(ada),
+        workspaceId,
+        projectId,
+        'REQ-1',
+        {
+          version: 1,
+        },
+      );
 
       // Act
-      const editing = knowledgeService.edit(
-        ada,
-        workspaceId,
-        projectId,
-        'REQ-1',
-        { kind: 'requirement', version: 2, title: 'Export' },
-      );
-      const deleting = knowledgeService.delete(
-        ada,
-        workspaceId,
-        projectId,
-        'REQ-1',
-        { version: 2 },
-      );
+      const [editing, deleting] = await Promise.allSettled([
+        knowledgeService.edit(person(ada), workspaceId, projectId, 'REQ-1', {
+          kind: 'requirement',
+          version: 2,
+          title: 'Export',
+        }),
+        knowledgeService.delete(person(ada), workspaceId, projectId, 'REQ-1', {
+          version: 2,
+        }),
+      ]);
 
       // Assert
-      await expect(editing).rejects.toBeInstanceOf(
-        KnowledgeItemNotDraftException,
-      );
-      await expect(deleting).rejects.toBeInstanceOf(
-        KnowledgeItemNotDraftException,
-      );
+      for (const outcome of [editing, deleting]) {
+        expect(outcome).toMatchObject({
+          status: 'rejected',
+          reason: expect.any(KnowledgeItemNotDraftException),
+        });
+      }
     });
   });
 
@@ -655,12 +734,22 @@ describe('KnowledgeService integration', () => {
       // Arrange
       const { workspaceId, projectId, ada, adaId } = await setUp();
       const knowledgeService = app.get(KnowledgeService);
-      await knowledgeService.record(ada, workspaceId, projectId, requirement);
-      await knowledgeService.record(ada, workspaceId, projectId, decision);
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        requirement,
+      );
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        decision,
+      );
 
       // Act
       const rejected = await knowledgeService.reject(
-        ada,
+        person(ada),
         workspaceId,
         projectId,
         'REQ-1',
@@ -675,24 +764,148 @@ describe('KnowledgeService integration', () => {
         rejectionReason: 'Customers never print',
       });
       const listed = await knowledgeService.list(
-        ada,
+        person(ada),
         workspaceId,
         projectId,
         firstPage,
       );
       expect(listed.items.map(({ key }) => key)).toEqual(['DEC-1']);
-      const asked = await knowledgeService.list(ada, workspaceId, projectId, {
-        status: 'rejected',
-        ...firstPage,
-      });
+      const asked = await knowledgeService.list(
+        person(ada),
+        workspaceId,
+        projectId,
+        {
+          statuses: ['rejected'],
+          ...firstPage,
+        },
+      );
       expect(asked.items.map(({ key }) => key)).toEqual(['REQ-1']);
       const read = await knowledgeService.get(
-        ada,
+        person(ada),
         workspaceId,
         projectId,
         'REQ-1',
       );
       expect(read).toEqual(rejected);
+    });
+  });
+
+  describe('through an external agent', () => {
+    it('records a Draft with its Source and rationale', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada, adaId } = await setUp();
+
+      // Act
+      const recorded = await app
+        .get(KnowledgeService)
+        .record(
+          agentOf(ada, 'maintainer'),
+          workspaceId,
+          projectId,
+          requirement,
+        );
+
+      // Assert
+      expect(recorded).toMatchObject({
+        source: 'external-agent',
+        rationale: 'Ada: "customers print reports"',
+        authorId: adaId,
+      });
+    });
+
+    it('refuses to record without a rationale, or to clear it', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada } = await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      const agent = agentOf(ada, 'maintainer');
+      await knowledgeService.record(agent, workspaceId, projectId, requirement);
+
+      // Act
+      const [recording, clearing] = await Promise.allSettled([
+        knowledgeService.record(agent, workspaceId, projectId, term('Invoice')),
+        knowledgeService.edit(person(ada), workspaceId, projectId, 'REQ-1', {
+          kind: 'requirement',
+          version: 1,
+          rationale: null,
+        }),
+      ]);
+
+      // Assert
+      for (const outcome of [recording, clearing]) {
+        expect(outcome).toMatchObject({
+          status: 'rejected',
+          reason: expect.any(RationaleRequiredException),
+        });
+      }
+    });
+
+    it("keeps the agent to the lower of its token's level and the Project Role", async () => {
+      // Arrange
+      const { workspaceId, projectId, ada } = await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        requirement,
+      );
+
+      // Act
+      const [recording, approving] = await Promise.allSettled([
+        knowledgeService.record(
+          agentOf(ada, 'viewer'),
+          workspaceId,
+          projectId,
+          requirement,
+        ),
+        knowledgeService.approve(
+          agentOf(ada, 'contributor'),
+          workspaceId,
+          projectId,
+          'REQ-1',
+          { version: 1 },
+        ),
+      ]);
+
+      // Assert
+      expect(recording).toMatchObject({
+        status: 'rejected',
+        reason: expect.any(KnowledgeRecordingForbiddenException),
+      });
+      expect(approving).toMatchObject({
+        status: 'rejected',
+        reason: expect.any(DraftApprovalForbiddenException),
+      });
+      const page = await knowledgeService.list(
+        agentOf(ada, 'contributor'),
+        workspaceId,
+        projectId,
+        firstPage,
+      );
+      expect(page.items[0]?.access).toMatchObject({
+        canEdit: true,
+        canApprove: false,
+      });
+    });
+
+    it('never gets more than the Project Role, whatever the token', async () => {
+      // Arrange
+      const { workspaceId, projectId, bob } = await setUp();
+
+      // Act
+      const recording = app
+        .get(KnowledgeService)
+        .record(
+          agentOf(bob, 'maintainer'),
+          workspaceId,
+          projectId,
+          requirement,
+        );
+
+      // Assert
+      await expect(recording).rejects.toBeInstanceOf(
+        KnowledgeRecordingForbiddenException,
+      );
     });
   });
 
@@ -707,7 +920,7 @@ describe('KnowledgeService integration', () => {
       // Act
       const page = await app
         .get(KnowledgeService)
-        .list(bob, workspaceId, projectId, firstPage);
+        .list(person(bob), workspaceId, projectId, firstPage);
 
       // Assert
       expect(page.access.canRecord).toEqual(kinds);
@@ -732,7 +945,7 @@ describe('KnowledgeService integration', () => {
       );
       await app
         .get(KnowledgeService)
-        .record(bob, workspaceId, projectId, term('Invoice'));
+        .record(person(bob), workspaceId, projectId, term('Invoice'));
 
       // Act
       await app.get(MembersService).leave(bob, workspaceId);
@@ -740,7 +953,7 @@ describe('KnowledgeService integration', () => {
       // Assert
       const page = await app
         .get(KnowledgeService)
-        .list(ada, workspaceId, projectId, firstPage);
+        .list(person(ada), workspaceId, projectId, firstPage);
       expect(page.total).toBe(1);
     });
 
@@ -749,7 +962,7 @@ describe('KnowledgeService integration', () => {
       const { workspaceId, projectId, ada } = await setUp();
       await app
         .get(KnowledgeService)
-        .record(ada, workspaceId, projectId, term('Invoice'));
+        .record(person(ada), workspaceId, projectId, term('Invoice'));
 
       // Act
       await app
@@ -769,7 +982,7 @@ describe('KnowledgeService integration', () => {
       const { workspaceId, projectId, ada } = await setUp();
       await app
         .get(KnowledgeService)
-        .record(ada, workspaceId, projectId, term('Invoice'));
+        .record(person(ada), workspaceId, projectId, term('Invoice'));
 
       // Act
       await app

@@ -1,6 +1,6 @@
 import { UnknownProjectRoleException } from '../exceptions/index.js';
 
-/** What a Member may do in one particular Project. */
+/** What a Member may do in one particular Project; each role allows all the one before it does. */
 export class ProjectRole {
   public static readonly Viewer = new ProjectRole('viewer');
   public static readonly Contributor = new ProjectRole('contributor');
@@ -33,5 +33,12 @@ export class ProjectRole {
 
   public equals(other: ProjectRole): boolean {
     return other.value === this.#value;
+  }
+
+  /** The lower of this and the given role, such as a Member's role capped by their token's level. */
+  public atMost(cap: ProjectRole): ProjectRole {
+    return ProjectRole.#all.indexOf(cap) < ProjectRole.#all.indexOf(this)
+      ? cap
+      : this;
   }
 }

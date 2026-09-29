@@ -5,6 +5,7 @@ import {
   KnowledgeItemChangedException,
   KnowledgeItemNotDraftException,
   KnowledgeKindMismatchException,
+  RationaleRequiredException,
 } from '../exceptions/index.js';
 import {
   KnowledgeItemId,
@@ -154,15 +155,19 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     return this.#status.equals(KnowledgeStatus.Draft);
   }
 
-  /** A person enters a Draft by hand; its Kind is the Kind of its content. */
+  /** Records a Draft; its Kind is the Kind of its content. */
   public static record(props: KnowledgeItemRecordProps): KnowledgeItem {
+    if (props.source.requiresRationale() && props.rationale === null) {
+      throw new RationaleRequiredException();
+    }
+
     return new KnowledgeItem(new KnowledgeItemId(), {
       workspaceId: new WorkspaceId(props.workspaceId),
       projectId: new ProjectId(props.projectId),
       key: new KnowledgeKey(props.content.kind, props.number),
       title: new KnowledgeTitle(props.title),
       status: KnowledgeStatus.Draft,
-      source: KnowledgeSource.Manual,
+      source: props.source,
       rationale:
         props.rationale === null ? null : new Rationale(props.rationale),
       content: props.content,
@@ -220,6 +225,9 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     }
     if (changes.title !== undefined) {
       this.#title = new KnowledgeTitle(changes.title);
+    }
+    if (changes.rationale === null && this.#source.requiresRationale()) {
+      throw new RationaleRequiredException();
     }
     if (changes.rationale !== undefined) {
       this.#rationale =
@@ -301,6 +309,7 @@ type KnowledgeItemState = {
 type KnowledgeItemRecordProps = {
   readonly workspaceId: string;
   readonly projectId: string;
+  readonly source: KnowledgeSource;
   /** The next number of the content's Kind in the Project. */
   readonly number: number;
   readonly title: string;
