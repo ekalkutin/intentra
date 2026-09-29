@@ -20,6 +20,7 @@ import { toWorkspaceDto } from '../mappers/index.js';
 import {
   InvitationRepository,
   MemberRepository,
+  PersonalAccessTokenRepository,
   ProjectRepository,
   ProjectRoleAssignmentRepository,
   WorkspaceRepository,
@@ -38,6 +39,7 @@ export class WorkspacesService implements WorkspacesApi {
     private readonly invitationRepository: InvitationRepository,
     private readonly projectRepository: ProjectRepository,
     private readonly projectRoleAssignmentRepository: ProjectRoleAssignmentRepository,
+    private readonly personalAccessTokenRepository: PersonalAccessTokenRepository,
   ) {}
 
   public async create(
@@ -88,6 +90,7 @@ export class WorkspacesService implements WorkspacesApi {
       this.#workspaceDeletionService.ensureDeletable(workspace, owner, {
         slug: data.slug,
       });
+      await this.personalAccessTokenRepository.deleteMany({ workspaceId: id });
       await this.projectRoleAssignmentRepository.deleteMany({
         workspaceId: id,
       });

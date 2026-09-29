@@ -1,6 +1,8 @@
+export { InvalidPersonalAccessTokenException } from './invalid-personal-access-token.exception.js';
 export { InvitationAlreadyPendingException } from './invitation-already-pending.exception.js';
 export { InvitationNotFoundException } from './invitation-not-found.exception.js';
 export { MemberNotFoundException } from './member-not-found.exception.js';
+export { PersonalAccessTokenNotFoundException } from './personal-access-token-not-found.exception.js';
 export { ProjectNotFoundException } from './project-not-found.exception.js';
 export { ProjectSlugTakenException } from './project-slug-taken.exception.js';
 export { WorkspaceNotFoundException } from './workspace-not-found.exception.js';

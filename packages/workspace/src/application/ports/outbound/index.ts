@@ -7,6 +7,15 @@ export {
   type MemberQueryProps,
 } from './member-repository.port.js';
 export {
+  PersonalAccessTokenRepository,
+  type PersonalAccessTokenDeleteProps,
+  type PersonalAccessTokenQueryProps,
+} from './personal-access-token-repository.port.js';
+export {
+  PersonalAccessTokenSecrets,
+  type IssuedSecret,
+} from './personal-access-token-secrets.port.js';
+export {
   ProjectRoleAssignmentRepository,
   type ProjectRoleAssignmentDeleteProps,
   type ProjectRoleAssignmentQueryProps,

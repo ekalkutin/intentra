@@ -9,8 +9,7 @@ import {
 import { IamApi } from '@intentra/contracts/iam';
 
 import { ACTOR, type ActorRequest } from './actor-request.js';
-
-const BEARER = /^Bearer\s+(\S+)$/i;
+import { readBearerToken } from './bearer-token.js';
 
 @Injectable()
 export class ActorGuard implements CanActivate {
@@ -18,9 +17,7 @@ export class ActorGuard implements CanActivate {
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<ActorRequest>();
-    const header = request.headers.authorization;
-    const token =
-      typeof header === 'string' ? BEARER.exec(header)?.[1] : undefined;
+    const token = readBearerToken(request.headers);
 
     if (!token) {
       throw new UnauthorizedException('Access token is missing');

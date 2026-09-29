@@ -13,11 +13,13 @@ import { AgentsApi } from '@intentra/contracts/agents';
 import { IamApi } from '@intentra/contracts/iam';
 import { WorkspaceApi } from '@intentra/contracts/workspace';
 
+import { readCaller } from './mcp-caller.js';
 import { registerMcpTools } from './mcp-tools.js';
 
 /**
  * Stateless MCP over Streamable HTTP: a fresh McpServer for every request,
- * offered the MCP tools with the published APIs in their request context.
+ * offered the MCP tools with the published APIs and the caller, taken from
+ * the Personal Access Token, in their request context.
  */
 @Injectable()
 export class McpHandler {
@@ -31,10 +33,10 @@ export class McpHandler {
     const apis: ToolApis = { iam, workspace, agents };
 
     this.#handle = toNodeHandler(
-      createMcpHandler(() => {
-        // TODO: add the caller from the personal access token.
+      createMcpHandler(({ authInfo }) => {
         const requestContext = new RequestContext();
         requestContext.set('apis', apis);
+        requestContext.set('caller', readCaller(authInfo));
         const server = new McpServer({ name: 'intentra', version: '1.0.0' });
         registerMcpTools(server, MCP_TOOLS, requestContext);
         return server;

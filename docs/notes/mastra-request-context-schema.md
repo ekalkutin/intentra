@@ -9,7 +9,7 @@ Tool из `libs/agent-toolkit` должен знать:
 - **кто вызывает** — человек, от лица которого действует агент (из PAT в MCP, из JWT у собственных агентов);
 - **через что работать** — опубликованные API контекстов (`ToolApis`: `iam`, `workspace`, `agents`).
 
-Сейчас MCP-хендлер (`libs/gateway/src/presentation/mcp/mcp.handler.ts`) кладёт в Mastra `RequestContext` только `apis`, пользователя там нет (TODO до появления PAT). Tools контекст пока не читают.
+MCP-хендлер (`libs/gateway/src/presentation/mcp/mcp.handler.ts`) кладёт в Mastra `RequestContext` `apis` и `caller` (`PersonalAccessTokenCallerDto`: `actor`, `workspaceId`, `level` из PAT). Tools контекст пока не читают.
 
 ## Что попробовать первым
 
@@ -33,4 +33,4 @@ Tool из `libs/agent-toolkit` должен знать:
 
 ## Когда решать
 
-Вместе с PAT-авторизацией в MCP и первым tool, которому нужны данные.
+С первым tool, которому нужны данные (PAT-авторизация в MCP уже есть).

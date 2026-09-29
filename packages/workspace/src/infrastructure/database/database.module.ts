@@ -6,6 +6,8 @@ import {
   InvitationSchema,
   MemberModel,
   MemberSchema,
+  PersonalAccessTokenModel,
+  PersonalAccessTokenSchema,
   ProjectModel,
   ProjectRoleAssignmentModel,
   ProjectRoleAssignmentSchema,
@@ -21,6 +23,10 @@ import {
       { name: MemberModel.name, schema: MemberSchema },
       { name: ProjectModel.name, schema: ProjectSchema },
       { name: InvitationModel.name, schema: InvitationSchema },
+      {
+        name: PersonalAccessTokenModel.name,
+        schema: PersonalAccessTokenSchema,
+      },
       {
         name: ProjectRoleAssignmentModel.name,
         schema: ProjectRoleAssignmentSchema,

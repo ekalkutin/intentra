@@ -1,6 +1,8 @@
 export { InvitationAcceptanceService } from './invitation-acceptance.service.js';
 export { InvitationSendingService } from './invitation-sending.service.js';
 export { MemberRemovalService } from './member-removal.service.js';
+export { PersonalAccessTokenCreationService } from './personal-access-token-creation.service.js';
+export { PersonalAccessTokenRevocationService } from './personal-access-token-revocation.service.js';
 export { ProjectCreationService } from './project-creation.service.js';
 export { ProjectDeletionService } from './project-deletion.service.js';
 export { ProjectRoleChangeService } from './project-role-change.service.js';

@@ -18,6 +18,16 @@ export {
 } from './members/member.dto.js';
 export { MembersApi } from './members/members.api.js';
 export {
+  CreatePersonalAccessTokenDtoSchema,
+  type CreatePersonalAccessTokenDto,
+} from './personal-access-tokens/create-personal-access-token.dto.js';
+export { type PersonalAccessTokenCallerDto } from './personal-access-tokens/personal-access-token-caller.dto.js';
+export {
+  type CreatedPersonalAccessTokenDto,
+  type PersonalAccessTokenDto,
+} from './personal-access-tokens/personal-access-token.dto.js';
+export { PersonalAccessTokensApi } from './personal-access-tokens/personal-access-tokens.api.js';
+export {
   ChangeProjectRoleDtoSchema,
   type ChangeProjectRoleDto,
 } from './project-roles/change-project-role.dto.js';

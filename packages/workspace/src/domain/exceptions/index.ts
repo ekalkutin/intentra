@@ -1,4 +1,6 @@
 export { AlreadyWorkspaceMemberException } from './already-workspace-member.exception.js';
+export { InvalidPersonalAccessTokenLifetimeException } from './invalid-personal-access-token-lifetime.exception.js';
+export { InvalidPersonalAccessTokenNameException } from './invalid-personal-access-token-name.exception.js';
 export { InvalidProjectNameException } from './invalid-project-name.exception.js';
 export { InvalidProjectSlugException } from './invalid-project-slug.exception.js';
 export { InvalidWorkspaceNameException } from './invalid-workspace-name.exception.js';
@@ -11,6 +13,7 @@ export { MemberNotActiveException } from './member-not-active.exception.js';
 export { MemberNotInWorkspaceException } from './member-not-in-workspace.exception.js';
 export { NotWorkspaceOwnerException } from './not-workspace-owner.exception.js';
 export { OwnerProjectRoleFixedException } from './owner-project-role-fixed.exception.js';
+export { PersonalAccessTokenRevocationForbiddenException } from './personal-access-token-revocation-forbidden.exception.js';
 export { ProjectCreationForbiddenException } from './project-creation-forbidden.exception.js';
 export { ProjectDeletionForbiddenException } from './project-deletion-forbidden.exception.js';
 export { ProjectRoleChangeForbiddenException } from './project-role-change-forbidden.exception.js';

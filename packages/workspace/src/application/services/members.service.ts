@@ -26,6 +26,7 @@ import {
 import { toMemberDto } from '../mappers/index.js';
 import {
   MemberRepository,
+  PersonalAccessTokenRepository,
   ProjectRoleAssignmentRepository,
   WorkspaceRepository,
 } from '../ports/outbound/index.js';
@@ -41,6 +42,7 @@ export class MembersService implements MembersApi {
     private readonly workspaceRepository: WorkspaceRepository,
     private readonly memberRepository: MemberRepository,
     private readonly projectRoleAssignmentRepository: ProjectRoleAssignmentRepository,
+    private readonly personalAccessTokenRepository: PersonalAccessTokenRepository,
   ) {}
 
   public async list(actor: Actor, workspaceId: string): Promise<MemberDto[]> {
@@ -74,6 +76,9 @@ export class MembersService implements MembersApi {
       await this.projectRoleAssignmentRepository.deleteMany({
         memberId: member.id,
       });
+      await this.personalAccessTokenRepository.deleteMany({
+        memberId: member.id,
+      });
     });
   }
 
@@ -89,6 +94,9 @@ export class MembersService implements MembersApi {
       this.#memberRemovalService.leave(workspace, member, { owners });
       await this.memberRepository.save(member);
       await this.projectRoleAssignmentRepository.deleteMany({
+        memberId: member.id,
+      });
+      await this.personalAccessTokenRepository.deleteMany({
         memberId: member.id,
       });
     });
