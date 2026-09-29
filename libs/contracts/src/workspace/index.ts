@@ -24,5 +24,9 @@ export {
   DeleteWorkspaceDtoSchema,
   type DeleteWorkspaceDto,
 } from './workspaces/delete-workspace.dto.js';
+export {
+  TransferOwnershipDtoSchema,
+  type TransferOwnershipDto,
+} from './workspaces/transfer-ownership.dto.js';
 export { type WorkspaceDto } from './workspaces/workspace.dto.js';
 export { WorkspacesApi } from './workspaces/workspaces.api.js';

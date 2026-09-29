@@ -6,6 +6,7 @@ import { Member, Workspace } from '../entities/index.js';
 import {
   MemberNotActiveException,
   MemberNotInWorkspaceException,
+  NotWorkspaceOwnerException,
 } from '../exceptions/index.js';
 
 import { OwnershipTransferService } from './ownership-transfer.service.js';
@@ -37,7 +38,7 @@ describe('OwnershipTransferService', () => {
     const contributor = joinMember(workspace.id);
 
     // Act
-    service.transfer(workspace, contributor);
+    service.transfer(workspace, owner, contributor);
 
     // Assert
     expect(workspace.isOwnedBy(contributor.id)).toBe(true);
@@ -50,7 +51,7 @@ describe('OwnershipTransferService', () => {
     const stranger = joinMember(new WorkspaceId());
 
     // Act
-    const transferring = () => service.transfer(workspace, stranger);
+    const transferring = () => service.transfer(workspace, owner, stranger);
 
     // Assert
     expect(transferring).toThrow(MemberNotInWorkspaceException);
@@ -64,10 +65,24 @@ describe('OwnershipTransferService', () => {
     former.remove();
 
     // Act
-    const transferring = () => service.transfer(workspace, former);
+    const transferring = () => service.transfer(workspace, owner, former);
 
     // Assert
     expect(transferring).toThrow(MemberNotActiveException);
+    expect(workspace.isOwnedBy(owner.id)).toBe(true);
+  });
+
+  it('rejects a Contributor handing over the Workspace', () => {
+    // Arrange
+    const { workspace, owner } = createWorkspace();
+    const contributor = joinMember(workspace.id);
+    const other = joinMember(workspace.id);
+
+    // Act
+    const transferring = () => service.transfer(workspace, contributor, other);
+
+    // Assert
+    expect(transferring).toThrow(NotWorkspaceOwnerException);
     expect(workspace.isOwnedBy(owner.id)).toBe(true);
   });
 });

@@ -15,9 +15,11 @@ import type { Actor } from '@intentra/contracts/iam';
 import {
   CreateWorkspaceDtoSchema,
   DeleteWorkspaceDtoSchema,
+  TransferOwnershipDtoSchema,
   WorkspaceApi,
   type CreateWorkspaceDto,
   type DeleteWorkspaceDto,
+  type TransferOwnershipDto,
   type WorkspaceDto,
 } from '@intentra/contracts/workspace';
 
@@ -49,5 +51,19 @@ export class WorkspacesController {
     @Body({ schema: DeleteWorkspaceDtoSchema }) data: DeleteWorkspaceDto,
   ): Promise<void> {
     return this.workspace.workspaces.delete(actor, workspaceId, data);
+  }
+
+  @Post(':workspaceId/transfer-ownership')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async transferOwnership(
+    @CurrentActor() actor: Actor,
+    @Param('workspaceId') workspaceId: string,
+    @Body({ schema: TransferOwnershipDtoSchema }) data: TransferOwnershipDto,
+  ): Promise<void> {
+    return this.workspace.workspaces.transferOwnership(
+      actor,
+      workspaceId,
+      data,
+    );
   }
 }

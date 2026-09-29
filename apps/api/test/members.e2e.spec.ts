@@ -192,4 +192,34 @@ describe('/api/workspaces/:workspaceId/members', () => {
       .expect(HttpStatus.CONFLICT)
       .expect(res => expect(res.body.code).toBe('OWNER_CANNOT_LEAVE'));
   });
+
+  it('lets the former Owner leave after handing the Workspace over', async () => {
+    // Arrange
+    const owner = await signIn('ada@example.com');
+    const workspaceId = await createWorkspace(owner);
+    await join(owner, workspaceId, 'bob@example.com');
+    const members = await app
+      .request()
+      .get(membersPath(workspaceId))
+      .set('Authorization', owner)
+      .expect(HttpStatus.OK);
+    const bob = members.body.find(
+      (m: { email: string }) => m.email === 'bob@example.com',
+    );
+    await app
+      .request()
+      .post(`${WORKSPACES_PATH}/${workspaceId}/transfer-ownership`)
+      .set('Authorization', owner)
+      .send({ memberId: bob.id })
+      .expect(HttpStatus.NO_CONTENT);
+
+    // Act
+    const response = app
+      .request()
+      .post(`${WORKSPACES_PATH}/${workspaceId}/leave`)
+      .set('Authorization', owner);
+
+    // Assert
+    await response.expect(HttpStatus.NO_CONTENT);
+  });
 });
