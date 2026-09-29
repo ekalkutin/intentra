@@ -7,10 +7,9 @@ import {
 } from '../value-objects/index.js';
 
 export class Workspace extends Aggregate<WorkspaceId> {
-  #name: WorkspaceName;
-  #ownerId: MemberId;
-
+  readonly #name: WorkspaceName;
   readonly #slug: WorkspaceSlug;
+  #ownerId: MemberId;
 
   private constructor(id: WorkspaceId, state: WorkspaceState) {
     super(id);
@@ -45,10 +44,6 @@ export class Workspace extends Aggregate<WorkspaceId> {
       slug: new WorkspaceSlug(props.slug),
       ownerId: new MemberId(props.ownerId),
     });
-  }
-
-  public rename(name: string): void {
-    this.#name = new WorkspaceName(name);
   }
 
   public isOwnedBy(memberId: MemberId): boolean {

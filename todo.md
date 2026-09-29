@@ -16,7 +16,6 @@ Where we stopped on 2026-09-29. Glossary: `CONTEXT-MAP.md`, `packages/iam/CONTEX
 
 ## Next, in this order
 
-- [ ] **Rename a Workspace** (`workspace.rename` exists, no use case yet)
 - [ ] **Delete a Workspace** immediately, with its Members, Invitations and Projects
 - [ ] **Transfer of Ownership** (`OwnershipTransferService` exists, no use case yet)
 - [ ] **Rename / delete a Project**

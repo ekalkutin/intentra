@@ -5,7 +5,7 @@ The top-level space in Intentra that groups people and the projects they work on
 ## Language
 
 **Workspace**:
-The top-level space that groups people and projects. It is created explicitly by an Account, never automatically at sign-up.
+The top-level space that groups people and projects. It is created explicitly by an Account, never automatically at sign-up. Its name is chosen at creation and cannot be changed later.
 _Avoid_: Organization, Portfolio, Team, Tenant
 
 **Workspace Slug**:

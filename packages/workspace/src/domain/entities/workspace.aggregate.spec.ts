@@ -57,29 +57,4 @@ describe('Workspace', () => {
       expect(creating).toThrow(InvalidWorkspaceSlugException);
     });
   });
-
-  describe('rename', () => {
-    it('changes the name but keeps the slug', () => {
-      // Arrange
-      const workspace = createWorkspace();
-
-      // Act
-      workspace.rename('Acme Industries');
-
-      // Assert
-      expect(workspace.name.value).toBe('Acme Industries');
-      expect(workspace.slug.value).toBe('acme-corp');
-    });
-
-    it('rejects an invalid name', () => {
-      // Arrange
-      const workspace = createWorkspace();
-
-      // Act
-      const renaming = () => workspace.rename('');
-
-      // Assert
-      expect(renaming).toThrow(InvalidWorkspaceNameException);
-    });
-  });
 });
