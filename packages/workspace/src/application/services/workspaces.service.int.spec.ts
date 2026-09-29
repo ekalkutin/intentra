@@ -13,10 +13,13 @@ import { TestingApp } from '@intentra/platform-testing';
 import { AccountId, UnitOfWork } from '@intentra/shared-kernel';
 
 import { Member } from '../../domain/entities/index.js';
+import { WorkspaceSlugMismatchException } from '../../domain/exceptions/index.js';
 import { WorkspaceModule } from '../../workspace.module.js';
 import { WorkspaceSlugTakenException } from '../exceptions/index.js';
 import { MemberRepository } from '../ports/outbound/index.js';
 
+import { InvitationsService } from './invitations.service.js';
+import { ProjectsService } from './projects.service.js';
 import { WorkspacesService } from './workspaces.service.js';
 
 function actor(): Actor {
@@ -137,6 +140,61 @@ describe('WorkspacesService integration', () => {
 
       // Assert
       expect(workspaces).toEqual([]);
+    });
+  });
+
+  describe('delete', () => {
+    it('deletes the Workspace with everything in it and frees its slug', async () => {
+      // Arrange
+      const service = app.get(WorkspacesService);
+      const ada = actor();
+      const workspace = await service.create(ada, {
+        name: 'Acme',
+        slug: 'acme',
+      });
+      await app
+        .get(ProjectsService)
+        .create(ada, workspace.id, { name: 'Billing', slug: 'billing' });
+      await app
+        .get(InvitationsService)
+        .create(ada, workspace.id, { email: 'bob@example.com' });
+
+      // Act
+      await service.delete(ada, workspace.id, { slug: 'acme' });
+
+      // Assert
+      await expect(service.list(ada)).resolves.toEqual([]);
+      await expect(
+        app
+          .get(InvitationsService)
+          .listReceived({ ...actor(), email: 'bob@example.com' }),
+      ).resolves.toEqual([]);
+      const recreated = await service.create(ada, {
+        name: 'Acme',
+        slug: 'acme',
+      });
+      await expect(
+        app.get(ProjectsService).list(ada, recreated.id),
+      ).resolves.toEqual([]);
+    });
+
+    it('keeps everything when the slug does not match', async () => {
+      // Arrange
+      const service = app.get(WorkspacesService);
+      const ada = actor();
+      const workspace = await service.create(ada, {
+        name: 'Acme',
+        slug: 'acme',
+      });
+
+      // Act
+      const deletion = service.delete(ada, workspace.id, { slug: 'acm' });
+
+      // Assert
+      await expect(deletion).rejects.toBeInstanceOf(
+        WorkspaceSlugMismatchException,
+      );
+      await expect(service.list(ada)).resolves.toEqual([workspace]);
     });
   });
 });

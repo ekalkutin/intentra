@@ -9,4 +9,7 @@ export type ProjectQueryProps = {
 export abstract class ProjectRepository {
   abstract save(project: Project): Promise<void>;
   abstract findMany(props: ProjectQueryProps): Promise<Project[]>;
+  abstract deleteMany(props: {
+    readonly workspaceId: WorkspaceId;
+  }): Promise<void>;
 }

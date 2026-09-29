@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { mongo, type Model } from 'mongoose';
 
 import { MongooseUnitOfWork } from '@intentra/platform-persistence';
+import type { WorkspaceId } from '@intentra/shared-kernel';
 
 import { InvitationAlreadyPendingException } from '../../../application/exceptions/index.js';
 import {
@@ -70,6 +71,15 @@ export class InvitationRepositoryAdapter implements InvitationRepository {
       .exec();
 
     return documents.map(document => this.toDomain(document));
+  }
+
+  public async deleteMany(props: {
+    readonly workspaceId: WorkspaceId;
+  }): Promise<void> {
+    await this.invitationModel
+      .deleteMany({ workspaceId: props.workspaceId.value })
+      .session(this.unitOfWork.requireSession())
+      .exec();
   }
 
   private toFilter(props: InvitationQueryProps) {

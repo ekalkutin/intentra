@@ -12,3 +12,4 @@ export { OwnerCannotLeaveException } from './owner-cannot-leave.exception.js';
 export { UnknownInvitationStatusException } from './unknown-invitation-status.exception.js';
 export { UnknownMemberStatusException } from './unknown-member-status.exception.js';
 export { UnknownRoleException } from './unknown-role.exception.js';
+export { WorkspaceSlugMismatchException } from './workspace-slug-mismatch.exception.js';

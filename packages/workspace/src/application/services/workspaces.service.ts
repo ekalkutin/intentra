@@ -3,27 +3,39 @@ import { Injectable } from '@nestjs/common';
 import type { Actor } from '@intentra/contracts/iam';
 import type {
   CreateWorkspaceDto,
+  DeleteWorkspaceDto,
   WorkspaceDto,
   WorkspacesApi,
 } from '@intentra/contracts/workspace';
-import { AccountId, UnitOfWork } from '@intentra/shared-kernel';
+import { AccountId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
-import { WorkspaceCreationService } from '../../domain/services/index.js';
+import {
+  WorkspaceCreationService,
+  WorkspaceDeletionService,
+} from '../../domain/services/index.js';
 import { MemberStatus } from '../../domain/value-objects/index.js';
+import { AccessResolver } from '../access/index.js';
+import { WorkspaceNotFoundException } from '../exceptions/index.js';
 import { toWorkspaceDto } from '../mappers/index.js';
 import {
+  InvitationRepository,
   MemberRepository,
+  ProjectRepository,
   WorkspaceRepository,
 } from '../ports/outbound/index.js';
 
 @Injectable()
 export class WorkspacesService implements WorkspacesApi {
   readonly #workspaceCreationService = new WorkspaceCreationService();
+  readonly #workspaceDeletionService = new WorkspaceDeletionService();
 
   constructor(
     private readonly unitOfWork: UnitOfWork,
+    private readonly accessResolver: AccessResolver,
     private readonly workspaceRepository: WorkspaceRepository,
     private readonly memberRepository: MemberRepository,
+    private readonly invitationRepository: InvitationRepository,
+    private readonly projectRepository: ProjectRepository,
   ) {}
 
   public async create(
@@ -55,5 +67,29 @@ export class WorkspacesService implements WorkspacesApi {
     });
 
     return workspaces.map(toWorkspaceDto);
+  }
+
+  public async delete(
+    actor: Actor,
+    workspaceId: string,
+    data: DeleteWorkspaceDto,
+  ): Promise<void> {
+    const id = new WorkspaceId(workspaceId);
+    const owner = await this.accessResolver.resolve(actor, id);
+
+    await this.unitOfWork.run(async () => {
+      const workspace = await this.workspaceRepository.findOne({ id });
+      if (!workspace) {
+        throw new WorkspaceNotFoundException();
+      }
+
+      this.#workspaceDeletionService.ensureDeletable(workspace, owner, {
+        slug: data.slug,
+      });
+      await this.projectRepository.deleteMany({ workspaceId: id });
+      await this.invitationRepository.deleteMany({ workspaceId: id });
+      await this.memberRepository.deleteMany({ workspaceId: id });
+      await this.workspaceRepository.delete(id);
+    });
   }
 }

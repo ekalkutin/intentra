@@ -156,4 +156,57 @@ describe('/api/workspaces', () => {
         );
     });
   });
+
+  describe('DELETE /:workspaceId', () => {
+    async function createWorkspace(authorization: string): Promise<string> {
+      const response = await app
+        .request()
+        .post(WORKSPACES_PATH)
+        .set('Authorization', authorization)
+        .send({ name: 'Acme', slug: 'acme' })
+        .expect(HttpStatus.CREATED);
+
+      return response.body.id;
+    }
+
+    it('deletes the Workspace once its slug is typed', async () => {
+      // Arrange
+      const owner = await signIn('ada@example.com');
+      const workspaceId = await createWorkspace(owner);
+
+      // Act
+      const response = app
+        .request()
+        .delete(`${WORKSPACES_PATH}/${workspaceId}`)
+        .set('Authorization', owner)
+        .send({ slug: 'acme' });
+
+      // Assert
+      await response.expect(HttpStatus.NO_CONTENT);
+      await app
+        .request()
+        .get(WORKSPACES_PATH)
+        .set('Authorization', owner)
+        .expect(HttpStatus.OK)
+        .expect(res => expect(res.body).toEqual([]));
+    });
+
+    it('rejects a slug that does not match', async () => {
+      // Arrange
+      const owner = await signIn('ada@example.com');
+      const workspaceId = await createWorkspace(owner);
+
+      // Act
+      const response = app
+        .request()
+        .delete(`${WORKSPACES_PATH}/${workspaceId}`)
+        .set('Authorization', owner)
+        .send({ slug: 'acm' });
+
+      // Assert
+      await response
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect(res => expect(res.body.code).toBe('WORKSPACE_SLUG_MISMATCH'));
+    });
+  });
 });

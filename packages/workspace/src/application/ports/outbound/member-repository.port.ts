@@ -18,4 +18,7 @@ export abstract class MemberRepository {
   abstract save(member: Member): Promise<void>;
   abstract findOne(props: MemberQueryProps): Promise<Member | null>;
   abstract findMany(props: MemberQueryProps): Promise<Member[]>;
+  abstract deleteMany(props: {
+    readonly workspaceId: WorkspaceId;
+  }): Promise<void>;
 }

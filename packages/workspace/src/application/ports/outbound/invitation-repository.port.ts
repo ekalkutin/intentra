@@ -17,4 +17,7 @@ export abstract class InvitationRepository {
   abstract save(invitation: Invitation): Promise<void>;
   abstract findOne(props: InvitationQueryProps): Promise<Invitation | null>;
   abstract findMany(props: InvitationQueryProps): Promise<Invitation[]>;
+  abstract deleteMany(props: {
+    readonly workspaceId: WorkspaceId;
+  }): Promise<void>;
 }

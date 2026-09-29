@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { mongo, type Model } from 'mongoose';
 
 import { MongooseUnitOfWork } from '@intentra/platform-persistence';
+import type { WorkspaceId } from '@intentra/shared-kernel';
 
 import { ProjectSlugTakenException } from '../../../application/exceptions/index.js';
 import {
@@ -56,6 +57,15 @@ export class ProjectRepositoryAdapter implements ProjectRepository {
       .exec();
 
     return documents.map(document => this.toDomain(document));
+  }
+
+  public async deleteMany(props: {
+    readonly workspaceId: WorkspaceId;
+  }): Promise<void> {
+    await this.projectModel
+      .deleteMany({ workspaceId: props.workspaceId.value })
+      .session(this.unitOfWork.requireSession())
+      .exec();
   }
 
   private toDomain(document: ProjectModel): Project {
