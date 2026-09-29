@@ -39,9 +39,9 @@ export class AuthService implements AuthApi {
   }
 
   public async signIn(data: SignInDto): Promise<TokenPair> {
-    const account = await this.accountRepository.findByEmail(
-      new Email(data.email),
-    );
+    const account = await this.accountRepository.findOne({
+      email: new Email(data.email),
+    });
     const passwordMatches =
       account !== null &&
       (await this.passwordHasher.compare(data.password, account.passwordHash));
@@ -57,7 +57,9 @@ export class AuthService implements AuthApi {
     const claims = await this.tokenSigner.verifyRefreshToken(data.refreshToken);
     const account =
       claims &&
-      (await this.accountRepository.findById(new AccountId(claims.accountId)));
+      (await this.accountRepository.findOne({
+        id: new AccountId(claims.accountId),
+      }));
 
     if (!account) {
       throw new InvalidRefreshTokenException();

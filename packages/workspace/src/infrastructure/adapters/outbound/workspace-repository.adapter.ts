@@ -1,0 +1,75 @@
+import { Injectable, Provider } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { mongo, type Model } from 'mongoose';
+
+import type { WorkspaceId } from '@intentra/shared-kernel';
+
+import { WorkspaceSlugTakenException } from '../../../application/exceptions/index.js';
+import {
+  WorkspaceRepository,
+  type WorkspaceQueryProps,
+} from '../../../application/ports/outbound/index.js';
+import { Workspace } from '../../../domain/entities/index.js';
+import { WorkspaceModel } from '../../database/index.js';
+
+const DUPLICATE_KEY_ERROR_CODE = 11000;
+
+@Injectable()
+export class WorkspaceRepositoryAdapter implements WorkspaceRepository {
+  constructor(
+    @InjectModel(WorkspaceModel.name)
+    private readonly workspaceModel: Model<WorkspaceModel>,
+  ) {}
+
+  public async save(workspace: Workspace): Promise<void> {
+    try {
+      await this.workspaceModel
+        .replaceOne(
+          { _id: workspace.id.value },
+          {
+            name: workspace.name.value,
+            slug: workspace.slug.value,
+            ownerId: workspace.ownerId.value,
+          },
+          { upsert: true },
+        )
+        .exec();
+    } catch (error) {
+      if (
+        error instanceof mongo.MongoServerError &&
+        error.code === DUPLICATE_KEY_ERROR_CODE
+      ) {
+        throw new WorkspaceSlugTakenException();
+      }
+      throw error;
+    }
+  }
+
+  public async delete(id: WorkspaceId): Promise<void> {
+    await this.workspaceModel.deleteOne({ _id: id.value }).exec();
+  }
+
+  public async findMany(props: WorkspaceQueryProps): Promise<Workspace[]> {
+    const documents = await this.workspaceModel
+      .find({ _id: { $in: props.ids.map(id => id.value) } })
+      .sort({ name: 1 })
+      .lean()
+      .exec();
+
+    return documents.map(document => this.toDomain(document));
+  }
+
+  private toDomain(document: WorkspaceModel): Workspace {
+    return Workspace.restore({
+      id: document._id,
+      name: document.name,
+      slug: document.slug,
+      ownerId: document.ownerId,
+    });
+  }
+}
+
+export const WORKSPACE_REPOSITORY_PROVIDER: Provider = {
+  provide: WorkspaceRepository,
+  useClass: WorkspaceRepositoryAdapter,
+};

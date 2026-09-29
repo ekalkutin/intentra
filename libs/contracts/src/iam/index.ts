@@ -1,6 +1,6 @@
-export { type AccountsApi } from './account/accounts.api.js';
+export { AccountsApi } from './account/accounts.api.js';
 export { type Actor } from './auth/actor.js';
-export { type AuthApi } from './auth/auth.api.js';
+export { AuthApi } from './auth/auth.api.js';
 export {
   RefreshTokensDtoSchema,
   type RefreshTokensDto,

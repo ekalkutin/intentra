@@ -1,1 +1,1 @@
-export interface AccountsApi {}
+export abstract class AccountsApi {}

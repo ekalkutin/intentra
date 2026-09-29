@@ -9,6 +9,7 @@ import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { ActorGuard } from './auth/index.js';
 import { ExceptionsFilter } from './errors/index.js';
 import { IAM_CONTROLLERS } from './iam/index.js';
+import { WORKSPACE_CONTROLLERS } from './workspace/index.js';
 
 @Module({})
 export class RestModule {
@@ -20,7 +21,7 @@ export class RestModule {
     return {
       module: RestModule,
       imports: [...contexts],
-      controllers: [...IAM_CONTROLLERS],
+      controllers: [...IAM_CONTROLLERS, ...WORKSPACE_CONTROLLERS],
       providers: [
         ActorGuard,
         { provide: APP_PIPE, useClass: StandardSchemaValidationPipe },

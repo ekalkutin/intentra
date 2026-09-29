@@ -50,6 +50,15 @@ export class Member extends Aggregate<MemberId> {
     });
   }
 
+  public static restore(props: MemberRestoreProps): Member {
+    return new Member(new MemberId(props.id), {
+      workspaceId: new WorkspaceId(props.workspaceId),
+      accountId: new AccountId(props.accountId),
+      role: Role.from(props.role),
+      status: MemberStatus.from(props.status),
+    });
+  }
+
   public isActive(): boolean {
     return this.#status.equals(MemberStatus.Active);
   }
@@ -77,4 +86,11 @@ type MemberCreateOwnerProps = {
   readonly id: string;
   readonly workspaceId: string;
   readonly accountId: string;
+};
+type MemberRestoreProps = {
+  readonly id: string;
+  readonly workspaceId: string;
+  readonly accountId: string;
+  readonly role: string;
+  readonly status: string;
 };

@@ -39,6 +39,14 @@ export class Workspace extends Aggregate<WorkspaceId> {
     });
   }
 
+  public static restore(props: WorkspaceRestoreProps): Workspace {
+    return new Workspace(new WorkspaceId(props.id), {
+      name: new WorkspaceName(props.name),
+      slug: new WorkspaceSlug(props.slug),
+      ownerId: new MemberId(props.ownerId),
+    });
+  }
+
   public rename(name: string): void {
     this.#name = new WorkspaceName(name);
   }
@@ -62,6 +70,12 @@ type WorkspaceState = {
   readonly ownerId: MemberId;
 };
 type WorkspaceCreateProps = {
+  readonly name: string;
+  readonly slug: string;
+  readonly ownerId: string;
+};
+type WorkspaceRestoreProps = {
+  readonly id: string;
   readonly name: string;
   readonly slug: string;
   readonly ownerId: string;

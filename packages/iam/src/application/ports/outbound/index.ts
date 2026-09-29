@@ -1,4 +1,7 @@
-export { AccountRepository } from './account-repository.port.js';
+export {
+  AccountRepository,
+  type AccountQueryProps,
+} from './account-repository.port.js';
 export { PasswordHasher } from './password-hasher.port.js';
 export {
   TokenSigner,
