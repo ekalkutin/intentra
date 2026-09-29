@@ -25,6 +25,16 @@ export {
   type TermFieldsDto,
 } from './knowledge/knowledge-fields.dto.js';
 export {
+  ApproveKnowledgeItemDtoSchema,
+  DeleteKnowledgeItemDtoSchema,
+  RejectKnowledgeItemDtoSchema,
+  type ApproveKnowledgeItemDto,
+  type DeleteKnowledgeItemDto,
+  type RejectKnowledgeItemDto,
+} from './knowledge/knowledge-item-change.dto.js';
+export {
+  type KnowledgeAccessDto,
+  type KnowledgeItemAccessDto,
   type KnowledgeItemDto,
   type KnowledgeItemPageDto,
 } from './knowledge/knowledge-item.dto.js';

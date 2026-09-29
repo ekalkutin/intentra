@@ -69,6 +69,24 @@ export class KnowledgeItemModel {
 
   @Prop({ type: Date, default: null })
   readonly lastEditedAt: Date | null;
+
+  @Prop({ type: String, default: null })
+  readonly approvedBy: string | null;
+
+  @Prop({ type: Date, default: null })
+  readonly approvedAt: Date | null;
+
+  @Prop({ type: String, default: null })
+  readonly rejectedBy: string | null;
+
+  @Prop({ type: Date, default: null })
+  readonly rejectedAt: Date | null;
+
+  @Prop({ type: String, default: null })
+  readonly rejectionReason: string | null;
+
+  @Prop({ type: Number, required: true })
+  readonly version: number;
 }
 
 export const KnowledgeItemSchema =

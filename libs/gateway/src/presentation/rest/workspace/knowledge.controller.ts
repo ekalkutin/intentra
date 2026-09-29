@@ -15,15 +15,21 @@ import {
 
 import type { Actor } from '@intentra/contracts/iam';
 import {
+  ApproveKnowledgeItemDtoSchema,
+  DeleteKnowledgeItemDtoSchema,
   EditKnowledgeItemDtoSchema,
   ListKnowledgeItemsDtoSchema,
   RecordKnowledgeItemDtoSchema,
+  RejectKnowledgeItemDtoSchema,
   WorkspaceApi,
+  type ApproveKnowledgeItemDto,
+  type DeleteKnowledgeItemDto,
   type EditKnowledgeItemDto,
   type KnowledgeItemDto,
   type KnowledgeItemPageDto,
   type ListKnowledgeItemsDto,
   type RecordKnowledgeItemDto,
+  type RejectKnowledgeItemDto,
 } from '@intentra/contracts/workspace';
 
 import { ActorGuard, CurrentActor } from '../auth/index.js';
@@ -89,7 +95,53 @@ export class KnowledgeController {
     @Param('workspaceId') workspaceId: string,
     @Param('projectId') projectId: string,
     @Param('key') key: string,
+    @Body({ schema: DeleteKnowledgeItemDtoSchema })
+    data: DeleteKnowledgeItemDto,
   ): Promise<void> {
-    return this.workspace.knowledge.delete(actor, workspaceId, projectId, key);
+    return this.workspace.knowledge.delete(
+      actor,
+      workspaceId,
+      projectId,
+      key,
+      data,
+    );
+  }
+
+  @Post(':key/approve')
+  @HttpCode(HttpStatus.OK)
+  public async approve(
+    @CurrentActor() actor: Actor,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Param('key') key: string,
+    @Body({ schema: ApproveKnowledgeItemDtoSchema })
+    data: ApproveKnowledgeItemDto,
+  ): Promise<KnowledgeItemDto> {
+    return this.workspace.knowledge.approve(
+      actor,
+      workspaceId,
+      projectId,
+      key,
+      data,
+    );
+  }
+
+  @Post(':key/reject')
+  @HttpCode(HttpStatus.OK)
+  public async reject(
+    @CurrentActor() actor: Actor,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Param('key') key: string,
+    @Body({ schema: RejectKnowledgeItemDtoSchema })
+    data: RejectKnowledgeItemDto,
+  ): Promise<KnowledgeItemDto> {
+    return this.workspace.knowledge.reject(
+      actor,
+      workspaceId,
+      projectId,
+      key,
+      data,
+    );
   }
 }

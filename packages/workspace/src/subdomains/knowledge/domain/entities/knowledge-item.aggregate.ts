@@ -1,28 +1,35 @@
 import { Aggregate, ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 
 import { MemberId } from '../../../tenancy/index.js';
-import { KnowledgeKindMismatchException } from '../exceptions/index.js';
+import {
+  KnowledgeItemChangedException,
+  KnowledgeItemNotDraftException,
+  KnowledgeKindMismatchException,
+} from '../exceptions/index.js';
 import {
   KnowledgeItemId,
+  KnowledgeItemVersion,
   KnowledgeKey,
   KnowledgeKind,
   KnowledgeSource,
   KnowledgeStatus,
   KnowledgeTitle,
   Rationale,
+  RejectionReason,
   type KnowledgeContent,
 } from '../value-objects/index.js';
 
 /**
  * One piece of what is known about a Project. Its Kind comes with its
- * Knowledge Key and never changes.
+ * Knowledge Key and never changes. Only a Draft changes, and only on the
+ * version its author last saw.
  */
 export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   readonly #workspaceId: WorkspaceId;
   readonly #projectId: ProjectId;
   readonly #key: KnowledgeKey;
   #title: KnowledgeTitle;
-  readonly #status: KnowledgeStatus;
+  #status: KnowledgeStatus;
   readonly #source: KnowledgeSource;
   #rationale: Rationale | null;
   #content: KnowledgeContent;
@@ -30,6 +37,12 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   readonly #recordedAt: Temporal.Instant;
   #lastEditedBy: MemberId | null;
   #lastEditedAt: Temporal.Instant | null;
+  #approvedBy: MemberId | null;
+  #approvedAt: Temporal.Instant | null;
+  #rejectedBy: MemberId | null;
+  #rejectedAt: Temporal.Instant | null;
+  #rejectionReason: RejectionReason | null;
+  #version: KnowledgeItemVersion;
 
   private constructor(id: KnowledgeItemId, state: KnowledgeItemState) {
     super(id);
@@ -45,6 +58,12 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     this.#recordedAt = state.recordedAt;
     this.#lastEditedBy = state.lastEditedBy;
     this.#lastEditedAt = state.lastEditedAt;
+    this.#approvedBy = state.approvedBy;
+    this.#approvedAt = state.approvedAt;
+    this.#rejectedBy = state.rejectedBy;
+    this.#rejectedAt = state.rejectedAt;
+    this.#rejectionReason = state.rejectionReason;
+    this.#version = state.version;
   }
 
   get workspaceId(): WorkspaceId {
@@ -102,6 +121,39 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     return this.#lastEditedAt;
   }
 
+  /** Null unless Approved. */
+  get approvedBy(): MemberId | null {
+    return this.#approvedBy;
+  }
+
+  /** Null unless Approved. */
+  get approvedAt(): Temporal.Instant | null {
+    return this.#approvedAt;
+  }
+
+  /** Null unless Rejected. */
+  get rejectedBy(): MemberId | null {
+    return this.#rejectedBy;
+  }
+
+  /** Null unless Rejected. */
+  get rejectedAt(): Temporal.Instant | null {
+    return this.#rejectedAt;
+  }
+
+  /** Null unless Rejected with a reason. */
+  get rejectionReason(): RejectionReason | null {
+    return this.#rejectionReason;
+  }
+
+  get version(): KnowledgeItemVersion {
+    return this.#version;
+  }
+
+  public isDraft(): boolean {
+    return this.#status.equals(KnowledgeStatus.Draft);
+  }
+
   /** A person enters a Draft by hand; its Kind is the Kind of its content. */
   public static record(props: KnowledgeItemRecordProps): KnowledgeItem {
     return new KnowledgeItem(new KnowledgeItemId(), {
@@ -118,6 +170,12 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
       recordedAt: Temporal.Now.instant(),
       lastEditedBy: null,
       lastEditedAt: null,
+      approvedBy: null,
+      approvedAt: null,
+      rejectedBy: null,
+      rejectedAt: null,
+      rejectionReason: null,
+      version: KnowledgeItemVersion.First,
     });
   }
 
@@ -139,14 +197,24 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
       content: props.content,
       authorId: new MemberId(props.authorId),
       recordedAt: props.recordedAt,
-      lastEditedBy:
-        props.lastEditedBy === null ? null : new MemberId(props.lastEditedBy),
+      lastEditedBy: toMemberId(props.lastEditedBy),
       lastEditedAt: props.lastEditedAt,
+      approvedBy: toMemberId(props.approvedBy),
+      approvedAt: props.approvedAt,
+      rejectedBy: toMemberId(props.rejectedBy),
+      rejectedAt: props.rejectedAt,
+      rejectionReason: RejectionReason.optional(props.rejectionReason),
+      version: new KnowledgeItemVersion(props.version),
     });
   }
 
   /** Changes what is given and records who edited it last and when. */
-  public edit(editorId: MemberId, changes: KnowledgeItemChanges): void {
+  public edit(
+    editorId: MemberId,
+    seenVersion: KnowledgeItemVersion,
+    changes: KnowledgeItemChanges,
+  ): void {
+    this.#ensureChangeable(seenVersion);
     if (changes.content && !changes.content.kind.equals(this.kind)) {
       throw new KnowledgeKindMismatchException();
     }
@@ -162,7 +230,52 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     }
     this.#lastEditedBy = editorId;
     this.#lastEditedAt = Temporal.Now.instant();
+    this.#version = this.#version.next();
   }
+
+  /** A Member confirms, on the version they read, that it is true for the Project. */
+  public approve(
+    approverId: MemberId,
+    seenVersion: KnowledgeItemVersion,
+  ): void {
+    this.#ensureChangeable(seenVersion);
+    this.#status = KnowledgeStatus.Approved;
+    this.#approvedBy = approverId;
+    this.#approvedAt = Temporal.Now.instant();
+    this.#version = this.#version.next();
+  }
+
+  /** A person turns it down as not true for the Project; a blank reason means none. */
+  public reject(
+    rejecterId: MemberId,
+    seenVersion: KnowledgeItemVersion,
+    reason: string | null,
+  ): void {
+    this.#ensureChangeable(seenVersion);
+    this.#status = KnowledgeStatus.Rejected;
+    this.#rejectedBy = rejecterId;
+    this.#rejectedAt = Temporal.Now.instant();
+    this.#rejectionReason = RejectionReason.optional(reason);
+    this.#version = this.#version.next();
+  }
+
+  /** Only a Draft, on the version the deleter saw, can be deleted. */
+  public ensureDeletable(seenVersion: KnowledgeItemVersion): void {
+    this.#ensureChangeable(seenVersion);
+  }
+
+  #ensureChangeable(seenVersion: KnowledgeItemVersion): void {
+    if (!this.isDraft()) {
+      throw new KnowledgeItemNotDraftException();
+    }
+    if (!seenVersion.equals(this.#version)) {
+      throw new KnowledgeItemChangedException();
+    }
+  }
+}
+
+function toMemberId(value: string | null): MemberId | null {
+  return value === null ? null : new MemberId(value);
 }
 
 type KnowledgeItemState = {
@@ -178,6 +291,12 @@ type KnowledgeItemState = {
   readonly recordedAt: Temporal.Instant;
   readonly lastEditedBy: MemberId | null;
   readonly lastEditedAt: Temporal.Instant | null;
+  readonly approvedBy: MemberId | null;
+  readonly approvedAt: Temporal.Instant | null;
+  readonly rejectedBy: MemberId | null;
+  readonly rejectedAt: Temporal.Instant | null;
+  readonly rejectionReason: RejectionReason | null;
+  readonly version: KnowledgeItemVersion;
 };
 type KnowledgeItemRecordProps = {
   readonly workspaceId: string;
@@ -204,6 +323,12 @@ type KnowledgeItemRestoreProps = {
   readonly recordedAt: Temporal.Instant;
   readonly lastEditedBy: string | null;
   readonly lastEditedAt: Temporal.Instant | null;
+  readonly approvedBy: string | null;
+  readonly approvedAt: Temporal.Instant | null;
+  readonly rejectedBy: string | null;
+  readonly rejectedAt: Temporal.Instant | null;
+  readonly rejectionReason: string | null;
+  readonly version: number;
 };
 /** What to change; a field left out stays as it is, a null rationale clears it. */
 export type KnowledgeItemChanges = {

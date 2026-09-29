@@ -7,6 +7,7 @@ import type {
   TermFieldsDto,
 } from '@intentra/contracts/workspace';
 
+import type { ProjectRole } from '../../../tenancy/index.js';
 import { KnowledgeItem } from '../../domain/entities/index.js';
 import {
   DecisionContent,
@@ -15,8 +16,13 @@ import {
 } from '../../domain/value-objects/index.js';
 
 import { toIsoString } from './instant.mapper.js';
+import { toKnowledgeItemAccessDto } from './knowledge-access.mapper.js';
 
-export function toKnowledgeItemDto(item: KnowledgeItem): KnowledgeItemDto {
+/** Seen by a Member with the given Project Role, who gets their own `access`. */
+export function toKnowledgeItemDto(
+  item: KnowledgeItem,
+  projectRole: ProjectRole,
+): KnowledgeItemDto {
   const frame = {
     id: item.id.value,
     key: item.key.value,
@@ -28,6 +34,13 @@ export function toKnowledgeItemDto(item: KnowledgeItem): KnowledgeItemDto {
     recordedAt: toIsoString(item.recordedAt),
     lastEditedBy: item.lastEditedBy?.value ?? null,
     lastEditedAt: item.lastEditedAt && toIsoString(item.lastEditedAt),
+    approvedBy: item.approvedBy?.value ?? null,
+    approvedAt: item.approvedAt && toIsoString(item.approvedAt),
+    rejectedBy: item.rejectedBy?.value ?? null,
+    rejectedAt: item.rejectedAt && toIsoString(item.rejectedAt),
+    rejectionReason: item.rejectionReason?.value ?? null,
+    version: item.version.value,
+    access: toKnowledgeItemAccessDto(item, projectRole),
   };
   const content = item.content;
 

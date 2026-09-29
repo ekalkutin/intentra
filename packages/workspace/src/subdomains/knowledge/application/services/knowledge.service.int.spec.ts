@@ -21,8 +21,11 @@ import {
   WorkspacesService,
 } from '../../../tenancy/index.js';
 import {
+  DraftApprovalForbiddenException,
   DraftDeletionForbiddenException,
   DraftEditingForbiddenException,
+  KnowledgeItemChangedException,
+  KnowledgeItemNotDraftException,
   KnowledgeKindMismatchException,
   KnowledgeRecordingForbiddenException,
 } from '../../domain/exceptions/index.js';
@@ -174,6 +177,18 @@ describe('KnowledgeService integration', () => {
         recordedAt: expect.any(String),
         lastEditedBy: null,
         lastEditedAt: null,
+        approvedBy: null,
+        approvedAt: null,
+        rejectedBy: null,
+        rejectedAt: null,
+        rejectionReason: null,
+        version: 1,
+        access: {
+          canEdit: true,
+          canDelete: true,
+          canApprove: true,
+          canReject: true,
+        },
       });
     });
 
@@ -312,7 +327,15 @@ describe('KnowledgeService integration', () => {
         .get(bob, workspaceId, projectId, 'DEC-1');
 
       // Assert
-      expect(item).toEqual(recorded);
+      expect(item).toEqual({
+        ...recorded,
+        access: {
+          canEdit: false,
+          canDelete: false,
+          canApprove: false,
+          canReject: false,
+        },
+      });
     });
 
     it('reports an unknown Knowledge Key as not found', async () => {
@@ -346,6 +369,7 @@ describe('KnowledgeService integration', () => {
         .get(KnowledgeService)
         .edit(bob, workspaceId, projectId, 'REQ-1', {
           kind: 'requirement',
+          version: 1,
           rationale: null,
           fields: {
             statement: 'Export a report to PDF and CSV',
@@ -367,11 +391,50 @@ describe('KnowledgeService integration', () => {
         authorId: adaId,
         lastEditedBy: bobId,
         lastEditedAt: expect.any(String),
+        version: 2,
+        access: { canEdit: true, canApprove: false },
       });
       const item = await app
         .get(KnowledgeService)
-        .get(ada, workspaceId, projectId, 'REQ-1');
+        .get(bob, workspaceId, projectId, 'REQ-1');
       expect(item).toEqual(edited);
+    });
+
+    it('refuses a change made on an older version, losing no edit', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada } = await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      await knowledgeService.record(ada, workspaceId, projectId, requirement);
+      await knowledgeService.edit(ada, workspaceId, projectId, 'REQ-1', {
+        kind: 'requirement',
+        version: 1,
+        title: 'Report export',
+      });
+
+      // Act
+      const editing = knowledgeService.edit(
+        ada,
+        workspaceId,
+        projectId,
+        'REQ-1',
+        {
+          kind: 'requirement',
+          version: 1,
+          title: 'PDF and CSV export',
+        },
+      );
+
+      // Assert
+      await expect(editing).rejects.toBeInstanceOf(
+        KnowledgeItemChangedException,
+      );
+      const item = await knowledgeService.get(
+        ada,
+        workspaceId,
+        projectId,
+        'REQ-1',
+      );
+      expect(item.title).toBe('Report export');
     });
 
     it('refuses another Kind', async () => {
@@ -386,6 +449,7 @@ describe('KnowledgeService integration', () => {
         .get(KnowledgeService)
         .edit(ada, workspaceId, projectId, 'REQ-1', {
           kind: 'term',
+          version: 1,
           title: 'Export',
         });
 
@@ -407,6 +471,7 @@ describe('KnowledgeService integration', () => {
         .get(KnowledgeService)
         .edit(bob, workspaceId, projectId, 'REQ-1', {
           kind: 'requirement',
+          version: 1,
           title: 'Export',
         });
 
@@ -432,7 +497,9 @@ describe('KnowledgeService integration', () => {
       );
 
       // Act
-      await knowledgeService.delete(bob, workspaceId, projectId, 'TERM-1');
+      await knowledgeService.delete(bob, workspaceId, projectId, 'TERM-1', {
+        version: 1,
+      });
 
       // Assert
       const reading = knowledgeService.get(
@@ -463,12 +530,187 @@ describe('KnowledgeService integration', () => {
       // Act
       const deleting = app
         .get(KnowledgeService)
-        .delete(bob, workspaceId, projectId, 'TERM-1');
+        .delete(bob, workspaceId, projectId, 'TERM-1', { version: 1 });
 
       // Assert
       await expect(deleting).rejects.toBeInstanceOf(
         DraftDeletionForbiddenException,
       );
+    });
+  });
+
+  describe('approve', () => {
+    it('lets a Maintainer approve a Draft on the version they saw', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada, adaId } = await setUp();
+      await app
+        .get(KnowledgeService)
+        .record(ada, workspaceId, projectId, requirement);
+
+      // Act
+      const approved = await app
+        .get(KnowledgeService)
+        .approve(ada, workspaceId, projectId, 'REQ-1', { version: 1 });
+
+      // Assert
+      expect(approved).toMatchObject({
+        status: 'approved',
+        approvedBy: adaId,
+        approvedAt: expect.any(String),
+        version: 2,
+        access: {
+          canEdit: false,
+          canDelete: false,
+          canApprove: false,
+          canReject: false,
+        },
+      });
+    });
+
+    it('refuses to approve a Draft edited since it was read', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada, bob } = await setUp(
+        ProjectRole.Contributor,
+      );
+      const knowledgeService = app.get(KnowledgeService);
+      await knowledgeService.record(ada, workspaceId, projectId, requirement);
+      await knowledgeService.edit(bob, workspaceId, projectId, 'REQ-1', {
+        kind: 'requirement',
+        version: 1,
+        title: 'PDF and Excel export',
+      });
+
+      // Act
+      const approving = knowledgeService.approve(
+        ada,
+        workspaceId,
+        projectId,
+        'REQ-1',
+        { version: 1 },
+      );
+
+      // Assert
+      await expect(approving).rejects.toBeInstanceOf(
+        KnowledgeItemChangedException,
+      );
+    });
+
+    it('forbids a Contributor', async () => {
+      // Arrange
+      const { workspaceId, projectId, bob } = await setUp(
+        ProjectRole.Contributor,
+      );
+      await app
+        .get(KnowledgeService)
+        .record(bob, workspaceId, projectId, requirement);
+
+      // Act
+      const approving = app
+        .get(KnowledgeService)
+        .approve(bob, workspaceId, projectId, 'REQ-1', { version: 1 });
+
+      // Assert
+      await expect(approving).rejects.toBeInstanceOf(
+        DraftApprovalForbiddenException,
+      );
+    });
+
+    it('never edits or deletes an Approved item', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada } = await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      await knowledgeService.record(ada, workspaceId, projectId, requirement);
+      await knowledgeService.approve(ada, workspaceId, projectId, 'REQ-1', {
+        version: 1,
+      });
+
+      // Act
+      const editing = knowledgeService.edit(
+        ada,
+        workspaceId,
+        projectId,
+        'REQ-1',
+        { kind: 'requirement', version: 2, title: 'Export' },
+      );
+      const deleting = knowledgeService.delete(
+        ada,
+        workspaceId,
+        projectId,
+        'REQ-1',
+        { version: 2 },
+      );
+
+      // Assert
+      await expect(editing).rejects.toBeInstanceOf(
+        KnowledgeItemNotDraftException,
+      );
+      await expect(deleting).rejects.toBeInstanceOf(
+        KnowledgeItemNotDraftException,
+      );
+    });
+  });
+
+  describe('reject', () => {
+    it('keeps a Rejected item out of the list unless asked for', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada, adaId } = await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      await knowledgeService.record(ada, workspaceId, projectId, requirement);
+      await knowledgeService.record(ada, workspaceId, projectId, decision);
+
+      // Act
+      const rejected = await knowledgeService.reject(
+        ada,
+        workspaceId,
+        projectId,
+        'REQ-1',
+        { version: 1, reason: 'Customers never print' },
+      );
+
+      // Assert
+      expect(rejected).toMatchObject({
+        status: 'rejected',
+        rejectedBy: adaId,
+        rejectedAt: expect.any(String),
+        rejectionReason: 'Customers never print',
+      });
+      const listed = await knowledgeService.list(
+        ada,
+        workspaceId,
+        projectId,
+        firstPage,
+      );
+      expect(listed.items.map(({ key }) => key)).toEqual(['DEC-1']);
+      const asked = await knowledgeService.list(ada, workspaceId, projectId, {
+        status: 'rejected',
+        ...firstPage,
+      });
+      expect(asked.items.map(({ key }) => key)).toEqual(['REQ-1']);
+      const read = await knowledgeService.get(
+        ada,
+        workspaceId,
+        projectId,
+        'REQ-1',
+      );
+      expect(read).toEqual(rejected);
+    });
+  });
+
+  describe('access', () => {
+    it.each([
+      [ProjectRole.Viewer, []],
+      [ProjectRole.Contributor, ['term', 'requirement', 'decision']],
+    ])('tells a %o which Kinds they may record', async (bobRole, kinds) => {
+      // Arrange
+      const { workspaceId, projectId, bob } = await setUp(bobRole);
+
+      // Act
+      const page = await app
+        .get(KnowledgeService)
+        .list(bob, workspaceId, projectId, firstPage);
+
+      // Assert
+      expect(page.access.canRecord).toEqual(kinds);
     });
   });
 

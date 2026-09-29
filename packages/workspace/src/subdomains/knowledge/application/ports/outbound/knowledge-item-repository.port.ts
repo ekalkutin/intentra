@@ -13,7 +13,8 @@ export type KnowledgeItemQueryProps = {
   readonly projectId: ProjectId;
   readonly key?: KnowledgeKey;
   readonly kind?: KnowledgeKind;
-  readonly status?: KnowledgeStatus;
+  /** Any of these; every status when left out. */
+  readonly statuses?: readonly KnowledgeStatus[];
 };
 
 export type KnowledgeItemPage = {

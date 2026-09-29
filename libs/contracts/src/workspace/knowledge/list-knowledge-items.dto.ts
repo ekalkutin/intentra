@@ -7,6 +7,7 @@ import {
 
 export const ListKnowledgeItemsDtoSchema = z.object({
   kind: KnowledgeKindDtoSchema.optional(),
+  /** Without it, Drafts and Approved; Rejected only when asked for. */
   status: KnowledgeStatusDtoSchema.optional(),
   take: z.coerce.number().int().min(1).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),

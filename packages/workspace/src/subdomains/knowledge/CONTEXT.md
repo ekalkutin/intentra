@@ -5,7 +5,7 @@ A subdomain of the Workspace context (see `CONTEXT-MAP.md`). The structured, liv
 ## Language
 
 **Knowledge Item**:
-One piece of what is known about a Project, such as a Term, a Business Rule or a Decision. Every Knowledge Item has a Kind, a status, an author and a source, and the fields of its Kind. It is deleted together with its Project, and stays, Drafts included, when its author leaves the Workspace or is removed.
+One piece of what is known about a Project, such as a Term, a Business Rule or a Decision. Every Knowledge Item has a Kind, a status, an author and a source, and the fields of its Kind. It is deleted together with its Project, and stays, Drafts included, when its author leaves the Workspace or is removed. Every change to it is made on the version its author last saw; a change made on an older version is refused, so no one's work is silently overwritten.
 _Avoid_: Artifact, Entry, Record, Fact
 
 **Knowledge Key**:
@@ -53,7 +53,7 @@ A Knowledge Item that has been recorded but not yet approved. Agents, Intentra's
 _Avoid_: Proposal, Suggestion, Pending
 
 **Approved**:
-A Knowledge Item a Member has confirmed as true for the Project. Approving is always a Member's act: Intentra's own Agents never approve, and an external agent may approve on a Member's behalf only when that Member's access token allows it. Only a Maintainer of the Project may approve, reject, supersede or retire, including the author. A Knowledge Item created by hand is also first a Draft. A Knowledge Item can be approved only once everything it depends on is Approved; a person may approve it together with those Drafts in one step. A Term it merely uses does not have to be Approved first. An Approved Knowledge Item is never edited: any change to it, even a small one, is a Supersession.
+A Knowledge Item a Member has confirmed as true for the Project. Approving is always a Member's act: Intentra's own Agents never approve, and an external agent may approve on a Member's behalf only when that Member's access token allows it. Only a Maintainer of the Project may approve, reject, supersede or retire, including the author. A Knowledge Item created by hand is also first a Draft. A Knowledge Item can be approved only once everything it depends on is Approved; a person may approve it together with those Drafts in one step. A Term it merely uses does not have to be Approved first. An Approved Knowledge Item is never edited: any change to it, even a small one, is a Supersession. Approving confirms the version the Member saw: a Draft edited since then cannot be approved until they look at it again.
 _Avoid_: Accepted, Confirmed, Published
 
 **Rejected**:

@@ -54,6 +54,12 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
           recordedAt: toDate(item.recordedAt),
           lastEditedBy: item.lastEditedBy?.value ?? null,
           lastEditedAt: item.lastEditedAt && toDate(item.lastEditedAt),
+          approvedBy: item.approvedBy?.value ?? null,
+          approvedAt: item.approvedAt && toDate(item.approvedAt),
+          rejectedBy: item.rejectedBy?.value ?? null,
+          rejectedAt: item.rejectedAt && toDate(item.rejectedAt),
+          rejectionReason: item.rejectionReason?.value ?? null,
+          version: item.version.value,
         },
         { upsert: true, session: this.unitOfWork.requireSession() },
       )
@@ -120,7 +126,9 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
       projectId: props.projectId.value,
       ...(kind && { kind: kind.value }),
       ...(props.key && { number: props.key.number }),
-      ...(props.status && { status: props.status.value }),
+      ...(props.statuses && {
+        status: { $in: props.statuses.map(status => status.value) },
+      }),
     };
   }
 
@@ -140,6 +148,12 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
       recordedAt: toInstant(document.recordedAt),
       lastEditedBy: document.lastEditedBy,
       lastEditedAt: document.lastEditedAt && toInstant(document.lastEditedAt),
+      approvedBy: document.approvedBy,
+      approvedAt: document.approvedAt && toInstant(document.approvedAt),
+      rejectedBy: document.rejectedBy,
+      rejectedAt: document.rejectedAt && toInstant(document.rejectedAt),
+      rejectionReason: document.rejectionReason,
+      version: document.version,
     });
   }
 }

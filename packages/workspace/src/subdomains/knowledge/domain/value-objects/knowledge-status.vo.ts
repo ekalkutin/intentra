@@ -1,10 +1,16 @@
 import { UnknownKnowledgeStatusException } from '../exceptions/index.js';
 
-/** Where a Knowledge Item is in its lifecycle; for now every one is a Draft. */
+/** Where a Knowledge Item is in its lifecycle. */
 export class KnowledgeStatus {
   public static readonly Draft = new KnowledgeStatus('draft');
+  public static readonly Approved = new KnowledgeStatus('approved');
+  public static readonly Rejected = new KnowledgeStatus('rejected');
 
-  static readonly #all: readonly KnowledgeStatus[] = [KnowledgeStatus.Draft];
+  static readonly #all: readonly KnowledgeStatus[] = [
+    KnowledgeStatus.Draft,
+    KnowledgeStatus.Approved,
+    KnowledgeStatus.Rejected,
+  ];
 
   readonly #value: string;
 

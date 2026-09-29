@@ -7,6 +7,8 @@ import {
 } from './knowledge-fields.dto.js';
 
 const frame = {
+  /** The version the client last saw (409 `KNOWLEDGE_ITEM_CHANGED` if it is not the current one). */
+  version: z.number().int().min(1),
   title: z.string().optional(),
   /** Null clears it. */
   rationale: z.string().nullable().optional(),

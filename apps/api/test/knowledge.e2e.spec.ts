@@ -214,7 +214,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
       .request()
       .patch(`${path}/REQ-1`)
       .set('Authorization', ada)
-      .send({ kind: 'requirement', title: 'Report export' });
+      .send({ kind: 'requirement', version: 1, title: 'Report export' });
     const read = await app
       .request()
       .get(`${path}/REQ-1`)
@@ -222,7 +222,8 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
     const deleted = await app
       .request()
       .delete(`${path}/REQ-1`)
-      .set('Authorization', ada);
+      .set('Authorization', ada)
+      .send({ version: 2 });
 
     // Assert
     expect(edited.status).toBe(HttpStatus.OK);
@@ -231,6 +232,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
       title: 'Report export',
       fields: { statement: 'Export a report to PDF' },
       lastEditedAt: expect.any(String),
+      version: 2,
     });
     expect(deleted.status).toBe(HttpStatus.NO_CONTENT);
     await app
@@ -238,6 +240,131 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
       .get(`${path}/REQ-1`)
       .set('Authorization', ada)
       .expect(HttpStatus.NOT_FOUND);
+  });
+
+  it('approves a Draft on the version the Maintainer saw', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send(requirement)
+      .expect(HttpStatus.CREATED);
+
+    // Act
+    const approved = await app
+      .request()
+      .post(`${path}/REQ-1/approve`)
+      .set('Authorization', ada)
+      .send({ version: 1 });
+
+    // Assert
+    expect(approved.status).toBe(HttpStatus.OK);
+    expect(approved.body).toMatchObject({
+      status: 'approved',
+      version: 2,
+      access: { canEdit: false, canApprove: false },
+    });
+    const editing = await app
+      .request()
+      .patch(`${path}/REQ-1`)
+      .set('Authorization', ada)
+      .send({ kind: 'requirement', version: 2, title: 'Export' });
+    expect(editing.status).toBe(HttpStatus.CONFLICT);
+    expect(editing.body.code).toBe('KNOWLEDGE_ITEM_NOT_DRAFT');
+  });
+
+  it('refuses a change made on an older version', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send(requirement)
+      .expect(HttpStatus.CREATED);
+    await app
+      .request()
+      .patch(`${path}/REQ-1`)
+      .set('Authorization', ada)
+      .send({ kind: 'requirement', version: 1, title: 'Report export' })
+      .expect(HttpStatus.OK);
+
+    // Act
+    const response = await app
+      .request()
+      .post(`${path}/REQ-1/approve`)
+      .set('Authorization', ada)
+      .send({ version: 1 });
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.CONFLICT);
+    expect(response.body.code).toBe('KNOWLEDGE_ITEM_CHANGED');
+  });
+
+  it('rejects a Draft and lists it only when asked for', async () => {
+    // Arrange
+    const { ada, bob, path } = await setUp();
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send(requirement)
+      .expect(HttpStatus.CREATED);
+
+    // Act
+    const rejected = await app
+      .request()
+      .post(`${path}/REQ-1/reject`)
+      .set('Authorization', ada)
+      .send({ version: 1, reason: 'Customers never print' });
+
+    // Assert
+    expect(rejected.status).toBe(HttpStatus.OK);
+    expect(rejected.body).toMatchObject({
+      status: 'rejected',
+      rejectionReason: 'Customers never print',
+    });
+    const listed = await app
+      .request()
+      .get(path)
+      .set('Authorization', bob)
+      .expect(HttpStatus.OK);
+    expect(listed.body).toMatchObject({
+      items: [],
+      total: 0,
+      access: { canRecord: [] },
+    });
+    const asked = await app
+      .request()
+      .get(path)
+      .query({ status: 'rejected' })
+      .set('Authorization', bob)
+      .expect(HttpStatus.OK);
+    expect(asked.body.total).toBe(1);
+  });
+
+  it('forbids a Viewer to approve', async () => {
+    // Arrange
+    const { ada, bob, path } = await setUp();
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send(requirement)
+      .expect(HttpStatus.CREATED);
+
+    // Act
+    const response = await app
+      .request()
+      .post(`${path}/REQ-1/approve`)
+      .set('Authorization', bob)
+      .send({ version: 1 });
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.FORBIDDEN);
+    expect(response.body.code).toBe('DRAFT_APPROVAL_FORBIDDEN');
   });
 
   it('rejects a malformed Knowledge Key', async () => {

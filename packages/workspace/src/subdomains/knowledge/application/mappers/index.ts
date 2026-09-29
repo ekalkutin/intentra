@@ -1,4 +1,8 @@
 export {
+  toKnowledgeAccessDto,
+  toKnowledgeItemAccessDto,
+} from './knowledge-access.mapper.js';
+export {
   toChangedKnowledgeContent,
   toKnowledgeContent,
   type KnowledgeFieldsInput,

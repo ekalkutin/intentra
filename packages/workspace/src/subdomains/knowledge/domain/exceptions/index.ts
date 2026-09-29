@@ -1,9 +1,15 @@
+export { DraftApprovalForbiddenException } from './draft-approval-forbidden.exception.js';
 export { DraftDeletionForbiddenException } from './draft-deletion-forbidden.exception.js';
 export { DraftEditingForbiddenException } from './draft-editing-forbidden.exception.js';
+export { DraftRejectionForbiddenException } from './draft-rejection-forbidden.exception.js';
 export { InvalidKnowledgeFieldsException } from './invalid-knowledge-fields.exception.js';
+export { InvalidKnowledgeItemVersionException } from './invalid-knowledge-item-version.exception.js';
 export { InvalidKnowledgeKeyException } from './invalid-knowledge-key.exception.js';
 export { InvalidKnowledgeTitleException } from './invalid-knowledge-title.exception.js';
 export { InvalidRationaleException } from './invalid-rationale.exception.js';
+export { InvalidRejectionReasonException } from './invalid-rejection-reason.exception.js';
+export { KnowledgeItemChangedException } from './knowledge-item-changed.exception.js';
+export { KnowledgeItemNotDraftException } from './knowledge-item-not-draft.exception.js';
 export { KnowledgeKindMismatchException } from './knowledge-kind-mismatch.exception.js';
 export { KnowledgeRecordingForbiddenException } from './knowledge-recording-forbidden.exception.js';
 export { UnknownKnowledgeKindException } from './unknown-knowledge-kind.exception.js';

@@ -1,6 +1,7 @@
 import type { Member, ProjectRole } from '../../../tenancy/index.js';
 import { KnowledgeItem, type KnowledgeItemChanges } from '../entities/index.js';
 import { DraftEditingForbiddenException } from '../exceptions/index.js';
+import type { KnowledgeItemVersion } from '../value-objects/index.js';
 
 import { KnowledgePolicyService } from './knowledge-policy.service.js';
 
@@ -12,11 +13,12 @@ export class DraftEditingService {
     editor: Member,
     projectRole: ProjectRole,
     item: KnowledgeItem,
+    seenVersion: KnowledgeItemVersion,
     changes: KnowledgeItemChanges,
   ): void {
     if (!this.#knowledgePolicyService.canEditDraft(projectRole, item)) {
       throw new DraftEditingForbiddenException();
     }
-    item.edit(editor.id, changes);
+    item.edit(editor.id, seenVersion, changes);
   }
 }

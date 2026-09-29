@@ -20,6 +20,10 @@ export class KnowledgeKind {
     this.#prefix = prefix;
   }
 
+  public static get all(): readonly KnowledgeKind[] {
+    return KnowledgeKind.#all;
+  }
+
   public static from(value: string): KnowledgeKind {
     const kind = KnowledgeKind.#all.find(
       candidate => candidate.value === value,

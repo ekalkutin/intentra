@@ -8,7 +8,11 @@ export const KnowledgeKindDtoSchema = z.enum([
 
 export type KnowledgeKindDto = z.infer<typeof KnowledgeKindDtoSchema>;
 
-export const KnowledgeStatusDtoSchema = z.enum(['draft']);
+export const KnowledgeStatusDtoSchema = z.enum([
+  'draft',
+  'approved',
+  'rejected',
+]);
 
 export type KnowledgeStatusDto = z.infer<typeof KnowledgeStatusDtoSchema>;
 
