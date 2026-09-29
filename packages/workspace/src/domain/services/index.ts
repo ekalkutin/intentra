@@ -1,3 +1,4 @@
+export { AccessPolicyService } from './access-policy.service.js';
 export { InvitationAcceptanceService } from './invitation-acceptance.service.js';
 export { InvitationSendingService } from './invitation-sending.service.js';
 export { MemberRemovalService } from './member-removal.service.js';

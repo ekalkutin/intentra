@@ -6,11 +6,15 @@ import {
   ProjectSlugMismatchException,
 } from '../exceptions/index.js';
 
+import { AccessPolicyService } from './access-policy.service.js';
+
 /**
  * Deletion cannot be undone: only an Owner, or the Manager who created the
  * Project, and only after typing the slug.
  */
 export class ProjectDeletionService {
+  readonly #accessPolicyService = new AccessPolicyService();
+
   public ensureDeletable(
     workspace: Workspace,
     deleter: Member,
@@ -23,19 +27,12 @@ export class ProjectDeletionService {
     if (!deleter.isActive()) {
       throw new MemberNotActiveException();
     }
-    if (!this.canDelete(deleter, project)) {
+    if (!this.#accessPolicyService.canDeleteProject(deleter, project)) {
       throw new ProjectDeletionForbiddenException();
     }
     if (project.slug.value !== props.slug) {
       throw new ProjectSlugMismatchException();
     }
-  }
-
-  private canDelete(deleter: Member, project: Project): boolean {
-    return (
-      deleter.isOwner() ||
-      (deleter.isManager() && project.isCreatedBy(deleter.id))
-    );
   }
 }
 

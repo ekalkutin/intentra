@@ -1,3 +1,4 @@
+import type { AccessApi } from './access/access.api.js';
 import type { InvitationsApi } from './invitations/invitations.api.js';
 import type { MembersApi } from './members/members.api.js';
 import type { PersonalAccessTokensApi } from './personal-access-tokens/personal-access-tokens.api.js';
@@ -12,4 +13,5 @@ export abstract class WorkspaceApi {
   abstract readonly invitations: InvitationsApi;
   abstract readonly members: MembersApi;
   abstract readonly personalAccessTokens: PersonalAccessTokensApi;
+  abstract readonly access: AccessApi;
 }

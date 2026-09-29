@@ -7,7 +7,11 @@ import {
 } from '../exceptions/index.js';
 import { Role } from '../value-objects/index.js';
 
+import { AccessPolicyService } from './access-policy.service.js';
+
 export class RoleChangeService {
+  readonly #accessPolicyService = new AccessPolicyService();
+
   /** An Owner gives an Active Member a Role or takes it away, their own included. */
   public change(
     workspace: Workspace,
@@ -16,7 +20,7 @@ export class RoleChangeService {
     props: RoleChangeProps,
   ): void {
     this.ensureActiveIn(workspace, changer);
-    if (!changer.isOwner()) {
+    if (!this.#accessPolicyService.canManageMembers(changer)) {
       throw new NotWorkspaceOwnerException();
     }
     this.ensureActiveIn(workspace, member);

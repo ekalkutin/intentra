@@ -6,7 +6,11 @@ import {
   NotWorkspaceOwnerException,
 } from '../exceptions/index.js';
 
+import { AccessPolicyService } from './access-policy.service.js';
+
 export class MemberRemovalService {
+  readonly #accessPolicyService = new AccessPolicyService();
+
   /** An Owner removes a Member, another Owner included. */
   public remove(
     workspace: Workspace,
@@ -15,7 +19,7 @@ export class MemberRemovalService {
     props: MemberRemovalProps,
   ): void {
     this.ensureActiveIn(workspace, remover);
-    if (!remover.isOwner()) {
+    if (!this.#accessPolicyService.canManageMembers(remover)) {
       throw new NotWorkspaceOwnerException();
     }
     this.leave(workspace, member, props);

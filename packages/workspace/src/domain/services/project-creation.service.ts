@@ -11,7 +11,11 @@ import {
 } from '../exceptions/index.js';
 import { ProjectRole } from '../value-objects/index.js';
 
+import { AccessPolicyService } from './access-policy.service.js';
+
 export class ProjectCreationService {
+  readonly #accessPolicyService = new AccessPolicyService();
+
   /** The creator becomes the new Project's Maintainer. */
   public create(
     workspace: Workspace,
@@ -24,7 +28,7 @@ export class ProjectCreationService {
     if (!creator.isActive()) {
       throw new MemberNotActiveException();
     }
-    if (!creator.isOwner() && !creator.isManager()) {
+    if (!this.#accessPolicyService.canCreateProjects(creator)) {
       throw new ProjectCreationForbiddenException();
     }
 

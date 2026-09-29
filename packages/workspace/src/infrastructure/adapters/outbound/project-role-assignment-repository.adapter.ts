@@ -70,7 +70,7 @@ export class ProjectRoleAssignmentRepositoryAdapter implements ProjectRoleAssign
 
   private toFilter(props: ProjectRoleAssignmentQueryProps) {
     return {
-      projectId: props.projectId.value,
+      ...(props.projectId && { projectId: props.projectId.value }),
       ...(props.memberId && { memberId: props.memberId.value }),
     };
   }

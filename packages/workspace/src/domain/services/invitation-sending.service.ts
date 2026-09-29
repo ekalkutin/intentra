@@ -6,7 +6,11 @@ import {
   NotWorkspaceOwnerException,
 } from '../exceptions/index.js';
 
+import { AccessPolicyService } from './access-policy.service.js';
+
 export class InvitationSendingService {
+  readonly #accessPolicyService = new AccessPolicyService();
+
   public send(
     workspace: Workspace,
     inviter: Member,
@@ -18,7 +22,7 @@ export class InvitationSendingService {
     if (!inviter.isActive()) {
       throw new MemberNotActiveException();
     }
-    if (!inviter.isOwner()) {
+    if (!this.#accessPolicyService.canManageInvitations(inviter)) {
       throw new NotWorkspaceOwnerException();
     }
     if (props.invitee?.isActive()) {

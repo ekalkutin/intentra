@@ -13,6 +13,7 @@ import { UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
 import { Workspace } from '../../domain/entities/index.js';
 import {
+  AccessPolicyService,
   PersonalAccessTokenCreationService,
   PersonalAccessTokenRevocationService,
 } from '../../domain/services/index.js';
@@ -37,6 +38,7 @@ import {
 
 @Injectable()
 export class PersonalAccessTokensService implements PersonalAccessTokensApi {
+  readonly #accessPolicyService = new AccessPolicyService();
   readonly #personalAccessTokenCreationService =
     new PersonalAccessTokenCreationService();
   readonly #personalAccessTokenRevocationService =
@@ -88,7 +90,9 @@ export class PersonalAccessTokensService implements PersonalAccessTokensApi {
 
     const tokens = await this.personalAccessTokenRepository.findMany({
       workspaceId: id,
-      ...(!member.isOwner() && { memberId: member.id }),
+      ...(!this.#accessPolicyService.canSeeAllPersonalAccessTokens(member) && {
+        memberId: member.id,
+      }),
     });
     const members = await this.memberRepository.findMany({
       workspaceId: id,

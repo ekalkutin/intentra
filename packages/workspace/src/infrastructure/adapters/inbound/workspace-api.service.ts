@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { WorkspaceApi } from '@intentra/contracts/workspace';
 
 import {
+  AccessService,
   InvitationsService,
   MembersService,
   PersonalAccessTokensService,
@@ -26,5 +27,7 @@ export class WorkspaceApiService implements WorkspaceApi {
     public readonly members: MembersService,
     @Inject(PersonalAccessTokensService)
     public readonly personalAccessTokens: PersonalAccessTokensService,
+    @Inject(AccessService)
+    public readonly access: AccessService,
   ) {}
 }

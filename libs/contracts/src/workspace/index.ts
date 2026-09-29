@@ -1,3 +1,8 @@
+export { AccessApi } from './access/access.api.js';
+export {
+  type ProjectAccessDto,
+  type WorkspaceAccessDto,
+} from './access/workspace-access.dto.js';
 export {
   CreateInvitationDtoSchema,
   type CreateInvitationDto,

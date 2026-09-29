@@ -3,10 +3,10 @@ import type { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 import { ProjectRoleAssignment } from '../../../domain/entities/index.js';
 import type { MemberId } from '../../../domain/value-objects/index.js';
 
-export type ProjectRoleAssignmentQueryProps = {
-  readonly projectId: ProjectId;
-  readonly memberId?: MemberId;
-};
+/** At least one scope, so that a call can never read every assignment. */
+export type ProjectRoleAssignmentQueryProps =
+  | { readonly projectId: ProjectId; readonly memberId?: MemberId }
+  | { readonly projectId?: ProjectId; readonly memberId: MemberId };
 
 /** Exactly one scope, so that a call can never delete every assignment. */
 export type ProjectRoleAssignmentDeleteProps =

@@ -16,6 +16,7 @@ import {
 import { Invitation, Member, Workspace } from '../../domain/entities/index.js';
 import { NotWorkspaceOwnerException } from '../../domain/exceptions/index.js';
 import {
+  AccessPolicyService,
   InvitationAcceptanceService,
   InvitationSendingService,
 } from '../../domain/services/index.js';
@@ -37,6 +38,7 @@ import {
 
 @Injectable()
 export class InvitationsService implements InvitationsApi {
+  readonly #accessPolicyService = new AccessPolicyService();
   readonly #invitationSendingService = new InvitationSendingService();
   readonly #invitationAcceptanceService = new InvitationAcceptanceService();
 
@@ -215,7 +217,7 @@ export class InvitationsService implements InvitationsApi {
   }
 
   private ensureOwner(member: Member): void {
-    if (!member.isOwner()) {
+    if (!this.#accessPolicyService.canManageInvitations(member)) {
       throw new NotWorkspaceOwnerException();
     }
   }

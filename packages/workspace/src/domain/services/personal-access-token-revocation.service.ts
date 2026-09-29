@@ -5,7 +5,11 @@ import {
   PersonalAccessTokenRevocationForbiddenException,
 } from '../exceptions/index.js';
 
+import { AccessPolicyService } from './access-policy.service.js';
+
 export class PersonalAccessTokenRevocationService {
+  readonly #accessPolicyService = new AccessPolicyService();
+
   /** Its Member or any Owner may revoke a token. */
   public ensureRevocable(
     workspace: Workspace,
@@ -18,7 +22,9 @@ export class PersonalAccessTokenRevocationService {
     if (!revoker.isActive()) {
       throw new MemberNotActiveException();
     }
-    if (!revoker.isOwner() && !token.isCreatedBy(revoker.id)) {
+    if (
+      !this.#accessPolicyService.canRevokePersonalAccessToken(revoker, token)
+    ) {
       throw new PersonalAccessTokenRevocationForbiddenException();
     }
   }

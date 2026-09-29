@@ -1,5 +1,6 @@
 import { Provider } from '@nestjs/common';
 
+import { AccessService } from './access.service.js';
 import { InvitationsService } from './invitations.service.js';
 import { MembersService } from './members.service.js';
 import { PersonalAccessTokensService } from './personal-access-tokens.service.js';
@@ -8,6 +9,7 @@ import { ProjectsService } from './projects.service.js';
 import { WorkspacesService } from './workspaces.service.js';
 
 export {
+  AccessService,
   InvitationsService,
   MembersService,
   PersonalAccessTokensService,
@@ -23,4 +25,5 @@ export const APPLICATION_SERVICES: Provider[] = [
   MembersService,
   ProjectRolesService,
   PersonalAccessTokensService,
+  AccessService,
 ];

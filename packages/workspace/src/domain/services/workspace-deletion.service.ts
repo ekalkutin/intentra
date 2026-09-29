@@ -6,8 +6,12 @@ import {
   WorkspaceSlugMismatchException,
 } from '../exceptions/index.js';
 
+import { AccessPolicyService } from './access-policy.service.js';
+
 /** Deletion cannot be undone: only an Owner, and only after typing the slug. */
 export class WorkspaceDeletionService {
+  readonly #accessPolicyService = new AccessPolicyService();
+
   public ensureDeletable(
     workspace: Workspace,
     owner: Member,
@@ -19,7 +23,7 @@ export class WorkspaceDeletionService {
     if (!owner.isActive()) {
       throw new MemberNotActiveException();
     }
-    if (!owner.isOwner()) {
+    if (!this.#accessPolicyService.canDeleteWorkspace(owner)) {
       throw new NotWorkspaceOwnerException();
     }
     if (workspace.slug.value !== props.slug) {

@@ -7,10 +7,10 @@ import {
 } from '../exceptions/index.js';
 import { ProjectRole } from '../value-objects/index.js';
 
-import { ProjectRoleResolutionService } from './project-role-resolution.service.js';
+import { AccessPolicyService } from './access-policy.service.js';
 
 export class ProjectRoleChangeService {
-  readonly #projectRoleResolutionService = new ProjectRoleResolutionService();
+  readonly #accessPolicyService = new AccessPolicyService();
 
   /** An Owner or a Maintainer of the Project gives an Active Member a Project Role. */
   public change(
@@ -20,11 +20,12 @@ export class ProjectRoleChangeService {
     props: ProjectRoleChangeProps,
   ): ProjectRoleAssignment {
     this.ensureActiveIn(project, changer);
-    const changerRole = this.#projectRoleResolutionService.resolve(
-      changer,
-      props.changerAssignment,
-    );
-    if (!changerRole.equals(ProjectRole.Maintainer)) {
+    if (
+      !this.#accessPolicyService.canChangeProjectRoles(
+        changer,
+        props.changerAssignment,
+      )
+    ) {
       throw new ProjectRoleChangeForbiddenException();
     }
     this.ensureActiveIn(project, member);
