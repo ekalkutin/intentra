@@ -53,7 +53,7 @@ A Knowledge Item that has been recorded but not yet approved. Agents, Intentra's
 _Avoid_: Proposal, Suggestion, Pending
 
 **Approved**:
-A Knowledge Item a Member has confirmed as true for the Project. Approving is always a Member's act: Intentra's own Agents never approve, and an external agent may approve on a Member's behalf only when that Member's access token allows it. For now any Active Member of the Workspace may approve, reject, supersede or retire, including the author. A Knowledge Item created by hand is also first a Draft. A Knowledge Item can be approved only once everything it depends on is Approved; a person may approve it together with those Drafts in one step. A Term it merely uses does not have to be Approved first. An Approved Knowledge Item is never edited: any change to it, even a small one, is a Supersession.
+A Knowledge Item a Member has confirmed as true for the Project. Approving is always a Member's act: Intentra's own Agents never approve, and an external agent may approve on a Member's behalf only when that Member's access token allows it. Only a Maintainer of the Project may approve, reject, supersede or retire, including the author. A Knowledge Item created by hand is also first a Draft. A Knowledge Item can be approved only once everything it depends on is Approved; a person may approve it together with those Drafts in one step. A Term it merely uses does not have to be Approved first. An Approved Knowledge Item is never edited: any change to it, even a small one, is a Supersession.
 _Avoid_: Accepted, Confirmed, Published
 
 **Rejected**:

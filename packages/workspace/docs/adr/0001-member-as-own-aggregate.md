@@ -1,3 +1,7 @@
+---
+status: accepted; the Owner part is superseded by ADR 0002
+---
+
 # Member is its own aggregate; the Owner is a property of the Workspace
 
 Member is a separate aggregate that refers to its Workspace and its Account by id, so a Member can be loaded and changed without loading the whole Workspace. A Workspace has exactly one Owner, and it is stored on the Workspace itself, not as a Role on a Member. A single field guarantees "exactly one Owner" by its structure, so neither a domain service nor concurrency protection is needed for it. A Transfer of Ownership is one write to the Workspace.

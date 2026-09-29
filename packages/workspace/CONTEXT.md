@@ -13,35 +13,48 @@ A short, globally unique, human-readable handle of a Workspace used in its addre
 _Avoid_: Handle, Alias, Subdomain
 
 **Member**:
-An Account's participation in a specific Workspace, with its own role and status. One Account can be a different Member in each Workspace it belongs to. A Member is Active or Removed; a Removed Member keeps its history but has no access. An Account is at most one Member per Workspace: a Removed Member who accepts a new Invitation becomes Active again.
+An Account's participation in a specific Workspace, with its own Role, Project Roles and status. One Account can be a different Member in each Workspace it belongs to. A Member is Active or Removed; a Removed Member keeps its history but has no access, and loses its Role and all its Project Roles. An Account is at most one Member per Workspace: a Removed Member who accepts a new Invitation becomes Active again, without a Role and a Viewer in every Project.
 _Avoid_: User, Participant, Collaborator
 
 **Invitation**:
-The Owner's offer for someone to join a Workspace as a Contributor. It is addressed to an email, and only an Account with that same email can accept it. On acceptance the invitee becomes a Member. An Invitation is Pending until it is Accepted or Declined by the invitee, Revoked by the Owner, or Expired after 7 days. An email has at most one Invitation per Workspace: inviting it again reopens that Invitation as Pending for another 7 days, with the same link.
+An Owner's offer for someone to join a Workspace as a Member without a Role. It is addressed to an email, and only an Account with that same email can accept it. On acceptance the invitee becomes a Member. An Invitation is Pending until it is Accepted or Declined by the invitee, Revoked by an Owner, or Expired after 7 days. An email has at most one Invitation per Workspace: inviting it again reopens that Invitation as Pending for another 7 days, with the same link.
 _Avoid_: Invite link, Join request
 
 **Project**:
-The container for one software product's context inside a Workspace. For now every Member of the Workspace can see every Project in it. A Project records which Member created it. For now only the Owner can create or delete a Project. Its name is chosen at creation and cannot be changed later.
+The container for one software product's context inside a Workspace. For now every Member of the Workspace can see every Project in it. A Project records which Member created it. An Owner or a Manager can create a Project; an Owner can delete any Project, a Manager only the ones they created. Its name is chosen at creation and cannot be changed later.
 
 **Project Slug**:
 A short, human-readable handle of a Project, unique within its Workspace and never changed after the Project is created. Together with the Workspace Slug it names a Project, e.g. `acme-corp/billing-service`.
 _Avoid_: Project key, Handle
 
 **Owner**:
-The one Member who owns a Workspace and manages it: its settings, its Members, its Projects and its deletion. Ownership belongs to the Workspace, not to a Role. The Account that creates a Workspace becomes its Owner. Ownership changes only by a Transfer of Ownership, and the Owner can neither leave nor be removed while they own the Workspace.
-_Avoid_: Admin, Owner role
-
-**Transfer of Ownership**:
-The Owner handing ownership of a Workspace to another Active Member. The former Owner stays in the Workspace as a regular Member.
-_Avoid_: Promote, Change owner role
+The Role of a Member who owns a Workspace and manages it: its settings, its Members, its Projects and its deletion. A Workspace can have several Owners but always has at least one. The Account that creates a Workspace becomes its first Owner. The last Owner can neither leave nor be removed.
+_Avoid_: Admin
 
 **Role**:
-What a Member is allowed to do inside a Workspace's Projects. For now the only Role is Contributor; more will come with permissions.
+What a Member may do in the Workspace beyond being a Member: Owner or Manager. A Member has at most one Role; a Member without one is simply a Member, and is shown as "Member" where Roles are listed. Any Owner can give any Active Member a Role or take it away, including the Owner Role and their own, as long as the Workspace keeps at least one Owner.
+_Avoid_: Member (as a role name), Workspace role
+
+**Manager**:
+The Role of a Member who may create Projects and delete the Projects they created.
+_Avoid_: Staff, Admin, Lead
+
+**Project Role**:
+What a Member may do in one particular Project: Viewer, Contributor or Maintainer. The same Member can hold different Project Roles in different Projects; a Member who was given none in a Project is a Viewer there. The Member who creates a Project becomes its Maintainer. An Owner is a Maintainer in every Project, and that cannot be changed while they are an Owner. Project Roles are given and taken away by an Owner or by a Maintainer of that Project. It does not decide who sees a Project, only what they may do in it. Intentra alone defines the Project Roles; a Workspace cannot create its own.
+_Avoid_: Project member, Position, Title, Access level
+
+**Viewer**:
+The Project Role that only reads the Project's knowledge.
+_Avoid_: Reader, Guest
 
 **Contributor**:
-A Role that works inside the Workspace's Projects but manages neither the Workspace nor its Projects.
-_Avoid_: Member (as a role name), Editor, User
+The Project Role that reads and records Drafts but cannot approve, reject, supersede or retire.
+_Avoid_: Editor, Writer
+
+**Maintainer**:
+The Project Role that does everything with the Project's knowledge: reads, records Drafts, approves, rejects, supersedes and retires. A Maintainer also gives and takes away Project Roles in that Project, except an Owner's.
+_Avoid_: Approver, Reviewer
 
 **Personal Access Token**:
-A secret a Member creates so that an external agent (Claude Code, Codex, Cursor) can work in the Workspace over MCP on that Member's behalf. It belongs to the Member and works only in that Workspace; to work in several Workspaces an agent is given one Personal Access Token per Workspace. It gives access to every Project in the Workspace. It has one of three levels, chosen when it is created: read only; read and record Drafts; or read, record Drafts and approve, reject, supersede or retire on the Member's behalf. No level lets an agent manage the Workspace (its Members, Invitations, Projects or settings). An agent using it can never do more than its Member may do. It expires after the period chosen when it is created (30 days, 90 days by default, a year, or never) and can be revoked at any time by its Member or by the Owner. The Owner sees every Personal Access Token in the Workspace (whose it is, its name, level, expiry and last use), but never its secret. It also stops working when its Member leaves or is removed, and when the Workspace is deleted.
+A secret a Member creates so that an external agent (Claude Code, Codex, Cursor) can work in the Workspace over MCP on that Member's behalf. It belongs to the Member and works only in that Workspace; to work in several Workspaces an agent is given one Personal Access Token per Workspace. It gives access to every Project in the Workspace. It carries a level named like a Project Role, chosen when it is created: Viewer, Contributor or Maintainer. In each Project the agent may do what the lower of the two allows: the token's level or its Member's Project Role there. No level lets an agent manage the Workspace (its Members, Invitations, Projects or settings). It expires after the period chosen when it is created (30 days, 90 days by default, a year, or never) and can be revoked at any time by its Member or by an Owner. Owners see every Personal Access Token in the Workspace (whose it is, its name, level, expiry and last use), but never its secret. It also stops working when its Member leaves or is removed, and when the Workspace is deleted.
 _Avoid_: Access Token (that is IAM's sign-in JWT), API key, Agent token. PAT is fine as a short form
