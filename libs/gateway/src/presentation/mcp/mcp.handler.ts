@@ -9,7 +9,6 @@ import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { MCP_TOOLS, type ToolApis } from '@intentra/agent-toolkit';
-import { AgentsApi } from '@intentra/contracts/agents';
 import { IamApi } from '@intentra/contracts/iam';
 import { WorkspaceApi } from '@intentra/contracts/workspace';
 
@@ -28,9 +27,8 @@ export class McpHandler {
   constructor(
     @Inject(IamApi) iam: IamApi,
     @Inject(WorkspaceApi) workspace: WorkspaceApi,
-    @Inject(AgentsApi) agents: AgentsApi,
   ) {
-    const apis: ToolApis = { iam, workspace, agents };
+    const apis: ToolApis = { iam, workspace };
 
     this.#handle = toNodeHandler(
       createMcpHandler(({ authInfo }) => {

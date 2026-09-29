@@ -4,9 +4,9 @@
 
 - [IAM](./packages/iam/CONTEXT.md): Accounts and how they prove who they are
 - **Workspace**: the top-level space that groups people, their Projects, what is known about each Project, and the AI agents that work on it. One context with one database, split into subdomains (Tenancy, Project Knowledge, Agents), each with its own glossary ([ADR 0001](./docs/adr/0001-knowledge-and-agents-are-subdomains-of-workspace.md)):
-  - [Tenancy](./packages/workspace/CONTEXT.md): Workspaces, Members, Roles, Invitations, Projects, Project Roles and Personal Access Tokens: who is in a Workspace and what they may do
-  - [Project Knowledge](./packages/knowledge/CONTEXT.md): the structured model of what a Project is (not built yet)
-  - [Agents](./packages/agents/CONTEXT.md): Intentra's own AI agents that work with people on a Project. External agents (Codex, Claude Code, Cursor) reaching Intentra over MCP are not part of it
+  - [Tenancy](./packages/workspace/src/subdomains/tenancy/CONTEXT.md): Workspaces, Members, Roles, Invitations, Projects, Project Roles and Personal Access Tokens: who is in a Workspace and what they may do
+  - [Project Knowledge](./packages/workspace/src/subdomains/knowledge/CONTEXT.md): the structured model of what a Project is (not built yet)
+  - [Agents](./packages/workspace/src/subdomains/agents/CONTEXT.md): Intentra's own AI agents that work with people on a Project. External agents (Codex, Claude Code, Cursor) reaching Intentra over MCP are not part of it
 
 ## Relationships
 

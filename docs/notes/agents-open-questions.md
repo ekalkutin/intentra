@@ -1,6 +1,6 @@
 # Agents: open questions
 
-Deferred on purpose. Glossary: `packages/agents/CONTEXT.md`.
+Deferred on purpose. Glossary: `packages/workspace/src/subdomains/agents/CONTEXT.md`.
 
 - **Usage limits on Intentra's models.** A Workspace without a Provider Key runs on Intentra's models at Intentra's cost. Limits, plans or a trial quota come later.
 - **More LLM providers.** For now a Provider Key can only be an OpenRouter key. Later: direct keys to Anthropic, OpenAI and others. Options discussed on 2026-09-29: one key per Workspace, one key per provider (a Model Profile names its provider; mixing providers is allowed), or any number of keys with a Model Profile naming its key (for splitting costs). One key per provider was the preferred option.

@@ -1,6 +1,6 @@
 # Project Knowledge: open questions
 
-Deferred on purpose. Glossary: `packages/knowledge/CONTEXT.md`.
+Deferred on purpose. Glossary: `packages/workspace/src/subdomains/knowledge/CONTEXT.md`.
 
 - **Approving by Kind.** Decided on 2026-09-29: a Project's Maintainers approve, reject, supersede and retire every Kind. Later, if teams need "only certain people approve Decisions", add owners per Kind on top of Project Roles (like GitHub CODEOWNERS), not job-title roles. What to lay down now: every approve / reject / supersede / retire goes through one permission check given the Member, the Project and the Kind; every Knowledge Item records who approved, rejected, superseded or retired it and when.
 - **Approving over MCP.** An external agent may approve, reject, supersede or retire on a Member's behalf only when the Member's personal access token allows it; that permission is off by default. Decided on 2026-09-29: the Personal Access Token (Workspace context) has three levels, and only the highest lets the agent approve. Intentra's own Agents have no tool to approve at all.

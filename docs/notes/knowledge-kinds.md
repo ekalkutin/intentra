@@ -1,6 +1,6 @@
 # Project Knowledge: starting set of Kinds
 
-Agreed on 2026-09-29 as a starting point; fields may change freely until there is data. Glossary: `packages/knowledge/CONTEXT.md`.
+Agreed on 2026-09-29 as a starting point; fields may change freely until there is data. Glossary: `packages/workspace/src/subdomains/knowledge/CONTEXT.md`.
 
 Every Knowledge Item has the common frame: Knowledge Key, title, markdown description, status, Source with Rationale, Links, and who approved / rejected / superseded / retired it and when. The table lists only the fields of each Kind.
 
