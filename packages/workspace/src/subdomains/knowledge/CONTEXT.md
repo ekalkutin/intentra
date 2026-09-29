@@ -5,7 +5,7 @@ A subdomain of the Workspace context (see `CONTEXT-MAP.md`). The structured, liv
 ## Language
 
 **Knowledge Item**:
-One piece of what is known about a Project, such as a Term, a Business Rule or a Decision. Every Knowledge Item has a Kind, a status, an author and a source, and the fields of its Kind. It is deleted together with its Project.
+One piece of what is known about a Project, such as a Term, a Business Rule or a Decision. Every Knowledge Item has a Kind, a status, an author and a source, and the fields of its Kind. It is deleted together with its Project, and stays, Drafts included, when its author leaves the Workspace or is removed.
 _Avoid_: Artifact, Entry, Record, Fact
 
 **Knowledge Key**:
@@ -45,11 +45,11 @@ A directed connection from one Knowledge Item to another, of one of these types:
 _Avoid_: Relation, Reference, Dependency
 
 **Source**:
-Where a Knowledge Item came from: a Conversation, in which an Agent recorded it; an external agent working for a Member over MCP; or a person entering it by hand. Unless it was entered by hand, a Source always carries a Rationale: a short quote or summary of what the Knowledge Item rests on, supplied by the Agent that recorded it. The Rationale is part of the knowledge and the team sees it, while the Conversation (or the external agent's own chat) stays private.
+Where a Knowledge Item came from: a Conversation, in which an Agent recorded it; an external agent working for a Member over MCP; or a person entering it by hand. Unless it was entered by hand, a Source always carries a Rationale: a short quote or summary of what the Knowledge Item rests on, supplied by the Agent that recorded it. The Rationale is part of the knowledge and the team sees it, while the Conversation (or the external agent's own chat) stays private. The Source never changes; while the Knowledge Item is a Draft, its Rationale can be edited like the rest of it.
 _Avoid_: Origin, Provenance, Reference
 
 **Draft**:
-A Knowledge Item that has been recorded but not yet approved. Agents, Intentra's own and external ones, only ever record Drafts. A Draft can be edited freely, by an Agent or a person, and keeps no history of its edits. Searches show Drafts marked as such; context assembled for implementing a task holds only Approved knowledge.
+A Knowledge Item that has been recorded but not yet approved. Agents, Intentra's own and external ones, only ever record Drafts. A Draft can be edited freely, by an Agent or any person who may record knowledge, not only its author. It keeps no history of its edits, only who edited it last and when; its author stays the one who recorded it. Searches show Drafts marked as such; context assembled for implementing a task holds only Approved knowledge.
 _Avoid_: Proposal, Suggestion, Pending
 
 **Approved**:
@@ -59,6 +59,10 @@ _Avoid_: Accepted, Confirmed, Published
 **Rejected**:
 A Draft a person has turned down as not true for the Project, optionally with a reason. It is kept so that Agents can tell when they are about to record it again, but it is not part of the Project's knowledge and searches leave it out. It never becomes Approved.
 _Avoid_: Declined, Deleted, Discarded
+
+**Deletion**:
+Removing a Draft that was recorded by mistake, such as under the wrong Kind or twice. Unlike a Rejection, it says nothing about whether the knowledge is true, and it leaves no trace; its Knowledge Key is never reused. Only a Draft can be deleted: an Approved Knowledge Item is superseded or retired instead.
+_Avoid_: Discard, Withdraw, Reject (for a mistake)
 
 **Obsolete**:
 A Knowledge Item that is no longer true for the Project. It becomes Obsolete only by a person's decision, through a Supersession or a Retirement, and is kept for history: searches leave it out, but it can still be reached by its id or through the chain of Supersessions.
