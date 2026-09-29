@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { mongo, type Model } from 'mongoose';
 
 import { MongooseUnitOfWork } from '@intentra/platform-persistence';
-import type { WorkspaceId } from '@intentra/shared-kernel';
+import type { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 
 import { ProjectSlugTakenException } from '../../../application/exceptions/index.js';
 import {
@@ -48,15 +48,32 @@ export class ProjectRepositoryAdapter implements ProjectRepository {
     }
   }
 
+  public async findOne(props: ProjectQueryProps): Promise<Project | null> {
+    const document = await this.projectModel
+      .findOne(this.toFilter(props))
+      .session(this.unitOfWork.session)
+      .lean()
+      .exec();
+
+    return document && this.toDomain(document);
+  }
+
   public async findMany(props: ProjectQueryProps): Promise<Project[]> {
     const documents = await this.projectModel
-      .find({ workspaceId: props.workspaceId.value })
+      .find(this.toFilter(props))
       .sort({ name: 1 })
       .session(this.unitOfWork.session)
       .lean()
       .exec();
 
     return documents.map(document => this.toDomain(document));
+  }
+
+  public async delete(id: ProjectId): Promise<void> {
+    await this.projectModel
+      .deleteOne({ _id: id.value })
+      .session(this.unitOfWork.requireSession())
+      .exec();
   }
 
   public async deleteMany(props: {
@@ -66,6 +83,13 @@ export class ProjectRepositoryAdapter implements ProjectRepository {
       .deleteMany({ workspaceId: props.workspaceId.value })
       .session(this.unitOfWork.requireSession())
       .exec();
+  }
+
+  private toFilter(props: ProjectQueryProps) {
+    return {
+      workspaceId: props.workspaceId.value,
+      ...(props.id && { _id: props.id.value }),
+    };
   }
 
   private toDomain(document: ProjectModel): Project {

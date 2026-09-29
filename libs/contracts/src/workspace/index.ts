@@ -13,6 +13,10 @@ export {
   CreateProjectDtoSchema,
   type CreateProjectDto,
 } from './projects/create-project.dto.js';
+export {
+  DeleteProjectDtoSchema,
+  type DeleteProjectDto,
+} from './projects/delete-project.dto.js';
 export { type ProjectDto } from './projects/project.dto.js';
 export { ProjectsApi } from './projects/projects.api.js';
 export { WorkspaceApi } from './workspace.api.js';

@@ -2,12 +2,21 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import { AccountId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
+import {
+  AccountId,
+  ProjectId,
+  UnitOfWork,
+  WorkspaceId,
+} from '@intentra/shared-kernel';
 
 import { Member } from '../../domain/entities/index.js';
-import { NotWorkspaceOwnerException } from '../../domain/exceptions/index.js';
+import {
+  NotWorkspaceOwnerException,
+  ProjectSlugMismatchException,
+} from '../../domain/exceptions/index.js';
 import { WorkspaceModule } from '../../workspace.module.js';
 import {
+  ProjectNotFoundException,
   ProjectSlugTakenException,
   WorkspaceNotFoundException,
 } from '../exceptions/index.js';
@@ -178,6 +187,69 @@ describe('ProjectsService integration', () => {
 
       // Assert
       await expect(listing).rejects.toBeInstanceOf(WorkspaceNotFoundException);
+    });
+  });
+
+  describe('delete', () => {
+    it('lets the Owner delete a Project, freeing its slug', async () => {
+      // Arrange
+      const owner = actor();
+      const workspaceId = await createWorkspace(owner);
+      const service = app.get(ProjectsService);
+      const project = await service.create(owner, workspaceId, {
+        name: 'Billing',
+        slug: 'billing',
+      });
+
+      // Act
+      await service.delete(owner, workspaceId, project.id, { slug: 'billing' });
+
+      // Assert
+      await expect(service.list(owner, workspaceId)).resolves.toEqual([]);
+      await expect(
+        service.create(owner, workspaceId, {
+          name: 'Billing',
+          slug: 'billing',
+        }),
+      ).resolves.toMatchObject({ slug: 'billing' });
+    });
+
+    it('keeps the Project when the slug does not match', async () => {
+      // Arrange
+      const owner = actor();
+      const workspaceId = await createWorkspace(owner);
+      const service = app.get(ProjectsService);
+      const project = await service.create(owner, workspaceId, {
+        name: 'Billing',
+        slug: 'billing',
+      });
+
+      // Act
+      const deletion = service.delete(owner, workspaceId, project.id, {
+        slug: 'bill',
+      });
+
+      // Assert
+      await expect(deletion).rejects.toBeInstanceOf(
+        ProjectSlugMismatchException,
+      );
+      await expect(service.list(owner, workspaceId)).resolves.toEqual([
+        project,
+      ]);
+    });
+
+    it('reports an unknown Project as not found', async () => {
+      // Arrange
+      const owner = actor();
+      const workspaceId = await createWorkspace(owner);
+
+      // Act
+      const deletion = app
+        .get(ProjectsService)
+        .delete(owner, workspaceId, new ProjectId().value, { slug: 'billing' });
+
+      // Assert
+      await expect(deletion).rejects.toBeInstanceOf(ProjectNotFoundException);
     });
   });
 });

@@ -21,7 +21,7 @@ The Owner's offer for someone to join a Workspace as a Contributor. It is addres
 _Avoid_: Invite link, Join request
 
 **Project**:
-The container for one software product's context inside a Workspace. For now every Member of the Workspace can see every Project in it. A Project records which Member created it. For now only the Owner can create, rename or delete a Project.
+The container for one software product's context inside a Workspace. For now every Member of the Workspace can see every Project in it. A Project records which Member created it. For now only the Owner can create or delete a Project. Its name is chosen at creation and cannot be changed later.
 
 **Project Slug**:
 A short, human-readable handle of a Project, unique within its Workspace and never changed after the Project is created. Together with the Workspace Slug it names a Project, e.g. `acme-corp/billing-service`.

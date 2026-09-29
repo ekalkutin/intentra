@@ -193,4 +193,34 @@ describe('/api/workspaces/:workspaceId/projects', () => {
         .expect(res => expect(res.body.code).toBe('INVALID_ENTITY_ID'));
     });
   });
+
+  describe('DELETE /:projectId', () => {
+    it('deletes the Project once its slug is typed', async () => {
+      // Arrange
+      const owner = await signIn('ada@example.com');
+      const workspaceId = await createWorkspace(owner);
+      const created = await app
+        .request()
+        .post(projectsPath(workspaceId))
+        .set('Authorization', owner)
+        .send({ name: 'Billing', slug: 'billing' })
+        .expect(HttpStatus.CREATED);
+
+      // Act
+      const response = app
+        .request()
+        .delete(`${projectsPath(workspaceId)}/${created.body.id}`)
+        .set('Authorization', owner)
+        .send({ slug: 'billing' });
+
+      // Assert
+      await response.expect(HttpStatus.NO_CONTENT);
+      await app
+        .request()
+        .get(projectsPath(workspaceId))
+        .set('Authorization', owner)
+        .expect(HttpStatus.OK)
+        .expect(res => expect(res.body).toEqual([]));
+    });
+  });
 });

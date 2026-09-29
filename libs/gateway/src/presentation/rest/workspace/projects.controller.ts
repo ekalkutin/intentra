@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Inject,
   Param,
   Post,
@@ -11,8 +14,10 @@ import {
 import type { Actor } from '@intentra/contracts/iam';
 import {
   CreateProjectDtoSchema,
+  DeleteProjectDtoSchema,
   WorkspaceApi,
   type CreateProjectDto,
+  type DeleteProjectDto,
   type ProjectDto,
 } from '@intentra/contracts/workspace';
 
@@ -24,7 +29,7 @@ export class ProjectsController {
   constructor(@Inject(WorkspaceApi) private readonly workspace: WorkspaceApi) {}
 
   @Post()
-  create(
+  public async create(
     @CurrentActor() actor: Actor,
     @Param('workspaceId') workspaceId: string,
     @Body({ schema: CreateProjectDtoSchema }) data: CreateProjectDto,
@@ -33,10 +38,21 @@ export class ProjectsController {
   }
 
   @Get()
-  list(
+  public async list(
     @CurrentActor() actor: Actor,
     @Param('workspaceId') workspaceId: string,
   ): Promise<ProjectDto[]> {
     return this.workspace.projects.list(actor, workspaceId);
+  }
+
+  @Delete(':projectId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async delete(
+    @CurrentActor() actor: Actor,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Body({ schema: DeleteProjectDtoSchema }) data: DeleteProjectDto,
+  ): Promise<void> {
+    return this.workspace.projects.delete(actor, workspaceId, projectId, data);
   }
 }
