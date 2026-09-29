@@ -1,0 +1,17 @@
+export { DecisionArea } from './decision-area.vo.js';
+export { DecisionContent } from './decision-content.vo.js';
+export { type KnowledgeContent } from './knowledge-content.js';
+export { KnowledgeItemId } from './knowledge-item-id.vo.js';
+export { KnowledgeKey } from './knowledge-key.vo.js';
+export { KnowledgeKind } from './knowledge-kind.vo.js';
+export { KnowledgeSource } from './knowledge-source.vo.js';
+export { KnowledgeStatus } from './knowledge-status.vo.js';
+export { KnowledgeText } from './knowledge-text.vo.js';
+export { KnowledgeTitle } from './knowledge-title.vo.js';
+export { Rationale } from './rationale.vo.js';
+export { RejectedAlternative } from './rejected-alternative.vo.js';
+export { RequirementContent } from './requirement-content.vo.js';
+export { RequirementPriority } from './requirement-priority.vo.js';
+export { RequirementType } from './requirement-type.vo.js';
+export { TermContent } from './term-content.vo.js';
+export { TermSort } from './term-sort.vo.js';

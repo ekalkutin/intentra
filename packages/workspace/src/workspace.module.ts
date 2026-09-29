@@ -4,6 +4,10 @@ import { WorkspaceApi } from '@intentra/contracts/workspace';
 
 import { CleanupAdapter } from './cleanup.adapter.js';
 import {
+  KNOWLEDGE_PROVIDERS,
+  KnowledgeDatabaseModule,
+} from './subdomains/knowledge/index.js';
+import {
   Cleanup,
   TENANCY_PROVIDERS,
   TenancyDatabaseModule,
@@ -13,9 +17,10 @@ import { ConfigurableModuleClass } from './workspace.module-defs.js';
 
 /** One context, one database: every subdomain is wired here (docs/adr/0001-knowledge-and-agents-are-subdomains-of-workspace.md). */
 @Module({
-  imports: [TenancyDatabaseModule],
+  imports: [TenancyDatabaseModule, KnowledgeDatabaseModule],
   providers: [
     ...TENANCY_PROVIDERS,
+    ...KNOWLEDGE_PROVIDERS,
     WorkspaceApiService,
     { provide: WorkspaceApi, useExisting: WorkspaceApiService },
     { provide: Cleanup, useClass: CleanupAdapter },

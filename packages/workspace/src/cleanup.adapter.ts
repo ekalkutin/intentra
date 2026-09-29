@@ -3,6 +3,10 @@ import { Injectable } from '@nestjs/common';
 import type { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 
 import {
+  KnowledgeItemRepository,
+  KnowledgeKeyCounter,
+} from './subdomains/knowledge/index.js';
+import {
   InvitationRepository,
   MemberRepository,
   PersonalAccessTokenRepository,
@@ -24,9 +28,13 @@ export class CleanupAdapter implements Cleanup {
     private readonly projectRepository: ProjectRepository,
     private readonly projectRoleAssignmentRepository: ProjectRoleAssignmentRepository,
     private readonly personalAccessTokenRepository: PersonalAccessTokenRepository,
+    private readonly knowledgeItemRepository: KnowledgeItemRepository,
+    private readonly knowledgeKeyCounter: KnowledgeKeyCounter,
   ) {}
 
   public async afterWorkspaceDeleted(workspaceId: WorkspaceId): Promise<void> {
+    await this.knowledgeItemRepository.deleteMany({ workspaceId });
+    await this.knowledgeKeyCounter.deleteMany({ workspaceId });
     await this.personalAccessTokenRepository.deleteMany({ workspaceId });
     await this.projectRoleAssignmentRepository.deleteMany({ workspaceId });
     await this.projectRepository.deleteMany({ workspaceId });
@@ -35,9 +43,12 @@ export class CleanupAdapter implements Cleanup {
   }
 
   public async afterProjectDeleted(projectId: ProjectId): Promise<void> {
+    await this.knowledgeItemRepository.deleteMany({ projectId });
+    await this.knowledgeKeyCounter.deleteMany({ projectId });
     await this.projectRoleAssignmentRepository.deleteMany({ projectId });
   }
 
+  /** The Member's Knowledge Items stay: they belong to the Project. */
   public async afterMemberRemoved(memberId: MemberId): Promise<void> {
     await this.projectRoleAssignmentRepository.deleteMany({ memberId });
     await this.personalAccessTokenRepository.deleteMany({ memberId });

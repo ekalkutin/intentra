@@ -5,6 +5,10 @@ import { APPLICATION_SERVICES } from './application/services/index.js';
 import { ADAPTERS } from './infrastructure/adapters/index.js';
 
 export {
+  AccessResolver,
+  type ProjectMembership,
+} from './application/access/index.js';
+export {
   AccessService,
   InvitationsService,
   MembersService,
@@ -21,7 +25,8 @@ export {
   ProjectRepository,
   ProjectRoleAssignmentRepository,
 } from './application/ports/outbound/index.js';
-export { MemberId } from './domain/value-objects/index.js';
+export { Member, Project } from './domain/entities/index.js';
+export { MemberId, ProjectRole } from './domain/value-objects/index.js';
 export { DatabaseModule as TenancyDatabaseModule } from './infrastructure/database/index.js';
 
 /** Who is in a Workspace and what they may do: Workspaces, Members, Roles, Invitations, Projects, Project Roles, Personal Access Tokens. */

@@ -1,7 +1,7 @@
 import { Provider } from '@nestjs/common';
 
-import { AccessResolver } from './access-resolver.js';
+import { AccessResolver, type ProjectMembership } from './access-resolver.js';
 
-export { AccessResolver };
+export { AccessResolver, type ProjectMembership };
 
 export const ACCESS_PROVIDERS: Provider[] = [AccessResolver];

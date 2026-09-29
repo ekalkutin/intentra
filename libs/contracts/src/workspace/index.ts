@@ -13,6 +13,38 @@ export {
 } from './invitations/invitation.dto.js';
 export { InvitationsApi } from './invitations/invitations.api.js';
 export {
+  EditKnowledgeItemDtoSchema,
+  type EditKnowledgeItemDto,
+} from './knowledge/edit-knowledge-item.dto.js';
+export {
+  DecisionFieldsDtoSchema,
+  RequirementFieldsDtoSchema,
+  TermFieldsDtoSchema,
+  type DecisionFieldsDto,
+  type RequirementFieldsDto,
+  type TermFieldsDto,
+} from './knowledge/knowledge-fields.dto.js';
+export {
+  type KnowledgeItemDto,
+  type KnowledgeItemPageDto,
+} from './knowledge/knowledge-item.dto.js';
+export {
+  KnowledgeKindDtoSchema,
+  KnowledgeStatusDtoSchema,
+  type KnowledgeKindDto,
+  type KnowledgeSourceDto,
+  type KnowledgeStatusDto,
+} from './knowledge/knowledge-kind.dto.js';
+export { KnowledgeApi } from './knowledge/knowledge.api.js';
+export {
+  ListKnowledgeItemsDtoSchema,
+  type ListKnowledgeItemsDto,
+} from './knowledge/list-knowledge-items.dto.js';
+export {
+  RecordKnowledgeItemDtoSchema,
+  type RecordKnowledgeItemDto,
+} from './knowledge/record-knowledge-item.dto.js';
+export {
   ChangeRoleDtoSchema,
   type ChangeRoleDto,
 } from './members/change-role.dto.js';
