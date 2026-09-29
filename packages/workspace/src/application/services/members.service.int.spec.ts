@@ -5,8 +5,12 @@ import { TestingApp } from '@intentra/platform-testing';
 import { AccountId, UnitOfWork } from '@intentra/shared-kernel';
 
 import { Member } from '../../domain/entities/index.js';
+import { OwnerCannotLeaveException } from '../../domain/exceptions/index.js';
 import { WorkspaceModule } from '../../workspace.module.js';
-import { WorkspaceNotFoundException } from '../exceptions/index.js';
+import {
+  MemberNotFoundException,
+  WorkspaceNotFoundException,
+} from '../exceptions/index.js';
 import { MemberRepository } from '../ports/outbound/index.js';
 
 import { MembersService } from './members.service.js';
@@ -99,5 +103,84 @@ describe('MembersService integration', () => {
 
     // Assert
     await expect(listing).rejects.toBeInstanceOf(WorkspaceNotFoundException);
+  });
+
+  describe('remove', () => {
+    it('takes away the removed Member’s access', async () => {
+      // Arrange
+      const ada = actor('ada@example.com');
+      const bob = actor('bob@example.com');
+      const workspaceId = await createWorkspace(ada);
+      const member = Member.join({
+        workspaceId,
+        accountId: bob.accountId,
+        email: bob.email,
+      });
+      await addMember(workspaceId, member);
+
+      // Act
+      await app.get(MembersService).remove(ada, workspaceId, member.id.value);
+
+      // Assert
+      await expect(
+        app.get(MembersService).list(bob, workspaceId),
+      ).rejects.toBeInstanceOf(WorkspaceNotFoundException);
+    });
+
+    it('reports a Member who is already gone as not found', async () => {
+      // Arrange
+      const ada = actor('ada@example.com');
+      const workspaceId = await createWorkspace(ada);
+      const member = Member.join({
+        workspaceId,
+        accountId: new AccountId().value,
+        email: 'bob@example.com',
+      });
+      member.remove();
+      await addMember(workspaceId, member);
+
+      // Act
+      const removal = app
+        .get(MembersService)
+        .remove(ada, workspaceId, member.id.value);
+
+      // Assert
+      await expect(removal).rejects.toBeInstanceOf(MemberNotFoundException);
+    });
+  });
+
+  describe('leave', () => {
+    it('takes away the leaving Member’s access', async () => {
+      // Arrange
+      const ada = actor('ada@example.com');
+      const bob = actor('bob@example.com');
+      const workspaceId = await createWorkspace(ada);
+      await addMember(
+        workspaceId,
+        Member.join({
+          workspaceId,
+          accountId: bob.accountId,
+          email: bob.email,
+        }),
+      );
+
+      // Act
+      await app.get(MembersService).leave(bob, workspaceId);
+
+      // Assert
+      await expect(app.get(WorkspacesService).list(bob)).resolves.toEqual([]);
+    });
+
+    it('does not let the Owner leave', async () => {
+      // Arrange
+      const ada = actor('ada@example.com');
+      const workspaceId = await createWorkspace(ada);
+
+      // Act
+      const leaving = app.get(MembersService).leave(ada, workspaceId);
+
+      // Assert
+      await expect(leaving).rejects.toBeInstanceOf(OwnerCannotLeaveException);
+    });
   });
 });

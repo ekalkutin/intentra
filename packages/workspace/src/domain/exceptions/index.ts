@@ -8,6 +8,7 @@ export { InvitationNotPendingException } from './invitation-not-pending.exceptio
 export { MemberNotActiveException } from './member-not-active.exception.js';
 export { MemberNotInWorkspaceException } from './member-not-in-workspace.exception.js';
 export { NotWorkspaceOwnerException } from './not-workspace-owner.exception.js';
+export { OwnerCannotLeaveException } from './owner-cannot-leave.exception.js';
 export { UnknownInvitationStatusException } from './unknown-invitation-status.exception.js';
 export { UnknownMemberStatusException } from './unknown-member-status.exception.js';
 export { UnknownRoleException } from './unknown-role.exception.js';

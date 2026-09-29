@@ -4,4 +4,12 @@ import type { MemberDto } from './member.dto.js';
 
 export abstract class MembersApi {
   abstract list(actor: Actor, workspaceId: string): Promise<MemberDto[]>;
+
+  abstract remove(
+    actor: Actor,
+    workspaceId: string,
+    memberId: string,
+  ): Promise<void>;
+
+  abstract leave(actor: Actor, workspaceId: string): Promise<void>;
 }

@@ -12,10 +12,10 @@ Where we stopped on 2026-09-29. Glossary: `CONTEXT-MAP.md`, `packages/iam/CONTEX
 - [x] `UnitOfWork` (MongoDB replica set + transactions): every write runs inside `UnitOfWork.run`, a write outside it throws `NoUnitOfWorkException`
 - [x] **Invitation**: Owner invites / lists / revokes (`/api/workspaces/:workspaceId/invitations`); invitee lists, opens, accepts, declines (`/api/invitations`). A Member keeps a copy of its Account's email; `Email` VO moved to shared-kernel
 - [x] `GET /api/workspaces/:workspaceId/members`: any Active Member sees the Active Members, sorted by email, with `isOwner`
+- [x] `DELETE /api/workspaces/:workspaceId/members/:memberId` (Owner) and `POST /api/workspaces/:workspaceId/leave` (any Member); the Owner can neither leave nor be removed (`MemberRemovalService`, 409 `OWNER_CANNOT_LEAVE`)
 
 ## Next, in this order
 
-- [ ] **Remove a Member** (Owner) and **leave a Workspace** (any Member). The Owner can neither leave nor be removed: a domain service, since it spans Workspace and Member.
 - [ ] **Rename a Workspace** (`workspace.rename` exists, no use case yet)
 - [ ] **Delete a Workspace** immediately, with its Members, Invitations and Projects
 - [ ] **Transfer of Ownership** (`OwnershipTransferService` exists, no use case yet)

@@ -58,6 +58,7 @@ export class MemberRepositoryAdapter implements MemberRepository {
 
   private toFilter(props: MemberQueryProps) {
     return {
+      ...(props.id && { _id: props.id.value }),
       ...(props.workspaceId && { workspaceId: props.workspaceId.value }),
       ...(props.accountId && { accountId: props.accountId.value }),
       ...(props.email && { email: props.email.value }),

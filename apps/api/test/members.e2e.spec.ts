@@ -64,22 +64,32 @@ describe('/api/workspaces/:workspaceId/members', () => {
     return response.body.id;
   }
 
-  it('shows a Member who joined by Invitation', async () => {
-    // Arrange
-    const owner = await signIn('ada@example.com');
-    const workspaceId = await createWorkspace(owner);
-    const invitee = await signIn('bob@example.com');
+  async function join(
+    owner: string,
+    workspaceId: string,
+    email: string,
+  ): Promise<string> {
+    const member = await signIn(email);
     const invitation = await app
       .request()
       .post(`${WORKSPACES_PATH}/${workspaceId}/invitations`)
       .set('Authorization', owner)
-      .send({ email: 'bob@example.com' })
+      .send({ email })
       .expect(HttpStatus.CREATED);
     await app
       .request()
       .post(`/api/invitations/${invitation.body.id}/accept`)
-      .set('Authorization', invitee)
+      .set('Authorization', member)
       .expect(HttpStatus.OK);
+
+    return member;
+  }
+
+  it('shows a Member who joined by Invitation', async () => {
+    // Arrange
+    const owner = await signIn('ada@example.com');
+    const workspaceId = await createWorkspace(owner);
+    const invitee = await join(owner, workspaceId, 'bob@example.com');
 
     // Act
     const response = app
@@ -113,5 +123,73 @@ describe('/api/workspaces/:workspaceId/members', () => {
     await response
       .expect(HttpStatus.NOT_FOUND)
       .expect(res => expect(res.body.code).toBe('WORKSPACE_NOT_FOUND'));
+  });
+
+  it('lets the Owner remove a Member, who then loses access', async () => {
+    // Arrange
+    const owner = await signIn('ada@example.com');
+    const workspaceId = await createWorkspace(owner);
+    const member = await join(owner, workspaceId, 'bob@example.com');
+    const members = await app
+      .request()
+      .get(membersPath(workspaceId))
+      .set('Authorization', owner)
+      .expect(HttpStatus.OK);
+    const bob = members.body.find(
+      (m: { email: string }) => m.email === 'bob@example.com',
+    );
+
+    // Act
+    const response = app
+      .request()
+      .delete(`${membersPath(workspaceId)}/${bob.id}`)
+      .set('Authorization', owner);
+
+    // Assert
+    await response.expect(HttpStatus.NO_CONTENT);
+    await app
+      .request()
+      .get(membersPath(workspaceId))
+      .set('Authorization', member)
+      .expect(HttpStatus.NOT_FOUND);
+  });
+
+  it('lets a Member leave', async () => {
+    // Arrange
+    const owner = await signIn('ada@example.com');
+    const workspaceId = await createWorkspace(owner);
+    const member = await join(owner, workspaceId, 'bob@example.com');
+
+    // Act
+    const response = app
+      .request()
+      .post(`${WORKSPACES_PATH}/${workspaceId}/leave`)
+      .set('Authorization', member);
+
+    // Assert
+    await response.expect(HttpStatus.NO_CONTENT);
+    await app
+      .request()
+      .get(WORKSPACES_PATH)
+      .set('Authorization', member)
+      .expect(HttpStatus.OK)
+      .expect(res => expect(res.body).toEqual([]));
+  });
+
+  it('does not let the Owner leave', async () => {
+    // Arrange
+    const owner = await signIn('ada@example.com');
+    const workspaceId = await createWorkspace(owner);
+
+    // Act
+    const response = app
+      .request()
+      .post(`${WORKSPACES_PATH}/${workspaceId}/leave`)
+      .set('Authorization', owner);
+
+    // Assert
+    await response
+      .expect(HttpStatus.CONFLICT)
+      .expect(res => expect(res.body.code).toBe('OWNER_CANNOT_LEAVE'));
   });
 });
