@@ -12,7 +12,3 @@
 - **Configurable Project permissions.** MVP: only an Owner creates, renames and deletes Projects. Later: a dedicated permission that lets a Member create Projects and delete the ones they created.
 - **Permissions model.** MVP: the only Role is Contributor, and ownership is a property of the Workspace. Next step: fixed Roles that each carry a set of permissions. Custom Roles per Workspace only if customers ask for them.
 - **Slug availability check.** MVP: the client submits the Workspace and, on `WORKSPACE_SLUG_TAKEN` (409), retries with the next suffix (`acme-corp-2`). Later: a query that tells whether a slug is free, likely as a GraphQL field.
-
-## Tech debt
-
-- **No transactions across aggregates.** MongoDB runs without a replica set (docker and tests), so writes to two aggregates are not atomic. Creating a Workspace saves the Workspace first, then its Owner's Member, and deletes the Workspace if the second write fails. If that delete fails too, a Workspace without an Owner remains and its slug stays taken. Accepting an Invitation will hit the same problem. Fix: run MongoDB as a replica set (`MongoMemoryReplSet` in tests) and save both aggregates in one transaction.

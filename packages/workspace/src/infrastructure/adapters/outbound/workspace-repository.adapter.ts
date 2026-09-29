@@ -2,6 +2,7 @@ import { Injectable, Provider } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { mongo, type Model } from 'mongoose';
 
+import { MongooseUnitOfWork } from '@intentra/platform-persistence';
 import type { WorkspaceId } from '@intentra/shared-kernel';
 
 import { WorkspaceSlugTakenException } from '../../../application/exceptions/index.js';
@@ -19,6 +20,7 @@ export class WorkspaceRepositoryAdapter implements WorkspaceRepository {
   constructor(
     @InjectModel(WorkspaceModel.name)
     private readonly workspaceModel: Model<WorkspaceModel>,
+    private readonly unitOfWork: MongooseUnitOfWork,
   ) {}
 
   public async save(workspace: Workspace): Promise<void> {
@@ -31,7 +33,7 @@ export class WorkspaceRepositoryAdapter implements WorkspaceRepository {
             slug: workspace.slug.value,
             ownerId: workspace.ownerId.value,
           },
-          { upsert: true },
+          { upsert: true, session: this.unitOfWork.requireSession() },
         )
         .exec();
     } catch (error) {
@@ -46,12 +48,16 @@ export class WorkspaceRepositoryAdapter implements WorkspaceRepository {
   }
 
   public async delete(id: WorkspaceId): Promise<void> {
-    await this.workspaceModel.deleteOne({ _id: id.value }).exec();
+    await this.workspaceModel
+      .deleteOne({ _id: id.value })
+      .session(this.unitOfWork.requireSession())
+      .exec();
   }
 
   public async findOne(props: WorkspaceQueryProps): Promise<Workspace | null> {
     const document = await this.workspaceModel
       .findOne(this.toFilter(props))
+      .session(this.unitOfWork.session)
       .lean()
       .exec();
 
@@ -62,6 +68,7 @@ export class WorkspaceRepositoryAdapter implements WorkspaceRepository {
     const documents = await this.workspaceModel
       .find(this.toFilter(props))
       .sort({ name: 1 })
+      .session(this.unitOfWork.session)
       .lean()
       .exec();
 

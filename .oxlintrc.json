@@ -219,6 +219,29 @@
           }
         ]
       }
+    },
+    {
+      "files": ["packages/*/src/**/infrastructure/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@intentra/**",
+                  "!@intentra/shared-kernel",
+                  "!@intentra/contracts",
+                  "!@intentra/contracts/**",
+                  "!@intentra/platform-persistence",
+                  "!@intentra/platform-testing"
+                ],
+                "message": "A context may depend only on contracts and the shared kernel; its infrastructure may also use the platform persistence adapters, and its tests the platform testing harness. Contexts integrate through published events, not through each other's packages."
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }

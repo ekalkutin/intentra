@@ -8,7 +8,7 @@ import type {
   SignInDto,
   TokenPair,
 } from '@intentra/contracts/iam';
-import { AccountId } from '@intentra/shared-kernel';
+import { AccountId, UnitOfWork } from '@intentra/shared-kernel';
 
 import { Account } from '../../domain/entities/index.js';
 import { Email } from '../../domain/value-objects/index.js';
@@ -26,6 +26,7 @@ import {
 @Injectable()
 export class AuthService implements AuthApi {
   constructor(
+    private readonly unitOfWork: UnitOfWork,
     private readonly accountRepository: AccountRepository,
     private readonly passwordHasher: PasswordHasher,
     private readonly tokenSigner: TokenSigner,
@@ -35,7 +36,7 @@ export class AuthService implements AuthApi {
     const passwordHash = await this.passwordHasher.hash(data.password);
     const account = Account.register({ email: data.email, passwordHash });
 
-    await this.accountRepository.save(account);
+    await this.unitOfWork.run(() => this.accountRepository.save(account));
   }
 
   public async signIn(data: SignInDto): Promise<TokenPair> {

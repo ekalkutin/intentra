@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import { AccountId, WorkspaceId } from '@intentra/shared-kernel';
+import { AccountId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
 import { Member } from '../../domain/entities/index.js';
 import { NotWorkspaceOwnerException } from '../../domain/exceptions/index.js';
@@ -41,9 +41,11 @@ describe('ProjectsService integration', () => {
 
   async function addContributor(workspaceId: string): Promise<Actor> {
     const contributor = actor();
-    await app
-      .get(MemberRepository)
-      .save(Member.join({ workspaceId, accountId: contributor.accountId }));
+    const member = Member.join({
+      workspaceId,
+      accountId: contributor.accountId,
+    });
+    await app.get(UnitOfWork).run(() => app.get(MemberRepository).save(member));
 
     return contributor;
   }

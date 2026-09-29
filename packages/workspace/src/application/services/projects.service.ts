@@ -6,7 +6,7 @@ import type {
   ProjectDto,
   ProjectsApi,
 } from '@intentra/contracts/workspace';
-import { WorkspaceId } from '@intentra/shared-kernel';
+import { UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
 import { ProjectCreationService } from '../../domain/services/index.js';
 import { AccessResolver } from '../access/index.js';
@@ -22,6 +22,7 @@ export class ProjectsService implements ProjectsApi {
   readonly #projectCreationService = new ProjectCreationService();
 
   constructor(
+    private readonly unitOfWork: UnitOfWork,
     private readonly accessResolver: AccessResolver,
     private readonly workspaceRepository: WorkspaceRepository,
     private readonly projectRepository: ProjectRepository,
@@ -43,7 +44,7 @@ export class ProjectsService implements ProjectsApi {
       name: data.name,
       slug: data.slug,
     });
-    await this.projectRepository.save(project);
+    await this.unitOfWork.run(() => this.projectRepository.save(project));
 
     return toProjectDto(project);
   }

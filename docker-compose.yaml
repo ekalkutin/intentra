@@ -5,10 +5,24 @@ services:
     ports:
       - '27017:27017'
     env_file: .env
+    # Transactions need a replica set, and a replica set with auth needs a keyFile.
+    entrypoint:
+      - bash
+      - -c
+      - |
+        head -c 756 /dev/urandom | base64 > /tmp/keyfile
+        chmod 400 /tmp/keyfile
+        chown mongodb:mongodb /tmp/keyfile
+        exec docker-entrypoint.sh mongod --replSet rs0 --keyFile /tmp/keyfile
     volumes:
       - mongo-data:/data/db
     healthcheck:
-      test: ['CMD', 'mongosh', '--quiet', '--eval', 'db.adminCommand("ping")']
+      test:
+        - CMD-SHELL
+        - >-
+          mongosh --quiet -u "$$MONGO_INITDB_ROOT_USERNAME" -p "$$MONGO_INITDB_ROOT_PASSWORD"
+          --authenticationDatabase admin --eval
+          "try { rs.status().ok } catch { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok }"
       interval: 10s
       retries: 5
 

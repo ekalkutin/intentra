@@ -2,6 +2,8 @@ import { Injectable, Provider } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { mongo, type Model } from 'mongoose';
 
+import { MongooseUnitOfWork } from '@intentra/platform-persistence';
+
 import { AccountAlreadyExistsException } from '../../../application/exceptions/index.js';
 import {
   AccountRepository,
@@ -17,6 +19,7 @@ export class AccountRepositoryAdapter implements AccountRepository {
   constructor(
     @InjectModel(AccountModel.name)
     private readonly accountModel: Model<AccountModel>,
+    private readonly unitOfWork: MongooseUnitOfWork,
   ) {}
 
   public async save(account: Account): Promise<void> {
@@ -28,7 +31,7 @@ export class AccountRepositoryAdapter implements AccountRepository {
             email: account.email.value,
             passwordHash: account.passwordHash,
           },
-          { upsert: true },
+          { upsert: true, session: this.unitOfWork.requireSession() },
         )
         .exec();
     } catch (error) {
@@ -45,7 +48,11 @@ export class AccountRepositoryAdapter implements AccountRepository {
   public async findOne(props: AccountQueryProps): Promise<Account | null> {
     const filter =
       'id' in props ? { _id: props.id.value } : { email: props.email.value };
-    const document = await this.accountModel.findOne(filter).lean().exec();
+    const document = await this.accountModel
+      .findOne(filter)
+      .session(this.unitOfWork.session)
+      .lean()
+      .exec();
 
     return document && this.toDomain(document);
   }

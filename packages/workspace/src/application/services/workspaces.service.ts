@@ -6,7 +6,7 @@ import type {
   WorkspaceDto,
   WorkspacesApi,
 } from '@intentra/contracts/workspace';
-import { AccountId } from '@intentra/shared-kernel';
+import { AccountId, UnitOfWork } from '@intentra/shared-kernel';
 
 import { WorkspaceCreationService } from '../../domain/services/index.js';
 import { MemberStatus } from '../../domain/value-objects/index.js';
@@ -21,6 +21,7 @@ export class WorkspacesService implements WorkspacesApi {
   readonly #workspaceCreationService = new WorkspaceCreationService();
 
   constructor(
+    private readonly unitOfWork: UnitOfWork,
     private readonly workspaceRepository: WorkspaceRepository,
     private readonly memberRepository: MemberRepository,
   ) {}
@@ -35,15 +36,10 @@ export class WorkspacesService implements WorkspacesApi {
       accountId: actor.accountId,
     });
 
-    // No transaction yet
-    // the Workspace goes first, so a taken slug fails before anything is written.
-    await this.workspaceRepository.save(workspace);
-    try {
+    await this.unitOfWork.run(async () => {
+      await this.workspaceRepository.save(workspace);
       await this.memberRepository.save(owner);
-    } catch (error) {
-      await this.workspaceRepository.delete(workspace.id).catch(() => {});
-      throw error;
-    }
+    });
 
     return toWorkspaceDto(workspace);
   }

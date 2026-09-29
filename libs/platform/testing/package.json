@@ -25,6 +25,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@intentra/platform-persistence": "workspace:*",
     "@nestjs/platform-express": "catalog:nestjs12",
     "@nestjs/testing": "catalog:nestjs12",
     "@types/supertest": "^7.2.1",

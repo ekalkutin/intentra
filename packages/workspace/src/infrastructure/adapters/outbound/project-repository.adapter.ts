@@ -2,6 +2,8 @@ import { Injectable, Provider } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { mongo, type Model } from 'mongoose';
 
+import { MongooseUnitOfWork } from '@intentra/platform-persistence';
+
 import { ProjectSlugTakenException } from '../../../application/exceptions/index.js';
 import {
   ProjectRepository,
@@ -17,6 +19,7 @@ export class ProjectRepositoryAdapter implements ProjectRepository {
   constructor(
     @InjectModel(ProjectModel.name)
     private readonly projectModel: Model<ProjectModel>,
+    private readonly unitOfWork: MongooseUnitOfWork,
   ) {}
 
   public async save(project: Project): Promise<void> {
@@ -30,7 +33,7 @@ export class ProjectRepositoryAdapter implements ProjectRepository {
             slug: project.slug.value,
             createdBy: project.createdBy.value,
           },
-          { upsert: true },
+          { upsert: true, session: this.unitOfWork.requireSession() },
         )
         .exec();
     } catch (error) {
@@ -48,6 +51,7 @@ export class ProjectRepositoryAdapter implements ProjectRepository {
     const documents = await this.projectModel
       .find({ workspaceId: props.workspaceId.value })
       .sort({ name: 1 })
+      .session(this.unitOfWork.session)
       .lean()
       .exec();
 

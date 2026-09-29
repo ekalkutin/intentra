@@ -1,8 +1,16 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import { AccountId } from '@intentra/shared-kernel';
+import { AccountId, UnitOfWork } from '@intentra/shared-kernel';
 
 import { Member } from '../../domain/entities/index.js';
 import { WorkspaceModule } from '../../workspace.module.js';
@@ -22,7 +30,10 @@ describe('WorkspacesService integration', () => {
     app = await TestingApp.create({ imports: [WorkspaceModule.register({})] });
   });
 
-  afterEach(() => app.clearDatabase());
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    await app.clearDatabase();
+  });
 
   afterAll(() => app?.close());
 
@@ -63,6 +74,24 @@ describe('WorkspacesService integration', () => {
         WorkspaceSlugTakenException,
       );
     });
+
+    it('keeps nothing when saving the Owner fails', async () => {
+      // Arrange
+      const service = app.get(WorkspacesService);
+      const ada = actor();
+      vi.spyOn(app.get(MemberRepository), 'save').mockRejectedValueOnce(
+        new Error('Owner not saved'),
+      );
+
+      // Act
+      const creation = service.create(ada, { name: 'Acme', slug: 'acme' });
+
+      // Assert
+      await expect(creation).rejects.toThrow('Owner not saved');
+      await expect(
+        service.create(ada, { name: 'Acme', slug: 'acme' }),
+      ).resolves.toMatchObject({ slug: 'acme' });
+    });
   });
 
   describe('list', () => {
@@ -98,7 +127,9 @@ describe('WorkspacesService integration', () => {
         accountId: bob.accountId,
       });
       member.remove();
-      await app.get(MemberRepository).save(member);
+      await app
+        .get(UnitOfWork)
+        .run(() => app.get(MemberRepository).save(member));
 
       // Act
       const workspaces = await service.list(bob);

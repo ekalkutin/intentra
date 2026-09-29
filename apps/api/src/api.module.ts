@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AgentsModule } from '@intentra/agents';
 import { GatewayModule } from '@intentra/gateway';
 import { IamModule, type IamModuleOptions } from '@intentra/iam';
+import { PersistenceModule } from '@intentra/platform-persistence';
 import { WorkspaceModule } from '@intentra/workspace';
 
 import {
@@ -39,6 +40,7 @@ const agents = AgentsModule.register({});
       }),
       inject: [ConfigService],
     }),
+    PersistenceModule,
     GatewayModule.register({ contexts: [iam, workspace, agents] }),
   ],
 })

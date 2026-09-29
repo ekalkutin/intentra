@@ -2,6 +2,8 @@ import { Injectable, Provider } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
 
+import { MongooseUnitOfWork } from '@intentra/platform-persistence';
+
 import {
   MemberRepository,
   type MemberQueryProps,
@@ -14,6 +16,7 @@ export class MemberRepositoryAdapter implements MemberRepository {
   constructor(
     @InjectModel(MemberModel.name)
     private readonly memberModel: Model<MemberModel>,
+    private readonly unitOfWork: MongooseUnitOfWork,
   ) {}
 
   public async save(member: Member): Promise<void> {
@@ -26,7 +29,7 @@ export class MemberRepositoryAdapter implements MemberRepository {
           role: member.role.value,
           status: member.status.value,
         },
-        { upsert: true },
+        { upsert: true, session: this.unitOfWork.requireSession() },
       )
       .exec();
   }
@@ -34,6 +37,7 @@ export class MemberRepositoryAdapter implements MemberRepository {
   public async findOne(props: MemberQueryProps): Promise<Member | null> {
     const document = await this.memberModel
       .findOne(this.toFilter(props))
+      .session(this.unitOfWork.session)
       .lean()
       .exec();
 
@@ -43,6 +47,7 @@ export class MemberRepositoryAdapter implements MemberRepository {
   public async findMany(props: MemberQueryProps): Promise<Member[]> {
     const documents = await this.memberModel
       .find(this.toFilter(props))
+      .session(this.unitOfWork.session)
       .lean()
       .exec();
 

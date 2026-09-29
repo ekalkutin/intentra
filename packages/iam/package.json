@@ -25,6 +25,7 @@
   "type": "module",
   "dependencies": {
     "@intentra/contracts": "workspace:*",
+    "@intentra/platform-persistence": "workspace:*",
     "@intentra/shared-kernel": "workspace:*",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/jwt": "catalog:nestjs12",

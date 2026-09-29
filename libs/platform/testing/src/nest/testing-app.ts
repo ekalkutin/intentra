@@ -5,6 +5,8 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test, type TestingModule } from '@nestjs/testing';
 import supertest from 'supertest';
 
+import { PersistenceModule } from '@intentra/platform-persistence';
+
 import {
   clearTestingDatabase,
   dropTestingDatabase,
@@ -21,7 +23,11 @@ export class TestingApp {
   public static async create(metadata: ModuleMetadata): Promise<TestingApp> {
     const moduleRef = await Test.createTestingModule({
       ...metadata,
-      imports: [testingDatabaseModule(), ...(metadata.imports ?? [])],
+      imports: [
+        testingDatabaseModule(),
+        PersistenceModule,
+        ...(metadata.imports ?? []),
+      ],
     }).compile();
 
     const http = moduleRef.createNestApplication<NestExpressApplication>();
