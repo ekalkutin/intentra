@@ -12,6 +12,7 @@ export class InvitationStatus {
     InvitationStatus.Accepted,
     InvitationStatus.Declined,
     InvitationStatus.Revoked,
+    InvitationStatus.Expired,
   ];
 
   readonly #value: string;

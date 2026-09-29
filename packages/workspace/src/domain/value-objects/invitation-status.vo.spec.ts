@@ -10,23 +10,13 @@ describe('InvitationStatus', () => {
     InvitationStatus.Accepted,
     InvitationStatus.Declined,
     InvitationStatus.Revoked,
+    InvitationStatus.Expired,
   ])('reads $value back into the same instance', status => {
     // Act
     const read = InvitationStatus.from(status.value);
 
     // Assert
     expect(read).toBe(status);
-  });
-
-  it('does not read Expired, which is never stored', () => {
-    // Arrange
-    const value = InvitationStatus.Expired.value;
-
-    // Act
-    const reading = () => InvitationStatus.from(value);
-
-    // Assert
-    expect(reading).toThrow(UnknownInvitationStatusException);
   });
 
   it('rejects an unknown value', () => {

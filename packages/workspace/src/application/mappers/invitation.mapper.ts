@@ -13,15 +13,14 @@ const ISO_MILLISECONDS: Temporal.InstantToStringOptions = {
 export function toInvitationDto(
   invitation: Invitation,
   workspace: Workspace,
-  now: Temporal.Instant,
 ): InvitationDto {
   return {
     id: invitation.id.value,
     workspaceId: invitation.workspaceId.value,
     workspaceName: workspace.name.value,
     email: invitation.email.value,
-    status: invitation.statusAt(now).value as InvitationStatusDto,
-    createdAt: invitation.createdAt.toString(ISO_MILLISECONDS),
+    status: invitation.status.value as InvitationStatusDto,
+    sentAt: invitation.sentAt.toString(ISO_MILLISECONDS),
     expiresAt: invitation.expiresAt.toString(ISO_MILLISECONDS),
   };
 }

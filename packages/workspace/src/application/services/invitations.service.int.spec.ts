@@ -69,7 +69,7 @@ describe('InvitationsService integration', () => {
         workspaceName: 'Acme',
         email: 'bob@example.com',
         status: 'pending',
-        createdAt: expect.any(String),
+        sentAt: expect.any(String),
         expiresAt: expect.any(String),
       });
       await expect(service.list(ada, workspaceId)).resolves.toEqual([
@@ -77,25 +77,23 @@ describe('InvitationsService integration', () => {
       ]);
     });
 
-    it('revokes the earlier Pending Invitation to the same email', async () => {
+    it('reopens the same Invitation when the email is invited again', async () => {
       // Arrange
       const ada = actor('ada@example.com');
       const workspaceId = await createWorkspace(ada);
       const earlier = await service.create(ada, workspaceId, {
         email: 'bob@example.com',
       });
+      await service.revoke(ada, workspaceId, earlier.id);
 
       // Act
-      const later = await service.create(ada, workspaceId, {
+      const again = await service.create(ada, workspaceId, {
         email: 'bob@example.com',
       });
 
       // Assert
-      const invitations = await service.list(ada, workspaceId);
-      expect(invitations.map(({ id, status }) => ({ id, status }))).toEqual([
-        { id: later.id, status: 'pending' },
-        { id: earlier.id, status: 'revoked' },
-      ]);
+      expect(again).toMatchObject({ id: earlier.id, status: 'pending' });
+      await expect(service.list(ada, workspaceId)).resolves.toEqual([again]);
     });
 
     it('rejects the email of an Active Member', async () => {

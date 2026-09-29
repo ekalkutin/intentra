@@ -17,7 +17,7 @@ An Account's participation in a specific Workspace, with its own role and status
 _Avoid_: User, Participant, Collaborator
 
 **Invitation**:
-The Owner's offer for someone to join a Workspace as a Contributor. It is addressed to an email, and only an Account with that same email can accept it. On acceptance the invitee becomes a Member. An Invitation is Pending until it is Accepted or Declined by the invitee, Revoked by the Owner, Expired after 7 days, or replaced by a newer Invitation to the same email.
+The Owner's offer for someone to join a Workspace as a Contributor. It is addressed to an email, and only an Account with that same email can accept it. On acceptance the invitee becomes a Member. An Invitation is Pending until it is Accepted or Declined by the invitee, Revoked by the Owner, or Expired after 7 days. An email has at most one Invitation per Workspace: inviting it again reopens that Invitation as Pending for another 7 days, with the same link.
 _Avoid_: Invite link, Join request
 
 **Project**:

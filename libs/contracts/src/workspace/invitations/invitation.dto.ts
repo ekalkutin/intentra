@@ -8,7 +8,7 @@ export type InvitationDto = {
   readonly email: string;
   readonly status: InvitationStatusDto;
   /** ISO 8601 */
-  readonly createdAt: string;
+  readonly sentAt: string;
   /** ISO 8601 */
   readonly expiresAt: string;
 };

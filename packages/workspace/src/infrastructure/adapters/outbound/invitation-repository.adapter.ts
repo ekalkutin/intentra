@@ -1,15 +1,18 @@
 import { Injectable, Provider } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model } from 'mongoose';
+import { mongo, type Model } from 'mongoose';
 
 import { MongooseUnitOfWork } from '@intentra/platform-persistence';
 
+import { InvitationAlreadyPendingException } from '../../../application/exceptions/index.js';
 import {
   InvitationRepository,
   type InvitationQueryProps,
 } from '../../../application/ports/outbound/index.js';
 import { Invitation } from '../../../domain/entities/index.js';
 import { InvitationModel } from '../../database/index.js';
+
+const DUPLICATE_KEY_ERROR_CODE = 11000;
 
 @Injectable()
 export class InvitationRepositoryAdapter implements InvitationRepository {
@@ -20,20 +23,30 @@ export class InvitationRepositoryAdapter implements InvitationRepository {
   ) {}
 
   public async save(invitation: Invitation): Promise<void> {
-    await this.invitationModel
-      .replaceOne(
-        { _id: invitation.id.value },
-        {
-          workspaceId: invitation.workspaceId.value,
-          email: invitation.email.value,
-          invitedBy: invitation.invitedBy.value,
-          createdAt: new Date(invitation.createdAt.epochMilliseconds),
-          expiresAt: new Date(invitation.expiresAt.epochMilliseconds),
-          status: invitation.status.value,
-        },
-        { upsert: true, session: this.unitOfWork.requireSession() },
-      )
-      .exec();
+    try {
+      await this.invitationModel
+        .replaceOne(
+          { _id: invitation.id.value },
+          {
+            workspaceId: invitation.workspaceId.value,
+            email: invitation.email.value,
+            invitedBy: invitation.invitedBy.value,
+            sentAt: new Date(invitation.sentAt.epochMilliseconds),
+            expiresAt: new Date(invitation.expiresAt.epochMilliseconds),
+            status: invitation.status.value,
+          },
+          { upsert: true, session: this.unitOfWork.requireSession() },
+        )
+        .exec();
+    } catch (error) {
+      if (
+        error instanceof mongo.MongoServerError &&
+        error.code === DUPLICATE_KEY_ERROR_CODE
+      ) {
+        throw new InvitationAlreadyPendingException();
+      }
+      throw error;
+    }
   }
 
   public async findOne(
@@ -51,7 +64,7 @@ export class InvitationRepositoryAdapter implements InvitationRepository {
   public async findMany(props: InvitationQueryProps): Promise<Invitation[]> {
     const documents = await this.invitationModel
       .find(this.toFilter(props))
-      .sort({ createdAt: -1 })
+      .sort({ sentAt: -1 })
       .session(this.unitOfWork.session)
       .lean()
       .exec();
@@ -74,9 +87,7 @@ export class InvitationRepositoryAdapter implements InvitationRepository {
       workspaceId: document.workspaceId,
       email: document.email,
       invitedBy: document.invitedBy,
-      createdAt: Temporal.Instant.fromEpochMilliseconds(
-        document.createdAt.getTime(),
-      ),
+      sentAt: Temporal.Instant.fromEpochMilliseconds(document.sentAt.getTime()),
       expiresAt: Temporal.Instant.fromEpochMilliseconds(
         document.expiresAt.getTime(),
       ),
