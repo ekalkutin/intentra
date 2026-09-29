@@ -1,5 +1,10 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
+import type { GatewayException } from './gateway.exception.js';
+import { InternalException } from './internal.exception.js';
+import { UnauthenticatedException } from './unauthenticated.exception.js';
+import { ValidationFailedException } from './validation-failed.exception.js';
+
 /** The one error shape every REST response uses. */
 export type WireError = {
   readonly message: string;
@@ -8,17 +13,12 @@ export type WireError = {
   readonly retryable: boolean;
 };
 
-/** Codes for errors Nest raises itself, e.g. the validation pipe or a guard. */
-const HTTP_CODES: Partial<Record<number, string>> = {
-  [HttpStatus.BAD_REQUEST]: 'VALIDATION_FAILED',
-  [HttpStatus.UNAUTHORIZED]: 'UNAUTHENTICATED',
-};
-
-const INTERNAL: WireError = {
-  message: 'Internal server error',
-  code: 'INTERNAL',
-  status: HttpStatus.INTERNAL_SERVER_ERROR,
-  retryable: false,
+/** Errors Nest raises itself, e.g. the validation pipe or a guard. */
+const HTTP_EXCEPTIONS: Partial<
+  Record<number, (message: string) => GatewayException>
+> = {
+  [HttpStatus.BAD_REQUEST]: message => new ValidationFailedException(message),
+  [HttpStatus.UNAUTHORIZED]: message => new UnauthenticatedException(message),
 };
 
 /**
@@ -28,31 +28,39 @@ const INTERNAL: WireError = {
 export function describeError(error: unknown): WireError | null {
   if (error instanceof HttpException) {
     const status = error.getStatus();
+    const known = HTTP_EXCEPTIONS[status]?.(error.message);
+    if (known) {
+      return toWire(known);
+    }
 
     return {
       message: error.message,
-      code: HTTP_CODES[status] ?? HttpStatus[status] ?? INTERNAL.code,
+      code: HttpStatus[status] ?? new InternalException().code,
       status,
       retryable: false,
     };
   }
-  if (isContextException(error)) {
-    return {
-      message: error.message,
-      code: error.code,
-      status: error.status,
-      retryable: error.retryable,
-    };
+  if (isWireShaped(error)) {
+    return toWire(error);
   }
 
   return null;
 }
 
 export function internalError(): WireError {
-  return INTERNAL;
+  return toWire(new InternalException());
 }
 
-function isContextException(error: unknown): error is Error & WireError {
+function toWire(error: Error & WireError): WireError {
+  return {
+    message: error.message,
+    code: error.code,
+    status: error.status,
+    retryable: error.retryable,
+  };
+}
+
+function isWireShaped(error: unknown): error is Error & WireError {
   return (
     error instanceof Error &&
     typeof (error as Partial<WireError>).code === 'string' &&

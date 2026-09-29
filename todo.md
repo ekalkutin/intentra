@@ -16,11 +16,10 @@ Where we stopped on 2026-09-29. Glossary: `CONTEXT-MAP.md`, `packages/iam/CONTEX
 - [x] `DELETE /api/workspaces/:workspaceId` with `{ slug }` to confirm (Owner only, 400 `WORKSPACE_SLUG_MISMATCH`): deletes Members, Invitations and Projects in one transaction
 - [x] `POST /api/workspaces/:workspaceId/transfer-ownership` with `{ memberId }` (Owner only, to an Active Member; the former Owner stays a Member)
 - [x] `DELETE /api/workspaces/:workspaceId/projects/:projectId` with `{ slug }` to confirm (Owner only). No renaming of Workspaces or Projects: names are chosen at creation
+- [x] Gateway errors are classes too: `GatewayException` → `ValidationFailedException`, `UnauthenticatedException`, `InternalException` (`libs/gateway/src/presentation/rest/errors/`)
 
 ## Next, in this order
 
 
 ## Open questions left unanswered
 
-- [ ] **Sign-in timing.** Sign-in answers faster for an unknown email (no password hash is checked), which hints whether an email is registered. Fix now with a dummy hash check, or add to `docs/notes/iam-open-questions.md`?
-- [ ] **String codes in the gateway filter.** `VALIDATION_FAILED`, `UNAUTHENTICATED`, `INTERNAL` are string literals in `libs/gateway/src/presentation/rest/errors/wire-error.ts`. Keep them, or turn them into gateway exception classes?
