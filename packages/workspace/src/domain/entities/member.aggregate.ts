@@ -83,6 +83,10 @@ export class Member extends Aggregate<MemberId> {
     return this.#role?.equals(Role.Owner) ?? false;
   }
 
+  public isManager(): boolean {
+    return this.#role?.equals(Role.Manager) ?? false;
+  }
+
   public belongsTo(workspaceId: WorkspaceId): boolean {
     return this.#workspaceId.equals(workspaceId);
   }

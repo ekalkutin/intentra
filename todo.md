@@ -24,7 +24,7 @@ Decided on 2026-09-29, see `packages/workspace/CONTEXT.md` and `packages/workspa
 
 - [x] **Owner as a Role on Member.** `Role` = Owner or none (`Member.role` is null), `Workspace.ownerId` removed, `MemberDto.role` replaces `isOwner`. Several Owners allowed; the last one cannot leave or be removed (409 `LAST_OWNER_CANNOT_LEAVE`). Owner-changing writes call `WorkspaceRepository.lock` in the same `UnitOfWork`.
 - [x] **Change a Member's Role**: `PUT /api/workspaces/:workspaceId/members/:memberId/role` with `{ role: 'owner' | null }` (any Owner, any Active Member, own Role included; 409 `LAST_OWNER_CANNOT_STEP_DOWN`). `RoleChangeService` replaced `OwnershipTransferService`; `POST /transfer-ownership` is gone
-- [ ] **Manager**: add `Role.Manager`; Owner or Manager creates a Project; Owner deletes any Project, Manager only the ones they created
+- [x] **Manager**: `Role.Manager` (`role: 'manager'`). Owner or Manager creates a Project (403 `PROJECT_CREATION_FORBIDDEN`); Owner deletes any Project, Manager only the ones they created (403 `PROJECT_DELETION_FORBIDDEN`)
 - [ ] **Project Roles** Viewer / Contributor / Maintainer, Viewer by default. The creator becomes Maintainer; an Owner is Maintainer everywhere, unchangeable. Owner or the Project's Maintainer gives and takes them. Removing a Member drops its Role and Project Roles
 - [ ] **Personal Access Token** in the Workspace context: create / list own / revoke (Member), list all / revoke any (Owner); level Viewer / Contributor / Maintainer; expiry 30 / 90 (default) / 365 days / never; last use; secret shown once. MCP handler authenticates by PAT and puts the Actor and the effective level into the tools' request context (see `docs/notes/mastra-request-context-schema.md`)
 

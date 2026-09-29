@@ -64,6 +64,35 @@ describe('/api/workspaces/:workspaceId/projects', () => {
     return response.body.id;
   }
 
+  async function join(
+    owner: string,
+    workspaceId: string,
+    email: string,
+  ): Promise<{ authorization: string; memberId: string }> {
+    const authorization = await signIn(email);
+    const invitation = await app
+      .request()
+      .post(`${WORKSPACES_PATH}/${workspaceId}/invitations`)
+      .set('Authorization', owner)
+      .send({ email })
+      .expect(HttpStatus.CREATED);
+    await app
+      .request()
+      .post(`/api/invitations/${invitation.body.id}/accept`)
+      .set('Authorization', authorization)
+      .expect(HttpStatus.OK);
+    const members = await app
+      .request()
+      .get(`${WORKSPACES_PATH}/${workspaceId}/members`)
+      .set('Authorization', owner)
+      .expect(HttpStatus.OK);
+    const member = members.body.find(
+      (m: { email: string }) => m.email === email,
+    );
+
+    return { authorization, memberId: member.id };
+  }
+
   describe('POST', () => {
     it('creates a Project', async () => {
       // Arrange
@@ -85,6 +114,50 @@ describe('/api/workspaces/:workspaceId/projects', () => {
           slug: 'billing',
         }),
       );
+    });
+
+    it('lets a Manager create a Project', async () => {
+      // Arrange
+      const owner = await signIn('ada@example.com');
+      const workspaceId = await createWorkspace(owner);
+      const bob = await join(owner, workspaceId, 'bob@example.com');
+      await app
+        .request()
+        .put(`${WORKSPACES_PATH}/${workspaceId}/members/${bob.memberId}/role`)
+        .set('Authorization', owner)
+        .send({ role: 'manager' })
+        .expect(HttpStatus.OK);
+
+      // Act
+      const response = app
+        .request()
+        .post(projectsPath(workspaceId))
+        .set('Authorization', bob.authorization)
+        .send({ name: 'Billing', slug: 'billing' });
+
+      // Assert
+      await response.expect(HttpStatus.CREATED);
+    });
+
+    it('rejects a Member without a Role', async () => {
+      // Arrange
+      const owner = await signIn('ada@example.com');
+      const workspaceId = await createWorkspace(owner);
+      const bob = await join(owner, workspaceId, 'bob@example.com');
+
+      // Act
+      const response = app
+        .request()
+        .post(projectsPath(workspaceId))
+        .set('Authorization', bob.authorization)
+        .send({ name: 'Billing', slug: 'billing' });
+
+      // Assert
+      await response
+        .expect(HttpStatus.FORBIDDEN)
+        .expect(res =>
+          expect(res.body.code).toBe('PROJECT_CREATION_FORBIDDEN'),
+        );
     });
 
     it('rejects a taken slug', async () => {

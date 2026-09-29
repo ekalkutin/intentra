@@ -10,6 +10,8 @@ export { LastOwnerCannotStepDownException } from './last-owner-cannot-step-down.
 export { MemberNotActiveException } from './member-not-active.exception.js';
 export { MemberNotInWorkspaceException } from './member-not-in-workspace.exception.js';
 export { NotWorkspaceOwnerException } from './not-workspace-owner.exception.js';
+export { ProjectCreationForbiddenException } from './project-creation-forbidden.exception.js';
+export { ProjectDeletionForbiddenException } from './project-deletion-forbidden.exception.js';
 export { ProjectSlugMismatchException } from './project-slug-mismatch.exception.js';
 export { UnknownInvitationStatusException } from './unknown-invitation-status.exception.js';
 export { UnknownMemberStatusException } from './unknown-member-status.exception.js';

@@ -32,6 +32,10 @@ export class Project extends Aggregate<ProjectId> {
     return this.#createdBy;
   }
 
+  public isCreatedBy(memberId: MemberId): boolean {
+    return this.#createdBy.equals(memberId);
+  }
+
   public static create(props: ProjectCreateProps): Project {
     return new Project(new ProjectId(), {
       workspaceId: new WorkspaceId(props.workspaceId),

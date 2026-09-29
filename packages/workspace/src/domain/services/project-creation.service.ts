@@ -2,7 +2,7 @@ import { Member, Project, Workspace } from '../entities/index.js';
 import {
   MemberNotActiveException,
   MemberNotInWorkspaceException,
-  NotWorkspaceOwnerException,
+  ProjectCreationForbiddenException,
 } from '../exceptions/index.js';
 
 export class ProjectCreationService {
@@ -17,8 +17,8 @@ export class ProjectCreationService {
     if (!creator.isActive()) {
       throw new MemberNotActiveException();
     }
-    if (!creator.isOwner()) {
-      throw new NotWorkspaceOwnerException();
+    if (!creator.isOwner() && !creator.isManager()) {
+      throw new ProjectCreationForbiddenException();
     }
 
     return Project.create({

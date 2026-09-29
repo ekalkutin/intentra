@@ -72,7 +72,7 @@ export class ProjectsService implements ProjectsApi {
     data: DeleteProjectDto,
   ): Promise<void> {
     const id = new WorkspaceId(workspaceId);
-    const owner = await this.accessResolver.resolve(actor, id);
+    const deleter = await this.accessResolver.resolve(actor, id);
 
     await this.unitOfWork.run(async () => {
       const workspace = await this.workspaceRepository.findOne({ id });
@@ -87,9 +87,14 @@ export class ProjectsService implements ProjectsApi {
         throw new ProjectNotFoundException();
       }
 
-      this.#projectDeletionService.ensureDeletable(workspace, owner, project, {
-        slug: data.slug,
-      });
+      this.#projectDeletionService.ensureDeletable(
+        workspace,
+        deleter,
+        project,
+        {
+          slug: data.slug,
+        },
+      );
       await this.projectRepository.delete(project.id);
     });
   }

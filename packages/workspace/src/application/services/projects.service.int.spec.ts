@@ -11,9 +11,11 @@ import {
 
 import { Member } from '../../domain/entities/index.js';
 import {
-  NotWorkspaceOwnerException,
+  ProjectCreationForbiddenException,
+  ProjectDeletionForbiddenException,
   ProjectSlugMismatchException,
 } from '../../domain/exceptions/index.js';
+import { Role } from '../../domain/value-objects/index.js';
 import { WorkspaceModule } from '../../workspace.module.js';
 import {
   ProjectNotFoundException,
@@ -48,13 +50,17 @@ describe('ProjectsService integration', () => {
     return workspace.id;
   }
 
-  async function addMember(workspaceId: string): Promise<Actor> {
+  async function addMember(
+    workspaceId: string,
+    role: Role | null = null,
+  ): Promise<Actor> {
     const joiner = actor();
     const member = Member.join({
       workspaceId,
       accountId: joiner.accountId,
       email: joiner.email,
     });
+    member.changeRole(role);
     await app.get(UnitOfWork).run(() => app.get(MemberRepository).save(member));
 
     return joiner;
@@ -90,7 +96,23 @@ describe('ProjectsService integration', () => {
         .create(member, workspaceId, { name: 'Billing', slug: 'billing' });
 
       // Assert
-      await expect(creation).rejects.toBeInstanceOf(NotWorkspaceOwnerException);
+      await expect(creation).rejects.toBeInstanceOf(
+        ProjectCreationForbiddenException,
+      );
+    });
+
+    it('lets a Manager create a Project', async () => {
+      // Arrange
+      const workspaceId = await createWorkspace(actor());
+      const manager = await addMember(workspaceId, Role.Manager);
+
+      // Act
+      const project = await app
+        .get(ProjectsService)
+        .create(manager, workspaceId, { name: 'Billing', slug: 'billing' });
+
+      // Assert
+      expect(project).toMatchObject({ name: 'Billing', slug: 'billing' });
     });
 
     it('hides the Workspace from an outsider', async () => {
@@ -236,6 +258,47 @@ describe('ProjectsService integration', () => {
       await expect(service.list(owner, workspaceId)).resolves.toEqual([
         project,
       ]);
+    });
+
+    it('lets a Manager delete a Project they created', async () => {
+      // Arrange
+      const workspaceId = await createWorkspace(actor());
+      const manager = await addMember(workspaceId, Role.Manager);
+      const service = app.get(ProjectsService);
+      const project = await service.create(manager, workspaceId, {
+        name: 'Billing',
+        slug: 'billing',
+      });
+
+      // Act
+      await service.delete(manager, workspaceId, project.id, {
+        slug: 'billing',
+      });
+
+      // Assert
+      await expect(service.list(manager, workspaceId)).resolves.toEqual([]);
+    });
+
+    it('rejects a Manager deleting a Project someone else created', async () => {
+      // Arrange
+      const owner = actor();
+      const workspaceId = await createWorkspace(owner);
+      const manager = await addMember(workspaceId, Role.Manager);
+      const service = app.get(ProjectsService);
+      const project = await service.create(owner, workspaceId, {
+        name: 'Billing',
+        slug: 'billing',
+      });
+
+      // Act
+      const deletion = service.delete(manager, workspaceId, project.id, {
+        slug: 'billing',
+      });
+
+      // Assert
+      await expect(deletion).rejects.toBeInstanceOf(
+        ProjectDeletionForbiddenException,
+      );
     });
 
     it('reports an unknown Project as not found', async () => {

@@ -4,40 +4,51 @@ import { AccountId } from '@intentra/shared-kernel';
 
 import { Member, Project, Workspace } from '../entities/index.js';
 import {
-  NotWorkspaceOwnerException,
+  ProjectDeletionForbiddenException,
   ProjectSlugMismatchException,
 } from '../exceptions/index.js';
+import { Role } from '../value-objects/index.js';
 
 import { ProjectDeletionService } from './project-deletion.service.js';
 import { WorkspaceCreationService } from './workspace-creation.service.js';
 
-function createWorkspace(): {
-  workspace: Workspace;
-  owner: Member;
-  project: Project;
-} {
-  const { workspace, owner } = new WorkspaceCreationService().create({
+function createWorkspace(): { workspace: Workspace; owner: Member } {
+  return new WorkspaceCreationService().create({
     name: 'Acme Corp',
     slug: 'acme-corp',
     accountId: new AccountId().value,
     email: 'ada@example.com',
   });
-  const project = Project.create({
+}
+
+function joinMember(workspace: Workspace, role: Role | null): Member {
+  const member = Member.join({
+    workspaceId: workspace.id.value,
+    accountId: new AccountId().value,
+    email: 'bob@example.com',
+  });
+  member.changeRole(role);
+
+  return member;
+}
+
+function createProject(workspace: Workspace, creator: Member): Project {
+  return Project.create({
     workspaceId: workspace.id.value,
     name: 'Billing',
     slug: 'billing',
-    createdBy: owner.id.value,
+    createdBy: creator.id.value,
   });
-
-  return { workspace, owner, project };
 }
 
 describe('ProjectDeletionService', () => {
   const service = new ProjectDeletionService();
 
-  it('lets the Owner delete after typing the slug', () => {
+  it('lets an Owner delete any Project after typing the slug', () => {
     // Arrange
-    const { workspace, owner, project } = createWorkspace();
+    const { workspace, owner } = createWorkspace();
+    const manager = joinMember(workspace, Role.Manager);
+    const project = createProject(workspace, manager);
 
     // Act
     const deleting = () =>
@@ -47,9 +58,53 @@ describe('ProjectDeletionService', () => {
     expect(deleting).not.toThrow();
   });
 
+  it('lets a Manager delete a Project they created', () => {
+    // Arrange
+    const { workspace } = createWorkspace();
+    const manager = joinMember(workspace, Role.Manager);
+    const project = createProject(workspace, manager);
+
+    // Act
+    const deleting = () =>
+      service.ensureDeletable(workspace, manager, project, { slug: 'billing' });
+
+    // Assert
+    expect(deleting).not.toThrow();
+  });
+
+  it('rejects a Manager deleting a Project someone else created', () => {
+    // Arrange
+    const { workspace, owner } = createWorkspace();
+    const manager = joinMember(workspace, Role.Manager);
+    const project = createProject(workspace, owner);
+
+    // Act
+    const deleting = () =>
+      service.ensureDeletable(workspace, manager, project, { slug: 'billing' });
+
+    // Assert
+    expect(deleting).toThrow(ProjectDeletionForbiddenException);
+  });
+
+  it('rejects the creator once they are no longer a Manager', () => {
+    // Arrange
+    const { workspace } = createWorkspace();
+    const creator = joinMember(workspace, Role.Manager);
+    const project = createProject(workspace, creator);
+    creator.changeRole(null);
+
+    // Act
+    const deleting = () =>
+      service.ensureDeletable(workspace, creator, project, { slug: 'billing' });
+
+    // Assert
+    expect(deleting).toThrow(ProjectDeletionForbiddenException);
+  });
+
   it('rejects a slug that does not match', () => {
     // Arrange
-    const { workspace, owner, project } = createWorkspace();
+    const { workspace, owner } = createWorkspace();
+    const project = createProject(workspace, owner);
 
     // Act
     const deleting = () =>
@@ -57,24 +112,5 @@ describe('ProjectDeletionService', () => {
 
     // Assert
     expect(deleting).toThrow(ProjectSlugMismatchException);
-  });
-
-  it('rejects a Contributor', () => {
-    // Arrange
-    const { workspace, project } = createWorkspace();
-    const contributor = Member.join({
-      workspaceId: workspace.id.value,
-      accountId: new AccountId().value,
-      email: 'bob@example.com',
-    });
-
-    // Act
-    const deleting = () =>
-      service.ensureDeletable(workspace, contributor, project, {
-        slug: 'billing',
-      });
-
-    // Assert
-    expect(deleting).toThrow(NotWorkspaceOwnerException);
   });
 });
