@@ -20,6 +20,7 @@ import {
   ListKnowledgeItemsDtoSchema,
   RecordKnowledgeItemDtoSchema,
   RejectKnowledgeItemDtoSchema,
+  RetireKnowledgeItemDtoSchema,
   WorkspaceApi,
   type ApproveKnowledgeItemDto,
   type CallerDto,
@@ -30,6 +31,7 @@ import {
   type ListKnowledgeItemsDto,
   type RecordKnowledgeItemDto,
   type RejectKnowledgeItemDto,
+  type RetireKnowledgeItemDto,
 } from '@intentra/contracts/workspace';
 
 import { ActorGuard, CurrentCaller } from '../auth/index.js';
@@ -142,6 +144,25 @@ export class KnowledgeController {
     data: RejectKnowledgeItemDto,
   ): Promise<KnowledgeItemDto> {
     return this.workspace.knowledge.reject(
+      caller,
+      workspaceId,
+      projectId,
+      key,
+      data,
+    );
+  }
+
+  @Post(':key/retire')
+  @HttpCode(HttpStatus.OK)
+  public async retire(
+    @CurrentCaller() caller: CallerDto,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Param('key') key: string,
+    @Body({ schema: RetireKnowledgeItemDtoSchema })
+    data: RetireKnowledgeItemDto,
+  ): Promise<KnowledgeItemDto> {
+    return this.workspace.knowledge.retire(
       caller,
       workspaceId,
       projectId,

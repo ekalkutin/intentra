@@ -9,6 +9,7 @@ import {
   listKnowledgeTool,
   listProjectsTool,
   rejectKnowledgeItemTool,
+  retireKnowledgeItemTool,
 } from './tools/index.js';
 
 /**
@@ -24,6 +25,7 @@ export const MCP_TOOLS = Object.fromEntries(
     ...KIND_TOOLS,
     approveKnowledgeItemTool,
     rejectKnowledgeItemTool,
+    retireKnowledgeItemTool,
     deleteKnowledgeDraftTool,
   ].map(tool => [tool.id, tool]),
 ) satisfies ToolsInput;

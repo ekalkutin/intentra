@@ -49,6 +49,7 @@ describe('KnowledgePolicyService', () => {
         synonymsToAvoid: [],
       }),
       authorId: new MemberId().value,
+      supersedes: null,
     });
 
     // Act

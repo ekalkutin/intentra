@@ -1,6 +1,9 @@
 import type { Member, Project, ProjectRole } from '../../../tenancy/index.js';
 import { KnowledgeItem } from '../entities/index.js';
-import { KnowledgeRecordingForbiddenException } from '../exceptions/index.js';
+import {
+  KnowledgeRecordingForbiddenException,
+  SupersededItemNotApprovedException,
+} from '../exceptions/index.js';
 import type {
   KnowledgeContent,
   KnowledgeSource,
@@ -11,7 +14,10 @@ import { KnowledgePolicyService } from './knowledge-policy.service.js';
 export class KnowledgeRecordingService {
   readonly #knowledgePolicyService = new KnowledgePolicyService();
 
-  /** A Contributor or Maintainer of the Project records a Draft, by hand or through an agent. */
+  /**
+   * A Contributor or Maintainer of the Project records a Draft, by hand or
+   * through an agent, possibly as the replacement of an Approved item.
+   */
   public record(
     project: Project,
     author: Member,
@@ -26,6 +32,9 @@ export class KnowledgeRecordingService {
     ) {
       throw new KnowledgeRecordingForbiddenException();
     }
+    if (props.replaced && !props.replaced.isApproved()) {
+      throw new SupersededItemNotApprovedException();
+    }
 
     return KnowledgeItem.record({
       workspaceId: project.workspaceId.value,
@@ -36,6 +45,7 @@ export class KnowledgeRecordingService {
       rationale: props.rationale,
       content: props.content,
       authorId: author.id.value,
+      supersedes: props.replaced?.key ?? null,
     });
   }
 }
@@ -46,4 +56,6 @@ type KnowledgeRecordingProps = {
   readonly title: string;
   readonly rationale: string | null;
   readonly content: KnowledgeContent;
+  /** The Approved item the Draft is to replace, if any. */
+  readonly replaced: KnowledgeItem | null;
 };

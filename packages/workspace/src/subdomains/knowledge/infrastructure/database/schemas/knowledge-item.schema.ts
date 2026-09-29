@@ -1,27 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-export type TermFieldsDocument = {
-  readonly definition: string;
-  readonly sort: string | null;
-  readonly synonymsToAvoid: string[];
-};
-
-export type RequirementFieldsDocument = {
-  readonly statement: string;
-  readonly type: string | null;
-  readonly priority: string | null;
-  readonly acceptanceCriteria: string[];
-};
-
-export type DecisionFieldsDocument = {
-  readonly decision: string;
-  readonly area: string | null;
-  readonly context: string | null;
-  readonly rejectedAlternatives: {
-    readonly alternative: string;
-    readonly reason: string | null;
-  }[];
-};
+import {
+  KnowledgeKind,
+  KnowledgeStatus,
+  type KnowledgeFields,
+} from '../../../domain/value-objects/index.js';
 
 @Schema({ collection: 'knowledge_items' })
 export class KnowledgeItemModel {
@@ -55,8 +38,7 @@ export class KnowledgeItemModel {
 
   /** The fields of the Kind, shaped by `kind`. */
   @Prop({ type: Object, required: true })
-  readonly fields:
-    TermFieldsDocument | RequirementFieldsDocument | DecisionFieldsDocument;
+  readonly fields: KnowledgeFields;
 
   @Prop({ type: String, required: true })
   readonly authorId: string;
@@ -85,6 +67,28 @@ export class KnowledgeItemModel {
   @Prop({ type: String, default: null })
   readonly rejectionReason: string | null;
 
+  /** The Knowledge Key of the item it replaces once approved. */
+  @Prop({ type: String, default: null })
+  readonly supersedes: string | null;
+
+  @Prop({ type: String, default: null })
+  readonly supersededBy: string | null;
+
+  @Prop({ type: Date, default: null })
+  readonly supersededAt: Date | null;
+
+  @Prop({ type: String, default: null })
+  readonly supersededByKey: string | null;
+
+  @Prop({ type: String, default: null })
+  readonly retiredBy: string | null;
+
+  @Prop({ type: Date, default: null })
+  readonly retiredAt: Date | null;
+
+  @Prop({ type: String, default: null })
+  readonly retirementReason: string | null;
+
   @Prop({ type: Number, required: true })
   readonly version: number;
 }
@@ -96,4 +100,16 @@ export const KnowledgeItemSchema =
 KnowledgeItemSchema.index(
   { projectId: 1, kind: 1, number: 1 },
   { unique: true },
+);
+
+/** A Project has one Approved Product Overview, even when two approvals race. */
+KnowledgeItemSchema.index(
+  { projectId: 1, kind: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      kind: KnowledgeKind.ProductOverview.value,
+      status: KnowledgeStatus.Approved.value,
+    },
+  },
 );

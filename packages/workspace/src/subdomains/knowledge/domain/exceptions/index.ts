@@ -8,11 +8,16 @@ export { InvalidKnowledgeKeyException } from './invalid-knowledge-key.exception.
 export { InvalidKnowledgeTitleException } from './invalid-knowledge-title.exception.js';
 export { InvalidRationaleException } from './invalid-rationale.exception.js';
 export { InvalidRejectionReasonException } from './invalid-rejection-reason.exception.js';
+export { InvalidRetirementReasonException } from './invalid-retirement-reason.exception.js';
 export { KnowledgeItemChangedException } from './knowledge-item-changed.exception.js';
+export { KnowledgeItemNotApprovedException } from './knowledge-item-not-approved.exception.js';
 export { KnowledgeItemNotDraftException } from './knowledge-item-not-draft.exception.js';
 export { KnowledgeKindMismatchException } from './knowledge-kind-mismatch.exception.js';
 export { KnowledgeRecordingForbiddenException } from './knowledge-recording-forbidden.exception.js';
+export { KnowledgeRetirementForbiddenException } from './knowledge-retirement-forbidden.exception.js';
+export { ProductOverviewAlreadyApprovedException } from './product-overview-already-approved.exception.js';
 export { RationaleRequiredException } from './rationale-required.exception.js';
+export { SupersededItemNotApprovedException } from './superseded-item-not-approved.exception.js';
 export { UnknownKnowledgeKindException } from './unknown-knowledge-kind.exception.js';
 export { UnknownKnowledgeSourceException } from './unknown-knowledge-source.exception.js';
 export { UnknownKnowledgeStatusException } from './unknown-knowledge-status.exception.js';

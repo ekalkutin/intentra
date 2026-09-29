@@ -1,9 +1,17 @@
 import { z } from 'zod';
 
 export const KnowledgeKindDtoSchema = z.enum([
-  'term',
+  'product-overview',
+  'goal',
+  'persona',
+  'scenario',
   'requirement',
+  'constraint',
+  'term',
+  'business-rule',
+  'integration',
   'decision',
+  'open-question',
 ]);
 
 export type KnowledgeKindDto = z.infer<typeof KnowledgeKindDtoSchema>;
@@ -12,6 +20,7 @@ export const KnowledgeStatusDtoSchema = z.enum([
   'draft',
   'approved',
   'rejected',
+  'obsolete',
 ]);
 
 export type KnowledgeStatusDto = z.infer<typeof KnowledgeStatusDtoSchema>;

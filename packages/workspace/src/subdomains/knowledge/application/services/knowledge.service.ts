@@ -11,6 +11,7 @@ import type {
   ListKnowledgeItemsDto,
   RecordKnowledgeItemDto,
   RejectKnowledgeItemDto,
+  RetireKnowledgeItemDto,
 } from '@intentra/contracts/workspace';
 import { ProjectId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
@@ -26,6 +27,7 @@ import {
   DraftEditingService,
   DraftRejectionService,
   KnowledgeRecordingService,
+  KnowledgeRetirementService,
 } from '../../domain/services/index.js';
 import {
   KnowledgeItemVersion,
@@ -58,6 +60,7 @@ export class KnowledgeService implements KnowledgeApi {
   readonly #draftDeletionService = new DraftDeletionService();
   readonly #draftApprovalService = new DraftApprovalService();
   readonly #draftRejectionService = new DraftRejectionService();
+  readonly #knowledgeRetirementService = new KnowledgeRetirementService();
 
   constructor(
     private readonly unitOfWork: UnitOfWork,
@@ -79,6 +82,10 @@ export class KnowledgeService implements KnowledgeApi {
         projectId,
       );
       const content = toKnowledgeContent(data);
+      const replaced =
+        data.supersedes === null
+          ? null
+          : await this.getItem(project.id, data.supersedes);
       const number = await this.knowledgeKeyCounter.next({
         workspaceId: project.workspaceId,
         projectId: project.id,
@@ -97,6 +104,7 @@ export class KnowledgeService implements KnowledgeApi {
           title: data.title,
           rationale: data.rationale,
           content,
+          replaced,
         },
       );
       await this.knowledgeItemRepository.save(item);
@@ -226,13 +234,34 @@ export class KnowledgeService implements KnowledgeApi {
         projectId,
       );
       const item = await this.getItem(project.id, key);
+      const replaced =
+        item.supersedes &&
+        (await this.knowledgeItemRepository.findOne({
+          projectId: project.id,
+          key: item.supersedes,
+        }));
+      const approvedProductOverview = item.kind.equals(
+        KnowledgeKind.ProductOverview,
+      )
+        ? await this.knowledgeItemRepository.findOne({
+            projectId: project.id,
+            kind: KnowledgeKind.ProductOverview,
+            statuses: [KnowledgeStatus.Approved],
+          })
+        : null;
 
       this.#draftApprovalService.approve(
         member,
         projectRole,
         item,
         new KnowledgeItemVersion(data.version),
+        { replaced, approvedProductOverview },
       );
+      // The replaced item first: a Project's one-Approved rules are unique
+      // indexes, checked write by write even inside the transaction.
+      if (replaced) {
+        await this.knowledgeItemRepository.save(replaced);
+      }
       await this.knowledgeItemRepository.save(item);
 
       return toKnowledgeItemDto(item, projectRole);
@@ -255,6 +284,34 @@ export class KnowledgeService implements KnowledgeApi {
       const item = await this.getItem(project.id, key);
 
       this.#draftRejectionService.reject(
+        member,
+        projectRole,
+        item,
+        new KnowledgeItemVersion(data.version),
+        data.reason,
+      );
+      await this.knowledgeItemRepository.save(item);
+
+      return toKnowledgeItemDto(item, projectRole);
+    });
+  }
+
+  public async retire(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    key: string,
+    data: RetireKnowledgeItemDto,
+  ): Promise<KnowledgeItemDto> {
+    return this.unitOfWork.run(async () => {
+      const { member, project, projectRole } = await this.resolve(
+        caller,
+        workspaceId,
+        projectId,
+      );
+      const item = await this.getItem(project.id, key);
+
+      this.#knowledgeRetirementService.retire(
         member,
         projectRole,
         item,

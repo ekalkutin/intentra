@@ -23,3 +23,12 @@ export const RejectKnowledgeItemDtoSchema = z.object({
 export type RejectKnowledgeItemDto = z.infer<
   typeof RejectKnowledgeItemDtoSchema
 >;
+
+export const RetireKnowledgeItemDtoSchema = z.object({
+  version,
+  reason: z.string().nullable().default(null),
+});
+
+export type RetireKnowledgeItemDto = z.infer<
+  typeof RetireKnowledgeItemDtoSchema
+>;

@@ -12,19 +12,11 @@ import {
 } from '../../../application/ports/outbound/index.js';
 import { KnowledgeItem } from '../../../domain/entities/index.js';
 import {
-  DecisionContent,
+  createKnowledgeContent,
   KnowledgeKind,
-  RequirementContent,
-  TermContent,
-  type KnowledgeContent,
   type KnowledgeItemId,
 } from '../../../domain/value-objects/index.js';
-import {
-  KnowledgeItemModel,
-  type DecisionFieldsDocument,
-  type RequirementFieldsDocument,
-  type TermFieldsDocument,
-} from '../../database/index.js';
+import { KnowledgeItemModel } from '../../database/index.js';
 
 @Injectable()
 export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
@@ -49,7 +41,7 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
           status: item.status.value,
           source: item.source.value,
           rationale: item.rationale?.value ?? null,
-          fields: toFieldsDocument(item.content),
+          fields: item.content.toFields(),
           authorId: item.authorId.value,
           recordedAt: toDate(item.recordedAt),
           lastEditedBy: item.lastEditedBy?.value ?? null,
@@ -59,6 +51,13 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
           rejectedBy: item.rejectedBy?.value ?? null,
           rejectedAt: item.rejectedAt && toDate(item.rejectedAt),
           rejectionReason: item.rejectionReason?.value ?? null,
+          supersedes: item.supersedes?.value ?? null,
+          supersededBy: item.supersededBy?.value ?? null,
+          supersededAt: item.supersededAt && toDate(item.supersededAt),
+          supersededByKey: item.supersededByKey?.value ?? null,
+          retiredBy: item.retiredBy?.value ?? null,
+          retiredAt: item.retiredAt && toDate(item.retiredAt),
+          retirementReason: item.retirementReason?.value ?? null,
           version: item.version.value,
         },
         { upsert: true, session: this.unitOfWork.requireSession() },
@@ -143,7 +142,10 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
       status: document.status,
       source: document.source,
       rationale: document.rationale,
-      content: toContent(KnowledgeKind.from(document.kind), document.fields),
+      content: createKnowledgeContent(
+        KnowledgeKind.from(document.kind),
+        document.fields,
+      ),
       authorId: document.authorId,
       recordedAt: toInstant(document.recordedAt),
       lastEditedBy: document.lastEditedBy,
@@ -153,55 +155,16 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
       rejectedBy: document.rejectedBy,
       rejectedAt: document.rejectedAt && toInstant(document.rejectedAt),
       rejectionReason: document.rejectionReason,
+      supersedes: document.supersedes,
+      supersededBy: document.supersededBy,
+      supersededAt: document.supersededAt && toInstant(document.supersededAt),
+      supersededByKey: document.supersededByKey,
+      retiredBy: document.retiredBy,
+      retiredAt: document.retiredAt && toInstant(document.retiredAt),
+      retirementReason: document.retirementReason,
       version: document.version,
     });
   }
-}
-
-function toFieldsDocument(
-  content: KnowledgeContent,
-): TermFieldsDocument | RequirementFieldsDocument | DecisionFieldsDocument {
-  if (content instanceof TermContent) {
-    return {
-      definition: content.definition.value,
-      sort: content.sort?.value ?? null,
-      synonymsToAvoid: content.synonymsToAvoid.map(synonym => synonym.value),
-    };
-  }
-  if (content instanceof RequirementContent) {
-    return {
-      statement: content.statement.value,
-      type: content.type?.value ?? null,
-      priority: content.priority?.value ?? null,
-      acceptanceCriteria: content.acceptanceCriteria.map(
-        criterion => criterion.value,
-      ),
-    };
-  }
-
-  return {
-    decision: content.decision.value,
-    area: content.area?.value ?? null,
-    context: content.context?.value ?? null,
-    rejectedAlternatives: content.rejectedAlternatives.map(alternative => ({
-      alternative: alternative.alternative.value,
-      reason: alternative.reason?.value ?? null,
-    })),
-  };
-}
-
-function toContent(
-  kind: KnowledgeKind,
-  fields: KnowledgeItemModel['fields'],
-): KnowledgeContent {
-  if (kind.equals(KnowledgeKind.Term)) {
-    return new TermContent(fields as TermFieldsDocument);
-  }
-  if (kind.equals(KnowledgeKind.Requirement)) {
-    return new RequirementContent(fields as RequirementFieldsDocument);
-  }
-
-  return new DecisionContent(fields as DecisionFieldsDocument);
 }
 
 function toDate(instant: Temporal.Instant): Date {

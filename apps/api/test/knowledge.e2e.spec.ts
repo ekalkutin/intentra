@@ -367,6 +367,70 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
     expect(response.body.code).toBe('DRAFT_APPROVAL_FORBIDDEN');
   });
 
+  it('replaces an Approved item, then retires the replacement', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send(requirement)
+      .expect(HttpStatus.CREATED);
+    await app
+      .request()
+      .post(`${path}/REQ-1/approve`)
+      .set('Authorization', ada)
+      .send({ version: 1 })
+      .expect(HttpStatus.OK);
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send({
+        ...requirement,
+        supersedes: 'REQ-1',
+        fields: { statement: 'Export a report to PDF and CSV' },
+      })
+      .expect(HttpStatus.CREATED);
+
+    // Act
+    const replacing = await app
+      .request()
+      .post(`${path}/REQ-2/approve`)
+      .set('Authorization', ada)
+      .send({ version: 1 });
+    const retiring = await app
+      .request()
+      .post(`${path}/REQ-2/retire`)
+      .set('Authorization', ada)
+      .send({ version: 2, reason: 'Printing was dropped' });
+
+    // Assert
+    expect(replacing.status).toBe(HttpStatus.OK);
+    expect(retiring.status).toBe(HttpStatus.OK);
+    expect(retiring.body).toMatchObject({
+      status: 'obsolete',
+      supersedes: 'REQ-1',
+      retirementReason: 'Printing was dropped',
+    });
+    const replaced = await app
+      .request()
+      .get(`${path}/REQ-1`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(replaced.body).toMatchObject({
+      status: 'obsolete',
+      supersededByKey: 'REQ-2',
+    });
+    const listed = await app
+      .request()
+      .get(path)
+      .query({ statuses: 'obsolete' })
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(listed.body.total).toBe(2);
+  });
+
   it('rejects a malformed Knowledge Key', async () => {
     // Arrange
     const { ada, path } = await setUp();

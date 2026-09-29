@@ -1,10 +1,6 @@
 import { z } from 'zod';
 
-import {
-  DecisionFieldsDtoSchema,
-  RequirementFieldsDtoSchema,
-  TermFieldsDtoSchema,
-} from './knowledge-fields.dto.js';
+import { KNOWLEDGE_FIELDS_DTO_SCHEMAS } from './knowledge-fields.dto.js';
 
 const frame = {
   /** The version the client last saw (409 `KNOWLEDGE_ITEM_CHANGED` if it is not the current one). */
@@ -14,27 +10,31 @@ const frame = {
   rationale: z.string().nullable().optional(),
 };
 
+function editing<K extends keyof typeof KNOWLEDGE_FIELDS_DTO_SCHEMAS>(kind: K) {
+  return z.object({
+    kind: z.literal(kind),
+    ...frame,
+    fields: KNOWLEDGE_FIELDS_DTO_SCHEMAS[kind].optional(),
+  });
+}
+
 /**
  * Changes a Draft; what is left out stays as it is, and `fields` replaces all
  * of them. `kind` must be the Draft's own Kind, which never changes
  * (400 `KNOWLEDGE_KIND_MISMATCH`).
  */
 export const EditKnowledgeItemDtoSchema = z.discriminatedUnion('kind', [
-  z.object({
-    kind: z.literal('term'),
-    ...frame,
-    fields: TermFieldsDtoSchema.optional(),
-  }),
-  z.object({
-    kind: z.literal('requirement'),
-    ...frame,
-    fields: RequirementFieldsDtoSchema.optional(),
-  }),
-  z.object({
-    kind: z.literal('decision'),
-    ...frame,
-    fields: DecisionFieldsDtoSchema.optional(),
-  }),
+  editing('product-overview'),
+  editing('goal'),
+  editing('persona'),
+  editing('scenario'),
+  editing('requirement'),
+  editing('constraint'),
+  editing('term'),
+  editing('business-rule'),
+  editing('integration'),
+  editing('decision'),
+  editing('open-question'),
 ]);
 
 export type EditKnowledgeItemDto = z.infer<typeof EditKnowledgeItemDtoSchema>;

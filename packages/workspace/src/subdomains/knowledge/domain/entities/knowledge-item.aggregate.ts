@@ -3,9 +3,11 @@ import { Aggregate, ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 import { MemberId } from '../../../tenancy/index.js';
 import {
   KnowledgeItemChangedException,
+  KnowledgeItemNotApprovedException,
   KnowledgeItemNotDraftException,
   KnowledgeKindMismatchException,
   RationaleRequiredException,
+  SupersededItemNotApprovedException,
 } from '../exceptions/index.js';
 import {
   KnowledgeItemId,
@@ -17,13 +19,15 @@ import {
   KnowledgeTitle,
   Rationale,
   RejectionReason,
+  RetirementReason,
   type KnowledgeContent,
 } from '../value-objects/index.js';
 
 /**
  * One piece of what is known about a Project. Its Kind comes with its
- * Knowledge Key and never changes. Only a Draft changes, and only on the
- * version its author last saw.
+ * Knowledge Key and never changes. A Draft changes freely; an Approved item
+ * only becomes Obsolete, by Supersession or Retirement. Every change is made
+ * on the version its author last saw.
  */
 export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   readonly #workspaceId: WorkspaceId;
@@ -43,6 +47,13 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   #rejectedBy: MemberId | null;
   #rejectedAt: Temporal.Instant | null;
   #rejectionReason: RejectionReason | null;
+  readonly #supersedes: KnowledgeKey | null;
+  #supersededBy: MemberId | null;
+  #supersededAt: Temporal.Instant | null;
+  #supersededByKey: KnowledgeKey | null;
+  #retiredBy: MemberId | null;
+  #retiredAt: Temporal.Instant | null;
+  #retirementReason: RetirementReason | null;
   #version: KnowledgeItemVersion;
 
   private constructor(id: KnowledgeItemId, state: KnowledgeItemState) {
@@ -64,6 +75,13 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     this.#rejectedBy = state.rejectedBy;
     this.#rejectedAt = state.rejectedAt;
     this.#rejectionReason = state.rejectionReason;
+    this.#supersedes = state.supersedes;
+    this.#supersededBy = state.supersededBy;
+    this.#supersededAt = state.supersededAt;
+    this.#supersededByKey = state.supersededByKey;
+    this.#retiredBy = state.retiredBy;
+    this.#retiredAt = state.retiredAt;
+    this.#retirementReason = state.retirementReason;
     this.#version = state.version;
   }
 
@@ -147,6 +165,41 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     return this.#rejectionReason;
   }
 
+  /** The Approved item of the same Kind this one replaces once approved, if any. */
+  get supersedes(): KnowledgeKey | null {
+    return this.#supersedes;
+  }
+
+  /** Null unless replaced: who approved the replacement. */
+  get supersededBy(): MemberId | null {
+    return this.#supersededBy;
+  }
+
+  /** Null unless replaced. */
+  get supersededAt(): Temporal.Instant | null {
+    return this.#supersededAt;
+  }
+
+  /** Null unless replaced. */
+  get supersededByKey(): KnowledgeKey | null {
+    return this.#supersededByKey;
+  }
+
+  /** Null unless retired. */
+  get retiredBy(): MemberId | null {
+    return this.#retiredBy;
+  }
+
+  /** Null unless retired. */
+  get retiredAt(): Temporal.Instant | null {
+    return this.#retiredAt;
+  }
+
+  /** Null unless retired with a reason. */
+  get retirementReason(): RetirementReason | null {
+    return this.#retirementReason;
+  }
+
   get version(): KnowledgeItemVersion {
     return this.#version;
   }
@@ -155,10 +208,17 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     return this.#status.equals(KnowledgeStatus.Draft);
   }
 
+  public isApproved(): boolean {
+    return this.#status.equals(KnowledgeStatus.Approved);
+  }
+
   /** Records a Draft; its Kind is the Kind of its content. */
   public static record(props: KnowledgeItemRecordProps): KnowledgeItem {
     if (props.source.requiresRationale() && props.rationale === null) {
       throw new RationaleRequiredException();
+    }
+    if (props.supersedes && !props.supersedes.kind.equals(props.content.kind)) {
+      throw new KnowledgeKindMismatchException();
     }
 
     return new KnowledgeItem(new KnowledgeItemId(), {
@@ -180,6 +240,13 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
       rejectedBy: null,
       rejectedAt: null,
       rejectionReason: null,
+      supersedes: props.supersedes,
+      supersededBy: null,
+      supersededAt: null,
+      supersededByKey: null,
+      retiredBy: null,
+      retiredAt: null,
+      retirementReason: null,
       version: KnowledgeItemVersion.First,
     });
   }
@@ -209,6 +276,13 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
       rejectedBy: toMemberId(props.rejectedBy),
       rejectedAt: props.rejectedAt,
       rejectionReason: RejectionReason.optional(props.rejectionReason),
+      supersedes: toKey(props.supersedes),
+      supersededBy: toMemberId(props.supersededBy),
+      supersededAt: props.supersededAt,
+      supersededByKey: toKey(props.supersededByKey),
+      retiredBy: toMemberId(props.retiredBy),
+      retiredAt: props.retiredAt,
+      retirementReason: RetirementReason.optional(props.retirementReason),
       version: new KnowledgeItemVersion(props.version),
     });
   }
@@ -272,10 +346,46 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     this.#ensureChangeable(seenVersion);
   }
 
+  /** Its replacement was approved: it becomes Obsolete, "superseded by" the replacement. */
+  public becomeSupersededBy(
+    replacementKey: KnowledgeKey,
+    approverId: MemberId,
+  ): void {
+    if (!this.isApproved()) {
+      throw new SupersededItemNotApprovedException();
+    }
+    this.#status = KnowledgeStatus.Obsolete;
+    this.#supersededBy = approverId;
+    this.#supersededAt = Temporal.Now.instant();
+    this.#supersededByKey = replacementKey;
+    this.#version = this.#version.next();
+  }
+
+  /** A person marks it Obsolete with nothing to replace it; a blank reason means none. */
+  public retire(
+    retirerId: MemberId,
+    seenVersion: KnowledgeItemVersion,
+    reason: string | null,
+  ): void {
+    if (!this.isApproved()) {
+      throw new KnowledgeItemNotApprovedException();
+    }
+    this.#ensureSeen(seenVersion);
+    this.#status = KnowledgeStatus.Obsolete;
+    this.#retiredBy = retirerId;
+    this.#retiredAt = Temporal.Now.instant();
+    this.#retirementReason = RetirementReason.optional(reason);
+    this.#version = this.#version.next();
+  }
+
   #ensureChangeable(seenVersion: KnowledgeItemVersion): void {
     if (!this.isDraft()) {
       throw new KnowledgeItemNotDraftException();
     }
+    this.#ensureSeen(seenVersion);
+  }
+
+  #ensureSeen(seenVersion: KnowledgeItemVersion): void {
     if (!seenVersion.equals(this.#version)) {
       throw new KnowledgeItemChangedException();
     }
@@ -284,6 +394,10 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
 
 function toMemberId(value: string | null): MemberId | null {
   return value === null ? null : new MemberId(value);
+}
+
+function toKey(value: string | null): KnowledgeKey | null {
+  return value === null ? null : KnowledgeKey.parse(value);
 }
 
 type KnowledgeItemState = {
@@ -304,6 +418,13 @@ type KnowledgeItemState = {
   readonly rejectedBy: MemberId | null;
   readonly rejectedAt: Temporal.Instant | null;
   readonly rejectionReason: RejectionReason | null;
+  readonly supersedes: KnowledgeKey | null;
+  readonly supersededBy: MemberId | null;
+  readonly supersededAt: Temporal.Instant | null;
+  readonly supersededByKey: KnowledgeKey | null;
+  readonly retiredBy: MemberId | null;
+  readonly retiredAt: Temporal.Instant | null;
+  readonly retirementReason: RetirementReason | null;
   readonly version: KnowledgeItemVersion;
 };
 type KnowledgeItemRecordProps = {
@@ -316,6 +437,8 @@ type KnowledgeItemRecordProps = {
   readonly rationale: string | null;
   readonly content: KnowledgeContent;
   readonly authorId: string;
+  /** The Approved item of the same Kind it replaces once approved, if any. */
+  readonly supersedes: KnowledgeKey | null;
 };
 type KnowledgeItemRestoreProps = {
   readonly id: string;
@@ -337,6 +460,13 @@ type KnowledgeItemRestoreProps = {
   readonly rejectedBy: string | null;
   readonly rejectedAt: Temporal.Instant | null;
   readonly rejectionReason: string | null;
+  readonly supersedes: string | null;
+  readonly supersededBy: string | null;
+  readonly supersededAt: Temporal.Instant | null;
+  readonly supersededByKey: string | null;
+  readonly retiredBy: string | null;
+  readonly retiredAt: Temporal.Instant | null;
+  readonly retirementReason: string | null;
   readonly version: number;
 };
 /** What to change; a field left out stays as it is, a null rationale clears it. */

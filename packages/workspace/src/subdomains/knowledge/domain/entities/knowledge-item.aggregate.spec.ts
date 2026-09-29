@@ -6,13 +6,16 @@ import { MemberId } from '../../../tenancy/index.js';
 import {
   InvalidKnowledgeTitleException,
   KnowledgeItemChangedException,
+  KnowledgeItemNotApprovedException,
   KnowledgeItemNotDraftException,
   KnowledgeKindMismatchException,
   RationaleRequiredException,
+  SupersededItemNotApprovedException,
 } from '../exceptions/index.js';
 import {
   DecisionContent,
   KnowledgeItemVersion,
+  KnowledgeKey,
   KnowledgeKind,
   KnowledgeSource,
   KnowledgeStatus,
@@ -35,6 +38,7 @@ function recordTerm(authorId = new MemberId()): KnowledgeItem {
     rationale: null,
     content: term('An offer to join a Workspace'),
     authorId: authorId.value,
+    supersedes: null,
   });
 }
 
@@ -70,6 +74,7 @@ describe('KnowledgeItem', () => {
           rationale: null,
           content: term('An offer to join a Workspace'),
           authorId: new MemberId().value,
+          supersedes: null,
         });
 
       // Assert
@@ -88,6 +93,7 @@ describe('KnowledgeItem', () => {
           rationale: null,
           content: term('An offer to join a Workspace'),
           authorId: new MemberId().value,
+          supersedes: null,
         });
 
       // Assert
@@ -255,6 +261,90 @@ describe('KnowledgeItem', () => {
       for (const change of changes) {
         expect(change).toThrow(KnowledgeItemNotDraftException);
       }
+    });
+  });
+
+  describe('supersession', () => {
+    it('refuses to replace an item of another Kind', () => {
+      // Act
+      const recording = () =>
+        KnowledgeItem.record({
+          workspaceId: new WorkspaceId().value,
+          projectId: new ProjectId().value,
+          source: KnowledgeSource.Manual,
+          number: 4,
+          title: 'Invitation',
+          rationale: null,
+          content: term('An offer to join a Workspace'),
+          authorId: new MemberId().value,
+          supersedes: KnowledgeKey.parse('REQ-1'),
+        });
+
+      // Assert
+      expect(recording).toThrow(KnowledgeKindMismatchException);
+    });
+
+    it('makes an Approved item Obsolete, superseded by its replacement', () => {
+      // Arrange
+      const approverId = new MemberId();
+      const item = recordTerm();
+      item.approve(new MemberId(), KnowledgeItemVersion.First);
+
+      // Act
+      item.becomeSupersededBy(KnowledgeKey.parse('TERM-9'), approverId);
+
+      // Assert
+      expect(item.status).toBe(KnowledgeStatus.Obsolete);
+      expect(item.supersededByKey?.value).toBe('TERM-9');
+      expect(item.supersededBy?.equals(approverId)).toBe(true);
+      expect(item.supersededAt).not.toBeNull();
+      expect(item.version.value).toBe(3);
+    });
+
+    it('refuses to replace an item that is not Approved', () => {
+      // Arrange
+      const item = recordTerm();
+
+      // Act
+      const superseding = () =>
+        item.becomeSupersededBy(KnowledgeKey.parse('TERM-9'), new MemberId());
+
+      // Assert
+      expect(superseding).toThrow(SupersededItemNotApprovedException);
+    });
+  });
+
+  describe('retire', () => {
+    it('makes an Approved item Obsolete with nothing to replace it', () => {
+      // Arrange
+      const retirerId = new MemberId();
+      const item = recordTerm();
+      item.approve(new MemberId(), KnowledgeItemVersion.First);
+
+      // Act
+      item.retire(retirerId, item.version, 'Invitations were dropped');
+
+      // Assert
+      expect(item.status).toBe(KnowledgeStatus.Obsolete);
+      expect(item.retiredBy?.equals(retirerId)).toBe(true);
+      expect(item.retirementReason?.value).toBe('Invitations were dropped');
+    });
+
+    it('refuses a Draft and an older version', () => {
+      // Arrange
+      const draft = recordTerm();
+      const approved = recordTerm();
+      approved.approve(new MemberId(), KnowledgeItemVersion.First);
+
+      // Act
+      const retiringDraft = () =>
+        draft.retire(new MemberId(), KnowledgeItemVersion.First, null);
+      const retiringStale = () =>
+        approved.retire(new MemberId(), KnowledgeItemVersion.First, null);
+
+      // Assert
+      expect(retiringDraft).toThrow(KnowledgeItemNotApprovedException);
+      expect(retiringStale).toThrow(KnowledgeItemChangedException);
     });
   });
 });

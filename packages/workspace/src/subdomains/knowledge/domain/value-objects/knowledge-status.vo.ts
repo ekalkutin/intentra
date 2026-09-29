@@ -5,11 +5,13 @@ export class KnowledgeStatus {
   public static readonly Draft = new KnowledgeStatus('draft');
   public static readonly Approved = new KnowledgeStatus('approved');
   public static readonly Rejected = new KnowledgeStatus('rejected');
+  public static readonly Obsolete = new KnowledgeStatus('obsolete');
 
   static readonly #all: readonly KnowledgeStatus[] = [
     KnowledgeStatus.Draft,
     KnowledgeStatus.Approved,
     KnowledgeStatus.Rejected,
+    KnowledgeStatus.Obsolete,
   ];
 
   readonly #value: string;

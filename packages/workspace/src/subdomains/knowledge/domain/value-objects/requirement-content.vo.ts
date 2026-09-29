@@ -10,7 +10,7 @@ export class RequirementContent {
   readonly #priority: RequirementPriority | null;
   readonly #acceptanceCriteria: readonly KnowledgeText[];
 
-  constructor(props: RequirementContentProps) {
+  constructor(props: RequirementFields) {
     this.#statement = new KnowledgeText(props.statement);
     this.#type = props.type === null ? null : RequirementType.from(props.type);
     this.#priority =
@@ -44,9 +44,20 @@ export class RequirementContent {
   get acceptanceCriteria(): readonly KnowledgeText[] {
     return this.#acceptanceCriteria;
   }
+
+  public toFields(): RequirementFields {
+    return {
+      statement: this.#statement.value,
+      type: this.#type?.value ?? null,
+      priority: this.#priority?.value ?? null,
+      acceptanceCriteria: this.#acceptanceCriteria.map(
+        criterion => criterion.value,
+      ),
+    };
+  }
 }
 
-type RequirementContentProps = {
+export type RequirementFields = {
   readonly statement: string;
   readonly type: string | null;
   readonly priority: string | null;

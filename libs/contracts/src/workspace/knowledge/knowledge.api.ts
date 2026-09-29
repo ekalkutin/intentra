@@ -5,6 +5,7 @@ import type {
   ApproveKnowledgeItemDto,
   DeleteKnowledgeItemDto,
   RejectKnowledgeItemDto,
+  RetireKnowledgeItemDto,
 } from './knowledge-item-change.dto.js';
 import type {
   KnowledgeItemDto,
@@ -19,9 +20,11 @@ import type { RecordKnowledgeItemDto } from './record-knowledge-item.dto.js';
  * Member reads. An external agent may do what the lower of its token's level
  * and the Member's Project Role allows, and what it records must carry a
  * rationale. A Knowledge Item is addressed by its Knowledge Key, such as
- * `REQ-12`. Every change but a recording applies only to a Draft
- * (409 `KNOWLEDGE_ITEM_NOT_DRAFT`) and only to the version the client saw
- * (409 `KNOWLEDGE_ITEM_CHANGED`).
+ * `REQ-12`. Every change but a recording or a retirement applies only to a
+ * Draft (409 `KNOWLEDGE_ITEM_NOT_DRAFT`), and every one only to the version
+ * the client saw (409 `KNOWLEDGE_ITEM_CHANGED`). An Approved item changes only
+ * by Supersession (approving a Draft recorded with `supersedes`) or
+ * Retirement.
  */
 export abstract class KnowledgeApi {
   abstract record(
@@ -64,6 +67,7 @@ export abstract class KnowledgeApi {
     data: DeleteKnowledgeItemDto,
   ): Promise<void>;
 
+  /** Approving a Draft that `supersedes` an item also makes that item Obsolete. */
   abstract approve(
     caller: CallerDto,
     workspaceId: string,
@@ -78,5 +82,14 @@ export abstract class KnowledgeApi {
     projectId: string,
     key: string,
     data: RejectKnowledgeItemDto,
+  ): Promise<KnowledgeItemDto>;
+
+  /** Marks an Approved item Obsolete with nothing to replace it. Maintainers only. */
+  abstract retire(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    key: string,
+    data: RetireKnowledgeItemDto,
   ): Promise<KnowledgeItemDto>;
 }

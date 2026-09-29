@@ -69,7 +69,7 @@ A Knowledge Item that is no longer true for the Project. It becomes Obsolete onl
 _Avoid_: Deprecated, Outdated, Archived
 
 **Supersession**:
-Approving a new Knowledge Item of the same Kind in place of an Approved one. The old one becomes Obsolete at that moment and is "superseded by" the new one.
+Approving a new Knowledge Item of the same Kind in place of an Approved one. The old one becomes Obsolete at that moment and is "superseded by" the new one. The new one names the item it replaces from the moment it is recorded, as a Draft, so anyone who may record Drafts can propose a replacement, while approving it stays a Maintainer's. If the item it replaces is no longer Approved by then (another replacement was approved first, or it was retired), the approval is refused rather than aimed at the newer item. A Project has one Approved Product Overview, which changes only this way.
 _Avoid_: Replacement, New version
 
 **Retirement**:

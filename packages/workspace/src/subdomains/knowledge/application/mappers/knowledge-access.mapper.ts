@@ -11,12 +11,17 @@ import { KnowledgeKind } from '../../domain/value-objects/index.js';
 
 const knowledgePolicyService = new KnowledgePolicyService();
 
-/** Whether they may, and whether the Knowledge Item, only a Draft, can change at all. */
+/**
+ * Whether they may, and whether the Knowledge Item can change that way at
+ * all: only a Draft is edited, deleted, approved or rejected, only an
+ * Approved item replaced or retired.
+ */
 export function toKnowledgeItemAccessDto(
   item: KnowledgeItem,
   projectRole: ProjectRole,
 ): KnowledgeItemAccessDto {
   const draft = item.isDraft();
+  const approved = item.isApproved();
 
   return {
     canEdit: draft && knowledgePolicyService.canEditDraft(projectRole, item),
@@ -26,6 +31,10 @@ export function toKnowledgeItemAccessDto(
       draft && knowledgePolicyService.canApproveDraft(projectRole, item),
     canReject:
       draft && knowledgePolicyService.canRejectDraft(projectRole, item),
+    canRecordReplacement:
+      approved &&
+      knowledgePolicyService.canRecordReplacement(projectRole, item),
+    canRetire: approved && knowledgePolicyService.canRetire(projectRole, item),
   };
 }
 

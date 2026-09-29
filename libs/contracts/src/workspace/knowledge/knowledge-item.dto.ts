@@ -1,8 +1,4 @@
-import type {
-  DecisionFieldsDto,
-  RequirementFieldsDto,
-  TermFieldsDto,
-} from './knowledge-fields.dto.js';
+import type { KnowledgeFieldsDtoByKind } from './knowledge-fields.dto.js';
 import type {
   KnowledgeKindDto,
   KnowledgeSourceDto,
@@ -15,6 +11,9 @@ export type KnowledgeItemAccessDto = {
   readonly canDelete: boolean;
   readonly canApprove: boolean;
   readonly canReject: boolean;
+  /** May record a Draft replacing this Approved item; approving it stays a Maintainer's. */
+  readonly canRecordReplacement: boolean;
+  readonly canRetire: boolean;
 };
 
 /** What the calling Member may do with a Project's knowledge as a whole. */
@@ -51,17 +50,31 @@ type KnowledgeItemFrameDto = {
   readonly rejectedAt: string | null;
   /** Null unless Rejected with a reason. */
   readonly rejectionReason: string | null;
+  /** The Knowledge Key of the Approved item this one replaces, if any. */
+  readonly supersedes: string | null;
+  /** Null unless replaced: who approved the replacement. */
+  readonly supersededBy: string | null;
+  /** ISO 8601, or null unless replaced. */
+  readonly supersededAt: string | null;
+  /** The Knowledge Key of the replacement, or null. */
+  readonly supersededByKey: string | null;
+  /** Null unless retired. */
+  readonly retiredBy: string | null;
+  /** ISO 8601, or null unless retired. */
+  readonly retiredAt: string | null;
+  /** Null unless retired with a reason. */
+  readonly retirementReason: string | null;
   /** Raised by every change; every write sends back the one the client saw. */
   readonly version: number;
   readonly access: KnowledgeItemAccessDto;
 };
 
-export type KnowledgeItemDto = KnowledgeItemFrameDto &
-  (
-    | { readonly kind: 'term'; readonly fields: TermFieldsDto }
-    | { readonly kind: 'requirement'; readonly fields: RequirementFieldsDto }
-    | { readonly kind: 'decision'; readonly fields: DecisionFieldsDto }
-  );
+export type KnowledgeItemDto = {
+  readonly [K in KnowledgeKindDto]: KnowledgeItemFrameDto & {
+    readonly kind: K;
+    readonly fields: KnowledgeFieldsDtoByKind[K];
+  };
+}[KnowledgeKindDto];
 
 export type KnowledgeItemPageDto = {
   readonly items: KnowledgeItemDto[];

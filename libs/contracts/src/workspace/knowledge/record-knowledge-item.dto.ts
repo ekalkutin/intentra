@@ -1,29 +1,40 @@
 import { z } from 'zod';
 
-import {
-  DecisionFieldsDtoSchema,
-  RequirementFieldsDtoSchema,
-  TermFieldsDtoSchema,
-} from './knowledge-fields.dto.js';
+import { KNOWLEDGE_FIELDS_DTO_SCHEMAS } from './knowledge-fields.dto.js';
 
 const frame = {
   title: z.string(),
   /** What the Knowledge Item rests on; optional only when entered by hand. */
   rationale: z.string().nullable().default(null),
+  /**
+   * The Knowledge Key of the Approved item of the same Kind this one replaces;
+   * approving it is then a Supersession.
+   */
+  supersedes: z.string().nullable().default(null),
 };
 
+function recording<K extends keyof typeof KNOWLEDGE_FIELDS_DTO_SCHEMAS>(
+  kind: K,
+) {
+  return z.object({
+    kind: z.literal(kind),
+    ...frame,
+    fields: KNOWLEDGE_FIELDS_DTO_SCHEMAS[kind],
+  });
+}
+
 export const RecordKnowledgeItemDtoSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('term'), ...frame, fields: TermFieldsDtoSchema }),
-  z.object({
-    kind: z.literal('requirement'),
-    ...frame,
-    fields: RequirementFieldsDtoSchema,
-  }),
-  z.object({
-    kind: z.literal('decision'),
-    ...frame,
-    fields: DecisionFieldsDtoSchema,
-  }),
+  recording('product-overview'),
+  recording('goal'),
+  recording('persona'),
+  recording('scenario'),
+  recording('requirement'),
+  recording('constraint'),
+  recording('term'),
+  recording('business-rule'),
+  recording('integration'),
+  recording('decision'),
+  recording('open-question'),
 ]);
 
 export type RecordKnowledgeItemDto = z.infer<

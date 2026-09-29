@@ -8,7 +8,7 @@ export class TermContent {
   readonly #sort: TermSort | null;
   readonly #synonymsToAvoid: readonly KnowledgeText[];
 
-  constructor(props: TermContentProps) {
+  constructor(props: TermFields) {
     this.#definition = new KnowledgeText(props.definition);
     this.#sort = props.sort === null ? null : TermSort.from(props.sort);
     this.#synonymsToAvoid = props.synonymsToAvoid.map(
@@ -35,9 +35,17 @@ export class TermContent {
   get synonymsToAvoid(): readonly KnowledgeText[] {
     return this.#synonymsToAvoid;
   }
+
+  public toFields(): TermFields {
+    return {
+      definition: this.#definition.value,
+      sort: this.#sort?.value ?? null,
+      synonymsToAvoid: this.#synonymsToAvoid.map(synonym => synonym.value),
+    };
+  }
 }
 
-type TermContentProps = {
+export type TermFields = {
   readonly definition: string;
   readonly sort: string | null;
   readonly synonymsToAvoid: readonly string[];

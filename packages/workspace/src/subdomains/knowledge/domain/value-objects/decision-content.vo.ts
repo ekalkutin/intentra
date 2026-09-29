@@ -10,7 +10,7 @@ export class DecisionContent {
   readonly #context: KnowledgeText | null;
   readonly #rejectedAlternatives: readonly RejectedAlternative[];
 
-  constructor(props: DecisionContentProps) {
+  constructor(props: DecisionFields) {
     this.#decision = new KnowledgeText(props.decision);
     this.#area = props.area === null ? null : DecisionArea.from(props.area);
     this.#context = KnowledgeText.optional(props.context);
@@ -42,9 +42,21 @@ export class DecisionContent {
   get rejectedAlternatives(): readonly RejectedAlternative[] {
     return this.#rejectedAlternatives;
   }
+
+  public toFields(): DecisionFields {
+    return {
+      decision: this.#decision.value,
+      area: this.#area?.value ?? null,
+      context: this.#context?.value ?? null,
+      rejectedAlternatives: this.#rejectedAlternatives.map(alternative => ({
+        alternative: alternative.alternative.value,
+        reason: alternative.reason?.value ?? null,
+      })),
+    };
+  }
 }
 
-type DecisionContentProps = {
+export type DecisionFields = {
   readonly decision: string;
   readonly area: string | null;
   readonly context: string | null;

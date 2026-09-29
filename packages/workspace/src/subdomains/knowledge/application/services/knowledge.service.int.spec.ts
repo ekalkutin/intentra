@@ -1,10 +1,11 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
-import type {
-  CallerDto,
-  ProjectRoleDto,
-  RecordKnowledgeItemDto,
+import {
+  KnowledgeKindDtoSchema,
+  type CallerDto,
+  type ProjectRoleDto,
+  type RecordKnowledgeItemDto,
 } from '@intentra/contracts/workspace';
 import { TestingApp } from '@intentra/platform-testing';
 import {
@@ -29,10 +30,14 @@ import {
   DraftDeletionForbiddenException,
   DraftEditingForbiddenException,
   KnowledgeItemChangedException,
+  KnowledgeItemNotApprovedException,
   KnowledgeItemNotDraftException,
   KnowledgeKindMismatchException,
   KnowledgeRecordingForbiddenException,
+  KnowledgeRetirementForbiddenException,
+  ProductOverviewAlreadyApprovedException,
   RationaleRequiredException,
+  SupersededItemNotApprovedException,
 } from '../../domain/exceptions/index.js';
 import { KnowledgeKind } from '../../domain/value-objects/index.js';
 import { KnowledgeItemNotFoundException } from '../exceptions/index.js';
@@ -60,6 +65,7 @@ function term(title: string): RecordKnowledgeItemDto {
     kind: 'term',
     title,
     rationale: null,
+    supersedes: null,
     fields: {
       definition: `What ${title} means`,
       sort: null,
@@ -72,6 +78,7 @@ const requirement: RecordKnowledgeItemDto = {
   kind: 'requirement',
   title: 'PDF export',
   rationale: 'Ada: "customers print reports"',
+  supersedes: null,
   fields: {
     statement: 'Export a report to PDF',
     type: 'functional',
@@ -84,6 +91,7 @@ const decision: RecordKnowledgeItemDto = {
   kind: 'decision',
   title: 'MongoDB',
   rationale: null,
+  supersedes: null,
   fields: {
     decision: 'Store data in MongoDB',
     area: 'architecture',
@@ -91,6 +99,14 @@ const decision: RecordKnowledgeItemDto = {
     rejectedAlternatives: [{ alternative: 'PostgreSQL', reason: null }],
   },
 };
+
+const productOverview = (summary: string): RecordKnowledgeItemDto => ({
+  kind: 'product-overview',
+  title: 'Intentra',
+  rationale: null,
+  supersedes: null,
+  fields: { summary, problem: null, audience: null, value: null },
+});
 
 const firstPage = { take: 50, offset: 0 };
 
@@ -201,12 +217,21 @@ describe('KnowledgeService integration', () => {
         rejectedBy: null,
         rejectedAt: null,
         rejectionReason: null,
+        supersedes: null,
+        supersededBy: null,
+        supersededAt: null,
+        supersededByKey: null,
+        retiredBy: null,
+        retiredAt: null,
+        retirementReason: null,
         version: 1,
         access: {
           canEdit: true,
           canDelete: true,
           canApprove: true,
           canReject: true,
+          canRecordReplacement: false,
+          canRetire: false,
         },
       });
     });
@@ -378,6 +403,8 @@ describe('KnowledgeService integration', () => {
           canDelete: false,
           canApprove: false,
           canReject: false,
+          canRecordReplacement: false,
+          canRetire: false,
         },
       });
     });
@@ -790,6 +817,349 @@ describe('KnowledgeService integration', () => {
     });
   });
 
+  describe('supersede', () => {
+    /** Ada records and approves REQ-1. */
+    async function approveRequirement(setup: Setup) {
+      const knowledgeService = app.get(KnowledgeService);
+      const ada = person(setup.ada);
+      await knowledgeService.record(
+        ada,
+        setup.workspaceId,
+        setup.projectId,
+        requirement,
+      );
+      await knowledgeService.approve(
+        ada,
+        setup.workspaceId,
+        setup.projectId,
+        'REQ-1',
+        { version: 1 },
+      );
+    }
+
+    function replacement(statement: string): RecordKnowledgeItemDto {
+      return {
+        kind: 'requirement',
+        title: 'Report export',
+        rationale: null,
+        supersedes: 'REQ-1',
+        fields: {
+          statement,
+          type: 'functional',
+          priority: 'must',
+          acceptanceCriteria: [],
+        },
+      };
+    }
+
+    it("replaces an Approved item once a Contributor's replacement is approved", async () => {
+      // Arrange
+      const setup = await setUp(ProjectRole.Contributor);
+      const { workspaceId, projectId, ada, adaId, bob } = setup;
+      const knowledgeService = app.get(KnowledgeService);
+      await approveRequirement(setup);
+      const approved = await knowledgeService.get(
+        person(bob),
+        workspaceId,
+        projectId,
+        'REQ-1',
+      );
+      await knowledgeService.record(
+        person(bob),
+        workspaceId,
+        projectId,
+        replacement('Export a report to PDF and CSV'),
+      );
+
+      // Act
+      const replacing = await knowledgeService.approve(
+        person(ada),
+        workspaceId,
+        projectId,
+        'REQ-2',
+        { version: 1 },
+      );
+
+      // Assert
+      expect(approved.access).toMatchObject({
+        canRecordReplacement: true,
+        canRetire: false,
+      });
+      expect(replacing).toMatchObject({
+        status: 'approved',
+        supersedes: 'REQ-1',
+      });
+      const replaced = await knowledgeService.get(
+        person(ada),
+        workspaceId,
+        projectId,
+        'REQ-1',
+      );
+      expect(replaced).toMatchObject({
+        status: 'obsolete',
+        supersededBy: adaId,
+        supersededAt: expect.any(String),
+        supersededByKey: 'REQ-2',
+        version: 3,
+        access: { canRecordReplacement: false, canRetire: false },
+      });
+      const listed = await knowledgeService.list(
+        person(ada),
+        workspaceId,
+        projectId,
+        firstPage,
+      );
+      expect(listed.items.map(({ key }) => key)).toEqual(['REQ-2']);
+      const obsolete = await knowledgeService.list(
+        person(ada),
+        workspaceId,
+        projectId,
+        { statuses: ['obsolete'], ...firstPage },
+      );
+      expect(obsolete.items.map(({ key }) => key)).toEqual(['REQ-1']);
+    });
+
+    it('refuses a second replacement of an item already replaced', async () => {
+      // Arrange
+      const setup = await setUp();
+      const { workspaceId, projectId, ada } = setup;
+      const knowledgeService = app.get(KnowledgeService);
+      await approveRequirement(setup);
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        replacement('Export a report to PDF and CSV'),
+      );
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        replacement('Export a report to PDF and Excel'),
+      );
+      await knowledgeService.approve(
+        person(ada),
+        workspaceId,
+        projectId,
+        'REQ-2',
+        { version: 1 },
+      );
+
+      // Act
+      const approving = knowledgeService.approve(
+        person(ada),
+        workspaceId,
+        projectId,
+        'REQ-3',
+        { version: 1 },
+      );
+
+      // Assert
+      await expect(approving).rejects.toBeInstanceOf(
+        SupersededItemNotApprovedException,
+      );
+    });
+
+    it('refuses to record a replacement of a Draft or of another Kind', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada } = await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      const caller = person(ada);
+      await knowledgeService.record(
+        caller,
+        workspaceId,
+        projectId,
+        requirement,
+      );
+      await knowledgeService.record(
+        caller,
+        workspaceId,
+        projectId,
+        term('Invoice'),
+      );
+      await knowledgeService.approve(caller, workspaceId, projectId, 'TERM-1', {
+        version: 1,
+      });
+
+      // Act
+      const [ofDraft, ofTerm] = await Promise.allSettled([
+        knowledgeService.record(
+          caller,
+          workspaceId,
+          projectId,
+          replacement('Export a report to PDF and CSV'),
+        ),
+        knowledgeService.record(caller, workspaceId, projectId, {
+          ...replacement('Export a report to PDF and CSV'),
+          supersedes: 'TERM-1',
+        }),
+      ]);
+
+      // Assert
+      expect(ofDraft).toMatchObject({
+        status: 'rejected',
+        reason: expect.any(SupersededItemNotApprovedException),
+      });
+      expect(ofTerm).toMatchObject({
+        status: 'rejected',
+        reason: expect.any(KnowledgeKindMismatchException),
+      });
+    });
+  });
+
+  describe('product overview', () => {
+    /** Ada approves PO-1. */
+    async function approveProductOverview(setup: Setup) {
+      const knowledgeService = app.get(KnowledgeService);
+      const caller = person(setup.ada);
+      await knowledgeService.record(
+        caller,
+        setup.workspaceId,
+        setup.projectId,
+        productOverview('A tool for invoices'),
+      );
+      await knowledgeService.approve(
+        caller,
+        setup.workspaceId,
+        setup.projectId,
+        'PO-1',
+        { version: 1 },
+      );
+    }
+
+    it('refuses a second Approved one beside the first', async () => {
+      // Arrange
+      const setup = await setUp();
+      const { workspaceId, projectId, ada } = setup;
+      await approveProductOverview(setup);
+      await app
+        .get(KnowledgeService)
+        .record(
+          person(ada),
+          workspaceId,
+          projectId,
+          productOverview('A tool for invoices and payments'),
+        );
+
+      // Act
+      const approving = app
+        .get(KnowledgeService)
+        .approve(person(ada), workspaceId, projectId, 'PO-2', { version: 1 });
+
+      // Assert
+      await expect(approving).rejects.toBeInstanceOf(
+        ProductOverviewAlreadyApprovedException,
+      );
+    });
+
+    it('changes only by Supersession', async () => {
+      // Arrange
+      const setup = await setUp();
+      const { workspaceId, projectId, ada } = setup;
+      const knowledgeService = app.get(KnowledgeService);
+      await approveProductOverview(setup);
+      await knowledgeService.record(person(ada), workspaceId, projectId, {
+        ...productOverview('A tool for invoices and payments'),
+        supersedes: 'PO-1',
+      });
+
+      // Act
+      await knowledgeService.approve(
+        person(ada),
+        workspaceId,
+        projectId,
+        'PO-2',
+        {
+          version: 1,
+        },
+      );
+
+      // Assert
+      const page = await knowledgeService.list(
+        person(ada),
+        workspaceId,
+        projectId,
+        { kind: 'product-overview', statuses: ['approved'], ...firstPage },
+      );
+      expect(page.items.map(({ key }) => key)).toEqual(['PO-2']);
+    });
+  });
+
+  describe('retire', () => {
+    it('lets a Maintainer retire an Approved item with a reason', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada, adaId } = await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        requirement,
+      );
+      await knowledgeService.approve(
+        person(ada),
+        workspaceId,
+        projectId,
+        'REQ-1',
+        { version: 1 },
+      );
+
+      // Act
+      const retired = await knowledgeService.retire(
+        person(ada),
+        workspaceId,
+        projectId,
+        'REQ-1',
+        { version: 2, reason: 'Printing was dropped' },
+      );
+
+      // Assert
+      expect(retired).toMatchObject({
+        status: 'obsolete',
+        retiredBy: adaId,
+        retiredAt: expect.any(String),
+        retirementReason: 'Printing was dropped',
+        version: 3,
+      });
+    });
+
+    it('forbids a Contributor and refuses a Draft', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada, bob } = await setUp(
+        ProjectRole.Contributor,
+      );
+      const knowledgeService = app.get(KnowledgeService);
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        requirement,
+      );
+
+      // Act
+      const [byContributor, ofDraft] = await Promise.allSettled([
+        knowledgeService.retire(person(bob), workspaceId, projectId, 'REQ-1', {
+          version: 1,
+          reason: null,
+        }),
+        knowledgeService.retire(person(ada), workspaceId, projectId, 'REQ-1', {
+          version: 1,
+          reason: null,
+        }),
+      ]);
+
+      // Assert
+      expect(byContributor).toMatchObject({
+        status: 'rejected',
+        reason: expect.any(KnowledgeRetirementForbiddenException),
+      });
+      expect(ofDraft).toMatchObject({
+        status: 'rejected',
+        reason: expect.any(KnowledgeItemNotApprovedException),
+      });
+    });
+  });
+
   describe('through an external agent', () => {
     it('records a Draft with its Source and rationale', async () => {
       // Arrange
@@ -912,7 +1282,7 @@ describe('KnowledgeService integration', () => {
   describe('access', () => {
     it.each([
       [ProjectRole.Viewer, []],
-      [ProjectRole.Contributor, ['term', 'requirement', 'decision']],
+      [ProjectRole.Contributor, KnowledgeKindDtoSchema.options],
     ])('tells a %o which Kinds they may record', async (bobRole, kinds) => {
       // Arrange
       const { workspaceId, projectId, bob } = await setUp(bobRole);

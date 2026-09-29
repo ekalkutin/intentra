@@ -152,7 +152,7 @@ describe('Knowledge tools over MCP', () => {
       projectId,
       statuses: ['approved', 'draft'],
     });
-    expect(withDrafts.structuredContent).toEqual({
+    expect(withDrafts.structuredContent).toMatchObject({
       items: [
         {
           key: 'REQ-1',
@@ -164,8 +164,8 @@ describe('Knowledge tools over MCP', () => {
         },
       ],
       total: 1,
-      canRecord: ['term', 'requirement', 'decision'],
     });
+    expect(withDrafts.structuredContent?.canRecord).toHaveLength(11);
   });
 
   it('refuses a recording without a rationale', async () => {
@@ -217,6 +217,41 @@ describe('Knowledge tools over MCP', () => {
     // Assert
     expect(result.isError).toBe(true);
     expect(result.content[0]?.text).toMatch(/^KNOWLEDGE_ITEM_CHANGED: /);
+  });
+
+  it('records every Kind through its own tool', async () => {
+    // Act
+    const result = await callTool('record_business_rule', {
+      projectId,
+      title: 'Due date',
+      rationale: 'Ada: "we give customers a month"',
+      fields: { rule: 'An invoice is due 30 days after it is sent' },
+    });
+
+    // Assert
+    expect(result.structuredContent).toMatchObject({
+      key: 'BR-1',
+      kind: 'business-rule',
+      mainField: 'An invoice is due 30 days after it is sent',
+    });
+  });
+
+  it("keeps the agent to its token's level when retiring", async () => {
+    // Arrange
+    await callTool('record_requirement', { projectId, ...requirement });
+
+    // Act
+    const result = await callTool('retire_knowledge_item', {
+      projectId,
+      key: 'REQ-1',
+      version: 1,
+    });
+
+    // Assert
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toMatch(
+      /^KNOWLEDGE_RETIREMENT_FORBIDDEN: /,
+    );
   });
 
   it('deletes a Draft recorded by mistake', async () => {
