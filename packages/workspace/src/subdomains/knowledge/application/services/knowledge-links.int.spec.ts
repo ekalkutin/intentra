@@ -3,6 +3,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import type { Actor } from '@intentra/contracts/iam';
 import type {
   CallerDto,
+  KnowledgeItemDto,
   KnowledgeLinkDto,
   RecordKnowledgeItemDto,
 } from '@intentra/contracts/workspace';
@@ -26,6 +27,8 @@ import {
   KnowledgeItemNeedsReviewException,
   LinkTargetNotCurrentException,
   LinkTargetNotFoundException,
+  ProductOverviewAlreadyApprovedException,
+  SupersededItemNotApprovedException,
 } from '../../domain/exceptions/index.js';
 
 import { KnowledgeService } from './knowledge.service.js';
@@ -65,6 +68,37 @@ function term(title: string): RecordKnowledgeItemDto {
       sort: null,
       synonymsToAvoid: [],
     },
+  };
+}
+
+function decision(title: string): RecordKnowledgeItemDto {
+  return {
+    kind: 'decision',
+    title,
+    rationale: null,
+    supersedes: null,
+    links: [],
+    fields: {
+      decision: title,
+      area: null,
+      context: null,
+      rejectedAlternatives: [],
+    },
+  };
+}
+
+function productOverview(
+  summary: string,
+  links: KnowledgeLinkDto[] = [],
+  supersedes: string | null = null,
+): RecordKnowledgeItemDto {
+  return {
+    kind: 'product-overview',
+    title: 'Intentra',
+    rationale: null,
+    supersedes,
+    links,
+    fields: { summary, problem: null, audience: null, value: null },
   };
 }
 
@@ -197,6 +231,26 @@ describe('KnowledgeService Links and Needs Review', () => {
     });
   });
 
+  it('refuses a Link to an Obsolete item, naming its replacement', async () => {
+    // Arrange
+    const { record, approve } = await setUp();
+    await record(requirement('Export an invoice'));
+    await approve('REQ-1');
+    await record(requirement('Export an invoice to PDF', [], 'REQ-1'));
+    await approve('REQ-2');
+
+    // Act
+    const recording = record(
+      requirement('A button', [{ type: 'depends-on', key: 'REQ-1' }]),
+    );
+
+    // Assert
+    await expect(recording).rejects.toBeInstanceOf(
+      LinkTargetNotCurrentException,
+    );
+    await expect(recording).rejects.toThrow(/REQ-2/);
+  });
+
   describe('approving together', () => {
     it('refuses to approve an item before what it depends on', async () => {
       // Arrange
@@ -242,6 +296,150 @@ describe('KnowledgeService Links and Needs Review', () => {
     });
   });
 
+  describe('superseding together', () => {
+    it('keeps an item Obsolete when what it depended on is replaced in the same batch', async () => {
+      // Arrange
+      const { record, approve, knowledge, ada, workspaceId, projectId } =
+        await setUp();
+      await record(requirement('Pay by card'));
+      await approve('REQ-1');
+      await record(
+        requirement('A pay button', [{ type: 'depends-on', key: 'REQ-1' }]),
+      );
+      await approve('REQ-2');
+      await record(requirement('A pay and refund button', [], 'REQ-2'));
+      await record(requirement('Pay by card or SBP', [], 'REQ-1'));
+
+      // Act
+      await app
+        .get(KnowledgeService)
+        .approveTogether(ada, workspaceId, projectId, {
+          items: [
+            { key: 'REQ-3', version: 1 },
+            { key: 'REQ-4', version: 1 },
+          ],
+        });
+
+      // Assert
+      expect(await knowledge('get', 'REQ-2')).toMatchObject({
+        status: 'obsolete',
+        supersededByKey: 'REQ-3',
+        needsReview: false,
+      });
+    });
+
+    it('keeps a Product Overview Obsolete when the Decision it rests on is replaced with it', async () => {
+      // Arrange
+      const { record, approve, knowledge, ada, workspaceId, projectId } =
+        await setUp();
+      await record(decision('Serve small firms'));
+      await approve('DEC-1');
+      await record(
+        productOverview('Invoices for small firms', [
+          { type: 'justified-by', key: 'DEC-1' },
+        ]),
+      );
+      await approve('PO-1');
+      await record({
+        ...decision('Serve firms of any size'),
+        supersedes: 'DEC-1',
+      });
+      await record(productOverview('Invoices for any firm', [], 'PO-1'));
+
+      // Act
+      await app
+        .get(KnowledgeService)
+        .approveTogether(ada, workspaceId, projectId, {
+          items: [
+            { key: 'DEC-2', version: 1 },
+            { key: 'PO-2', version: 1 },
+          ],
+        });
+
+      // Assert
+      expect(await knowledge('get', 'PO-1')).toMatchObject({
+        status: 'obsolete',
+      });
+    });
+
+    it('approves an item listed twice in one batch once, keeping its mark', async () => {
+      // Arrange
+      const { record, approve, knowledge, ada, workspaceId, projectId } =
+        await setUp();
+      await record(requirement('Pay by card'));
+      await approve('REQ-1');
+      await record(
+        requirement('A pay button', [{ type: 'depends-on', key: 'REQ-1' }]),
+      );
+      await record(requirement('Pay by card or SBP', [], 'REQ-1'));
+
+      // Act
+      await app
+        .get(KnowledgeService)
+        .approveTogether(ada, workspaceId, projectId, {
+          items: [
+            { key: 'REQ-2', version: 1 },
+            { key: 'REQ-2', version: 1 },
+            { key: 'REQ-3', version: 1 },
+          ],
+        });
+
+      // Assert
+      expect(await knowledge('get', 'REQ-2')).toMatchObject({
+        status: 'approved',
+        needsReview: true,
+        reviewCauses: ['REQ-1'],
+        version: 3,
+      });
+    });
+
+    it('refuses two new Product Overviews in one batch', async () => {
+      // Arrange
+      const { record, ada, workspaceId, projectId } = await setUp();
+      await record(productOverview('Invoices'));
+      await record(productOverview('Payments'));
+
+      // Act
+      const approving = app
+        .get(KnowledgeService)
+        .approveTogether(ada, workspaceId, projectId, {
+          items: [
+            { key: 'PO-1', version: 1 },
+            { key: 'PO-2', version: 1 },
+          ],
+        });
+
+      // Assert
+      await expect(approving).rejects.toBeInstanceOf(
+        ProductOverviewAlreadyApprovedException,
+      );
+    });
+
+    it('refuses two replacements of one item in one batch', async () => {
+      // Arrange
+      const { record, approve, ada, workspaceId, projectId } = await setUp();
+      await record(requirement('Pay by card'));
+      await approve('REQ-1');
+      await record(requirement('Pay by card or SBP', [], 'REQ-1'));
+      await record(requirement('Pay by card or cash', [], 'REQ-1'));
+
+      // Act
+      const approving = app
+        .get(KnowledgeService)
+        .approveTogether(ada, workspaceId, projectId, {
+          items: [
+            { key: 'REQ-2', version: 1 },
+            { key: 'REQ-3', version: 1 },
+          ],
+        });
+
+      // Assert
+      await expect(approving).rejects.toBeInstanceOf(
+        SupersededItemNotApprovedException,
+      );
+    });
+  });
+
   describe('dependencies', () => {
     it('gives the whole cascade, each item once, cycles included', async () => {
       // Arrange
@@ -266,6 +464,7 @@ describe('KnowledgeService Links and Needs Review', () => {
 
       // Assert
       expect(cascade).toMatchObject({
+        dependencyNeedsReview: false,
         items: [
           { key: 'REQ-3' },
           { key: 'REQ-2' },
@@ -372,6 +571,115 @@ describe('KnowledgeService Links and Needs Review', () => {
       });
     });
 
+    it('marks what depends on a rejected Draft, and what is justified by a retired Decision', async () => {
+      // Arrange
+      const { record, approve, knowledge, ada, workspaceId, projectId } =
+        await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      await record(requirement('Pay by card'));
+      await record(
+        requirement('A pay button', [{ type: 'depends-on', key: 'REQ-1' }]),
+      );
+      await record(decision('Serve small firms'));
+      await approve('DEC-1');
+      await record(
+        requirement('Simple invoices', [
+          { type: 'justified-by', key: 'DEC-1' },
+        ]),
+      );
+      await approve('REQ-3');
+
+      // Act
+      await knowledgeService.reject(ada, workspaceId, projectId, 'REQ-1', {
+        version: 1,
+        reason: null,
+      });
+      await knowledgeService.retire(ada, workspaceId, projectId, 'DEC-1', {
+        version: 2,
+        reason: null,
+      });
+
+      // Assert
+      expect(await knowledge('get', 'REQ-2')).toMatchObject({
+        needsReview: true,
+        reviewCauses: ['REQ-1'],
+      });
+      expect(await knowledge('get', 'REQ-3')).toMatchObject({
+        needsReview: true,
+        reviewCauses: ['DEC-1'],
+      });
+    });
+
+    it('tells from the cascade that something below is under review', async () => {
+      // Arrange
+      const setup = await setUp();
+      const { record, approve, knowledge } = setup;
+      await approveChain(setup);
+      await record(requirement('Pay by card or SBP', [], 'REQ-1'));
+
+      // Act
+      await approve('REQ-5');
+
+      // Assert
+      expect(await knowledge('dependencies', 'REQ-4')).toMatchObject({
+        dependencyNeedsReview: true,
+        items: [
+          { key: 'REQ-4', needsReview: false },
+          { key: 'REQ-2', needsReview: true },
+          { key: 'REQ-1', status: 'obsolete' },
+        ],
+      });
+    });
+
+    it('passes the mark on when a marked item is replaced in turn', async () => {
+      // Arrange
+      const setup = await setUp();
+      const { record, approve, knowledge } = setup;
+      await approveChain(setup);
+      await record(requirement('Pay by card or SBP', [], 'REQ-1'));
+      await approve('REQ-5');
+      await record(requirement('A pay button with a choice', [], 'REQ-2'));
+
+      // Act
+      await approve('REQ-6');
+
+      // Assert
+      expect(await knowledge('get', 'REQ-4')).toMatchObject({
+        needsReview: true,
+        reviewCauses: ['REQ-2'],
+      });
+    });
+
+    it('lets a Contributor confirm a marked Draft, dropping its Link to a retired item', async () => {
+      // Arrange
+      const { record, approve, knowledge, ada, bob, workspaceId, projectId } =
+        await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      await record(requirement('Pay by card'));
+      await approve('REQ-1');
+      await record(
+        requirement('A pay button', [{ type: 'depends-on', key: 'REQ-1' }]),
+      );
+      await knowledgeService.retire(ada, workspaceId, projectId, 'REQ-1', {
+        version: 2,
+        reason: 'Cards were dropped',
+      });
+      const marked = (await knowledge('get', 'REQ-2')) as KnowledgeItemDto;
+
+      // Act
+      const confirmed = await knowledgeService.confirm(
+        bob,
+        workspaceId,
+        projectId,
+        'REQ-2',
+        { version: marked.version },
+      );
+
+      // Assert
+      expect(marked.access.canConfirm).toBe(true);
+      expect(confirmed).toMatchObject({ needsReview: false, links: [] });
+    });
+
     it('keeps a marked Draft from being approved until it is confirmed or relinked', async () => {
       // Arrange
       const { record, approve, ada, workspaceId, projectId } = await setUp();
@@ -402,6 +710,26 @@ describe('KnowledgeService Links and Needs Review', () => {
   });
 
   describe('deleting', () => {
+    it('refuses to delete a Draft an Approved item links to', async () => {
+      // Arrange
+      const { record, approve, ada, workspaceId, projectId } = await setUp();
+      await record(term('Invoice'));
+      await record(
+        requirement('Invoices', [{ type: 'uses-term', key: 'TERM-1' }]),
+      );
+      await approve('REQ-1');
+
+      // Act
+      const deleting = app
+        .get(KnowledgeService)
+        .delete(ada, workspaceId, projectId, 'TERM-1', { version: 1 });
+
+      // Assert
+      await expect(deleting).rejects.toBeInstanceOf(
+        KnowledgeItemLinkedException,
+      );
+    });
+
     it('refuses to delete a Draft another item links to', async () => {
       // Arrange
       const { record, ada, workspaceId, projectId } = await setUp();

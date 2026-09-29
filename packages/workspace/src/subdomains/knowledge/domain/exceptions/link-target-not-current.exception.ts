@@ -1,9 +1,12 @@
 import { ConflictException } from '@intentra/shared-kernel';
 
 export class LinkTargetNotCurrentException extends ConflictException<'LINK_TARGET_NOT_CURRENT'> {
-  constructor() {
+  /** Given the replacement's Knowledge Key when the target was superseded. */
+  constructor(replacementKey: string | null) {
     super(
-      'A link cannot lead to a rejected or obsolete item: link to its replacement instead',
+      replacementKey
+        ? `A link cannot lead to an obsolete item: link to its replacement ${replacementKey} instead`
+        : 'A link cannot lead to a rejected or obsolete item',
       'LINK_TARGET_NOT_CURRENT',
     );
   }

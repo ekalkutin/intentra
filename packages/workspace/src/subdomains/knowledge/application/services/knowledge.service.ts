@@ -33,6 +33,7 @@ import {
   KnowledgeRecordingService,
   KnowledgeRetirementService,
   ReviewMarkingService,
+  type SeenDraft,
 } from '../../domain/services/index.js';
 import {
   KnowledgeItemVersion,
@@ -214,6 +215,9 @@ export class KnowledgeService implements KnowledgeApi {
       items: cascade.items.map(dependency =>
         toKnowledgeDependencyDto(dependency, projectRole),
       ),
+      dependencyNeedsReview: cascade.items.some(
+        dependency => dependency !== item && dependency.needsReview(),
+      ),
       links: cascade.links.map(({ from, to }) => ({
         from: from.value,
         to: to.value,
@@ -319,12 +323,18 @@ export class KnowledgeService implements KnowledgeApi {
         workspaceId,
         projectId,
       );
-      const drafts = await Promise.all(
-        data.items.map(async ({ key, version }) => ({
+      // One by one: a transaction takes no parallel operations. Each item
+      // once, so that no second copy of it is saved over the first.
+      const drafts: SeenDraft[] = [];
+      for (const { key, version } of data.items) {
+        if (drafts.some(({ item }) => item.key.value === key)) {
+          continue;
+        }
+        drafts.push({
           item: await this.getItem(project.id, key),
           seenVersion: new KnowledgeItemVersion(version),
-        })),
-      );
+        });
+      }
       const related = await this.knowledgeItemRepository.findMany({
         projectId: project.id,
         keys: drafts.flatMap(({ item }) => [
@@ -352,7 +362,10 @@ export class KnowledgeService implements KnowledgeApi {
         },
       );
       const approved = drafts.map(({ item }) => item);
-      const marked = await this.markSourcesOf(project.id, superseded, approved);
+      const marked = await this.markSourcesOf(project.id, superseded, [
+        ...superseded,
+        ...approved,
+      ]);
       // The replaced items first: a Project's one-Approved rules are unique
       // indexes, checked write by write even inside the transaction.
       await this.saveAll([...superseded, ...approved, ...marked]);

@@ -28,6 +28,9 @@ export const getKnowledgeDependenciesTool = createTool({
       }),
     ),
     links: z.array(z.object({ from: z.string(), to: z.string() })),
+    dependencyNeedsReview: z
+      .boolean()
+      .describe('Whether anything below the item itself is under review.'),
   }),
   requestContextSchema: toolContextSchema,
   mcp: { annotations: { readOnlyHint: true } },
@@ -44,6 +47,7 @@ export const getKnowledgeDependenciesTool = createTool({
     return {
       items: cascade.items.map(({ access: _access, ...item }) => item),
       links: cascade.links,
+      dependencyNeedsReview: cascade.dependencyNeedsReview,
     };
   },
 });

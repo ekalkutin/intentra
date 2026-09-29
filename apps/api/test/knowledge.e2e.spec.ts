@@ -513,6 +513,33 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
     });
   });
 
+  it('refuses a batch listing one item twice', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send(requirement)
+      .expect(HttpStatus.CREATED);
+
+    // Act
+    const response = await app
+      .request()
+      .post(`${path}/approve`)
+      .set('Authorization', ada)
+      .send({
+        items: [
+          { key: 'REQ-1', version: 1 },
+          { key: 'REQ-1', version: 1 },
+        ],
+      });
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+    expect(response.body.code).toBe('VALIDATION_FAILED');
+  });
+
   it('rejects a malformed Knowledge Key', async () => {
     // Arrange
     const { ada, path } = await setUp();

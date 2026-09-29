@@ -116,5 +116,7 @@ export type KnowledgeDependencyDto = {
  */
 export type KnowledgeDependenciesDto = {
   readonly items: KnowledgeDependencyDto[];
+  /** Whether anything below the item itself is marked Needs Review. */
+  readonly dependencyNeedsReview: boolean;
   readonly links: { readonly from: string; readonly to: string }[];
 };

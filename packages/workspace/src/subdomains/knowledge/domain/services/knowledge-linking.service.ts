@@ -24,7 +24,9 @@ export class KnowledgeLinkingService {
         throw new InvalidLinkException();
       }
       if (!target.isDraft() && !target.isApproved()) {
-        throw new LinkTargetNotCurrentException();
+        throw new LinkTargetNotCurrentException(
+          target.supersededByKey?.value ?? null,
+        );
       }
     }
   }

@@ -35,7 +35,13 @@ export type RetireKnowledgeItemDto = z.infer<
 
 export const ApproveKnowledgeItemsDtoSchema = z.object({
   /** Approved together, all or nothing; each Knowledge Key with the version the client saw. */
-  items: z.array(z.object({ key: z.string(), version })).min(1),
+  items: z
+    .array(z.object({ key: z.string(), version }))
+    .min(1)
+    .refine(
+      items => new Set(items.map(({ key }) => key)).size === items.length,
+      { message: 'Each Knowledge Key may appear once' },
+    ),
 });
 
 export type ApproveKnowledgeItemsDto = z.infer<
