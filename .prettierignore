@@ -2,3 +2,5 @@
 **/generated/**
 **/__generated__/
 pnpm-lock.yaml
+# shadcn components, written by its CLI only: updating them overwrites any edit.
+apps/web/src/shared/ui/primitives/

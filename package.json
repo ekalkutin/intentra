@@ -8,7 +8,7 @@
     "build": "nx run-many -t build",
     "typecheck": "nx run-many -t typecheck",
     "test": "nx run-many -t test",
-    "lint": "oxlint --no-error-on-unmatched-pattern apps/ packages/ libs/",
+    "lint": "oxlint --no-error-on-unmatched-pattern apps/ packages/ libs/ && pnpm --filter @intentra/web run lint:fsd",
     "prettier": "prettier --write \"{apps,packages,libs}/**/*.{ts,tsx,json}\"",
     "prettier:check": "prettier --check \"{apps,packages,libs}/**/*.{ts,tsx,json}\"",
     "prepare": "husky"

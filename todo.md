@@ -68,7 +68,7 @@ Goal: the whole model in `packages/workspace/src/subdomains/knowledge/CONTEXT.md
 - [x] **7. Needs Review** (built within step 6). Marked when an item it depends on is superseded, retired or rejected; shown in searches; cleared by confirming, by editing or rejecting a Draft, or by a Supersession or Retirement.
   - Decided in step 6: one step, plus the computed `dependencyNeedsReview` when reading one item.
 
-## Next, in this order: Agents, first slice (Conversation + Orchestrator)
+## Done: Agents, first slice (Conversation + Orchestrator)
 
 Goal: a Member talks with the Orchestrator in a Project and it records Drafts, backend only (REST + stream, e2e tests); the UI is the next piece of work. Grilled on 2026-09-30. Glossary: `packages/workspace/src/subdomains/agents/CONTEXT.md`; ADR `packages/workspace/src/subdomains/agents/docs/adr/0002-agents-run-the-orchestrator-through-agent-toolkit.md`; deferred: `docs/notes/agents-open-questions.md`. The UI prototype on branch `poc/ui-prototype` (commit fcce71f, checked out in `~/projects/intentra-with-poc`) has the Orchestrator, its instructions, `offer_choices`, the stream handler and a scripted-model e2e to carry over.
 
@@ -97,5 +97,16 @@ Decided:
   - Found: before `@mastra/core` 1.72.0, saving a generated title re-created the thread, which reset its `createdAt` and wrote back the `metadata` read when the answer began (a hiding in between would be lost). 1.72.0 saves it with `updateThread({ id, title })`, so we need at least 1.72.0; an e2e test holds the title back and checks `createdAt`, to catch it coming back.
   - Decided: the answer waits for its title and streams it (`generateTitle: { emitEvent: true }`, chunk `data-thread-title`), so the title is kept before the answer ends; while an answer runs, a message, an edit and a deletion are all refused with 409 `CONVERSATION_BUSY`. Nothing overwrites anyone else's change.
   - Built: `updatedAt` is Mastra's: the last message, rename or hiding; the list sorts by it. Mastra pages by page number, so the adapter reads `offset + take` threads and drops the first `offset`.
+
+## Next, in this order: Web UI
+
+Goal: `apps/web`, the web UI, built in small reviewable steps, the UI prototype (branch `poc/ui-prototype`, `~/projects/intentra-with-poc/apps/prototype`) as a reference for screens and styling. Stack, structure and rules: `docs/adr/0003-web-ui-is-an-fsd-spa-on-rtk-query.md`. Grilled on 2026-09-30.
+
+- [x] **1. Signing in.** `/auth/sign-up` (email, password, repeated password; signs in right after), `/auth/sign-in`, and `/`: the signed-in Account's email (`GET /api/iam/me`), a sign-out button and a theme switch (system, light, dark; system by default). Everything else from the ADR is laid down here: FSD with Steiger, `shared/api` with the refresh on 401, the session in `localStorage` synced across tabs, `returnTo`, error codes translated, i18n in Russian. The login page's layout, the Geist font and the shadcn theme come from the prototype.
+  - Unit tests only on the `returnTo` check, turning an error into a text and a field, and the refresh decision; the rest is checked by running the app.
+  - Built: shadcn on Base UI (`base-nova`), its components only in `shared/ui/primitives`, written by the CLI; the prototype's `radix-nova` predated shadcn's switch. The session is `sessionTokens` in `shared/api` (localStorage, `storage` events from other tabs); Redux holds only RTK Query's cache. The sign-in, sign-up and sign-out code lives in its pages (used once); `switch-theme` is a feature (used twice). Zod speaks Russian through its own `z.locales.ru()`. Checked in a browser: 14 scenarios (validation, sign-up then signed in, theme kept, one refresh on an expired access token, sign-out in both tabs, wrong password, email taken, `returnTo` kept and foreign ones dropped, an expired refresh token signing out).
+- [ ] **2. Workspaces, Projects and the chat.** Choose or create a Workspace and a Project; the list of Conversations and a Conversation on `useChat`, with `offer_choices` cards and the recorded Drafts linked by Knowledge Key.
+- [ ] **3. Reading knowledge.** A Project's knowledge and one Knowledge Item.
+- [ ] **4. Approving.** Approve and reject Drafts, with the cascade of dependencies.
 
 ## Open questions left unanswered
