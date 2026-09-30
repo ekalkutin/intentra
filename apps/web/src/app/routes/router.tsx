@@ -2,6 +2,8 @@ import { createBrowserRouter, redirect } from 'react-router';
 
 import { SignInPage, SignUpPage } from '@/pages/auth';
 import { InvitationsPage } from '@/pages/invitations';
+import { KnowledgeEditorPage } from '@/pages/knowledge-editor';
+import { KnowledgeItemPage } from '@/pages/knowledge-item';
 import { ProjectAccessPage } from '@/pages/project-access';
 import { ProjectInterviewPage } from '@/pages/project-interview';
 import { ProjectKnowledgePage } from '@/pages/project-knowledge';
@@ -12,7 +14,12 @@ import { WorkspaceMembersPage } from '@/pages/workspace-members';
 import { WorkspaceProjectsPage } from '@/pages/workspace-projects';
 import { WorkspaceSettingsPage } from '@/pages/workspace-settings';
 import { WorkspaceTokensPage } from '@/pages/workspace-tokens';
-import { PROJECT_PAGES, ROUTES, WORKSPACE_PAGES } from '@/shared/config';
+import {
+  KNOWLEDGE_PAGES,
+  PROJECT_PAGES,
+  ROUTES,
+  WORKSPACE_PAGES,
+} from '@/shared/config';
 import { AppShell } from '@/widgets/app-shell';
 
 import { requireNoSession, requireSession } from './guards';
@@ -43,7 +50,15 @@ export const router = createBrowserRouter([
               { index: true, Component: ProjectOverviewPage },
               {
                 path: PROJECT_PAGES.knowledge,
-                Component: ProjectKnowledgePage,
+                children: [
+                  { index: true, Component: ProjectKnowledgePage },
+                  { path: KNOWLEDGE_PAGES.new, Component: KnowledgeEditorPage },
+                  { path: KNOWLEDGE_PAGES.item, Component: KnowledgeItemPage },
+                  {
+                    path: KNOWLEDGE_PAGES.edit,
+                    Component: KnowledgeEditorPage,
+                  },
+                ],
               },
               {
                 path: PROJECT_PAGES.interview,

@@ -25,9 +25,9 @@ export function orchestratorInstructions(
     `You talk with one Member of the Project "${project.name}". Pass projectId "${project.id}" to every tool that takes one; work in no other Project.`,
     ROLE_RULES[project.role],
     recordsNothing
-      ? 'Answer questions about the Project from its Approved knowledge (list_knowledge, get_knowledge_item), and say when something is only a Draft or not known yet.'
+      ? 'Answer questions about the Project from its Approved knowledge (get_knowledge_summary for what is known of each Kind, list_knowledge, get_knowledge_item), and say when something is only a Draft or not known yet.'
       : [
-          'Interview the person about their product: ask one or two focused questions at a time, starting with what is missing (with no Product Overview yet, start there).',
+          'Interview the person about their product: ask one or two focused questions at a time, starting with what is missing (get_knowledge_summary shows it: Kinds with nothing Approved, Drafts waiting, items to review; with no Product Overview yet, start there).',
           "Before recording, check what is already known with list_knowledge, statuses ['approved', 'draft', 'rejected']: never record a duplicate, nor what was rejected.",
           'Record what you learn as Drafts with the record_ tool of the right Kind. Fill only what the person actually said: an empty optional field is a gap to ask about, never something to invent. The rationale quotes or sums up what they said.',
           'Link items where they relate (depends-on, uses-term, justified-by, answers, conflicts-with).',

@@ -292,15 +292,394 @@ export const ru = {
     needsReview_other: '{{count}} записи требуют проверки',
     empty:
       'Журнал пока пуст. Знания появятся из интервью с агентом или от внешних агентов через MCP.',
-    truncated: 'Посчитаны первые {{shown}} записей из {{total}}.',
     startInterview: 'Интервью',
+    openReview: 'Открыть',
     recordedBy: '{{who}}, {{source}}',
     version: 'v{{version}}',
   },
+  kindsOne: {
+    'product-overview': 'Обзор продукта',
+    goal: 'Цель',
+    persona: 'Персона',
+    scenario: 'Сценарий',
+    requirement: 'Требование',
+    constraint: 'Ограничение',
+    term: 'Термин',
+    'business-rule': 'Бизнес-правило',
+    integration: 'Интеграция',
+    decision: 'Решение',
+    'open-question': 'Открытый вопрос',
+  },
+  kindDescriptions: {
+    'product-overview':
+      'Что это за продукт и для кого. В проекте одно утверждённое описание; меняется только заменой.',
+    goal: 'Чего проект хочет достичь и как понять, что достиг.',
+    persona:
+      'Кто пользуется продуктом или взаимодействует с ним: человек или система.',
+    scenario:
+      'Что делает исполнитель и что получает в конце. Исполнитель — персона, связанная через «зависит от».',
+    requirement: 'Что система делает или каким качеством обладает.',
+    constraint: 'Что навязано проекту извне и не обсуждается.',
+    term: 'Слово и что оно значит в этом проекте.',
+    'business-rule': 'Правило бизнеса одним предложением.',
+    integration:
+      'Связь продукта с внешней системой: зачем, куда и чем обмениваемся.',
+    decision: 'Что выбрал проект, в какой ситуации и что отверг.',
+    'open-question':
+      'Что в проекте ещё не решено. Закрывается утверждённым ответом.',
+  },
+  knowledgeCounts: {
+    needs_one: '{{count}} потребность',
+    needs_few: '{{count}} потребности',
+    needs_many: '{{count}} потребностей',
+    needs_other: '{{count}} потребности',
+    steps_one: '{{count}} шаг',
+    steps_few: '{{count}} шага',
+    steps_many: '{{count}} шагов',
+    steps_other: '{{count}} шага',
+    acceptanceCriteria_one: '{{count}} критерий',
+    acceptanceCriteria_few: '{{count}} критерия',
+    acceptanceCriteria_many: '{{count}} критериев',
+    acceptanceCriteria_other: '{{count}} критерия',
+    synonymsToAvoid_one: '{{count}} слово избегаем',
+    synonymsToAvoid_few: '{{count}} слова избегаем',
+    synonymsToAvoid_many: '{{count}} слов избегаем',
+    synonymsToAvoid_other: '{{count}} слова избегаем',
+    rejectedAlternatives_one: '{{count}} вариант отвергнут',
+    rejectedAlternatives_few: '{{count}} варианта отвергнуто',
+    rejectedAlternatives_many: '{{count}} вариантов отвергнуто',
+    rejectedAlternatives_other: '{{count}} варианта отвергнуто',
+  },
+  facts: {
+    answered: 'Есть ответ',
+    open: 'Открыт',
+  },
+  knowledgeFields: {
+    'product-overview': {
+      summary: 'Суть продукта',
+      problem: 'Какую проблему решает',
+      audience: 'Для кого',
+      value: 'Что получают пользователи',
+    },
+    goal: {
+      outcome: 'Чего хотим достичь',
+      successMetric: 'Как понять, что достигли',
+    },
+    persona: {
+      profile: 'Кто это',
+      type: 'Человек или система',
+      needs: 'Потребности',
+    },
+    scenario: {
+      expectedResult: 'Ожидаемый результат',
+      steps: 'Шаги',
+    },
+    requirement: {
+      statement: 'Формулировка',
+      type: 'Тип',
+      priority: 'Приоритет',
+      acceptanceCriteria: 'Критерии приёмки',
+    },
+    constraint: {
+      constraint: 'Ограничение',
+      imposedBy: 'Чем задано',
+    },
+    term: {
+      definition: 'Определение',
+      sort: 'Что обозначает',
+      synonymsToAvoid: 'Слова, которых избегаем',
+    },
+    'business-rule': {
+      rule: 'Правило',
+    },
+    integration: {
+      purpose: 'Зачем нужна',
+      externalSystem: 'Внешняя система',
+      direction: 'Направление',
+      exchanged: 'Чем обмениваемся',
+    },
+    decision: {
+      decision: 'Что решили',
+      area: 'Область',
+      context: 'Контекст',
+      rejectedAlternatives: 'Отвергнутые варианты',
+    },
+    'open-question': {
+      question: 'Вопрос',
+    },
+  },
+  knowledgeHints: {
+    'product-overview': {
+      summary: 'Что за продукт и для кого, в нескольких предложениях.',
+    },
+    goal: {
+      outcome: 'Результат, к которому стремится проект.',
+    },
+    persona: {
+      profile: 'Кто пользуется продуктом или взаимодействует с ним.',
+      needs: 'По одной потребности в строке.',
+    },
+    scenario: {
+      expectedResult: 'Что исполнитель получает в конце.',
+      steps:
+        'По одному шагу в строке, по порядку. Исполнителя укажите связью «зависит от» с персоной.',
+    },
+    requirement: {
+      statement: 'Что система делает или каким качеством обладает.',
+      acceptanceCriteria: 'По одной проверке в строке.',
+    },
+    constraint: {
+      constraint: 'Что навязано проекту извне и не обсуждается.',
+    },
+    term: {
+      definition: 'Что это слово значит в проекте.',
+      synonymsToAvoid:
+        'Другие слова для того же, которыми проект не пользуется.',
+    },
+    'business-rule': {
+      rule: 'Одним предложением.',
+    },
+    integration: {
+      purpose: 'Для чего продукт связан с другой системой.',
+    },
+    decision: {
+      decision: 'Что выбрал проект.',
+      context: 'Ситуация, из-за которой пришлось выбирать.',
+    },
+    'open-question': {
+      question: 'Что о проекте ещё не решено.',
+    },
+  },
+  knowledgeOptions: {
+    persona: {
+      type: { person: 'Человек', system: 'Система' },
+    },
+    requirement: {
+      type: {
+        functional: 'Функциональное',
+        'non-functional': 'Нефункциональное',
+      },
+      priority: {
+        must: 'Обязательно (must)',
+        should: 'Желательно (should)',
+        could: 'Если успеем (could)',
+      },
+    },
+    constraint: {
+      imposedBy: {
+        law: 'Закон',
+        budget: 'Бюджет',
+        deadline: 'Срок',
+        customer: 'Заказчик',
+        company: 'Компания',
+        infrastructure: 'Инфраструктура',
+      },
+    },
+    term: {
+      sort: {
+        entity: 'Сущность',
+        value: 'Значение',
+        role: 'Роль',
+        'action-event': 'Действие или событие',
+        other: 'Другое',
+      },
+    },
+    integration: {
+      direction: {
+        outbound: 'Мы отправляем им',
+        inbound: 'Они отправляют нам',
+        both: 'В обе стороны',
+      },
+    },
+    decision: {
+      area: {
+        architecture: 'Архитектура',
+        product: 'Продукт',
+        business: 'Бизнес',
+      },
+    },
+  },
+  linkTypes: {
+    'depends-on': 'Зависит от',
+    'uses-term': 'Использует термин',
+    'justified-by': 'Обосновано решением',
+    answers: 'Отвечает на',
+    'conflicts-with': 'Противоречит',
+  },
+  incomingLinkTypes: {
+    'depends-on': 'Зависят от этой записи',
+    'uses-term': 'Используют этот термин',
+    'justified-by': 'Обоснованы этим решением',
+    answers: 'Отвечают на этот вопрос',
+    'conflicts-with': 'Противоречат этой записи',
+  },
   knowledge: {
     title: 'Знания',
-    pending:
-      'Здесь будет полный журнал знаний проекта: поиск, фильтры, ревью черновиков.',
+    description:
+      'Всё, что известно о продукте: утверждённые знания и черновики, которые ждут решения человека.',
+    views: {
+      current: 'Актуальные',
+      drafts: 'Черновики',
+      review: 'На проверке',
+      rejected: 'Отклонённые',
+      obsolete: 'Устаревшие',
+    },
+    viewsLabel: 'Статус',
+    allKinds: 'Все виды',
+    kindLabel: 'Вид знаний',
+    record: 'Записать',
+    recordKind: 'Что записать',
+    needsReview: 'на проверке',
+    previewMissing: '{{key}} не найдена — возможно, черновик удалили.',
+    kindsNav: 'Вид',
+    key: 'Ключ',
+    status: 'Статус',
+    links_one: '{{count}} связь',
+    links_few: '{{count}} связи',
+    links_many: '{{count}} связей',
+    links_other: '{{count}} связи',
+    empty: {
+      current:
+        'Знаний пока нет. Запишите первое вручную, проведите интервью с агентом или подключите внешнего агента через MCP.',
+      drafts: 'Черновиков нет: все разобраны.',
+      review: 'Перепроверять нечего.',
+      rejected: 'Отклонённых записей нет.',
+      obsolete: 'Устаревших записей нет.',
+    },
+    emptyKind: 'Записей этого вида здесь нет.',
+    more_one: 'Ещё {{count}}',
+    more_few: 'Ещё {{count}}',
+    more_many: 'Ещё {{count}}',
+    more_other: 'Ещё {{count}}',
+  },
+  knowledgeItem: {
+    back: 'Знания',
+    previous: 'Предыдущая запись',
+    next: 'Следующая запись',
+    position: '{{position}} из {{total}}',
+    missing: 'Такой записи нет',
+    missingHint: 'Возможно, черновик удалили. Вернитесь к списку знаний.',
+    content: 'Содержание',
+    notFilled: 'не заполнено',
+    rationale: 'Обоснование',
+    noRationale: 'Обоснование не записано.',
+    links: 'Связи',
+    linksDescription: 'На что опирается запись и что опирается на неё.',
+    noLinks: 'Связей нет.',
+    noLinksHint:
+      'Связей пока нет. Свяжите запись с персонами, терминами, решениями и требованиями, на которые она опирается, — так её смысл понятен без пересказа.',
+    notInIndex: 'не найдена: удалена или за пределами первых 200 записей.',
+    seeAbove: '(см. выше)',
+    replaces: 'Заменяет',
+    replacedBy: 'Заменена на',
+    dependencies: 'Цепочка зависимостей',
+    dependenciesDescription:
+      'Черновики из цепочки утвердятся вместе с этой записью, одним шагом.',
+    properties: 'Свойства',
+    key: 'Ключ',
+    kind: 'Вид',
+    status: 'Статус',
+    version: 'Версия',
+    source: 'Источник',
+    history: 'История',
+    events: {
+      recorded: 'Записано',
+      edited: 'Изменено',
+      approved: 'Утверждено',
+      rejected: 'Отклонено',
+      superseded: 'Заменено',
+      retired: 'Выведено из обращения',
+    },
+    approve: 'Утвердить',
+    approveWith_one: 'Утвердить вместе с {{count}} черновиком',
+    approveWith_few: 'Утвердить вместе с {{count}} черновиками',
+    approveWith_many: 'Утвердить вместе с {{count}} черновиками',
+    approveWith_other: 'Утвердить вместе с {{count}} черновика',
+    approveBlocked:
+      'Утвердить пока нельзя: сначала разберите {{keys}} — там черновик на проверке, черновик, который вам не утвердить, или отклонённая либо устаревшая запись.',
+    edit: 'Править',
+    more: 'Другие действия',
+    reject: 'Отклонить',
+    rejectTitle: 'Отклонить <mono>{{key}}</mono>?',
+    rejectDescription:
+      'Черновик останется в журнале как отклонённый. Причина поможет автору и агентам не предлагать его снова.',
+    reason: 'Причина',
+    reasonHint: 'Необязательно.',
+    delete: 'Удалить черновик',
+    deleteTitle: 'Удалить <mono>{{key}}</mono>?',
+    deleteDescription:
+      'Черновик исчезнет без следа. Если он записан по ошибке — удаляйте; если он неверен по сути — лучше отклонить.',
+    deleteConfirm: 'Удалить',
+    recordReplacement: 'Записать замену',
+    retire: 'Вывести из обращения',
+    retireTitle: 'Вывести <mono>{{key}}</mono> из обращения?',
+    retireDescription:
+      'Запись станет устаревшей, и замены у неё не будет. Записи, которые от неё зависят, попадут на проверку.',
+    retireConfirm: 'Вывести',
+    confirm: 'Всё ещё верно',
+    needsReviewTitle: 'Требует проверки',
+    needsReview:
+      'Изменилось то, на чём держится запись: <keys/>. Проверьте, верна ли она ещё. Если нет — поправьте черновик или запишите замену.',
+    dependencyNeedsReview:
+      'Что-то дальше по цепочке зависимостей ждёт проверки.',
+    supersedes: 'После утверждения заменит <key/>.',
+    supersededBy: 'Заменена записью <key/>.',
+    rejectedBecause: 'Отклонена. Причина: {{reason}}',
+    rejectedNoReason: 'Отклонена без указания причины.',
+    retiredBecause: 'Выведена из обращения. Причина: {{reason}}',
+    retiredNoReason: 'Выведена из обращения без указания причины.',
+    answeredBy: 'Ответ записан в <keys/>.',
+    stillOpen: 'Вопрос открыт: утверждённого ответа пока нет.',
+    by: '{{who}}, <mono>{{date}}</mono>',
+  },
+  knowledgeEditor: {
+    titleNew: 'Новый черновик',
+    titleEdit: 'Правка <mono>{{key}}</mono>',
+    titleReplacement: 'Замена <mono>{{key}}</mono>',
+    descriptionNew:
+      'Вид: {{kind}}. Черновик станет знанием только после утверждения.',
+    descriptionEdit:
+      'Вид: {{kind}}. Править можно, пока черновик не утверждён.',
+    descriptionReplacement:
+      'Вид: {{kind}}. Когда черновик утвердят, он заменит {{key}}, а {{key}} устареет.',
+    about: 'Запись',
+    content: 'Содержание',
+    title: 'Заголовок',
+    titleHint: 'Коротко, чтобы узнать запись в списке.',
+    rationale: 'Обоснование',
+    rationaleHint:
+      'Откуда это известно: встреча, документ, чьё-то решение. Необязательно.',
+    links: 'Связи',
+    linksHint:
+      'На какие записи опирается эта. Утвердить её можно, только когда утверждено всё, от чего она зависит.',
+    addLink: 'Добавить связь',
+    linkType: 'Тип связи',
+    linkTarget: 'Запись',
+    chooseTarget: 'Выберите запись',
+    removeLink: 'Убрать связь',
+    noTargets: 'Других записей пока нет.',
+    addEntry: 'Добавить строку',
+    removeEntry: 'Убрать строку',
+    alternative: 'Вариант',
+    alternativeReason: 'Почему отвергнут',
+    addAlternative: 'Добавить вариант',
+    removeAlternative: 'Убрать вариант',
+    none: 'Не указано',
+    submitNew: 'Записать черновик',
+    submitEdit: 'Сохранить',
+    notDraft:
+      'Это уже не черновик: утверждённую запись не правят. Чтобы изменить её, запишите замену.',
+    cannotEdit:
+      'Править черновики в этом проекте вам нельзя: нужен доступ «пишет» или «утверждает».',
+    notRecordable: 'Записывать знания этого вида вам нельзя.',
+    unknownKind: 'Выберите, что записать, на странице знаний.',
+    changed:
+      'Пока вы правили, черновик изменил кто-то ещё. Скопируйте свои правки, откройте черновик заново и повторите.',
+    missingSuperseded: 'Заменяемая запись не найдена.',
+    leaveTitle: 'Уйти без сохранения?',
+    leaveDescription: 'Введённое на этой странице пропадёт.',
+    leave: 'Уйти',
+    stay: 'Остаться',
   },
   interview: {
     title: 'Интервью',
@@ -349,6 +728,45 @@ export const ru = {
     INVALID_PERSONAL_ACCESS_TOKEN_NAME: 'Введите название токена',
     INVALID_PERSONAL_ACCESS_TOKEN_LIFETIME: 'Выберите срок действия',
     PERSONAL_ACCESS_TOKEN_NOT_FOUND: 'Токен не найден',
+    KNOWLEDGE_ITEM_NOT_FOUND: 'Такой записи нет',
+    KNOWLEDGE_ITEM_CHANGED:
+      'Запись изменилась, пока вы её читали. Мы показали новую версию — проверьте её и повторите',
+    KNOWLEDGE_ITEM_NOT_DRAFT:
+      'Это уже не черновик: его утвердили или отклонили',
+    KNOWLEDGE_ITEM_NOT_APPROVED: 'Запись больше не утверждена',
+    KNOWLEDGE_ITEM_NOT_MARKED: 'Запись уже не требует проверки',
+    KNOWLEDGE_ITEM_NEEDS_REVIEW:
+      'Сначала проверьте запись: изменилось то, на чём она держится',
+    KNOWLEDGE_ITEM_LINKED:
+      'На этот черновик ссылаются другие записи. Сначала уберите эти связи',
+    KNOWLEDGE_KIND_MISMATCH: 'Вид черновика менять нельзя',
+    KNOWLEDGE_RECORDING_FORBIDDEN: 'Записывать знания этого вида вам нельзя',
+    KNOWLEDGE_RETIREMENT_FORBIDDEN:
+      'Выводить из обращения может только тот, кто утверждает в проекте',
+    KNOWLEDGE_CONFIRMATION_FORBIDDEN:
+      'Подтвердить эту запись может только тот, кто утверждает в проекте',
+    DRAFT_APPROVAL_FORBIDDEN:
+      'Утверждать может только тот, кто утверждает в проекте',
+    DRAFT_REJECTION_FORBIDDEN:
+      'Отклонять может только тот, кто утверждает в проекте',
+    DRAFT_EDITING_FORBIDDEN: 'Править черновики вам нельзя',
+    DRAFT_DELETION_FORBIDDEN: 'Удалять черновики вам нельзя',
+    DEPENDENCIES_NOT_APPROVED:
+      'Не всё, от чего зависит запись, утверждено. Утвердите их вместе',
+    SUPERSEDED_ITEM_NOT_APPROVED:
+      'Заменяемая запись уже не утверждена: её заменили или вывели из обращения',
+    PRODUCT_OVERVIEW_ALREADY_APPROVED:
+      'Обзор продукта уже утверждён. Запишите новый как его замену',
+    INVALID_KNOWLEDGE_TITLE: 'Введите заголовок до 200 символов',
+    INVALID_KNOWLEDGE_FIELDS: 'Проверьте поля записи',
+    INVALID_RATIONALE: 'Обоснование — не больше 2000 символов',
+    RATIONALE_REQUIRED: 'Запишите обоснование',
+    INVALID_REJECTION_REASON: 'Причина — не больше 2000 символов',
+    INVALID_RETIREMENT_REASON: 'Причина — не больше 2000 символов',
+    INVALID_LINK: 'Проверьте связи',
+    LINK_TARGET_NOT_FOUND: 'Запись, на которую ведёт связь, не найдена',
+    LINK_TARGET_NOT_CURRENT:
+      'Связь ведёт на отклонённую или устаревшую запись. Выберите актуальную',
     PERSONAL_ACCESS_TOKEN_REVOCATION_FORBIDDEN:
       'Отозвать этот токен может только его автор или владелец',
   },

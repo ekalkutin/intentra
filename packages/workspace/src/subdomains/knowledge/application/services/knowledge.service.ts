@@ -1,20 +1,22 @@
 import { Injectable } from '@nestjs/common';
 
-import type {
-  ApproveKnowledgeItemDto,
-  ApproveKnowledgeItemsDto,
-  CallerDto,
-  ConfirmKnowledgeItemDto,
-  DeleteKnowledgeItemDto,
-  EditKnowledgeItemDto,
-  KnowledgeApi,
-  KnowledgeDependenciesDto,
-  KnowledgeItemDto,
-  KnowledgeItemPageDto,
-  ListKnowledgeItemsDto,
-  RecordKnowledgeItemDto,
-  RejectKnowledgeItemDto,
-  RetireKnowledgeItemDto,
+import {
+  KnowledgeListOrderDtoSchema,
+  type ApproveKnowledgeItemDto,
+  type ApproveKnowledgeItemsDto,
+  type CallerDto,
+  type ConfirmKnowledgeItemDto,
+  type DeleteKnowledgeItemDto,
+  type EditKnowledgeItemDto,
+  type KnowledgeApi,
+  type KnowledgeDependenciesDto,
+  type KnowledgeItemDto,
+  type KnowledgeItemPageDto,
+  type KnowledgeSummaryDto,
+  type ListKnowledgeItemsDto,
+  type RecordKnowledgeItemDto,
+  type RejectKnowledgeItemDto,
+  type RetireKnowledgeItemDto,
 } from '@intentra/contracts/workspace';
 import { ProjectId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
@@ -50,8 +52,10 @@ import {
   toKnowledgeDependencyDto,
   toKnowledgeItemDto,
   toKnowledgeSource,
+  toKnowledgeSummaryDto,
 } from '../mappers/index.js';
 import {
+  KNOWLEDGE_ITEM_ORDERS,
   KnowledgeItemRepository,
   KnowledgeKeyCounter,
 } from '../ports/outbound/index.js';
@@ -157,6 +161,10 @@ export class KnowledgeService implements KnowledgeApi {
     const items = await this.knowledgeItemRepository.findMany(props, {
       take: query.take,
       offset: query.offset,
+      order:
+        query.order === KnowledgeListOrderDtoSchema.enum['newest-first']
+          ? KNOWLEDGE_ITEM_ORDERS.newestFirst
+          : KNOWLEDGE_ITEM_ORDERS.byKey,
     });
     const total = await this.knowledgeItemRepository.count(props);
     const answers = await this.findAnswers(project.id, items);
@@ -170,6 +178,23 @@ export class KnowledgeService implements KnowledgeApi {
       total,
       access: toKnowledgeAccessDto(projectRole),
     };
+  }
+
+  public async summary(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+  ): Promise<KnowledgeSummaryDto> {
+    const { project, projectRole } = await this.resolve(
+      caller,
+      workspaceId,
+      projectId,
+    );
+    const counts = await this.knowledgeItemRepository.countGroups({
+      projectId: project.id,
+    });
+
+    return toKnowledgeSummaryDto(counts, projectRole);
   }
 
   public async get(

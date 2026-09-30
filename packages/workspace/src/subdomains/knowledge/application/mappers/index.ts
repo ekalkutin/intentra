@@ -11,3 +11,4 @@ export {
   toKnowledgeItemDto,
 } from './knowledge-item.mapper.js';
 export { toKnowledgeSource } from './knowledge-source.mapper.js';
+export { toKnowledgeSummaryDto } from './knowledge-summary.mapper.js';

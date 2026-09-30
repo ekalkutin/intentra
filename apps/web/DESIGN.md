@@ -162,6 +162,9 @@ A cool neutral ramp (hue 286, near-zero chroma) with one muted indigo accent and
 - **Review Amber** (`warning`): the triangle of "needs review".
 - **Destructive Red** (`destructive`): destructive buttons, field errors, load failures, the "declined" status icon.
 
+### Kind Tones
+- **Eleven muted hues** (`--kind-<kind>`, class `text-kind-<kind>`; light `oklch(0.58 0.09 h)`, dark `oklch(0.75 0.08 h)`; Open Question stays neutral grey): each Kind of knowledge has one, used only on its icon (`KindIcon`, `KindBadge`) in lists, the Kinds navigation, previews and the overview. Hues sit away from the signal hues and the indigo. User decision, 2026-10-01.
+
 ### Neutral
 - **Canvas White** (`canvas`): the work area and the page ground inside it.
 - **Surface White** (`surface`): list blocks, popovers, dialogs; one step brighter than the canvas.
@@ -271,6 +274,14 @@ There are no content cards. The container is the **List**: a 1px-bordered, 0.5re
 ### Initial Tile
 A square with the first letter of a name (hairline border, canvas fill, muted 600 capital) standing in for a picture of a Project or Workspace, at 1.25rem in menus and 2rem in the switcher, 0.4rem radius, 0.75rem letter (0.875rem in the large tile).
 
+### Knowledge Items
+- **Kind Badge:** the Kind's toned icon plus its name in muted text; never a filled chip.
+- **Fact Chips:** an item's short facts (choices, list sizes, one-line texts) as 1.25rem outline chips in muted text, under its statement in rows, tiles and previews.
+- **Related Tiles:** on an item's page, linked items are bordered tiles (0.5rem radius, 0.75rem padding) in a two-column grid from 768px, grouped under the Link's meaning with an arrow for out or in; each shows key, Kind, status, title, three lines of statement and facts, and opens the item. Rejected and Obsolete tiles fade to 70%. This is the one sanctioned tile grid: it previews content, it does not structure the page.
+- **Dependency Tree:** the `depends-on` cascade as indented rows inside one bordered block, joined by hairline elbows.
+- **Markdown:** item texts render as Markdown at body size (14px, 1.5rem leading, measure 68ch): lists, emphasis, inline code on muted, code blocks and tables in hairline blocks. Knowledge Keys in text become mono links with a hover preview of the item.
+- **History:** a hairline timeline with small dots; only the approval (green) and the rejection (red) dots take colour, and a reason sits under its event.
+
 ### Navigating Row
 A list row that leads somewhere takes `interactive`: its link stretches over the row, the row washes with muted grey at 60% on hover and on focus-within, and keyboard focus draws an inset indigo ring (2px at 50%, the same strength as the primitives) on the whole row.
 
@@ -288,7 +299,7 @@ A list row that leads somewhere takes `interactive`: its link stretches over the
 - **Do** keep the page settle (220ms, ease-out-expo, 0.25rem rise) as the only page-level motion, collapsed under reduced motion.
 
 ### Don't:
-- **Don't** build card grids, metric tiles or boxed dashboard panels.
+- **Don't** build card grids, metric tiles or boxed dashboard panels (the Related Tiles of linked knowledge are the one exception).
 - **Don't** add eyebrows, kickers or uppercase tracked labels above headings.
 - **Don't** blur anything; dim with the plain scrim.
 - **Don't** add decorative icons; an icon either names a navigation target, an action or a status.

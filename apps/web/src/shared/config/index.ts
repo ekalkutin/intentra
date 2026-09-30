@@ -1,9 +1,13 @@
 export {
+  KNOWLEDGE_PAGES,
+  KNOWLEDGE_SEARCH_PARAMS,
   PROJECT_PAGES,
   RETURN_TO_PARAM,
   ROUTE_PARAMS,
   ROUTES,
   WORKSPACE_PAGES,
+  knowledgeItemPath,
+  newKnowledgeItemPath,
   projectPath,
   workspacePath,
   type ProjectPage,

@@ -1,8 +1,7 @@
-import {
-  KnowledgeKindDtoSchema,
-  KnowledgeStatusDtoSchema,
-  type KnowledgeItemDto,
-  type KnowledgeKindDto,
+import type {
+  KnowledgeItemDto,
+  KnowledgeKindDto,
+  KnowledgeKindSummaryDto,
 } from '@intentra/contracts/workspace';
 
 export type KindSummary = {
@@ -16,33 +15,29 @@ export type KnowledgeSummary = {
   readonly kinds: KindSummary[];
   readonly approved: number;
   readonly drafts: number;
-  /** Drafts, the most recently recorded first. */
-  readonly awaitingApproval: KnowledgeItemDto[];
+  /** Drafts and Approved items marked Needs Review. */
+  readonly needsReview: number;
+  /** The newest Drafts, as the server ordered them. */
+  readonly awaitingApproval: readonly KnowledgeItemDto[];
 };
 
-/** Counts a Project's Drafts and Approved items by Kind. */
+/** The overview's counts, from the Project's summary, and the Drafts to show. */
 export function summarizeKnowledge(
-  items: readonly KnowledgeItemDto[],
+  kinds: readonly KnowledgeKindSummaryDto[],
+  drafts: readonly KnowledgeItemDto[],
 ): KnowledgeSummary {
-  const drafts = items.filter(
-    item => item.status === KnowledgeStatusDtoSchema.enum.draft,
-  );
-  const approved = items.filter(
-    item => item.status === KnowledgeStatusDtoSchema.enum.approved,
-  );
-  const countOf = (list: readonly KnowledgeItemDto[], kind: KnowledgeKindDto) =>
-    list.filter(item => item.kind === kind).length;
+  const total = (pick: (kind: KnowledgeKindSummaryDto) => number) =>
+    kinds.reduce((sum, kind) => sum + pick(kind), 0);
 
   return {
-    kinds: KnowledgeKindDtoSchema.options.map(kind => ({
+    kinds: kinds.map(({ kind, statuses }) => ({
       kind,
-      approved: countOf(approved, kind),
-      drafts: countOf(drafts, kind),
+      approved: statuses.approved,
+      drafts: statuses.draft,
     })),
-    approved: approved.length,
-    drafts: drafts.length,
-    awaitingApproval: [...drafts].sort((a, b) =>
-      b.recordedAt.localeCompare(a.recordedAt),
-    ),
+    approved: total(kind => kind.statuses.approved),
+    drafts: total(kind => kind.statuses.draft),
+    needsReview: total(kind => kind.needsReview),
+    awaitingApproval: drafts,
   };
 }

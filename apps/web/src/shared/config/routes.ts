@@ -2,6 +2,7 @@
 export const ROUTE_PARAMS = {
   workspaceSlug: 'workspaceSlug',
   projectSlug: 'projectSlug',
+  knowledgeKey: 'knowledgeKey',
 } as const;
 
 const WORKSPACE_BASE = '/w';
@@ -58,6 +59,51 @@ export function projectPath(
   const base = `${workspacePath(workspaceSlug)}/${PROJECT_BASE}/${encodeURIComponent(projectSlug)}`;
 
   return page ? `${base}/${page}` : base;
+}
+
+const EDIT_SEGMENT = 'edit';
+
+/** The pages under a Project's knowledge, relative to it. */
+export const KNOWLEDGE_PAGES = {
+  new: 'new',
+  item: `:${ROUTE_PARAMS.knowledgeKey}`,
+  edit: `:${ROUTE_PARAMS.knowledgeKey}/${EDIT_SEGMENT}`,
+} as const;
+
+/** The query parameters of the knowledge pages. */
+export const KNOWLEDGE_SEARCH_PARAMS = {
+  /** Which part of the knowledge the list shows. */
+  view: 'view',
+  kind: 'kind',
+  /** The Knowledge Key a new Draft replaces. */
+  supersedes: 'supersedes',
+} as const;
+
+/** The path of one Knowledge Item, or of its editing page. */
+export function knowledgeItemPath(
+  workspaceSlug: string,
+  projectSlug: string,
+  key: string,
+  { edit = false }: { readonly edit?: boolean } = {},
+): string {
+  const base = `${projectPath(workspaceSlug, projectSlug, PROJECT_PAGES.knowledge)}/${encodeURIComponent(key)}`;
+
+  return edit ? `${base}/${EDIT_SEGMENT}` : base;
+}
+
+/** The path of the page that records a new Draft of a Kind, perhaps replacing an Approved item. */
+export function newKnowledgeItemPath(
+  workspaceSlug: string,
+  projectSlug: string,
+  kind: string,
+  supersedes?: string,
+): string {
+  const params = new URLSearchParams({ [KNOWLEDGE_SEARCH_PARAMS.kind]: kind });
+  if (supersedes) {
+    params.set(KNOWLEDGE_SEARCH_PARAMS.supersedes, supersedes);
+  }
+
+  return `${projectPath(workspaceSlug, projectSlug, PROJECT_PAGES.knowledge)}/${KNOWLEDGE_PAGES.new}?${params.toString()}`;
 }
 
 /** The query parameter that carries where to go back to after signing in. */

@@ -5,6 +5,14 @@ import {
   KnowledgeStatusDtoSchema,
 } from './knowledge-kind.dto.js';
 
+/**
+ * How a list is ordered: by Kind, then the Knowledge Key's number (the
+ * default), or the most recently recorded first.
+ */
+export const KnowledgeListOrderDtoSchema = z.enum(['by-key', 'newest-first']);
+
+export type KnowledgeListOrderDto = z.infer<typeof KnowledgeListOrderDtoSchema>;
+
 export const ListKnowledgeItemsDtoSchema = z.object({
   kind: KnowledgeKindDtoSchema.optional(),
   /**
@@ -24,6 +32,8 @@ export const ListKnowledgeItemsDtoSchema = z.object({
       z.boolean(),
     )
     .optional(),
+  /** By Kind and Knowledge Key when left out. */
+  order: KnowledgeListOrderDtoSchema.optional(),
   take: z.coerce.number().int().min(1).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
 });

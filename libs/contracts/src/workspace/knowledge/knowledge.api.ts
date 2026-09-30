@@ -13,6 +13,7 @@ import type {
   KnowledgeDependenciesDto,
   KnowledgeItemDto,
   KnowledgeItemPageDto,
+  KnowledgeSummaryDto,
 } from './knowledge-item.dto.js';
 import type { ListKnowledgeItemsDto } from './list-knowledge-items.dto.js';
 import type { RecordKnowledgeItemDto } from './record-knowledge-item.dto.js';
@@ -37,13 +38,23 @@ export abstract class KnowledgeApi {
     data: RecordKnowledgeItemDto,
   ): Promise<KnowledgeItemDto>;
 
-  /** Sorted by Kind, then by the Knowledge Key's number. */
+  /** Sorted by Kind, then by the Knowledge Key's number, or the newest first when asked. */
   abstract list(
     caller: CallerDto,
     workspaceId: string,
     projectId: string,
     query: ListKnowledgeItemsDto,
   ): Promise<KnowledgeItemPageDto>;
+
+  /**
+   * Counts the Project's items by Kind and status, and those marked Needs
+   * Review, over the whole Project (a list is read a page at a time).
+   */
+  abstract summary(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+  ): Promise<KnowledgeSummaryDto>;
 
   /** Reads a Knowledge Item in any status, Rejected included. */
   abstract get(

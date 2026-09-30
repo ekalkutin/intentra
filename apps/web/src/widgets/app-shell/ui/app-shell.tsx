@@ -1,10 +1,11 @@
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useParams } from 'react-router';
 
 import { useCurrentProject } from '@/entities/project';
 import { useCurrentWorkspace } from '@/entities/workspace';
 import { ROUTE_PARAMS, ROUTES, workspacePath } from '@/shared/config';
+import { useScrollRestoration } from '@/shared/lib';
 import {
   Button,
   Page,
@@ -25,6 +26,8 @@ export function AppShell() {
   const { t } = useTranslation();
   const params = useParams();
   const [searching, setSearching] = useState(false);
+  const canvas = useRef<HTMLDivElement>(null);
+  useScrollRestoration(canvas);
   const current = useCurrentWorkspace();
   const currentProject = useCurrentProject(
     current.workspace?.id,
@@ -45,7 +48,10 @@ export function AppShell() {
       />
       <SidebarInset className='min-w-0 overflow-hidden md:shadow-(--canvas-shadow) md:ring-1 md:ring-border'>
         <AppHeader onSearch={() => setSearching(true)} />
-        <div className='min-h-0 flex-1 overflow-y-auto'>
+        <div
+          ref={canvas}
+          className='min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto'
+        >
           {current.isMissing ? (
             <Missing
               title={t('shell.workspaceMissing')}

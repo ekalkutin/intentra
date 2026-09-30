@@ -2,14 +2,24 @@ import { MessagesSquare, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
+import {
+  KNOWLEDGE_VIEWS,
+  useKnowledgeItemsQuery,
+  useKnowledgeSummaryQuery,
+} from '@/entities/knowledge-item';
 import { useMembersQuery } from '@/entities/member';
 import { useCurrentProject } from '@/entities/project';
 import { useCurrentWorkspace } from '@/entities/workspace';
 import { toApiError } from '@/shared/api';
-import { PROJECT_PAGES, projectPath } from '@/shared/config';
+import {
+  KNOWLEDGE_SEARCH_PARAMS,
+  PROJECT_PAGES,
+  projectPath,
+} from '@/shared/config';
 import { useDescribeError } from '@/shared/i18n';
 import {
   Alert,
+  AlertAction,
   AlertDescription,
   Button,
   LoadError,
@@ -18,16 +28,15 @@ import {
   PageSection,
   PageSkeleton,
 } from '@/shared/ui';
-import { KnowledgeStatusDtoSchema } from '@intentra/contracts/workspace';
+import {
+  KnowledgeListOrderDtoSchema,
+  KnowledgeStatusDtoSchema,
+} from '@intentra/contracts/workspace';
 
-import { useKnowledgeItemsQuery } from '../api/knowledge-api';
 import { summarizeKnowledge } from '../model/summary';
 
-import { AwaitingApproval } from './awaiting-approval';
+import { AWAITING_SHOWN, AwaitingApproval } from './awaiting-approval';
 import { Contents } from './contents';
-
-/** The most items one request reads; a larger Project is counted in part. */
-const COUNTED = 200;
 
 /**
  * The Project's table of contents: what is signed by Kind, what waits for a
@@ -43,21 +52,17 @@ export function ProjectOverviewPage() {
     projectId: project?.id ?? '',
   };
   const skip = !workspace || !project;
-  const knowledge = useKnowledgeItemsQuery(
+  const knowledge = useKnowledgeSummaryQuery(scope, { skip });
+  // The newest Drafts, as the server orders them; the counts come from the summary.
+  const drafts = useKnowledgeItemsQuery(
     {
       ...scope,
       filter: {
-        statuses: [
-          KnowledgeStatusDtoSchema.enum.draft,
-          KnowledgeStatusDtoSchema.enum.approved,
-        ],
-        take: COUNTED,
+        statuses: [KnowledgeStatusDtoSchema.enum.draft],
+        order: KnowledgeListOrderDtoSchema.enum['newest-first'],
+        take: AWAITING_SHOWN,
       },
     },
-    { skip },
-  );
-  const needsReview = useKnowledgeItemsQuery(
-    { ...scope, filter: { needsReview: true, take: 1 } },
     { skip },
   );
   const { data: members = [] } = useMembersQuery(workspace?.id ?? '', {
@@ -69,9 +74,12 @@ export function ProjectOverviewPage() {
     return <PageSkeleton />;
   }
 
-  const summary = summarizeKnowledge(knowledge.data?.items ?? []);
-  const total = knowledge.data?.total ?? 0;
-  const reviewCount = needsReview.data?.total ?? 0;
+  const summary = summarizeKnowledge(
+    knowledge.data?.kinds ?? [],
+    drafts.data?.items ?? [],
+  );
+  const total = summary.approved + summary.drafts;
+  const reviewCount = summary.needsReview;
   const emailOf = (memberId: string) =>
     members.find(member => member.id === memberId)?.email;
 
@@ -108,10 +116,24 @@ export function ProjectOverviewPage() {
       />
       {reviewCount > 0 && (
         <Alert>
-          <TriangleAlert className='text-warning' />
+          <TriangleAlert className='text-warning!' />
           <AlertDescription className='text-foreground'>
             {t('overview.needsReview', { count: reviewCount })}
           </AlertDescription>
+          <AlertAction>
+            <Button
+              variant='outline'
+              size='sm'
+              render={
+                <Link
+                  to={`${projectPath(workspace.slug, project.slug, PROJECT_PAGES.knowledge)}?${KNOWLEDGE_SEARCH_PARAMS.view}=${KNOWLEDGE_VIEWS.review}`}
+                />
+              }
+              nativeButton={false}
+            >
+              {t('overview.openReview')}
+            </Button>
+          </AlertAction>
         </Alert>
       )}
       {loadError ? (
@@ -134,12 +156,11 @@ export function ProjectOverviewPage() {
               title={t('overview.contents')}
               description={t('overview.contentsDescription')}
             >
-              <Contents kinds={summary.kinds} />
-              {total > COUNTED && (
-                <p className='text-xs text-muted-foreground'>
-                  {t('overview.truncated', { shown: COUNTED, total })}
-                </p>
-              )}
+              <Contents
+                kinds={summary.kinds}
+                workspaceSlug={workspace.slug}
+                projectSlug={project.slug}
+              />
             </PageSection>
             <PageSection
               title={
@@ -157,6 +178,8 @@ export function ProjectOverviewPage() {
               <AwaitingApproval
                 drafts={summary.awaitingApproval}
                 emailOf={emailOf}
+                workspaceSlug={workspace.slug}
+                projectSlug={project.slug}
               />
             </PageSection>
           </div>

@@ -168,6 +168,30 @@ describe('Knowledge tools over MCP', () => {
     expect(withDrafts.structuredContent?.canRecord).toHaveLength(11);
   });
 
+  it('counts the knowledge by Kind and status in one call', async () => {
+    // Arrange
+    await callTool('record_requirement', { projectId, ...requirement });
+
+    // Act
+    const result = await callTool('get_knowledge_summary', { projectId });
+
+    // Assert
+    expect(result.isError).toBeFalsy();
+    const kinds = (result.structuredContent?.kinds ?? []) as {
+      kind: string;
+    }[];
+    expect(kinds).toHaveLength(11);
+    expect(kinds.find(entry => entry.kind === 'requirement')).toEqual({
+      kind: 'requirement',
+      draft: 1,
+      approved: 0,
+      rejected: 0,
+      obsolete: 0,
+      needsReview: 0,
+    });
+    expect(result.structuredContent?.canRecord).toHaveLength(11);
+  });
+
   it('refuses a recording without a rationale', async () => {
     // Act
     const result = await callTool('record_term', {

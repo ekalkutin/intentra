@@ -2,6 +2,13 @@ import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '@/shared/lib';
 
+/**
+ * The link of an `interactive` row: it stretches over the whole row and draws
+ * the row's keyboard focus.
+ */
+export const LIST_ROW_LINK_CLASS =
+  'outline-none after:absolute after:inset-0 after:content-[""] focus-visible:after:ring-2 focus-visible:after:ring-ring/50 focus-visible:after:ring-inset';
+
 /** Rows in one bordered block, divided by hairlines. */
 export function List({ className, ...props }: ComponentProps<'ul'>) {
   return (

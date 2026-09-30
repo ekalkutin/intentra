@@ -1,11 +1,13 @@
 import { Injectable, Provider } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model } from 'mongoose';
+import { Types, type Model } from 'mongoose';
 
 import { MongooseUnitOfWork } from '@intentra/platform-persistence';
 
 import {
+  KNOWLEDGE_ITEM_ORDERS,
   KnowledgeItemRepository,
+  type KnowledgeItemCount,
   type KnowledgeItemDeleteProps,
   type KnowledgeItemPage,
   type KnowledgeItemQueryProps,
@@ -14,6 +16,7 @@ import { KnowledgeItem } from '../../../domain/entities/index.js';
 import {
   createKnowledgeContent,
   KnowledgeKind,
+  KnowledgeStatus,
   type KnowledgeItemId,
 } from '../../../domain/value-objects/index.js';
 import { KnowledgeItemModel } from '../../database/index.js';
@@ -86,9 +89,12 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
     if (matchesNothing(props)) {
       return [];
     }
-    let query = this.knowledgeItemModel
-      .find(this.toFilter(props))
-      .sort({ kind: 1, number: 1 });
+    let query = this.knowledgeItemModel.find(this.toFilter(props)).sort(
+      page?.order === KNOWLEDGE_ITEM_ORDERS.newestFirst
+        ? // The id breaks ties between items recorded in the same millisecond, so pages stay stable.
+          { recordedAt: -1, _id: -1 }
+        : { kind: 1, number: 1 },
+    );
     if (page) {
       query = query.skip(page.offset).limit(page.take);
     }
@@ -109,6 +115,46 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
       .countDocuments(this.toFilter(props))
       .session(this.unitOfWork.session)
       .exec();
+  }
+
+  public async countGroups(
+    props: KnowledgeItemQueryProps,
+  ): Promise<KnowledgeItemCount[]> {
+    if (matchesNothing(props)) {
+      return [];
+    }
+    const groups = await this.knowledgeItemModel
+      .aggregate<{
+        _id: { kind: string; status: string; needsReview: boolean };
+        count: number;
+      }>([
+        // An aggregation is not cast by the schema, unlike find: the id goes as a UUID.
+        {
+          $match: {
+            ...this.toFilter(props),
+            projectId: new Types.UUID(props.projectId.value),
+          },
+        },
+        {
+          $group: {
+            _id: {
+              kind: '$kind',
+              status: '$status',
+              needsReview: { $gt: [{ $size: '$reviewCauses' }, 0] },
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ])
+      .session(this.unitOfWork.session)
+      .exec();
+
+    return groups.map(({ _id, count }) => ({
+      kind: KnowledgeKind.from(_id.kind),
+      status: KnowledgeStatus.from(_id.status),
+      needsReview: _id.needsReview,
+      count,
+    }));
   }
 
   public async delete(id: KnowledgeItemId): Promise<void> {

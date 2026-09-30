@@ -3,8 +3,15 @@ export { Brand } from './components/brand';
 export { ConfirmBySlugDialog } from './components/confirm-by-slug-dialog';
 export { ConfirmDialog } from './components/confirm-dialog';
 export { CopyField } from './components/copy-field';
-export { List, ListEmpty, ListRow, ListSkeleton } from './components/list';
+export {
+  LIST_ROW_LINK_CLASS,
+  List,
+  ListEmpty,
+  ListRow,
+  ListSkeleton,
+} from './components/list';
 export { LoadError } from './components/load-error';
+export { InlineMarkdown, Markdown, type Linkify } from './components/markdown';
 export {
   NameSlugForm,
   type NameSlug,
@@ -50,6 +57,16 @@ export {
   CommandShortcut,
 } from './primitives/command';
 export {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from './primitives/alert-dialog';
+export {
   Dialog,
   DialogClose,
   DialogContent,
@@ -82,6 +99,11 @@ export {
   FieldGroup,
   FieldLabel,
 } from './primitives/field';
+export {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from './primitives/hover-card';
 export { Input } from './primitives/input';
 export { Kbd, KbdGroup } from './primitives/kbd';
 export { Label } from './primitives/label';
@@ -121,7 +143,16 @@ export {
   useSidebar,
 } from './primitives/sidebar';
 export { Spinner } from './primitives/spinner';
+export {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './primitives/table';
 export { Tabs, TabsList, TabsTrigger } from './primitives/tabs';
+export { Textarea } from './primitives/textarea';
 export {
   Tooltip,
   TooltipContent,

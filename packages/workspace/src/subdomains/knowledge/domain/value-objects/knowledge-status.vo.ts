@@ -20,6 +20,10 @@ export class KnowledgeStatus {
     this.#value = value;
   }
 
+  public static get all(): readonly KnowledgeStatus[] {
+    return KnowledgeStatus.#all;
+  }
+
   public static from(value: string): KnowledgeStatus {
     const status = KnowledgeStatus.#all.find(
       candidate => candidate.value === value,

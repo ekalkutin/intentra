@@ -33,6 +33,7 @@ import {
   type KnowledgeDependenciesDto,
   type KnowledgeItemDto,
   type KnowledgeItemPageDto,
+  type KnowledgeSummaryDto,
   type ListKnowledgeItemsDto,
   type RecordKnowledgeItemDto,
   type RejectKnowledgeItemDto,
@@ -71,6 +72,16 @@ export class KnowledgeController {
     query: ListKnowledgeItemsDto,
   ): Promise<KnowledgeItemPageDto> {
     return this.workspace.knowledge.list(caller, workspaceId, projectId, query);
+  }
+
+  // Declared before `:key`, which would otherwise take `summary` for a Knowledge Key.
+  @Get('summary')
+  public async summary(
+    @CurrentCaller() caller: CallerDto,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+  ): Promise<KnowledgeSummaryDto> {
+    return this.workspace.knowledge.summary(caller, workspaceId, projectId);
   }
 
   @Post('approve')

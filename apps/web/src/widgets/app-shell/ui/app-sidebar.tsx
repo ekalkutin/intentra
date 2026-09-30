@@ -55,9 +55,10 @@ export function AppSidebar({
       setOpenMobile(false);
     }
   };
-  const link = (to: string, children: ReactNode) => (
+  /** A section is active on its own page and, unless it is an index, on the pages under it. */
+  const link = (to: string, children: ReactNode, nested = false) => (
     <SidebarMenuButton
-      isActive={pathname === to}
+      isActive={pathname === to || (nested && pathname.startsWith(`${to}/`))}
       className={ITEM_CLASS}
       render={<Link to={to} onClick={closeOnMobile} />}
     >
@@ -93,6 +94,7 @@ export function AppSidebar({
                         <entry.icon />
                         <span>{t(`shell.projectPages.${entry.labelKey}`)}</span>
                       </>,
+                      entry.page !== undefined,
                     )}
                   </SidebarMenuItem>
                 ))}

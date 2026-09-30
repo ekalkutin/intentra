@@ -199,6 +199,123 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
     ).toEqual(['REQ-2', 'REQ-3']);
   });
 
+  it('lists the most recently recorded first when asked', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    for (const body of [
+      requirement,
+      { kind: 'term', title: 'Invoice', fields: { definition: 'A bill' } },
+      { ...requirement, title: 'CSV export' },
+    ]) {
+      await app
+        .request()
+        .post(path)
+        .set('Authorization', ada)
+        .send(body)
+        .expect(HttpStatus.CREATED);
+    }
+
+    // Act
+    const response = await app
+      .request()
+      .get(path)
+      .query({ order: 'newest-first', take: 2 })
+      .set('Authorization', ada);
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.OK);
+    expect(
+      response.body.items.map((item: { key: string }) => item.key),
+    ).toEqual(['REQ-2', 'TERM-1']);
+    expect(response.body.total).toBe(3);
+  });
+
+  it('counts the whole knowledge by Kind and status, marks included', async () => {
+    // Arrange
+    const { ada, bob, path } = await setUp();
+    const record = (body: object) =>
+      app
+        .request()
+        .post(path)
+        .set('Authorization', ada)
+        .send(body)
+        .expect(HttpStatus.CREATED);
+    await record(requirement);
+    await app
+      .request()
+      .post(`${path}/REQ-1/approve`)
+      .set('Authorization', ada)
+      .send({ version: 1 })
+      .expect(HttpStatus.OK);
+    await record({
+      ...requirement,
+      title: 'CSV export',
+      links: [{ type: 'depends-on', key: 'REQ-1' }],
+    });
+    await record({ ...requirement, title: 'Print' });
+    await app
+      .request()
+      .post(`${path}/REQ-3/reject`)
+      .set('Authorization', ada)
+      .send({ version: 1 })
+      .expect(HttpStatus.OK);
+    await app
+      .request()
+      .post(`${path}/REQ-1/retire`)
+      .set('Authorization', ada)
+      .send({ version: 2 })
+      .expect(HttpStatus.OK);
+    await record({
+      kind: 'term',
+      title: 'Invoice',
+      fields: { definition: 'What a customer pays' },
+    });
+
+    // Act
+    const response = await app
+      .request()
+      .get(`${path}/summary`)
+      .set('Authorization', bob);
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.OK);
+    expect(response.body.kinds).toHaveLength(11);
+    expect(
+      response.body.kinds.find(
+        (entry: { kind: string }) => entry.kind === 'requirement',
+      ),
+    ).toEqual({
+      kind: 'requirement',
+      statuses: { draft: 1, approved: 0, rejected: 1, obsolete: 1 },
+      needsReview: 1,
+    });
+    expect(
+      response.body.kinds.find(
+        (entry: { kind: string }) => entry.kind === 'term',
+      ),
+    ).toEqual({
+      kind: 'term',
+      statuses: { draft: 1, approved: 0, rejected: 0, obsolete: 0 },
+      needsReview: 0,
+    });
+    expect(response.body.access).toEqual({ canRecord: [] });
+  });
+
+  it('hides the summary from someone outside the Workspace', async () => {
+    // Arrange
+    const { path } = await setUp();
+    const eve = await signIn('eve@example.com');
+
+    // Act
+    const response = await app
+      .request()
+      .get(`${path}/summary`)
+      .set('Authorization', eve);
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.NOT_FOUND);
+  });
+
   it('reads, edits and deletes a Draft by its Knowledge Key', async () => {
     // Arrange
     const { ada, path } = await setUp();

@@ -120,3 +120,17 @@ export type KnowledgeDependenciesDto = {
   readonly dependencyNeedsReview: boolean;
   readonly links: { readonly from: string; readonly to: string }[];
 };
+
+/** How many items one Kind holds, by status. */
+export type KnowledgeKindSummaryDto = {
+  readonly kind: KnowledgeKindDto;
+  readonly statuses: { readonly [S in KnowledgeStatusDto]: number };
+  /** Drafts and Approved items marked Needs Review. */
+  readonly needsReview: number;
+};
+
+/** How much a Project knows, counted whole: every Kind, in the model's order, empty ones included. */
+export type KnowledgeSummaryDto = {
+  readonly kinds: KnowledgeKindSummaryDto[];
+  readonly access: KnowledgeAccessDto;
+};

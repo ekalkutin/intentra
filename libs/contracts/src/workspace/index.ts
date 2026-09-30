@@ -94,6 +94,8 @@ export {
   type KnowledgeItemAccessDto,
   type KnowledgeItemDto,
   type KnowledgeItemPageDto,
+  type KnowledgeKindSummaryDto,
+  type KnowledgeSummaryDto,
 } from './knowledge/knowledge-item.dto.js';
 export {
   KnowledgeKindDtoSchema,
@@ -111,7 +113,9 @@ export {
   type KnowledgeLinkTypeDto,
 } from './knowledge/knowledge-link.dto.js';
 export {
+  KnowledgeListOrderDtoSchema,
   ListKnowledgeItemsDtoSchema,
+  type KnowledgeListOrderDto,
   type ListKnowledgeItemsDto,
 } from './knowledge/list-knowledge-items.dto.js';
 export {

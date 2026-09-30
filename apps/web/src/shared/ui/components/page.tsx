@@ -27,8 +27,16 @@ export function PageHeader({
   readonly actions?: ReactNode;
 }) {
   return (
-    <header className='flex flex-wrap items-start justify-between gap-x-6 gap-y-3'>
-      <div className='min-w-0 max-w-2xl flex-1'>
+    <header
+      className={cn(
+        'flex flex-wrap justify-between gap-x-6 gap-y-3',
+        // A lone title shares one line with the actions; under a description they keep to the top.
+        description ? 'items-start' : 'items-center',
+      )}
+    >
+      <div
+        className={cn('max-w-2xl min-w-0 flex-1', description && 'basis-64')}
+      >
         <h1 className='text-2xl font-semibold tracking-[-0.02em] text-balance'>
           {title}
         </h1>
@@ -39,7 +47,7 @@ export function PageHeader({
         )}
       </div>
       {actions && (
-        <div className='flex shrink-0 flex-wrap items-center gap-2'>
+        <div className='flex max-w-full shrink-0 flex-wrap items-center gap-2'>
           {actions}
         </div>
       )}

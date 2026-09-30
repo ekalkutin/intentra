@@ -27,9 +27,30 @@ export type KnowledgeItemQueryProps = {
   readonly needsReview?: boolean;
 };
 
+/** How many items share a Kind, a status and whether they are marked Needs Review. */
+export type KnowledgeItemCount = {
+  readonly kind: KnowledgeKind;
+  readonly status: KnowledgeStatus;
+  readonly needsReview: boolean;
+  readonly count: number;
+};
+
+/** How found items are ordered. */
+export const KNOWLEDGE_ITEM_ORDERS = {
+  /** By Kind, then by the Knowledge Key's number. */
+  byKey: 'by-key',
+  /** The most recently recorded first. */
+  newestFirst: 'newest-first',
+} as const;
+
+export type KnowledgeItemOrder =
+  (typeof KNOWLEDGE_ITEM_ORDERS)[keyof typeof KNOWLEDGE_ITEM_ORDERS];
+
 export type KnowledgeItemPage = {
   readonly take: number;
   readonly offset: number;
+  /** By Kind and key when left out. */
+  readonly order?: KnowledgeItemOrder;
 };
 
 /** Exactly one scope, so that a call can never delete every Knowledge Item. */
@@ -41,12 +62,16 @@ export abstract class KnowledgeItemRepository {
   abstract findOne(
     props: KnowledgeItemQueryProps,
   ): Promise<KnowledgeItem | null>;
-  /** Sorted by Kind, then by the Knowledge Key's number; every match without a page. */
+  /** Sorted as the page asks (by Kind, then the Knowledge Key's number, by default); every match without a page. */
   abstract findMany(
     props: KnowledgeItemQueryProps,
     page?: KnowledgeItemPage,
   ): Promise<KnowledgeItem[]>;
   abstract count(props: KnowledgeItemQueryProps): Promise<number>;
+  /** The matching items counted by Kind, status and Needs Review; groups with none left out. */
+  abstract countGroups(
+    props: KnowledgeItemQueryProps,
+  ): Promise<KnowledgeItemCount[]>;
   abstract delete(id: KnowledgeItemId): Promise<void>;
   abstract deleteMany(props: KnowledgeItemDeleteProps): Promise<void>;
 

@@ -7,6 +7,7 @@ import {
   echoTool,
   getKnowledgeDependenciesTool,
   getKnowledgeItemTool,
+  getKnowledgeSummaryTool,
   KIND_TOOLS,
   listKnowledgeTool,
   listProjectsTool,
@@ -23,6 +24,7 @@ export const MCP_TOOLS = Object.fromEntries(
   [
     echoTool,
     listProjectsTool,
+    getKnowledgeSummaryTool,
     listKnowledgeTool,
     getKnowledgeItemTool,
     getKnowledgeDependenciesTool,
@@ -42,6 +44,7 @@ export const MCP_TOOLS = Object.fromEntries(
  */
 export const ORCHESTRATOR_TOOLS = Object.fromEntries(
   [
+    getKnowledgeSummaryTool,
     listKnowledgeTool,
     getKnowledgeItemTool,
     getKnowledgeDependenciesTool,
