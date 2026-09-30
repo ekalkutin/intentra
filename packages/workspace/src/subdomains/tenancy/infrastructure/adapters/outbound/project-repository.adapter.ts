@@ -94,11 +94,11 @@ export class ProjectRepositoryAdapter extends ProjectRepository {
 
   private toDomain(document: ProjectModel): Project {
     return Project.restore({
-      id: document._id,
-      workspaceId: document.workspaceId,
+      id: document._id.toHexString(),
+      workspaceId: document.workspaceId.toHexString(),
       name: document.name,
       slug: document.slug,
-      createdBy: document.createdBy,
+      createdBy: document.createdBy.toHexString(),
     });
   }
 }

@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { SchemaTypes, Types } from 'mongoose';
 
 import {
   KnowledgeKind,
@@ -9,14 +10,14 @@ import {
 
 @Schema({ collection: 'knowledge_items' })
 export class KnowledgeItemModel {
-  @Prop({ type: String, required: true })
-  readonly _id: string;
+  @Prop({ type: SchemaTypes.UUID, required: true })
+  readonly _id: Types.UUID;
 
-  @Prop({ type: String, required: true, index: true })
-  readonly workspaceId: string;
+  @Prop({ type: SchemaTypes.UUID, required: true, index: true })
+  readonly workspaceId: Types.UUID;
 
-  @Prop({ type: String, required: true })
-  readonly projectId: string;
+  @Prop({ type: SchemaTypes.UUID, required: true })
+  readonly projectId: Types.UUID;
 
   @Prop({ type: String, required: true })
   readonly kind: string;
@@ -41,26 +42,26 @@ export class KnowledgeItemModel {
   @Prop({ type: Object, required: true })
   readonly fields: KnowledgeFields;
 
-  @Prop({ type: String, required: true })
-  readonly authorId: string;
+  @Prop({ type: SchemaTypes.UUID, required: true })
+  readonly authorId: Types.UUID;
 
   @Prop({ type: Date, required: true })
   readonly recordedAt: Date;
 
-  @Prop({ type: String, default: null })
-  readonly lastEditedBy: string | null;
+  @Prop({ type: SchemaTypes.UUID, default: null })
+  readonly lastEditedBy: Types.UUID | null;
 
   @Prop({ type: Date, default: null })
   readonly lastEditedAt: Date | null;
 
-  @Prop({ type: String, default: null })
-  readonly approvedBy: string | null;
+  @Prop({ type: SchemaTypes.UUID, default: null })
+  readonly approvedBy: Types.UUID | null;
 
   @Prop({ type: Date, default: null })
   readonly approvedAt: Date | null;
 
-  @Prop({ type: String, default: null })
-  readonly rejectedBy: string | null;
+  @Prop({ type: SchemaTypes.UUID, default: null })
+  readonly rejectedBy: Types.UUID | null;
 
   @Prop({ type: Date, default: null })
   readonly rejectedAt: Date | null;
@@ -72,8 +73,8 @@ export class KnowledgeItemModel {
   @Prop({ type: String, default: null })
   readonly supersedes: string | null;
 
-  @Prop({ type: String, default: null })
-  readonly supersededBy: string | null;
+  @Prop({ type: SchemaTypes.UUID, default: null })
+  readonly supersededBy: Types.UUID | null;
 
   @Prop({ type: Date, default: null })
   readonly supersededAt: Date | null;
@@ -81,8 +82,8 @@ export class KnowledgeItemModel {
   @Prop({ type: String, default: null })
   readonly supersededByKey: string | null;
 
-  @Prop({ type: String, default: null })
-  readonly retiredBy: string | null;
+  @Prop({ type: SchemaTypes.UUID, default: null })
+  readonly retiredBy: Types.UUID | null;
 
   @Prop({ type: Date, default: null })
   readonly retiredAt: Date | null;

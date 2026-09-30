@@ -90,10 +90,10 @@ export class ProjectRoleAssignmentRepositoryAdapter implements ProjectRoleAssign
     document: ProjectRoleAssignmentModel,
   ): ProjectRoleAssignment {
     return ProjectRoleAssignment.restore({
-      id: document._id,
-      workspaceId: document.workspaceId,
-      projectId: document.projectId,
-      memberId: document.memberId,
+      id: document._id.toHexString(),
+      workspaceId: document.workspaceId.toHexString(),
+      projectId: document.projectId.toHexString(),
+      memberId: document.memberId.toHexString(),
       role: document.role,
     });
   }

@@ -81,9 +81,9 @@ export class MemberRepositoryAdapter extends MemberRepository {
 
   private toDomain(document: MemberModel): Member {
     return Member.restore({
-      id: document._id,
-      workspaceId: document.workspaceId,
-      accountId: document.accountId,
+      id: document._id.toHexString(),
+      workspaceId: document.workspaceId.toHexString(),
+      accountId: document.accountId.toHexString(),
       email: document.email,
       role: document.role,
       status: document.status,

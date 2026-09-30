@@ -1,6 +1,6 @@
 import { Injectable, Provider } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model } from 'mongoose';
+import { Types, type Model } from 'mongoose';
 
 import { MongooseUnitOfWork } from '@intentra/platform-persistence';
 import type { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
@@ -31,7 +31,10 @@ export class KnowledgeKeyCounterAdapter implements KnowledgeKeyCounter {
         { projectId: props.projectId.value, kind: props.kind.value },
         {
           $inc: { lastNumber: 1 },
-          $setOnInsert: { workspaceId: props.workspaceId.value },
+          $setOnInsert: {
+            _id: new Types.UUID(),
+            workspaceId: props.workspaceId.value,
+          },
         },
         {
           upsert: true,

@@ -90,7 +90,7 @@ export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
 
   private toDomain(document: WorkspaceModel): Workspace {
     return Workspace.restore({
-      id: document._id,
+      id: document._id.toHexString(),
       name: document.name,
       slug: document.slug,
     });

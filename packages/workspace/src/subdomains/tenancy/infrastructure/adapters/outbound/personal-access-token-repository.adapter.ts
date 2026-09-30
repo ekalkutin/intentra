@@ -99,9 +99,9 @@ export class PersonalAccessTokenRepositoryAdapter extends PersonalAccessTokenRep
 
   private toDomain(document: PersonalAccessTokenModel): PersonalAccessToken {
     return PersonalAccessToken.restore({
-      id: document._id,
-      workspaceId: document.workspaceId,
-      memberId: document.memberId,
+      id: document._id.toHexString(),
+      workspaceId: document.workspaceId.toHexString(),
+      memberId: document.memberId.toHexString(),
       name: document.name,
       level: document.level,
       secretHash: document.secretHash,

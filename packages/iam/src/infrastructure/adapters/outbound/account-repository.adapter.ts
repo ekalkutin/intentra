@@ -57,7 +57,7 @@ export class AccountRepositoryAdapter implements AccountRepository {
 
   private toDomain(document: AccountModel): Account {
     return Account.restore({
-      id: document._id,
+      id: document._id.toHexString(),
       email: document.email,
       passwordHash: document.passwordHash,
     });

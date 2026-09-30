@@ -1,9 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { SchemaTypes, Types } from 'mongoose';
 
 @Schema({ collection: 'workspaces' })
 export class WorkspaceModel {
-  @Prop({ type: String, required: true })
-  readonly _id: string;
+  @Prop({ type: SchemaTypes.UUID, required: true })
+  readonly _id: Types.UUID;
 
   @Prop({ type: String, required: true })
   readonly name: string;

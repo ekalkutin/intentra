@@ -1,15 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { SchemaTypes, Types } from 'mongoose';
 
 @Schema({ collection: 'members' })
 export class MemberModel {
-  @Prop({ type: String, required: true })
-  readonly _id: string;
+  @Prop({ type: SchemaTypes.UUID, required: true })
+  readonly _id: Types.UUID;
 
-  @Prop({ type: String, required: true })
-  readonly workspaceId: string;
+  @Prop({ type: SchemaTypes.UUID, required: true })
+  readonly workspaceId: Types.UUID;
 
-  @Prop({ type: String, required: true, index: true })
-  readonly accountId: string;
+  @Prop({ type: SchemaTypes.UUID, required: true, index: true })
+  readonly accountId: Types.UUID;
 
   @Prop({ type: String, required: true })
   readonly email: string;

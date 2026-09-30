@@ -93,10 +93,10 @@ export class InvitationRepositoryAdapter extends InvitationRepository {
 
   private toDomain(document: InvitationModel): Invitation {
     return Invitation.restore({
-      id: document._id,
-      workspaceId: document.workspaceId,
+      id: document._id.toHexString(),
+      workspaceId: document.workspaceId.toHexString(),
       email: document.email,
-      invitedBy: document.invitedBy,
+      invitedBy: document.invitedBy.toHexString(),
       sentAt: Temporal.Instant.fromEpochMilliseconds(document.sentAt.getTime()),
       expiresAt: Temporal.Instant.fromEpochMilliseconds(
         document.expiresAt.getTime(),
