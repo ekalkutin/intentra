@@ -30,7 +30,7 @@ export const rejectKnowledgeItemTool = createTool({
   execute: async ({ projectId, key, ...data }, { requestContext }) =>
     requestContext
       .get('apis')
-      .workspace.knowledge.reject(
+      .knowledge.reject(
         requestContext.get('caller'),
         requestContext.get('workspaceId'),
         projectId,

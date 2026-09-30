@@ -20,7 +20,7 @@ export const getKnowledgeItemTool = createTool({
   execute: async ({ projectId, key }, { requestContext }) =>
     requestContext
       .get('apis')
-      .workspace.knowledge.get(
+      .knowledge.get(
         requestContext.get('caller'),
         requestContext.get('workspaceId'),
         projectId,

@@ -26,11 +26,11 @@ export const listProjectsTool = createTool({
   requestContextSchema: toolContextSchema,
   mcp: { annotations: { readOnlyHint: true } },
   execute: async (_, { requestContext }) => {
-    const { workspace } = requestContext.get('apis');
+    const apis = requestContext.get('apis');
     const caller = requestContext.get('caller');
     const workspaceId = requestContext.get('workspaceId');
-    const projects = await workspace.projects.list(caller.actor, workspaceId);
-    const access = await workspace.access.get(caller.actor, workspaceId);
+    const projects = await apis.projects.list(caller.actor, workspaceId);
+    const access = await apis.access.get(caller.actor, workspaceId);
 
     return {
       projects: projects.map(project => ({

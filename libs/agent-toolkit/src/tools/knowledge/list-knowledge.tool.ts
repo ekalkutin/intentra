@@ -51,7 +51,7 @@ export const listKnowledgeTool = createTool({
   execute: async ({ projectId, ...query }, { requestContext }) => {
     const page = await requestContext
       .get('apis')
-      .workspace.knowledge.list(
+      .knowledge.list(
         requestContext.get('caller'),
         requestContext.get('workspaceId'),
         projectId,

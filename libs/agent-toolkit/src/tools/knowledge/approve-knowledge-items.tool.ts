@@ -30,7 +30,7 @@ export const approveKnowledgeItemsTool = createTool({
   execute: async ({ projectId, items }, { requestContext }) => ({
     approved: await requestContext
       .get('apis')
-      .workspace.knowledge.approveTogether(
+      .knowledge.approveTogether(
         requestContext.get('caller'),
         requestContext.get('workspaceId'),
         projectId,

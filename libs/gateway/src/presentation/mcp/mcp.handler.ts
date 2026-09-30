@@ -9,26 +9,30 @@ import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { MCP_TOOLS, type ToolApis } from '@intentra/agent-toolkit';
-import { IamApi } from '@intentra/contracts/iam';
-import { WorkspaceApi, type CallerDto } from '@intentra/contracts/workspace';
+import {
+  AgentKindDtoSchema,
+  WorkspaceApi,
+  type CallerDto,
+} from '@intentra/contracts/workspace';
 
 import { readCaller } from './mcp-caller.js';
 import { registerMcpTools } from './mcp-tools.js';
 
 /**
  * Stateless MCP over Streamable HTTP: a fresh McpServer for every request,
- * offered the MCP tools with the published APIs, the caller (an agent working
+ * offered the MCP tools with the published sub-APIs, the caller (an agent working
  * for the token's Member) and the token's Workspace in their request context.
  */
 @Injectable()
 export class McpHandler {
   readonly #handle: NodeMcpRequestHandler;
 
-  constructor(
-    @Inject(IamApi) iam: IamApi,
-    @Inject(WorkspaceApi) workspace: WorkspaceApi,
-  ) {
-    const apis: ToolApis = { iam, workspace };
+  constructor(@Inject(WorkspaceApi) workspace: WorkspaceApi) {
+    const apis: ToolApis = {
+      knowledge: workspace.knowledge,
+      projects: workspace.projects,
+      access: workspace.access,
+    };
 
     this.#handle = toNodeHandler(
       createMcpHandler(({ authInfo }) => {
@@ -38,7 +42,11 @@ export class McpHandler {
         if (caller) {
           requestContext.set('caller', {
             actor: caller.actor,
-            agent: { level: caller.level },
+            agent: {
+              kind: AgentKindDtoSchema.enum.external,
+              level: caller.level,
+              projectId: null,
+            },
           } satisfies CallerDto);
           requestContext.set('workspaceId', caller.workspaceId);
         }

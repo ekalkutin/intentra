@@ -37,7 +37,7 @@ export const getKnowledgeDependenciesTool = createTool({
   execute: async ({ projectId, key }, { requestContext }) => {
     const cascade = await requestContext
       .get('apis')
-      .workspace.knowledge.dependencies(
+      .knowledge.dependencies(
         requestContext.get('caller'),
         requestContext.get('workspaceId'),
         projectId,

@@ -25,7 +25,7 @@ export const confirmKnowledgeItemTool = createTool({
   execute: async ({ projectId, key, version }, { requestContext }) =>
     requestContext
       .get('apis')
-      .workspace.knowledge.confirm(
+      .knowledge.confirm(
         requestContext.get('caller'),
         requestContext.get('workspaceId'),
         projectId,

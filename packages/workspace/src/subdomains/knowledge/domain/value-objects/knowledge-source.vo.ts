@@ -4,10 +4,12 @@ import { UnknownKnowledgeSourceException } from '../exceptions/index.js';
 export class KnowledgeSource {
   public static readonly Manual = new KnowledgeSource('manual');
   public static readonly ExternalAgent = new KnowledgeSource('external-agent');
+  public static readonly IntentraAgent = new KnowledgeSource('intentra-agent');
 
   static readonly #all: readonly KnowledgeSource[] = [
     KnowledgeSource.Manual,
     KnowledgeSource.ExternalAgent,
+    KnowledgeSource.IntentraAgent,
   ];
 
   readonly #value: string;

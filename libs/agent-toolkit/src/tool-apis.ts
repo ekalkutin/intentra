@@ -1,11 +1,17 @@
-import type { IamApi } from '@intentra/contracts/iam';
-import type { WorkspaceApi } from '@intentra/contracts/workspace';
+import type {
+  AccessApi,
+  KnowledgeApi,
+  ProjectsApi,
+} from '@intentra/contracts/workspace';
 
 /**
- * The published APIs tools read from and write to, passed in Mastra's
- * `requestContext` by whoever runs the tools.
+ * The published sub-APIs tools read from and write to, passed in Mastra's
+ * `requestContext` by whoever runs the tools. Only the ones tools use, never
+ * the whole `WorkspaceApi`: Intentra's own Agents, which run the tools, are
+ * part of it themselves.
  */
 export type ToolApis = {
-  readonly iam: IamApi;
-  readonly workspace: WorkspaceApi;
+  readonly knowledge: KnowledgeApi;
+  readonly projects: ProjectsApi;
+  readonly access: AccessApi;
 };

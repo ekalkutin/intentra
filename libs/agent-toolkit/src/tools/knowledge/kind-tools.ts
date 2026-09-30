@@ -119,7 +119,7 @@ function createRecordTool(spec: KindSpec) {
     requestContextSchema: toolContextSchema,
     mcp: { annotations: { readOnlyHint: false } },
     execute: async ({ projectId, ...data }, { requestContext }) =>
-      requestContext.get('apis').workspace.knowledge.record(
+      requestContext.get('apis').knowledge.record(
         requestContext.get('caller'),
         requestContext.get('workspaceId'),
         projectId,
@@ -146,7 +146,7 @@ function createEditTool(spec: KindSpec) {
     requestContextSchema: toolContextSchema,
     mcp: { annotations: { readOnlyHint: false } },
     execute: async ({ projectId, key, ...data }, { requestContext }) =>
-      requestContext.get('apis').workspace.knowledge.edit(
+      requestContext.get('apis').knowledge.edit(
         requestContext.get('caller'),
         requestContext.get('workspaceId'),
         projectId,

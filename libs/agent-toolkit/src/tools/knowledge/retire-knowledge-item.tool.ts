@@ -30,7 +30,7 @@ export const retireKnowledgeItemTool = createTool({
   execute: async ({ projectId, key, ...data }, { requestContext }) =>
     requestContext
       .get('apis')
-      .workspace.knowledge.retire(
+      .knowledge.retire(
         requestContext.get('caller'),
         requestContext.get('workspaceId'),
         projectId,

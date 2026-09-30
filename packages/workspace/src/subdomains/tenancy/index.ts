@@ -8,6 +8,7 @@ export {
   AccessResolver,
   type ProjectMembership,
 } from './application/access/index.js';
+export { ProjectNotFoundException } from './application/exceptions/index.js';
 export {
   AccessService,
   InvitationsService,

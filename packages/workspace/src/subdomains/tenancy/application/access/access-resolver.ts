@@ -4,14 +4,17 @@ import type { Actor } from '@intentra/contracts/iam';
 import type { CallerDto } from '@intentra/contracts/workspace';
 import {
   AccountId,
-  type ProjectId,
+  ProjectId,
   type WorkspaceId,
 } from '@intentra/shared-kernel';
 
 import { Member, Project } from '../../domain/entities/index.js';
 import { ProjectRoleResolutionService } from '../../domain/services/index.js';
 import { MemberStatus, ProjectRole } from '../../domain/value-objects/index.js';
-import { WorkspaceNotFoundException } from '../exceptions/index.js';
+import {
+  ProjectNotFoundException,
+  WorkspaceNotFoundException,
+} from '../exceptions/index.js';
 import {
   MemberRepository,
   ProjectRepository,
@@ -62,13 +65,20 @@ export class AccessResolver {
     return member;
   }
 
-  /** For use cases scoped to one Project; an unknown Project is not found. */
+  /**
+   * For use cases scoped to one Project; an unknown Project is not found, and
+   * so is any Project but the one an agent is limited to.
+   */
   public async resolveInProject(
     caller: CallerDto,
     workspaceId: WorkspaceId,
     projectId: ProjectId,
   ): Promise<ProjectMembership> {
     const member = await this.resolve(caller.actor, workspaceId);
+    const agentProjectId = caller.agent?.projectId;
+    if (agentProjectId && !projectId.equals(new ProjectId(agentProjectId))) {
+      throw new ProjectNotFoundException();
+    }
     const project = await this.projectRepository.getOne({
       workspaceId,
       id: projectId,

@@ -2,7 +2,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
 import {
+  AgentKindDtoSchema,
   KnowledgeKindDtoSchema,
+  ProjectRoleDtoSchema,
   type CallerDto,
   type ProjectRoleDto,
   type RecordKnowledgeItemDto,
@@ -20,6 +22,7 @@ import {
   Member,
   MemberRepository,
   MembersService,
+  ProjectNotFoundException,
   ProjectRole,
   ProjectRolesService,
   ProjectsService,
@@ -57,7 +60,22 @@ function person(actor: Actor): CallerDto {
 }
 
 function agentOf(actor: Actor, level: ProjectRoleDto): CallerDto {
-  return { actor, agent: { level } };
+  return {
+    actor,
+    agent: { kind: AgentKindDtoSchema.enum.external, level, projectId: null },
+  };
+}
+
+/** Intentra's own Agent in a Conversation: at most a Contributor, in the Conversation's Project only. */
+function intentraAgentOf(actor: Actor, projectId: string): CallerDto {
+  return {
+    actor,
+    agent: {
+      kind: AgentKindDtoSchema.enum.intentra,
+      level: ProjectRoleDtoSchema.enum.contributor,
+      projectId,
+    },
+  };
 }
 
 function term(title: string): RecordKnowledgeItemDto {
@@ -1288,6 +1306,76 @@ describe('KnowledgeService integration', () => {
       // Assert
       await expect(recording).rejects.toBeInstanceOf(
         KnowledgeRecordingForbiddenException,
+      );
+    });
+  });
+
+  describe("through Intentra's own agent", () => {
+    it('records a Draft with its Source and rationale', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada, adaId } = await setUp();
+
+      // Act
+      const recorded = await app
+        .get(KnowledgeService)
+        .record(
+          intentraAgentOf(ada, projectId),
+          workspaceId,
+          projectId,
+          requirement,
+        );
+
+      // Assert
+      expect(recorded).toMatchObject({
+        source: 'intentra-agent',
+        rationale: 'Ada: "customers print reports"',
+        authorId: adaId,
+      });
+    });
+
+    it('reaches no Project but its own, whatever the Project Role', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada } = await setUp();
+      const payroll = await app
+        .get(ProjectsService)
+        .create(ada, workspaceId, { name: 'Payroll', slug: 'payroll' });
+      const knowledgeService = app.get(KnowledgeService);
+      const agent = intentraAgentOf(ada, projectId);
+
+      // Act
+      const [recording, listing] = await Promise.allSettled([
+        knowledgeService.record(agent, workspaceId, payroll.id, requirement),
+        knowledgeService.list(agent, workspaceId, payroll.id, firstPage),
+      ]);
+
+      // Assert
+      for (const outcome of [recording, listing]) {
+        expect(outcome).toMatchObject({
+          status: 'rejected',
+          reason: expect.any(ProjectNotFoundException),
+        });
+      }
+    });
+
+    it('works as a Contributor for a Maintainer', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada } = await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      const agent = intentraAgentOf(ada, projectId);
+      await knowledgeService.record(agent, workspaceId, projectId, requirement);
+
+      // Act
+      const approving = knowledgeService.approve(
+        agent,
+        workspaceId,
+        projectId,
+        'REQ-1',
+        { version: 1 },
+      );
+
+      // Assert
+      await expect(approving).rejects.toBeInstanceOf(
+        DraftApprovalForbiddenException,
       );
     });
   });

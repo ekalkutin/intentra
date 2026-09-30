@@ -24,7 +24,7 @@ export const deleteKnowledgeDraftTool = createTool({
   execute: async ({ projectId, key, version }, { requestContext }) => {
     await requestContext
       .get('apis')
-      .workspace.knowledge.delete(
+      .knowledge.delete(
         requestContext.get('caller'),
         requestContext.get('workspaceId'),
         projectId,

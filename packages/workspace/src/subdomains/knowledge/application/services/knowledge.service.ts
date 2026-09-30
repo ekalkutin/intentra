@@ -41,7 +41,6 @@ import {
   KnowledgeKind,
   KnowledgeLink,
   KnowledgeLinkType,
-  KnowledgeSource,
   KnowledgeStatus,
 } from '../../domain/value-objects/index.js';
 import {
@@ -50,6 +49,7 @@ import {
   toKnowledgeContent,
   toKnowledgeDependencyDto,
   toKnowledgeItemDto,
+  toKnowledgeSource,
 } from '../mappers/index.js';
 import {
   KnowledgeItemRepository,
@@ -116,9 +116,7 @@ export class KnowledgeService implements KnowledgeApi {
         member,
         projectRole,
         {
-          source: caller.agent
-            ? KnowledgeSource.ExternalAgent
-            : KnowledgeSource.Manual,
+          source: toKnowledgeSource(caller),
           number,
           title: data.title,
           rationale: data.rationale,

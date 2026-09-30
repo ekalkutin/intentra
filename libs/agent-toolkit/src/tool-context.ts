@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import {
+  AgentKindDtoSchema,
   ProjectRoleDtoSchema,
   type CallerDto,
 } from '@intentra/contracts/workspace';
@@ -18,7 +19,13 @@ export const toolContextSchema = z.object({
   ),
   caller: z.object({
     actor: z.object({ accountId: z.string(), email: z.string() }),
-    agent: z.object({ level: ProjectRoleDtoSchema }).nullable(),
+    agent: z
+      .object({
+        kind: AgentKindDtoSchema,
+        level: ProjectRoleDtoSchema,
+        projectId: z.string().nullable(),
+      })
+      .nullable(),
   }) satisfies z.ZodType<CallerDto>,
   workspaceId: z.string(),
 });
