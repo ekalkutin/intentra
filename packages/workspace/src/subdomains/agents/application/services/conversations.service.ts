@@ -2,8 +2,12 @@ import { Injectable } from '@nestjs/common';
 
 import type { Actor } from '@intentra/contracts/iam';
 import type {
+  ConversationDto,
+  ConversationPageDto,
   ConversationsApi,
   ConversationWithMessagesDto,
+  EditConversationDto,
+  ListConversationsDto,
   SendMessageDto,
 } from '@intentra/contracts/workspace';
 import { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
@@ -19,7 +23,11 @@ import {
   ConversationBusyException,
   ConversationNotFoundException,
 } from '../exceptions/index.js';
-import { toConversationWithMessagesDto } from '../mappers/index.js';
+import {
+  toConversationDto,
+  toConversationPageDto,
+  toConversationWithMessagesDto,
+} from '../mappers/index.js';
 import {
   ConversationStore,
   Orchestrator,
@@ -27,9 +35,10 @@ import {
 } from '../ports/outbound/index.js';
 
 /**
- * A Member's Conversations with the Orchestrator. One answer at a time per
- * Conversation, tracked in this process: it holds while the API runs as one
- * instance (`docs/notes/agents-open-questions.md`).
+ * A Member's Conversations with the Orchestrator. While an answer runs (its
+ * title included), nothing else changes the Conversation, tracked in this
+ * process: it holds while the API runs as one instance
+ * (`docs/notes/agents-open-questions.md`).
  */
 @Injectable()
 export class ConversationsService implements ConversationsApi {
@@ -40,6 +49,28 @@ export class ConversationsService implements ConversationsApi {
     private readonly conversationStore: ConversationStore,
     private readonly orchestrator: Orchestrator,
   ) {}
+
+  public async list(
+    actor: Actor,
+    workspaceId: string,
+    projectId: string,
+    query: ListConversationsDto,
+  ): Promise<ConversationPageDto> {
+    const { member, project } = await this.resolve(
+      actor,
+      workspaceId,
+      projectId,
+    );
+    const page = await this.conversationStore.findMany({
+      memberId: member.id,
+      projectId: project.id,
+      hidden: query.hidden,
+      take: query.take,
+      offset: query.offset,
+    });
+
+    return toConversationPageDto(page);
+  }
 
   public async get(
     actor: Actor,
@@ -55,6 +86,50 @@ export class ConversationsService implements ConversationsApi {
     const messages = await this.conversationStore.findMessages(conversation.id);
 
     return toConversationWithMessagesDto(conversation, messages);
+  }
+
+  public async edit(
+    actor: Actor,
+    workspaceId: string,
+    projectId: string,
+    conversationId: string,
+    data: EditConversationDto,
+  ): Promise<ConversationDto> {
+    const membership = await this.resolve(actor, workspaceId, projectId);
+    const conversation = await this.getConversation(
+      membership,
+      new ConversationId(conversationId),
+    );
+    this.ensureIdle(conversation.id);
+
+    if (data.title !== undefined) {
+      conversation.rename(data.title);
+    }
+    if (data.hidden === true) {
+      conversation.hide();
+    }
+    if (data.hidden === false) {
+      conversation.show();
+    }
+    await this.conversationStore.update(conversation);
+
+    return toConversationDto(conversation);
+  }
+
+  public async delete(
+    actor: Actor,
+    workspaceId: string,
+    projectId: string,
+    conversationId: string,
+  ): Promise<void> {
+    const membership = await this.resolve(actor, workspaceId, projectId);
+    const conversation = await this.getConversation(
+      membership,
+      new ConversationId(conversationId),
+    );
+    this.ensureIdle(conversation.id);
+
+    await this.conversationStore.delete(conversation.id);
   }
 
   public async send(
@@ -75,9 +150,7 @@ export class ConversationsService implements ConversationsApi {
       throw new ConversationNotFoundException();
     }
     // Checked and taken with no await in between, so two messages cannot both pass.
-    if (this.#answering.has(id.value)) {
-      throw new ConversationBusyException();
-    }
+    this.ensureIdle(id);
     this.#answering.add(id.value);
 
     try {
@@ -91,6 +164,9 @@ export class ConversationsService implements ConversationsApi {
         });
       if (!found) {
         await this.conversationStore.save(conversation);
+      } else if (conversation.hidden) {
+        conversation.show();
+        await this.conversationStore.update(conversation);
       }
       const answer = await this.orchestrator.answer({
         conversation,
@@ -118,6 +194,12 @@ export class ConversationsService implements ConversationsApi {
       new WorkspaceId(workspaceId),
       new ProjectId(projectId),
     );
+  }
+
+  private ensureIdle(id: ConversationId): void {
+    if (this.#answering.has(id.value)) {
+      throw new ConversationBusyException();
+    }
   }
 
   /** Its Member's Conversation in this Project; to anyone else it does not exist. */

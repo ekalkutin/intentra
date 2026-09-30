@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import type { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 
+import { ConversationStore } from './subdomains/agents/index.js';
 import {
   KnowledgeItemRepository,
   KnowledgeKeyCounter,
@@ -18,7 +19,9 @@ import {
 
 /**
  * The one place that knows what lies under a Workspace, a Project or a Member,
- * in every subdomain. Runs inside the caller's transaction.
+ * in every subdomain. Runs inside the caller's transaction; Conversations are
+ * kept by the Agents' runtime outside it, so a rolled-back deletion still
+ * loses them (Agents ADR 0002).
  */
 @Injectable()
 export class CleanupAdapter implements Cleanup {
@@ -30,9 +33,11 @@ export class CleanupAdapter implements Cleanup {
     private readonly personalAccessTokenRepository: PersonalAccessTokenRepository,
     private readonly knowledgeItemRepository: KnowledgeItemRepository,
     private readonly knowledgeKeyCounter: KnowledgeKeyCounter,
+    private readonly conversationStore: ConversationStore,
   ) {}
 
   public async afterWorkspaceDeleted(workspaceId: WorkspaceId): Promise<void> {
+    await this.conversationStore.deleteMany({ workspaceId });
     await this.knowledgeItemRepository.deleteMany({ workspaceId });
     await this.knowledgeKeyCounter.deleteMany({ workspaceId });
     await this.personalAccessTokenRepository.deleteMany({ workspaceId });
@@ -43,13 +48,15 @@ export class CleanupAdapter implements Cleanup {
   }
 
   public async afterProjectDeleted(projectId: ProjectId): Promise<void> {
+    await this.conversationStore.deleteMany({ projectId });
     await this.knowledgeItemRepository.deleteMany({ projectId });
     await this.knowledgeKeyCounter.deleteMany({ projectId });
     await this.projectRoleAssignmentRepository.deleteMany({ projectId });
   }
 
-  /** The Member's Knowledge Items stay: they belong to the Project. */
+  /** The Member's Knowledge Items stay: they belong to the Project. Their Conversations go. */
   public async afterMemberRemoved(memberId: MemberId): Promise<void> {
+    await this.conversationStore.deleteMany({ memberId });
     await this.projectRoleAssignmentRepository.deleteMany({ memberId });
     await this.personalAccessTokenRepository.deleteMany({ memberId });
   }

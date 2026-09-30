@@ -11,8 +11,8 @@ export class Conversation extends Aggregate<ConversationId> {
   readonly #workspaceId: WorkspaceId;
   readonly #projectId: ProjectId;
   readonly #memberId: MemberId;
-  readonly #title: ConversationTitle | null;
-  readonly #hidden: boolean;
+  #title: ConversationTitle | null;
+  #hidden: boolean;
   readonly #createdAt: Temporal.Instant;
   readonly #updatedAt: Temporal.Instant;
 
@@ -54,6 +54,20 @@ export class Conversation extends Aggregate<ConversationId> {
 
   get updatedAt(): Temporal.Instant {
     return this.#updatedAt;
+  }
+
+  /** Its Member names it; Intentra's suggestion only fills a missing title. */
+  public rename(title: string): void {
+    this.#title = new ConversationTitle(title);
+  }
+
+  /** Out of the Member's list of Conversations, not gone. */
+  public hide(): void {
+    this.#hidden = true;
+  }
+
+  public show(): void {
+    this.#hidden = false;
   }
 
   /** Only its Member reaches it, and only in its Project. */

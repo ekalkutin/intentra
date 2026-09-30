@@ -42,7 +42,9 @@ export const MEMORY_PROVIDER: Provider = {
       }),
       options: {
         messageHistory: { maxTokens: options.historyTokens },
-        generateTitle: true,
+        // The answer waits for the title and streams it (`data-thread-title`),
+        // so the title is kept before anything else may change the Conversation.
+        generateTitle: { emitEvent: true },
       },
     }),
 };

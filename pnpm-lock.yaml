@@ -168,8 +168,8 @@ catalogs:
       specifier: ^1.10.5
       version: 1.10.5
     '@mastra/core':
-      specifier: ^1.71.0
-      version: 1.71.0
+      specifier: ^1.72.0
+      version: 1.72.0
     '@mastra/memory':
       specifier: ^1.33.0
       version: 1.33.0
@@ -321,7 +321,7 @@ importers:
         version: link:../contracts
       '@mastra/core':
         specifier: 'catalog:'
-        version: 1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
+        version: 1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
       zod:
         specifier: 'catalog:'
         version: 4.6.5
@@ -345,7 +345,7 @@ importers:
         version: link:../contracts
       '@mastra/core':
         specifier: 'catalog:'
-        version: 1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
+        version: 1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
       '@modelcontextprotocol/node':
         specifier: 'catalog:'
         version: 2.1.0(@modelcontextprotocol/server@2.1.0)(hono@4.13.9)
@@ -467,16 +467,16 @@ importers:
         version: link:../../libs/shared-kernel
       '@mastra/ai-sdk':
         specifier: 'catalog:'
-        version: 1.10.5(@mastra/core@1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))(zod@4.6.5)
+        version: 1.10.5(@mastra/core@1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))(zod@4.6.5)
       '@mastra/core':
         specifier: 'catalog:'
-        version: 1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
+        version: 1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
       '@mastra/memory':
         specifier: 'catalog:'
-        version: 1.33.0(@mastra/core@1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))(supports-color@7.2.0)
+        version: 1.33.0(@mastra/core@1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))(supports-color@7.2.0)
       '@mastra/mongodb':
         specifier: 'catalog:'
-        version: 1.20.0(@mastra/core@1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))
+        version: 1.20.0(@mastra/core@1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))
       '@nestjs/common':
         specifier: catalog:nestjs12
         version: 12.1.1(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@7.2.0)
@@ -782,8 +782,8 @@ packages:
       '@mastra/core': '>=1.5.0-0 <2.0.0-0'
       zod: ^3.25.0 || ^4.0.0
 
-  '@mastra/core@1.71.0':
-    resolution: {integrity: sha512-qpv0qbyzyFWBWVlzP+G4oea6e3e3JyxmeNAtS5wuzWc0/iHv47DWRYNJXbDC0kleYd6L4afFPh7dLxCsuyCSKg==}
+  '@mastra/core@1.72.0':
+    resolution: {integrity: sha512-gJo7L7VGa7Ho1FPq0ciA/guBuSsJbCLSNjiObARvnLqk4UQxIsXrZ6Co8xkiNnPcWBHTtn1LF8pyadv0mziN+Q==}
     engines: {node: '>=22.13.0'}
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
@@ -799,12 +799,6 @@ packages:
     engines: {node: '>=22.13.0'}
     peerDependencies:
       '@mastra/core': '>=1.68.0-0 <2.0.0-0'
-
-  '@mastra/schema-compat@1.3.11':
-    resolution: {integrity: sha512-NvR+wYk4/d0uqzk702Aehd8Vbop+844c1Dp7TMkZVis71LzPORWJbFPQswrom9o+v5ollUfif+28lZzutGMq+A==}
-    engines: {node: '>=22.13.0'}
-    peerDependencies:
-      zod: ^3.25.0 || ^4.0.0
 
   '@mastra/schema-compat@1.3.12':
     resolution: {integrity: sha512-jrkp9XGBgQ5Z1aU3fkf95qCN0sRMYwJyq4oN6sk/XvPIjRoPVDM9K3CJlOYMi33GLicRNHhE5SMbg64U4hTbKg==}
@@ -3783,12 +3777,12 @@ snapshots:
     dependencies:
       '@lukeed/csprng': 1.1.0
 
-  '@mastra/ai-sdk@1.10.5(@mastra/core@1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))(zod@4.6.5)':
+  '@mastra/ai-sdk@1.10.5(@mastra/core@1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))(zod@4.6.5)':
     dependencies:
-      '@mastra/core': 1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
+      '@mastra/core': 1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
       zod: 4.6.5
 
-  '@mastra/core@1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)':
+  '@mastra/core@1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)':
     dependencies:
       '@a2a-js/sdk-v0_3': '@a2a-js/sdk@0.3.14(express@5.2.1(supports-color@7.2.0))'
       '@a2a-js/sdk-v1': '@a2a-js/sdk@1.0.1(express@5.2.1(supports-color@7.2.0))'
@@ -3799,7 +3793,7 @@ snapshots:
       '@ai-sdk/provider-v7': '@ai-sdk/provider@4.0.17'
       '@isaacs/ttlcache': 2.1.5
       '@lukeed/uuid': 2.0.1
-      '@mastra/schema-compat': 1.3.11(zod@4.6.5)
+      '@mastra/schema-compat': 1.3.12(zod@4.6.5)
       '@standard-schema/spec': 1.1.0
       chat: 4.41.0(ai@7.0.122(zod@4.6.5))(supports-color@7.2.0)(zod@4.6.5)
       croner: 10.0.1
@@ -3840,9 +3834,9 @@ snapshots:
       - zod-openapi
       - zod-to-json-schema
 
-  '@mastra/memory@1.33.0(@mastra/core@1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))(supports-color@7.2.0)':
+  '@mastra/memory@1.33.0(@mastra/core@1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))(supports-color@7.2.0)':
     dependencies:
-      '@mastra/core': 1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
+      '@mastra/core': 1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
       '@mastra/schema-compat': 1.3.12(zod@4.6.5)
       async-mutex: 0.5.0
       diff: 8.0.4
@@ -3854,10 +3848,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mastra/mongodb@1.20.0(@mastra/core@1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))':
+  '@mastra/mongodb@1.20.0(@mastra/core@1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5))':
     dependencies:
       '@lukeed/uuid': 2.0.1
-      '@mastra/core': 1.71.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
+      '@mastra/core': 1.72.0(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod@4.6.5)
       mongodb: 7.6.0
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
@@ -3867,12 +3861,6 @@ snapshots:
       - mongodb-client-encryption
       - snappy
       - socks
-
-  '@mastra/schema-compat@1.3.11(zod@4.6.5)':
-    dependencies:
-      json-schema-to-zod: 2.8.1
-      zod: 4.6.5
-      zod-from-json-schema: 0.5.6
 
   '@mastra/schema-compat@1.3.12(zod@4.6.5)':
     dependencies:

@@ -1,6 +1,9 @@
 export {
   ConversationStore,
+  type ConversationDeleteProps,
+  type ConversationListProps,
   type ConversationMessage,
+  type ConversationPage,
   type ConversationQueryProps,
 } from './conversation-store.port.js';
 export {

@@ -7,7 +7,15 @@ export type ConversationDto = {
   readonly title: string | null;
   readonly hidden: boolean;
   readonly createdAt: string;
+  /** Its last message, or its last rename or hiding. */
   readonly updatedAt: string;
+};
+
+/** One page of a Member's Conversations in a Project, the latest activity first. */
+export type ConversationPageDto = {
+  readonly items: ConversationDto[];
+  /** How many Conversations match, across every page. */
+  readonly total: number;
 };
 
 /** A Conversation with its messages, oldest first, in the AI SDK UI message format. */

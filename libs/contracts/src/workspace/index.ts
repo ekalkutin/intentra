@@ -17,9 +17,18 @@ export {
 } from './conversations/choices.dto.js';
 export {
   type ConversationDto,
+  type ConversationPageDto,
   type ConversationWithMessagesDto,
 } from './conversations/conversation.dto.js';
 export { ConversationsApi } from './conversations/conversations.api.js';
+export {
+  EditConversationDtoSchema,
+  type EditConversationDto,
+} from './conversations/edit-conversation.dto.js';
+export {
+  ListConversationsDtoSchema,
+  type ListConversationsDto,
+} from './conversations/list-conversations.dto.js';
 export {
   MESSAGE_MAX_LENGTH,
   SendMessageDtoSchema,

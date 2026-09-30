@@ -3,10 +3,15 @@ import type { ServerResponse } from 'node:http';
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Inject,
   Param,
+  Patch,
   Post,
+  Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -14,9 +19,15 @@ import { pipeUIMessageStreamToResponse } from 'ai';
 
 import type { Actor } from '@intentra/contracts/iam';
 import {
+  EditConversationDtoSchema,
+  ListConversationsDtoSchema,
   SendMessageDtoSchema,
   WorkspaceApi,
+  type ConversationDto,
+  type ConversationPageDto,
   type ConversationWithMessagesDto,
+  type EditConversationDto,
+  type ListConversationsDto,
   type SendMessageDto,
 } from '@intentra/contracts/workspace';
 
@@ -32,6 +43,21 @@ import { ActorGuard, CurrentActor } from '../auth/index.js';
 export class ConversationsController {
   constructor(@Inject(WorkspaceApi) private readonly workspace: WorkspaceApi) {}
 
+  @Get()
+  public async list(
+    @CurrentActor() actor: Actor,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Query({ schema: ListConversationsDtoSchema }) query: ListConversationsDto,
+  ): Promise<ConversationPageDto> {
+    return this.workspace.conversations.list(
+      actor,
+      workspaceId,
+      projectId,
+      query,
+    );
+  }
+
   @Get(':conversationId')
   public async get(
     @CurrentActor() actor: Actor,
@@ -40,6 +66,39 @@ export class ConversationsController {
     @Param('conversationId') conversationId: string,
   ): Promise<ConversationWithMessagesDto> {
     return this.workspace.conversations.get(
+      actor,
+      workspaceId,
+      projectId,
+      conversationId,
+    );
+  }
+
+  @Patch(':conversationId')
+  public async edit(
+    @CurrentActor() actor: Actor,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Param('conversationId') conversationId: string,
+    @Body({ schema: EditConversationDtoSchema }) data: EditConversationDto,
+  ): Promise<ConversationDto> {
+    return this.workspace.conversations.edit(
+      actor,
+      workspaceId,
+      projectId,
+      conversationId,
+      data,
+    );
+  }
+
+  @Delete(':conversationId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async delete(
+    @CurrentActor() actor: Actor,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Param('conversationId') conversationId: string,
+  ): Promise<void> {
+    await this.workspace.conversations.delete(
       actor,
       workspaceId,
       projectId,

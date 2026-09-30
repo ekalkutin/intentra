@@ -1,10 +1,14 @@
 import type {
   ConversationDto,
+  ConversationPageDto,
   ConversationWithMessagesDto,
 } from '@intentra/contracts/workspace';
 
 import type { Conversation } from '../../domain/entities/index.js';
-import type { ConversationMessage } from '../ports/outbound/index.js';
+import type {
+  ConversationMessage,
+  ConversationPage,
+} from '../ports/outbound/index.js';
 
 /** Mongo keeps milliseconds: a date must read the same before and after a round trip. */
 function toIsoString(instant: Temporal.Instant): string {
@@ -26,4 +30,11 @@ export function toConversationWithMessagesDto(
   messages: readonly ConversationMessage[],
 ): ConversationWithMessagesDto {
   return { ...toConversationDto(conversation), messages };
+}
+
+export function toConversationPageDto({
+  items,
+  total,
+}: ConversationPage): ConversationPageDto {
+  return { items: items.map(toConversationDto), total };
 }

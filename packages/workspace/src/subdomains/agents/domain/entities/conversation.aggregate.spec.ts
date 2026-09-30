@@ -73,4 +73,50 @@ describe('Conversation', () => {
       expect(verdicts).toEqual([true, false, false]);
     });
   });
+
+  describe('rename', () => {
+    it('takes the Member’s title', () => {
+      // Arrange
+      const conversation = Conversation.start(
+        startProps(new MemberId(), new ProjectId()),
+      );
+
+      // Act
+      conversation.rename(' PDF export ');
+
+      // Assert
+      expect(conversation.title?.value).toBe('PDF export');
+    });
+
+    it('rejects an empty title', () => {
+      // Arrange
+      const conversation = Conversation.start(
+        startProps(new MemberId(), new ProjectId()),
+      );
+
+      // Act
+      const renaming = () => conversation.rename(' ');
+
+      // Assert
+      expect(renaming).toThrow(InvalidConversationTitleException);
+    });
+  });
+
+  describe('hide and show', () => {
+    it('hides it and shows it again', () => {
+      // Arrange
+      const conversation = Conversation.start(
+        startProps(new MemberId(), new ProjectId()),
+      );
+
+      // Act
+      conversation.hide();
+      const hidden = conversation.hidden;
+      conversation.show();
+
+      // Assert
+      expect(hidden).toBe(true);
+      expect(conversation.hidden).toBe(false);
+    });
+  });
 });
