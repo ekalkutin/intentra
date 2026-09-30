@@ -24,11 +24,17 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@intentra/agent-toolkit": "workspace:*",
     "@intentra/contracts": "workspace:*",
     "@intentra/platform-persistence": "workspace:*",
     "@intentra/shared-kernel": "workspace:*",
+    "@mastra/ai-sdk": "catalog:",
+    "@mastra/core": "catalog:",
+    "@mastra/memory": "catalog:",
+    "@mastra/mongodb": "catalog:",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/mongoose": "catalog:nestjs12",
+    "ai": "catalog:",
     "mongoose": "catalog:"
   },
   "devDependencies": {

@@ -7,3 +7,4 @@ export { InvalidEmailException } from './invalid-email.exception.js';
 export { InvalidEntityIdException } from './invalid-entity-id.exception.js';
 export { NotFoundException } from './not-found.exception.js';
 export { UnauthorizedException } from './unauthorized.exception.js';
+export { UnavailableException } from './unavailable.exception.js';

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { AGENT_TOOLS, MCP_TOOLS } from './catalog.js';
+import { MCP_TOOLS, ORCHESTRATOR_TOOLS } from './catalog.js';
 
 describe.each([
   ['MCP_TOOLS', MCP_TOOLS],
-  ['AGENT_TOOLS', AGENT_TOOLS],
+  ['ORCHESTRATOR_TOOLS', ORCHESTRATOR_TOOLS],
 ])('%s', (_name, tools) => {
   it('keys every tool by its snake_case id', () => {
     // Act

@@ -33,6 +33,7 @@
     ]
   },
   "devDependencies": {
+    "@intentra/contracts": "workspace:*",
     "@intentra/platform-testing": "workspace:*"
   }
 }

@@ -5,7 +5,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { GatewayModule } from '@intentra/gateway';
 import { IamModule, type IamModuleOptions } from '@intentra/iam';
 import { PersistenceModule } from '@intentra/platform-persistence';
-import { WorkspaceModule } from '@intentra/workspace';
+import {
+  WorkspaceModule,
+  type WorkspaceModuleOptions,
+} from '@intentra/workspace';
 
 import {
   EnvironmentSchema,
@@ -20,7 +23,13 @@ const iam = IamModule.registerAsync({
   ): IamModuleOptions => configService.get('iam', { infer: true }),
 });
 
-const workspace = WorkspaceModule.register({});
+const workspace = WorkspaceModule.registerAsync({
+  imports: [ConfigModule],
+  inject: [ConfigService],
+  useFactory: (
+    configService: ConfigService<Variables, true>,
+  ): WorkspaceModuleOptions => configService.get('workspace', { infer: true }),
+});
 
 @Module({
   imports: [

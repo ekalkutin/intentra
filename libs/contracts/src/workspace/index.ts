@@ -10,6 +10,22 @@ export {
   type WorkspaceAccessDto,
 } from './access/workspace-access.dto.js';
 export {
+  ChoiceOptionDtoSchema,
+  ChoicesDtoSchema,
+  type ChoiceOptionDto,
+  type ChoicesDto,
+} from './conversations/choices.dto.js';
+export {
+  type ConversationDto,
+  type ConversationWithMessagesDto,
+} from './conversations/conversation.dto.js';
+export { ConversationsApi } from './conversations/conversations.api.js';
+export {
+  MESSAGE_MAX_LENGTH,
+  SendMessageDtoSchema,
+  type SendMessageDto,
+} from './conversations/send-message.dto.js';
+export {
   CreateInvitationDtoSchema,
   type CreateInvitationDto,
 } from './invitations/create-invitation.dto.js';

@@ -27,11 +27,12 @@ export async function clearTestingDatabase(
   moduleRef: TestingModule,
 ): Promise<void> {
   const connection = moduleRef.get<Connection>(getConnectionToken());
-  await Promise.all(
-    Object.values(connection.collections).map(collection =>
-      collection.deleteMany({}),
-    ),
-  );
+  // Every collection, not only the models': a library such as Mastra keeps its own.
+  const collections = await connection
+    .getClient()
+    .db(connection.name)
+    .collections();
+  await Promise.all(collections.map(collection => collection.deleteMany({})));
 }
 
 export async function dropTestingDatabase(

@@ -1,6 +1,11 @@
 import { ConfigurableModuleBuilder } from '@nestjs/common';
 
-export type WorkspaceModuleOptions = {};
+import type { AgentsOptions } from './subdomains/agents/index.js';
+
+export type WorkspaceModuleOptions = {
+  /** Intentra's own Agents; without a model, sending them a message answers 503. */
+  readonly agents?: Partial<AgentsOptions>;
+};
 
 export const {
   ConfigurableModuleClass,

@@ -30,6 +30,7 @@
     "build"
   ],
   "dependencies": {
+    "ai": "catalog:",
     "zod": "catalog:"
   }
 }
