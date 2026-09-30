@@ -45,7 +45,7 @@ A directed connection from one Knowledge Item to another, of one of these types:
 _Avoid_: Relation, Reference, Dependency
 
 **Source**:
-Where a Knowledge Item came from: a Conversation, in which an Agent recorded it; an external agent working for a Member over MCP; or a person entering it by hand. Unless it was entered by hand, a Source always carries a Rationale: a short quote or summary of what the Knowledge Item rests on, supplied by the Agent that recorded it. The Rationale is part of the knowledge and the team sees it, while the Conversation (or the external agent's own chat) stays private. The Source never changes; while the Knowledge Item is a Draft, its Rationale can be edited like the rest of it.
+Where a Knowledge Item came from: a Conversation, in which an Agent recorded it; an external agent working for a Member over MCP; or a person entering it by hand. It says which of the three, never which Conversation. Unless it was entered by hand, a Source always carries a Rationale: a short quote or summary of what the Knowledge Item rests on, supplied by the Agent that recorded it. The Rationale is part of the knowledge and the team sees it, while the Conversation (or the external agent's own chat) stays private. The Source never changes; while the Knowledge Item is a Draft, its Rationale can be edited like the rest of it.
 _Avoid_: Origin, Provenance, Reference
 
 **Draft**:

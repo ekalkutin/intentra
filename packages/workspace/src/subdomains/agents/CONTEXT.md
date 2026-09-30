@@ -9,7 +9,7 @@ An AI assistant that Intentra provides to every Workspace. It has a name, a desc
 _Avoid_: Bot, Assistant, AI, Custom agent
 
 **Orchestrator**:
-The main Agent, and the only one people talk to. It hands parts of the work to Specialists.
+The main Agent, and the only one people talk to. It hands parts of the work to Specialists. In a Conversation it works only in that Conversation's Project and at most as a Contributor, whatever its Member's Project Role: it records, edits and deletes Drafts and confirms a Draft marked Needs Review, and never approves, rejects, retires or confirms an Approved Knowledge Item, not even when a Maintainer asks it to.
 _Avoid_: Main agent, Router, Supervisor
 
 **Specialist**:
@@ -25,7 +25,7 @@ A Workspace's own key to an LLM provider, added by an Owner. For now the only pr
 _Avoid_: API key, BYOK key, Token
 
 **Conversation**:
-A private exchange between one Active Member and the Orchestrator within a Workspace. Only that Member sees it. The Orchestrator in it may do only what the Member's Project Role allows: with a Viewer it answers questions but records nothing. What the team shares is the knowledge the Agents record from it, not the Conversation itself. For now a Conversation always takes place in a Project. It is deleted with its Project, and when its Member leaves or is removed.
+A private exchange between one Active Member and the Orchestrator within a Project. Only that Member sees it, and a Member may have any number of them in a Project. The Member always speaks first; the Orchestrator records what it learns as Drafts right away and says in its answer which ones it recorded. The Orchestrator in it may do only what the Member's current Project Role allows, read anew for every message: with a Viewer it answers questions but records nothing. It remembers nothing from the Member's other Conversations; what the team shares is the knowledge the Agents record from it, not the Conversation itself. It has a title, suggested by Intentra from its start and changeable by its Member. Its Member can hide it from the list, and it comes back on its own once the Member writes in it again, or delete it. It is deleted with its Project, and when its Member leaves or is removed.
 _Avoid_: Chat, Session, Thread, Interview
 
 **Model Profile**:

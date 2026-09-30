@@ -1,6 +1,6 @@
 # TODO
 
-Where we stopped on 2026-09-29. Glossary: `CONTEXT-MAP.md`, `packages/iam/CONTEXT.md`, `packages/workspace/src/subdomains/tenancy/CONTEXT.md`, `packages/workspace/src/subdomains/agents/CONTEXT.md`, `packages/workspace/src/subdomains/knowledge/CONTEXT.md`. Decisions: `packages/workspace/src/subdomains/tenancy/docs/adr/`, `packages/workspace/src/subdomains/agents/docs/adr/`, `packages/workspace/src/subdomains/knowledge/docs/adr/`. Deferred ideas and tech debt: `docs/notes/workspace-open-questions.md`, `docs/notes/iam-open-questions.md`, `docs/notes/agents-open-questions.md`, `docs/notes/knowledge-open-questions.md`, `docs/notes/knowledge-kinds.md`.
+Where we stopped on 2026-09-30. Glossary: `CONTEXT-MAP.md`, `packages/iam/CONTEXT.md`, `packages/workspace/src/subdomains/tenancy/CONTEXT.md`, `packages/workspace/src/subdomains/agents/CONTEXT.md`, `packages/workspace/src/subdomains/knowledge/CONTEXT.md`. Decisions: `packages/workspace/src/subdomains/tenancy/docs/adr/`, `packages/workspace/src/subdomains/agents/docs/adr/`, `packages/workspace/src/subdomains/knowledge/docs/adr/`. Deferred ideas and tech debt: `docs/notes/workspace-open-questions.md`, `docs/notes/iam-open-questions.md`, `docs/notes/agents-open-questions.md`, `docs/notes/knowledge-open-questions.md`, `docs/notes/knowledge-kinds.md`.
 
 ## Done
 
@@ -23,7 +23,7 @@ Where we stopped on 2026-09-29. Glossary: `CONTEXT-MAP.md`, `packages/iam/CONTEX
 - [x] **Project Roles** Viewer / Contributor / Maintainer, stored as `ProjectRoleAssignment` (no assignment = Viewer; an Owner is always Maintainer, 409 `OWNER_PROJECT_ROLE_FIXED`). The creator gets Maintainer. `GET /api/workspaces/:workspaceId/projects/:projectId/roles` (any Member) and `PUT …/roles/:memberId` with `{ role }` (Owner or the Project's Maintainer, 403 `PROJECT_ROLE_CHANGE_FORBIDDEN`). Assignments are deleted with their Member (leave / remove), Project and Workspace
 - [x] **Personal Access Token** in the Workspace context: `POST` / `GET /api/workspaces/:workspaceId/personal-access-tokens` and `DELETE …/:tokenId` (own tokens; an Owner sees and revokes all). `{ name, level, lifetimeDays: 30 | 90 | 365 | null }`, 90 by default; the `intr_…` secret (the list shows a hint such as `intr_…x7Qa`) is shown once and stored as SHA-256; revoking deletes it; last use is recorded. Deleted with its Member (leave / remove) and Workspace. `/api/mcp` requires `Authorization: Bearer intr_…` (401 `INVALID_PERSONAL_ACCESS_TOKEN`) and puts `caller` (`actor`, `workspaceId`, `level`) next to `apis` in the tools' request context. In each Project an agent gets the lower of `level` and the Member's Project Role (`AccessResolver.resolveInProject`, step 3)
 
-## Next, in this order: Project Knowledge up to the full model
+## Done: Project Knowledge up to the full model
 
 Goal: the whole model in `packages/workspace/src/subdomains/knowledge/CONTEXT.md` (option C), built in steps of about 1 000–1 500 lines each (half of it tests), one commit per step with green tests, so each one can be reviewed. Each step starts with a short grilling on its open decisions; answers go to the glossary, ADRs or `docs/notes/knowledge-kinds.md`. Glossary: `packages/workspace/src/subdomains/knowledge/CONTEXT.md`, ADR `packages/workspace/src/subdomains/knowledge/docs/adr/0001-one-knowledge-item-aggregate.md`, fields: `docs/notes/knowledge-kinds.md`.
 
@@ -67,5 +67,30 @@ Goal: the whole model in `packages/workspace/src/subdomains/knowledge/CONTEXT.md
   - Decided: a Link cannot be recorded to a Rejected, Obsolete (409, pointing to `supersededByKey`) or missing item. A Link stays on its target when that one is later rejected, superseded or retired, and its source gets Needs Review (never re-aimed at the replacement: nobody checked that it still holds). An item that a Draft or an Approved item links to cannot be deleted (409 `KNOWLEDGE_ITEM_LINKED`, naming them), so no current item's Link points at nothing, not even an Approved one's; Links from Rejected or Obsolete items do not block it (nobody edits those any more, and a duplicate could otherwise never go).
 - [x] **7. Needs Review** (built within step 6). Marked when an item it depends on is superseded, retired or rejected; shown in searches; cleared by confirming, by editing or rejecting a Draft, or by a Supersession or Retirement.
   - Decided in step 6: one step, plus the computed `dependencyNeedsReview` when reading one item.
+
+## Next, in this order: Agents, first slice (Conversation + Orchestrator)
+
+Goal: a Member talks with the Orchestrator in a Project and it records Drafts, backend only (REST + stream, e2e tests); the UI is the next piece of work. Grilled on 2026-09-30. Glossary: `packages/workspace/src/subdomains/agents/CONTEXT.md`; ADR `packages/workspace/src/subdomains/agents/docs/adr/0002-agents-run-the-orchestrator-through-agent-toolkit.md`; deferred: `docs/notes/agents-open-questions.md`. The UI prototype on branch `poc/ui-prototype` (commit fcce71f, checked out in `~/projects/intentra-with-poc`) has the Orchestrator, its instructions, `offer_choices`, the stream handler and a scripted-model e2e to carry over.
+
+Decided:
+- A Member has any number of Conversations in a Project. A Conversation is a Mastra thread in Mastra Memory (`@mastra/memory` + `@mastra/mongodb`, Mastra's own collections): `resourceId` is the Member, `metadata` holds `workspaceId`, `projectId` and `hidden`. No Conversation record of our own.
+- The client generates the Conversation's id (UUID); the first message creates it (404 if the id is someone else's). The Member always writes first.
+- The title is generated by Mastra (`generateTitle`) and can be renamed. A Conversation can be hidden (listed only with `?hidden=true`; a new message brings it back) and deleted by its Member.
+- Deleted with its Project, its Workspace, and when its Member leaves or is removed: `CleanupAdapter` deletes the threads through the Conversation store, inside the transaction (Mastra is not part of it; losing threads on a rollback is accepted).
+- No memory across Conversations. The model sees the history within a token budget (`messageHistory`, about 64k tokens), without past tool calls (`ToolCallFilter`); the stored messages keep them.
+- One model from env: `OPENROUTER_API_KEY` (optional) and `AGENT_MODEL`; without a key, sending a message answers 503 `AGENT_NOT_CONFIGURED` and everything else works. Built-in Model Profiles come later.
+- Instructions carried over from the prototype as they are (a function of the Project Role).
+- The Orchestrator records Drafts right away and lists them by Knowledge Key in its answer. Source `intentra-agent`, Rationale required, no link to the Conversation.
+- `CallerDto.agent` becomes `{ kind: 'external' | 'intentra', level, projectId | null }`. MCP passes `external` with `projectId: null`; the Orchestrator passes `intentra`, level Contributor, the Conversation's Project. Knowledge takes the Source from `kind`. `AccessResolver.resolveInProject` treats every other Project as unreachable (404). The Project Role is read anew for every message.
+- Orchestrator tools: `list_knowledge`, `get_knowledge_item`, `get_knowledge_dependencies`, `record_*`, `edit_*`, `confirm_knowledge_item`, `delete_knowledge_draft`, `offer_choices`. No `list_projects`, approve, reject or retire.
+- Tool context narrows to `apis: { knowledge, projects, access }` (no `iam`, no whole `WorkspaceApi`), so the Agents subdomain can give them its sibling sub-APIs without a DI cycle.
+- An answer runs to the end on the server even if the client leaves; at most about 25 steps and 3 minutes (config). While it runs, another message to the Conversation is refused with 409 (a mark in the process's memory).
+- A message is at most about 20 000 characters (zod, 400).
+- REST under `/api/workspaces/:workspaceId/projects/:projectId/conversations`: `GET` (`take` / `offset` as in knowledge, `?hidden=true`, newest activity first; `{ items, total }` of `id`, `title`, `hidden`, `createdAt`, `updatedAt`), `GET /:id` (with its messages), `POST /:id/messages` (answer streamed in the AI SDK UI message stream format), `PATCH /:id` with `{ title?, hidden? }`, `DELETE /:id`. Only the Conversation's Member reaches it; anyone else gets 404.
+- Tests: e2e with a scripted stand-in model, as in the prototype.
+
+- [ ] **A. Caller and tools groundwork.** `CallerDto.agent` gains `kind` and `projectId`; `AccessResolver.resolveInProject` enforces `projectId`; Knowledge Source `intentra-agent` from `kind`; MCP passes `external`. Tool context narrows to `{ knowledge, projects, access }`. No behaviour change over REST or MCP.
+- [ ] **B. The Orchestrator answers.** Config (`OPENROUTER_API_KEY`, `AGENT_MODEL`, limits); Mastra Memory on MongoDB; the Agents subdomain (store, service, `conversations` sub-API of `WorkspaceApi`); the Orchestrator and `offer_choices` in `agent-toolkit`; `POST /:id/messages` (creates on first message, streams, runs to the end, 409 while busy, 503 without a model) and `GET /:id`; title generation; scripted-model e2e.
+- [ ] **C. Managing Conversations.** `GET` list with pages and `hidden`, `PATCH /:id`, `DELETE /:id`; `CleanupAdapter` deletes threads with their Project, Workspace and Member.
 
 ## Open questions left unanswered
