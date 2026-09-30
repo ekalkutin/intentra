@@ -7,23 +7,24 @@ related_targets: ["src/pages","src/app/routes"]
 
 # App shell: Workspace → Project
 
-Mode: Operate. Scope: the signed-in shell (spine sidebar, top bar, ⌘K), first run without a Workspace, received invitations, Workspace management (Projects, Members, Invitations, Personal Access Tokens, settings), Project overview, Project Roles and settings; Knowledge and Interview are honest stub pages. Audience: a mixed product team, no role first. Real API data only; access verdicts from `WorkspaceAccessDto` / `ProjectAccessDto`; routes by slug (`/w/:workspace/p/:project`); the last Workspace remembered in localStorage.
+Mode: Operate. Scope: the signed-in shell, first run without a Workspace, received invitations, Workspace management (Projects, Members, Invitations, Personal Access Tokens, settings), Project overview, access and settings; Knowledge and Interview are stub pages. Audience: a mixed product team, no role first. Real API data only; access verdicts from `WorkspaceAccessDto` / `ProjectAccessDto`; routes by slug; the last Workspace, and the last Project per Workspace, remembered in localStorage.
+
+Structure (user-pinned, 2026-09-30, final revision): an inset shell in the manner of ~/projects/multica: the sidebar sits on a quiet grey frame and the work area is a rounded, ringed canvas beside it. Sidebar, top to bottom, nothing split to the bottom: the Project switcher (initial tile, Project name, Workspace name under it, a small downward triangle; its menu lists Projects, "new project", and a Workspace submenu to switch or create Workspaces), then the group "Работа" (the selected Project's sections: overview, knowledge, interview, access, settings — always shown; on Workspace pages it points at the last opened Project), then the group "Пространство" (Projects, Members, Tokens for agents, Workspace settings). No breadcrumbs, no tabs, no rail on the sidebar's edge. The canvas header: the sidebar toggle button on the left (always), the search (⌘K on Apple, Ctrl K elsewhere) centred, the account menu (invitations, theme, sign out) on the right.
 
 ## Direction contract
 
-THESIS: Intentra is a laboratory record book. Every piece of knowledge is an entry: graphite while it is a Draft, ink once a person signed it, struck through with one line (still legible) when rejected. Refuses the neutral card dashboard with metric tiles.
+THESIS: the category standard, played straight at Linear/Vercel craft: a conventional app frame where lists, statuses and keys carry the product, and nothing decorates. Refuses the earlier "record book" metaphor and any card-grid dashboard.
 
-OWN-WORLD: cool near-white page; blue-black ink for text and primary controls; graphite for proposed/secondary; one record-book red used only for the margin rule and destructive actions. A dark cloth spine (sidebar) in both themes. Hairline ruled rows, not cards. Geist for prose, Geist Mono tabular for keys, counts, dates, versions and slugs, all aligned on the margin axis. Small radius. Every status has a mark (dashed, solid, struck), never color alone.
+OWN-WORLD: neutral cool greys; a grey app frame (the sidebar's ground) around a near-white canvas with white lists; near-black primary buttons (inverted in dark); one muted indigo accent, oklch(0.6 0.13 278) light / oklch(0.72 0.11 278) dark (user decision, 2026-09-30), only for focus rings and unread dots; Geist for text, Geist Mono for Knowledge Keys, slugs, counts and dates; 0.5rem radius, 12px canvas radius; 1px borders; bordered lists with row dividers instead of cards; statuses as icon plus word (dashed circle Draft, check Approved, cross Rejected, slash Obsolete); shadows only on the canvas (soft), popovers and dialogs.
 
-STORY: a Member opens the app, lands in their last Workspace, picks a Project volume on the spine and sees its table of contents: what is signed, what waits for a signature, what needs review. Workspace pages are the book's front matter: signatories (Members), invitations, agent tokens.
+STORY: a Member opens the app, lands in their last Workspace and last Project, and works through "Работа"; switching Project (frequent) is the top of the sidebar, switching Workspace (rare) one level deeper in the same menu; the Workspace's pages are always the second group.
 
-FIRST VIEWPORT: spine left (Workspace switcher on top, Project volumes, the open Project's sections, Workspace front matter, account at the foot). Main: thin top bar with breadcrumbs and ⌘K. Page: a red vertical margin rule ~7rem from the left edge running the full height; slug in the margin, Project name as the title right of it; below, the table of contents by Kind with dot leaders to counts; beside it at ≥1280px the "awaiting signature" ledger with keys in the margin. Primary action (Interview) top right of the page header.
+FIRST VIEWPORT: grey frame; the sidebar (Project switcher, "Работа", "Пространство"); beside it an 8px-inset canvas with a 12px radius, a hairline ring and a soft shadow. Canvas header 3rem: toggle left, search centred, avatar right. Content column up to 72rem: title and "Ваш доступ: …" on the left, the primary "Интервью" button on the right; below, at ≥1280px, two columns: "Знания по видам" (bordered list of Kinds, approved count with the Approved check, Drafts as a badge) and "Ждут утверждения" (bordered list of Drafts, key leading each row on the first line).
 
-FORM: "Laboratory record book", position 3 of 7 on the ordered list; seed key a150ca9d. Raises: marks not hues (cyclorama); tabular mono on one margin axis (dive); palette law (arcade); one geometry — the margin rule — drives layout, keys and state marks (zoo). Signature interaction: hovering or focusing an entry reveals its provenance (author, source, version) in the margin. Motion: the margin rule draws top to bottom once on first load; pages crossfade while the rule stays put.
+FORM: canon (standing exit), chosen in the re-roll round of seed key a150ca9d; quality bar Linear and Vercel.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
 ## Open decisions
 
 - The mark stays a placeholder until a real logo exists.
-- Knowledge list, Draft review and the Interview get their own surfaces later; they inherit this world.

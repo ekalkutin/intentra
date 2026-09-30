@@ -12,6 +12,18 @@ export const ru = {
     slugHint:
       'От 3 до 15 символов: латиница, цифры и дефисы. После создания не меняется.',
   },
+  validation: {
+    required: 'Заполните поле',
+    tooShort_one: 'Не меньше {{count}} символа',
+    tooShort_few: 'Не меньше {{count}} символов',
+    tooShort_many: 'Не меньше {{count}} символов',
+    tooShort_other: 'Не меньше {{count}} символа',
+    tooLong_one: 'Не больше {{count}} символа',
+    tooLong_few: 'Не больше {{count}} символов',
+    tooLong_many: 'Не больше {{count}} символов',
+    tooLong_other: 'Не больше {{count}} символа',
+    email: 'Введите email в формате name@example.com',
+  },
   common: {
     cancel: 'Отмена',
     close: 'Закрыть',
@@ -93,11 +105,13 @@ export const ru = {
     projects: 'Проекты',
     createProject: 'Новый проект',
     noProjects: 'Проектов пока нет',
+    work: 'Работа',
+    noProjectsHint: 'Создайте проект, чтобы начать собирать знания о продукте.',
     workspacePages: {
       projects: 'Проекты',
       members: 'Участники',
       tokens: 'Токены для агентов',
-      settings: 'Настройки',
+      settings: 'Настройки пространства',
     },
     projectPages: {
       overview: 'Оглавление',
@@ -108,8 +122,8 @@ export const ru = {
     },
     account: 'Аккаунт',
     receivedInvitations: 'Приглашения',
-    search: 'Перейти',
-    searchPlaceholder: 'Проект, раздел или пространство…',
+    search: 'Поиск',
+    searchPlaceholder: 'Поиск',
     searchEmpty: 'Ничего не нашлось',
     searchTitle: 'Быстрый переход',
     searchDescription: 'Найдите проект, раздел или пространство',
@@ -156,7 +170,7 @@ export const ru = {
     empty: 'В этом пространстве ещё нет проектов.',
     emptyReadOnly:
       'Проектов пока нет. Создать проект может владелец или менеджер.',
-    yourRole: 'ваш доступ',
+    yourAccess: 'Ваш доступ: {{role}}',
   },
   members: {
     title: 'Участники',
@@ -260,7 +274,7 @@ export const ru = {
       'Менять доступ может владелец пространства или тот, кто утверждает в этом проекте.',
   },
   overview: {
-    contents: 'Оглавление',
+    contents: 'Знания по видам',
     contentsDescription: 'Что уже записано о продукте, по видам знаний.',
     approved: 'утверждено',
     drafts_one: '{{count}} черновик',
@@ -268,10 +282,10 @@ export const ru = {
     drafts_many: '{{count}} черновиков',
     drafts_other: '{{count}} черновика',
     nothing: '—',
-    awaiting: 'Ждут подписи',
+    awaiting: 'Ждут утверждения',
     awaitingDescription:
       'Черновики, которые предложили люди и агенты. Знанием они станут только после утверждения.',
-    awaitingEmpty: 'Все записи подписаны.',
+    awaitingEmpty: 'Все черновики разобраны.',
     needsReview_one: '{{count}} запись требует проверки',
     needsReview_few: '{{count}} записи требуют проверки',
     needsReview_many: '{{count}} записей требуют проверки',

@@ -20,7 +20,7 @@ export function SignInPage() {
           {t('signIn.noAccount')}{' '}
           <Link
             to={{ pathname: ROUTES.signUp, search }}
-            className='text-foreground underline'
+            className='font-medium text-foreground underline underline-offset-4'
           >
             {t('signIn.toSignUp')}
           </Link>

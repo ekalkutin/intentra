@@ -4,4 +4,3 @@ export { readStored, removeStored, writeStored } from './storage';
 export { suggestSlug } from './suggest-slug';
 export { ThemeProvider, ThemeSchema, useTheme, type Theme } from './theme';
 export { useIsMobile } from './use-mobile';
-export { useMediaQuery } from './use-media-query';

@@ -1,9 +1,9 @@
 import {
   KeyRound,
+  LayoutList,
   Library,
   ListTree,
   MessagesSquare,
-  NotebookPen,
   Settings,
   ShieldCheck,
   Users,
@@ -24,7 +24,7 @@ type Entry<Page> = {
   readonly labelKey: string;
 };
 
-/** The pages of a Workspace, in the order the spine lists them. */
+/** The pages of a Workspace, in the order the sidebar lists them. */
 export const WORKSPACE_NAVIGATION = [
   { page: undefined, icon: Library, labelKey: 'projects' },
   { page: WORKSPACE_PAGES.members, icon: Users, labelKey: 'members' },
@@ -32,10 +32,10 @@ export const WORKSPACE_NAVIGATION = [
   { page: WORKSPACE_PAGES.settings, icon: Settings, labelKey: 'settings' },
 ] as const satisfies readonly Entry<WorkspacePage>[];
 
-/** The pages of a Project, in the order the spine lists them. */
+/** The sections of a Project, in the order the sidebar lists them. */
 export const PROJECT_NAVIGATION = [
   { page: undefined, icon: ListTree, labelKey: 'overview' },
-  { page: PROJECT_PAGES.knowledge, icon: NotebookPen, labelKey: 'knowledge' },
+  { page: PROJECT_PAGES.knowledge, icon: LayoutList, labelKey: 'knowledge' },
   {
     page: PROJECT_PAGES.interview,
     icon: MessagesSquare,

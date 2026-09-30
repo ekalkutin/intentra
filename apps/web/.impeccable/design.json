@@ -1,0 +1,551 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-30T20:09:21+00:00",
+  "title": "Design System: Intentra",
+  "extensions": {
+    "colorMeta": {
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Canvas White",
+        "canonical": "oklch(0.992 0 0)",
+        "dark": "oklch(0.2 0.005 286)",
+        "cssVar": "--background",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.60 0 0)",
+          "oklch(0.72 0 0)",
+          "oklch(0.84 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface White",
+        "canonical": "oklch(1 0 0)",
+        "dark": "oklch(0.225 0.006 286)",
+        "cssVar": "--card",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.60 0 0)",
+          "oklch(0.72 0 0)",
+          "oklch(0.84 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Near-Black Ink",
+        "canonical": "oklch(0.21 0.006 286)",
+        "dark": "oklch(0.96 0.002 286)",
+        "cssVar": "--foreground / --primary",
+        "tonalRamp": [
+          "oklch(0.15 0.006 286)",
+          "oklch(0.26 0.006 286)",
+          "oklch(0.37 0.006 286)",
+          "oklch(0.48 0.006 286)",
+          "oklch(0.60 0.006 286)",
+          "oklch(0.72 0.006 286)",
+          "oklch(0.84 0.006 286)",
+          "oklch(0.95 0.006 286)"
+        ]
+      },
+      "ink-inverse": {
+        "role": "neutral",
+        "displayName": "Ink Inverse",
+        "canonical": "oklch(0.985 0 0)",
+        "dark": "oklch(0.2 0.005 286)",
+        "cssVar": "--primary-foreground",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.26 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.60 0 0)",
+          "oklch(0.72 0 0)",
+          "oklch(0.84 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "frame": {
+        "role": "neutral",
+        "displayName": "Frame Grey",
+        "canonical": "oklch(0.965 0.0015 286)",
+        "dark": "oklch(0.155 0.005 286)",
+        "cssVar": "--sidebar",
+        "tonalRamp": [
+          "oklch(0.15 0.0015 286)",
+          "oklch(0.26 0.0015 286)",
+          "oklch(0.37 0.0015 286)",
+          "oklch(0.48 0.0015 286)",
+          "oklch(0.60 0.0015 286)",
+          "oklch(0.72 0.0015 286)",
+          "oklch(0.84 0.0015 286)",
+          "oklch(0.95 0.0015 286)"
+        ]
+      },
+      "frame-text": {
+        "role": "neutral",
+        "displayName": "Frame Text",
+        "canonical": "oklch(0.37 0.01 286)",
+        "dark": "oklch(0.8 0.008 286)",
+        "cssVar": "--sidebar-foreground",
+        "tonalRamp": [
+          "oklch(0.15 0.01 286)",
+          "oklch(0.26 0.01 286)",
+          "oklch(0.37 0.01 286)",
+          "oklch(0.48 0.01 286)",
+          "oklch(0.60 0.01 286)",
+          "oklch(0.72 0.01 286)",
+          "oklch(0.84 0.01 286)",
+          "oklch(0.95 0.01 286)"
+        ]
+      },
+      "frame-active": {
+        "role": "neutral",
+        "displayName": "Frame Active",
+        "canonical": "oklch(0.925 0.004 286)",
+        "dark": "oklch(0.235 0.007 286)",
+        "cssVar": "--sidebar-accent",
+        "tonalRamp": [
+          "oklch(0.15 0.004 286)",
+          "oklch(0.26 0.004 286)",
+          "oklch(0.37 0.004 286)",
+          "oklch(0.48 0.004 286)",
+          "oklch(0.60 0.004 286)",
+          "oklch(0.72 0.004 286)",
+          "oklch(0.84 0.004 286)",
+          "oklch(0.95 0.004 286)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Grey",
+        "canonical": "oklch(0.967 0.001 286)",
+        "dark": "oklch(0.25 0.006 286)",
+        "cssVar": "--muted / --secondary / --accent",
+        "tonalRamp": [
+          "oklch(0.15 0.001 286)",
+          "oklch(0.26 0.001 286)",
+          "oklch(0.37 0.001 286)",
+          "oklch(0.48 0.001 286)",
+          "oklch(0.60 0.001 286)",
+          "oklch(0.72 0.001 286)",
+          "oklch(0.84 0.001 286)",
+          "oklch(0.95 0.001 286)"
+        ]
+      },
+      "muted-text": {
+        "role": "neutral",
+        "displayName": "Muted Text",
+        "canonical": "oklch(0.51 0.014 286)",
+        "dark": "oklch(0.71 0.012 286)",
+        "cssVar": "--muted-foreground",
+        "tonalRamp": [
+          "oklch(0.15 0.014 286)",
+          "oklch(0.26 0.014 286)",
+          "oklch(0.37 0.014 286)",
+          "oklch(0.48 0.014 286)",
+          "oklch(0.60 0.014 286)",
+          "oklch(0.72 0.014 286)",
+          "oklch(0.84 0.014 286)",
+          "oklch(0.95 0.014 286)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(0.92 0.004 286)",
+        "dark": "oklch(1 0 0 / 11%)",
+        "cssVar": "--border",
+        "tonalRamp": [
+          "oklch(0.15 0.004 286)",
+          "oklch(0.26 0.004 286)",
+          "oklch(0.37 0.004 286)",
+          "oklch(0.48 0.004 286)",
+          "oklch(0.60 0.004 286)",
+          "oklch(0.72 0.004 286)",
+          "oklch(0.84 0.004 286)",
+          "oklch(0.95 0.004 286)"
+        ]
+      },
+      "input-stroke": {
+        "role": "neutral",
+        "displayName": "Input Stroke",
+        "canonical": "oklch(0.9 0.005 286)",
+        "dark": "oklch(1 0 0 / 14%)",
+        "cssVar": "--input",
+        "tonalRamp": [
+          "oklch(0.15 0.005 286)",
+          "oklch(0.26 0.005 286)",
+          "oklch(0.37 0.005 286)",
+          "oklch(0.48 0.005 286)",
+          "oklch(0.60 0.005 286)",
+          "oklch(0.72 0.005 286)",
+          "oklch(0.84 0.005 286)",
+          "oklch(0.95 0.005 286)"
+        ]
+      },
+      "accent-indigo": {
+        "role": "secondary",
+        "displayName": "Muted Indigo",
+        "canonical": "oklch(0.6 0.13 278)",
+        "dark": "oklch(0.72 0.11 278)",
+        "cssVar": "--ring / --sidebar-ring / --brand",
+        "tonalRamp": [
+          "oklch(0.15 0.13 278)",
+          "oklch(0.26 0.13 278)",
+          "oklch(0.37 0.13 278)",
+          "oklch(0.48 0.13 278)",
+          "oklch(0.60 0.13 278)",
+          "oklch(0.72 0.13 278)",
+          "oklch(0.84 0.13 278)",
+          "oklch(0.95 0.13 278)"
+        ]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Approval Green",
+        "canonical": "oklch(0.56 0.14 155)",
+        "dark": "oklch(0.72 0.15 155)",
+        "cssVar": "--success",
+        "tonalRamp": [
+          "oklch(0.15 0.14 155)",
+          "oklch(0.26 0.14 155)",
+          "oklch(0.37 0.14 155)",
+          "oklch(0.48 0.14 155)",
+          "oklch(0.60 0.14 155)",
+          "oklch(0.72 0.14 155)",
+          "oklch(0.84 0.14 155)",
+          "oklch(0.95 0.14 155)"
+        ]
+      },
+      "warning": {
+        "role": "tertiary",
+        "displayName": "Review Amber",
+        "canonical": "oklch(0.66 0.15 65)",
+        "dark": "oklch(0.8 0.14 70)",
+        "cssVar": "--warning",
+        "tonalRamp": [
+          "oklch(0.15 0.15 65)",
+          "oklch(0.26 0.15 65)",
+          "oklch(0.37 0.15 65)",
+          "oklch(0.48 0.15 65)",
+          "oklch(0.60 0.15 65)",
+          "oklch(0.72 0.15 65)",
+          "oklch(0.84 0.15 65)",
+          "oklch(0.95 0.15 65)"
+        ]
+      },
+      "destructive": {
+        "role": "tertiary",
+        "displayName": "Destructive Red",
+        "canonical": "oklch(0.577 0.215 27)",
+        "dark": "oklch(0.68 0.19 22)",
+        "cssVar": "--destructive",
+        "tonalRamp": [
+          "oklch(0.15 0.215 27)",
+          "oklch(0.26 0.215 27)",
+          "oklch(0.37 0.215 27)",
+          "oklch(0.48 0.215 27)",
+          "oklch(0.60 0.215 27)",
+          "oklch(0.72 0.215 27)",
+          "oklch(0.84 0.215 27)",
+          "oklch(0.95 0.215 27)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page title in the page header; one per page."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section titles; weight, not size, sets them apart."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Row text, descriptions, prose."
+      },
+      "body-strong": {
+        "displayName": "Body Strong",
+        "purpose": "Buttons and the primary line of a row."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Meta, third row lines, sidebar group labels, badges; sentence case."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Knowledge Keys, slugs, counts, dates, URLs, secrets, keyboard hints; tabular figures."
+      }
+    },
+    "shadows": [
+      {
+        "name": "canvas",
+        "value": "light: 0 1px 3px oklch(0.2 0.006 286 / 0.08), 0 1px 2px oklch(0.2 0.006 286 / 0.06); dark: 0 1px 2px oklch(0 0 0 / 0.25), 0 1px 1px oklch(0 0 0 / 0.18)",
+        "cssVar": "--canvas-shadow",
+        "purpose": "The inset canvas from 768px, always with a 1px hairline ring."
+      },
+      {
+        "name": "floating",
+        "value": "primitive shadow-md / shadow-lg + 0 0 0 1px color-mix(in oklch, var(--foreground) 10%, transparent)",
+        "purpose": "Dropdown menus and submenus (owned by the primitives)."
+      },
+      {
+        "name": "scrim",
+        "value": "background: color-mix(in oklch, oklch(0.15 0.005 286) 35%, transparent); backdrop-filter: none",
+        "purpose": "Dialog overlay: a plain dim, never blurred."
+      },
+      {
+        "name": "focus",
+        "value": "border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent)",
+        "purpose": "Indigo focus on controls: border shifts to the indigo with a soft 3px halo at 50%; navigating rows use an inset 2px indigo ring at 50%."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Easing of the page settle."
+      },
+      {
+        "name": "page-settle",
+        "value": "220ms ease-out-expo, from opacity 0 and translate 0 0.25rem",
+        "purpose": "A new page settles in; the only page-level motion."
+      },
+      {
+        "name": "sidebar-collapse",
+        "value": "200ms linear (primitive)",
+        "purpose": "Sidebar width and offset when toggled with Ctrl B / ⌘B."
+      },
+      {
+        "name": "row-hover",
+        "value": "transition-colors 150ms",
+        "purpose": "Wash under navigating rows."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation and transition durations 0.01ms",
+        "purpose": "prefers-reduced-motion: reduce collapses all motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px",
+        "purpose": "List row lead and meta move out beside the content."
+      },
+      {
+        "name": "md",
+        "value": "768px",
+        "purpose": "Sidebar docks; canvas insets with ring and shadow; search shows its field and Kbd; page padding 2rem."
+      },
+      {
+        "name": "xl",
+        "value": "1280px",
+        "purpose": "Two-column layouts (Project overview 2fr / 3fr)."
+      }
+    ],
+    "unusedTokens": [
+      {
+        "name": "--chart-1 … --chart-5",
+        "purpose": "Unused shadcn defaults (pure grey); not part of the system."
+      }
+    ],
+    "scales": {
+      "fontSizes": {
+        "closed": [
+          "1.5rem",
+          "0.875rem",
+          "0.75rem"
+        ],
+        "note": "Own code only; primitive sizes (e.g. button sm 0.8rem) are primitive-owned."
+      },
+      "fontWeights": {
+        "closed": [
+          400,
+          500,
+          600
+        ]
+      },
+      "tracking": {
+        "closed": [
+          "-0.02em (page title only)"
+        ]
+      },
+      "radius": {
+        "closed": [
+          "md 0.4rem",
+          "lg 0.5rem",
+          "xl 0.7rem",
+          "full"
+        ]
+      },
+      "listRow": {
+        "padding": "0.75rem 1rem",
+        "minHeight": "none",
+        "singleLineHeight": "44px",
+        "actionsGap": "0.5rem"
+      },
+      "menuMinWidth": "15rem",
+      "measure": {
+        "description": "42rem (max-w-2xl)",
+        "inlineForm": "32rem (max-w-lg)",
+        "formDialog": "28rem (max-w-md)",
+        "pageColumn": "72rem (max-w-6xl)"
+      },
+      "spacing": [
+        "0.25rem",
+        "0.5rem",
+        "0.75rem",
+        "1rem",
+        "2rem",
+        "4rem"
+      ]
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Near-black main action, inverted in dark; at most one per page header.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z\"/><path d=\"M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1\"/></svg>Интервью</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:6px;height:2rem;padding:0 .625rem;border:1px solid transparent;border-radius:var(--radius);background:var(--primary);color:var(--primary-foreground);font:500 .875rem/1 \"Geist Variable\",sans-serif;cursor:pointer;transition:all .15s}.ds-btn-primary:hover{background:color-mix(in oklch,var(--primary) 80%,transparent)}.ds-btn-primary:focus-visible{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in oklch,var(--ring) 50%,transparent)}.ds-btn-primary:active{transform:translateY(1px)}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary actions, retry, navigation to a page.",
+      "html": "<button class=\"ds-btn-outline\">Повторить</button>",
+      "css": ".ds-btn-outline{display:inline-flex;align-items:center;height:2rem;padding:0 .625rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--background);color:var(--foreground);font:500 .875rem/1 \"Geist Variable\",sans-serif;cursor:pointer;transition:all .15s}.ds-btn-outline:hover{background:var(--muted)}.ds-btn-outline:focus-visible{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in oklch,var(--ring) 50%,transparent)}.ds-btn-outline:active{transform:translateY(1px)}"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Delete or revoke only, always behind a confirm dialog.",
+      "html": "<button class=\"ds-btn-destructive\">Удалить проект</button>",
+      "css": ".ds-btn-destructive{display:inline-flex;align-items:center;height:2rem;padding:0 .625rem;border:1px solid transparent;border-radius:var(--radius);background:color-mix(in oklch,var(--destructive) 10%,transparent);color:var(--destructive);font:500 .875rem/1 \"Geist Variable\",sans-serif;cursor:pointer}.ds-btn-destructive:hover{background:color-mix(in oklch,var(--destructive) 20%,transparent)}.ds-btn-destructive:focus-visible{outline:none;border-color:color-mix(in oklch,var(--destructive) 40%,transparent);box-shadow:0 0 0 3px color-mix(in oklch,var(--destructive) 20%,transparent)}"
+    },
+    {
+      "name": "Slug Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Field with the input stroke; slugs and secrets in mono. Focus: border to the indigo plus a soft 3px indigo halo.",
+      "html": "<input class=\"ds-input\" value=\"billing\" aria-label=\"Slug\">",
+      "css": ".ds-input{height:2rem;width:16rem;padding:0 .625rem;border:1px solid var(--input);border-radius:var(--radius);background:transparent;color:var(--foreground);font:400 .875rem/1 \"Geist Mono Variable\",ui-monospace,monospace;font-variant-numeric:tabular-nums;transition:all .15s}.ds-input:focus-visible{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in oklch,var(--ring) 50%,transparent)}"
+    },
+    {
+      "name": "Sidebar Navigation",
+      "kind": "nav",
+      "refersTo": "sidebar-item",
+      "description": "Project switcher, then the groups Работа and Пространство on the frame grey.",
+      "html": "<nav class=\"ds-side\"><button class=\"ds-switch\"><span class=\"ds-tile\">Б</span><span class=\"ds-sw-t\"><b>Биллинг</b><small>Acme Labs</small></span><svg width=\"8\" height=\"8\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M2 4h20L12 21z\"/></svg></button><div class=\"ds-glabel\">Работа</div><a class=\"ds-item is-active\" href=\"#\">Оглавление</a><a class=\"ds-item\" href=\"#\">Знания</a><a class=\"ds-item\" href=\"#\">Интервью</a><div class=\"ds-glabel\">Пространство</div><a class=\"ds-item\" href=\"#\">Проекты</a><a class=\"ds-item\" href=\"#\">Участники</a></nav>",
+      "css": ".ds-side{display:flex;flex-direction:column;gap:2px;width:16rem;padding:.5rem;background:var(--sidebar);color:var(--sidebar-foreground);font:400 .875rem/1.25rem \"Geist Variable\",sans-serif}.ds-switch{display:flex;align-items:center;gap:.5rem;height:3rem;padding:.5rem;border:0;border-radius:calc(var(--radius)*.8);background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}.ds-switch:hover{background:var(--sidebar-accent)}.ds-switch:focus-visible{outline:2px solid var(--sidebar-ring)}.ds-switch svg{margin-left:auto;color:var(--muted-foreground)}.ds-tile{display:flex;align-items:center;justify-content:center;width:2rem;height:2rem;border:1px solid var(--border);border-radius:calc(var(--radius)*.8);background:var(--background);color:var(--muted-foreground);font-weight:600;font-size:.875rem}.ds-sw-t{display:grid;line-height:1.2}.ds-sw-t b{color:var(--sidebar-accent-foreground);font-weight:600;font-size:.875rem}.ds-sw-t small{font-size:.75rem;color:var(--muted-foreground)}.ds-glabel{height:2rem;display:flex;align-items:center;padding:0 .5rem;margin-top:.5rem;font-size:.75rem;color:color-mix(in oklch,var(--sidebar-foreground) 70%,transparent)}.ds-item{display:flex;align-items:center;height:2rem;padding:0 .5rem;border-radius:calc(var(--radius)*.8);color:var(--muted-foreground);text-decoration:none}.ds-item:hover{background:color-mix(in oklch,var(--sidebar-accent) 70%,transparent)}.ds-item.is-active{background:var(--sidebar-accent);color:var(--sidebar-accent-foreground);font-weight:500}.ds-item:focus-visible{outline:2px solid var(--sidebar-ring)}"
+    },
+    {
+      "name": "Status Badges",
+      "kind": "chip",
+      "refersTo": "status-badge",
+      "description": "Icon plus word on an outline pill; only the icon takes colour.",
+      "html": "<div class=\"ds-badges\"><span class=\"ds-badge\"><svg class=\"i-p\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-dasharray=\"3 3\"><circle cx=\"12\" cy=\"12\" r=\"10\"/></svg>1 черновик</span><span class=\"ds-badge\"><svg class=\"i-d\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/></svg>утверждено</span><span class=\"ds-badge\"><svg class=\"i-x\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m15 9-6 6M9 9l6 6\"/></svg>отклонено</span><span class=\"ds-badge\"><svg class=\"i-p\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M4.9 4.9l14.2 14.2\"/></svg>устарело</span><span class=\"ds-badge\"><svg class=\"i-w\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z\"/><path d=\"M12 9v4M12 17h.01\"/></svg>на проверку</span></div>",
+      "css": ".ds-badges{display:flex;flex-wrap:wrap;gap:.5rem}.ds-badge{display:inline-flex;align-items:center;gap:4px;height:1.25rem;padding:.125rem .5rem .125rem .375rem;border:1px solid var(--border);border-radius:calc(var(--radius)*2.6);color:var(--muted-foreground);font:400 .75rem/1 \"Geist Variable\",sans-serif;white-space:nowrap}.ds-badge svg{width:12px;height:12px}.i-p{color:var(--muted-foreground)}.i-d{color:var(--success)}.i-x{color:var(--destructive)}.i-w{color:var(--warning)}"
+    },
+    {
+      "name": "List with Rows",
+      "kind": "custom",
+      "refersTo": "list-row",
+      "description": "Bordered white block with hairline dividers; mono lead, content, meta; the navigating row washes on hover and draws an inset ring on focus.",
+      "html": "<ul class=\"ds-list\"><li class=\"ds-row\"><span class=\"ds-lead\">INT-1</span><div class=\"ds-c\"><p class=\"ds-t\">1С: выгрузка счетов</p><p class=\"ds-s\">Выгружать выставленные счета в бухгалтерию клиента.</p></div><span class=\"ds-meta\">30.09.2026</span></li><li class=\"ds-row is-nav\"><span class=\"ds-lead\">billing</span><div class=\"ds-c\"><a class=\"ds-t ds-link\" href=\"#\">Биллинг</a><p class=\"ds-s\">Ваш доступ: утверждает</p></div></li></ul>",
+      "css": ".ds-list{list-style:none;margin:0;padding:0;width:36rem;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);color:var(--card-foreground);font:400 .875rem/1.25rem \"Geist Variable\",sans-serif}.ds-row{position:relative;display:flex;align-items:flex-start;gap:1rem;padding:.75rem 1rem}.ds-row+.ds-row{border-top:1px solid var(--border)}.ds-row.is-nav{transition:background .15s}.ds-row.is-nav:hover,.ds-row.is-nav:focus-within{background:color-mix(in oklch,var(--accent) 60%,transparent)}.ds-lead{width:5rem;flex-shrink:0;padding-top:2px;font:400 .75rem/1.25rem \"Geist Mono Variable\",ui-monospace,monospace;font-variant-numeric:tabular-nums;color:var(--muted-foreground)}.ds-c{flex:1;min-width:0}.ds-t{margin:0;font-weight:500;color:inherit;text-decoration:none;display:block}.ds-s{margin:0;color:var(--muted-foreground)}.ds-meta{flex-shrink:0;padding-top:2px;font:400 .75rem/1.25rem \"Geist Mono Variable\",ui-monospace,monospace;color:var(--muted-foreground)}.ds-link{outline:none}.ds-link::after{content:\"\";position:absolute;inset:0}.ds-link:focus-visible::after{box-shadow:inset 0 0 0 2px color-mix(in oklch,var(--ring) 50%,transparent)}"
+    },
+    {
+      "name": "Inset Canvas and Header",
+      "kind": "custom",
+      "refersTo": "canvas",
+      "description": "Frame grey around a rounded ringed canvas; 3rem header with toggle, centred search, avatar.",
+      "html": "<div class=\"ds-frame\"><div class=\"ds-canvas\"><header class=\"ds-head\"><button class=\"ds-ic\" aria-label=\"Панель\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M9 3v18\"/></svg></button><button class=\"ds-search\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><span>Поиск</span><kbd>Ctrl K</kbd></button><span class=\"ds-av\"><span>A</span><i></i></span></header><div class=\"ds-body\"><h1>Биллинг</h1><p>Ваш доступ: утверждает</p></div></div></div>",
+      "css": ".ds-frame{padding:.5rem;background:var(--sidebar);font-family:\"Geist Variable\",sans-serif;width:44rem}.ds-canvas{overflow:hidden;border-radius:calc(var(--radius)*1.4);background:var(--background);color:var(--foreground);box-shadow:var(--canvas-shadow),0 0 0 1px var(--border)}.ds-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.75rem;height:3rem;padding:0 .75rem;border-bottom:1px solid var(--border)}.ds-ic{width:1.75rem;height:1.75rem;display:flex;align-items:center;justify-content:center;border:0;border-radius:calc(var(--radius)*.8);background:transparent;color:inherit;cursor:pointer}.ds-ic:hover{background:var(--muted)}.ds-ic:focus-visible,.ds-search:focus-visible{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in oklch,var(--ring) 50%,transparent)}.ds-search{display:flex;align-items:center;gap:.5rem;width:20rem;height:2rem;padding:0 .625rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--background);color:var(--muted-foreground);font:400 .875rem/1 \"Geist Variable\",sans-serif;cursor:pointer}.ds-search span{flex:1;text-align:left}.ds-search kbd{padding:0 .25rem;border-radius:calc(var(--radius)*.6);background:var(--muted);font:500 .75rem/1.25rem \"Geist Variable\",sans-serif}.ds-av{justify-self:end;position:relative;width:1.5rem;height:1.5rem;border-radius:9999px;background:var(--muted);display:flex;align-items:center;justify-content:center;font-size:.75rem}.ds-av i{position:absolute;top:-1px;right:-1px;width:.5rem;height:.5rem;border-radius:9999px;background:var(--brand);box-shadow:0 0 0 2px var(--background)}.ds-body{padding:2rem}.ds-body h1{margin:0;font-size:1.5rem;line-height:2rem;font-weight:600;letter-spacing:-.02em}.ds-body p{margin:.25rem 0 0;font-size:.875rem;color:var(--muted-foreground)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Category Standard, Played Straight",
+    "overview": "Intentra looks like the tool a product team already expects to work in, finished at the level of Linear and Vercel. A quiet cool-grey frame carries the sidebar; beside it the work area is a near-white canvas, inset by 8px, softly rounded, with a hairline ring and a barely-there shadow. Everything the product knows is shown as lists, statuses and keys; nothing on the page exists to decorate. The brand's commitment is to be the category standard, so the system wins on craft, restraint and consistency, not on a metaphor.\n\nDensity is that of a working tool: 14px text, 32px controls, hairline-divided rows, generous air between sections and tight air inside them. Colour is almost entirely neutral. Near-black is the primary control colour (inverted in dark mode); one muted indigo is reserved for focus rings and unread dots; green, amber and red appear only inside status icons and destructive actions. The system rejects card-grid dashboards, metric tiles, eyebrows above headings, frosted glass and decorative iconography.\n\nThe interface is composed from shadcn primitives (base-nova style on Base UI). They are installed by the CLI into `shared/ui/primitives` and never hand-edited; everything specific to Intentra lives in own components (`shared/ui/components`, `widgets`) that compose them, and theme-wide overrides live in the global stylesheet. All visible copy comes from i18n (Russian now, English later), so every layout must hold longer strings.",
+    "keyCharacteristics": [
+      "An inset shell: grey frame with the sidebar, a rounded ringed canvas beside it, a 3rem canvas header.",
+      "Near-black primary controls, one muted indigo accent used only for focus rings and unread dots.",
+      "Bordered lists with row dividers instead of cards.",
+      "Statuses always as icon plus word.",
+      "Geist for words, Geist Mono (tabular) only for machine-shaped values.",
+      "Flat content; shadow only on the canvas and on floating layers."
+    ],
+    "rules": [
+      {
+        "name": "The One Indigo Rule",
+        "body": "Indigo is focus rings and the unread dot, nothing else. It never colours a link, a button, a heading or a status, and never fills anything larger than the dot.",
+        "section": "colors"
+      },
+      {
+        "name": "The Signal Needs a Word Rule",
+        "body": "Green, amber and red appear only inside an icon that sits beside a word, or on a destructive action. Colour is never the only carrier of meaning.",
+        "section": "colors"
+      },
+      {
+        "name": "The Inverted Night Rule",
+        "body": "Dark mode is the same system inverted: the frame goes darker than the canvas, the primary button turns near-white, the indigo accent and the signal hues lighten to hold contrast, so focus rings and the unread dot stay visible on the dark canvas. Borders become white at 11% (input 14%, sidebar 8%).",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono Is for Values Rule",
+        "body": "Geist Mono sets only keys, slugs, counts, dates and URLs (and secrets in copy fields). Names, roles and prose stay in Geist.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Kicker Rule",
+        "body": "No eyebrows, kickers or uppercase tracked labels above headings. A section is its title plus at most one muted description line.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Blur Rule",
+        "body": "Nothing is frosted. Overlays dim with a plain scrim (`oklch(0.15 0.005 286)` at 35%) and `backdrop-filter: none`.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Flat Content Rule",
+        "body": "Lists, sections and headers carry no shadow. If something needs separating, use a hairline.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do compose shadcn primitives wherever one exists; add new ones with the CLI and never edit files in `shared/ui/primitives`. Theme-wide changes go in the global stylesheet; Intentra-specific shapes go in own components.",
+      "Do show lists as bordered blocks with hairline dividers (the List component).",
+      "Do show every status as an icon plus a word (StatusBadge).",
+      "Do set Knowledge Keys, slugs, counts, dates and URLs in Geist Mono with tabular figures.",
+      "Do reserve the muted indigo for focus rings and unread dots.",
+      "Do give hover feedback only to rows that navigate, and give the same row a visible keyboard focus.",
+      "Do take every visible string from i18n and let layouts wrap for longer English or Russian strings.",
+      "Do reuse the closed scales (sizes, weights, radii, row density, menu width, measure) instead of adding a step.",
+      "Do keep the page settle (220ms, ease-out-expo, 0.25rem rise) as the only page-level motion, collapsed under reduced motion."
+    ],
+    "donts": [
+      "Don't build card grids, metric tiles or boxed dashboard panels.",
+      "Don't add eyebrows, kickers or uppercase tracked labels above headings.",
+      "Don't blur anything; dim with the plain scrim.",
+      "Don't add decorative icons; an icon either names a navigation target, an action or a status.",
+      "Don't signal status by colour alone, or use indigo, green or amber as a fill.",
+      "Don't colour links, buttons, headings or statuses with indigo; links stay ink with an underline.",
+      "Don't set names, roles or prose in mono.",
+      "Don't add hover states to rows or blocks that do not navigate.",
+      "Don't hard-code copy in components."
+    ]
+  }
+}

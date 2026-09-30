@@ -46,6 +46,7 @@ Intentra is the knowledge and intent layer between people and AI developers. It 
 ## Brand Commitments
 
 - Name: Intentra. The current mark is a placeholder (a lucide icon in a rounded square, `src/shared/ui/components/brand.tsx`), not a committed logo.
+- Visual standard (chosen 2026-09-30): the category standard, played straight. The web UI should sit naturally alongside Linear and Vercel, and their craft level is the bar: calm neutral surfaces, conventional app structure, no decorative metaphor.
 - Voice: precise, plain and calm, like an analyst rather than a hype assistant. Use domain terms from the glossary consistently. Undecided: no formal voice guide yet.
 
 ## Evidence on Hand
