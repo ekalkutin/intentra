@@ -4,3 +4,6 @@
 pnpm-lock.yaml
 # shadcn components, written by its CLI only: updating them overwrites any edit.
 apps/web/src/shared/ui/primitives/
+apps/web/src/shared/lib/utils.ts
+apps/web/src/shared/lib/use-mobile.ts
+apps/web/src/app/styles/index.css
