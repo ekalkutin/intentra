@@ -6,3 +6,11 @@ coverage
 .nx
 *.tsbuildinfo
 .env
+
+# impeccable: engine binary is downloaded on demand; keep only shared design artifacts
+.*/skills/impeccable/scripts/bin/
+**/.impeccable/*
+!**/.impeccable/config.json
+!**/.impeccable/design.json
+!**/.impeccable/surfaces/
+!**/.impeccable/critique/
