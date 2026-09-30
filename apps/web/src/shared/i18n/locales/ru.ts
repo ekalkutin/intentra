@@ -7,6 +7,20 @@ export const ru = {
     repeatPassword: 'Повторите пароль',
     passwordHint: 'Не меньше 8 символов.',
     passwordsDiffer: 'Пароли не совпадают',
+    name: 'Название',
+    slug: 'Адрес',
+    slugHint:
+      'От 3 до 15 символов: латиница, цифры и дефисы. После создания не меняется.',
+  },
+  common: {
+    cancel: 'Отмена',
+    close: 'Закрыть',
+    retry: 'Повторить',
+    copy: 'Скопировать',
+    copied: 'Скопировано',
+    you: 'вы',
+    never: 'никогда',
+    loadFailed: 'Не удалось загрузить',
   },
   signIn: {
     title: 'С возвращением',
@@ -24,9 +38,6 @@ export const ru = {
       'Аккаунт создан, но войти не получилось. Войдите на странице входа',
     toSignIn: 'Войти',
   },
-  home: {
-    signedInAs: 'Вы вошли как {{email}}',
-  },
   signOut: {
     submit: 'Выйти',
   },
@@ -36,6 +47,252 @@ export const ru = {
     light: 'Светлая',
     dark: 'Тёмная',
   },
+  roles: {
+    owner: 'Владелец',
+    manager: 'Менеджер',
+    none: 'Без роли',
+  },
+  projectRoles: {
+    viewer: 'Читает',
+    contributor: 'Пишет',
+    maintainer: 'Утверждает',
+    viewerHint: 'Видит знания проекта',
+    contributorHint: 'Записывает и правит черновики',
+    maintainerHint: 'Утверждает и отклоняет знания',
+  },
+  kinds: {
+    'product-overview': 'Обзор продукта',
+    goal: 'Цели',
+    persona: 'Персоны',
+    scenario: 'Сценарии',
+    requirement: 'Требования',
+    constraint: 'Ограничения',
+    term: 'Термины',
+    'business-rule': 'Бизнес-правила',
+    integration: 'Интеграции',
+    decision: 'Решения',
+    'open-question': 'Открытые вопросы',
+  },
+  statuses: {
+    draft: 'черновик',
+    approved: 'утверждено',
+    rejected: 'отклонено',
+    obsolete: 'устарело',
+  },
+  sources: {
+    manual: 'вручную',
+    'external-agent': 'внешний агент',
+    'intentra-agent': 'агент Intentra',
+  },
+  shell: {
+    navigation: 'Навигация',
+    toggleSidebar: 'Показать или скрыть панель',
+    workspace: 'Пространство',
+    workspaces: 'Пространства',
+    createWorkspace: 'Новое пространство',
+    projects: 'Проекты',
+    createProject: 'Новый проект',
+    noProjects: 'Проектов пока нет',
+    workspacePages: {
+      projects: 'Проекты',
+      members: 'Участники',
+      tokens: 'Токены для агентов',
+      settings: 'Настройки',
+    },
+    projectPages: {
+      overview: 'Оглавление',
+      knowledge: 'Знания',
+      interview: 'Интервью',
+      roles: 'Доступ',
+      settings: 'Настройки',
+    },
+    account: 'Аккаунт',
+    receivedInvitations: 'Приглашения',
+    search: 'Перейти',
+    searchPlaceholder: 'Проект, раздел или пространство…',
+    searchEmpty: 'Ничего не нашлось',
+    searchTitle: 'Быстрый переход',
+    searchDescription: 'Найдите проект, раздел или пространство',
+    workspaceMissing: 'Такого пространства нет',
+    workspaceMissingHint:
+      'Возможно, его удалили или вас в нём больше нет. Выберите другое.',
+    projectMissing: 'Такого проекта нет',
+    projectMissingHint:
+      'Возможно, его удалили. Откройте проект из списка слева.',
+    toWorkspaces: 'К пространствам',
+  },
+  start: {
+    title: 'Создайте первое пространство',
+    description:
+      'В пространстве живут ваши проекты и люди, которые над ними работают.',
+    or: 'Или примите приглашение',
+    noInvitations:
+      'Приглашений пока нет. Попросите владельца пространства пригласить ваш email.',
+  },
+  createWorkspace: {
+    title: 'Новое пространство',
+    description: 'Пространство объединяет людей и их проекты.',
+    namePlaceholder: 'Например, Acme',
+    submit: 'Создать пространство',
+  },
+  createProject: {
+    title: 'Новый проект',
+    description:
+      'Проект собирает всё, что известно об одном программном продукте.',
+    namePlaceholder: 'Например, Биллинг',
+    submit: 'Создать проект',
+  },
+  receivedInvitations: {
+    title: 'Приглашения',
+    description: 'Пространства, в которые вас пригласили.',
+    empty: 'Новых приглашений нет.',
+    accept: 'Принять',
+    decline: 'Отклонить',
+    expires: 'до <mono>{{date}}</mono>',
+  },
+  projects: {
+    title: 'Проекты',
+    description: 'Каждый проект — отдельный журнал знаний о продукте.',
+    empty: 'В этом пространстве ещё нет проектов.',
+    emptyReadOnly:
+      'Проектов пока нет. Создать проект может владелец или менеджер.',
+    yourRole: 'ваш доступ',
+  },
+  members: {
+    title: 'Участники',
+    description: 'Кто работает в пространстве и с какой ролью.',
+    membersSection: 'Участники',
+    remove: 'Убрать из пространства',
+    removeTitle: 'Убрать {{email}}?',
+    removeDescription:
+      'Человек потеряет доступ ко всем проектам пространства, его токены для агентов перестанут работать. Записанные им знания останутся.',
+    removeConfirm: 'Убрать',
+    roleLabel: 'Роль {{email}}',
+    invitationsSection: 'Приглашения',
+    invitationsDescription:
+      'Приглашённый увидит приглашение после входа с этим email.',
+    invite: 'Пригласить',
+    inviteEmail: 'Email нового участника',
+    invitationsEmpty: 'Открытых приглашений нет.',
+    revoke: 'Отозвать',
+    sent: 'отправлено {{date}}',
+  },
+  invitationStatuses: {
+    pending: 'ждёт ответа',
+    accepted: 'принято',
+    declined: 'отклонено',
+    revoked: 'отозвано',
+    expired: 'истекло',
+  },
+  tokens: {
+    title: 'Токены для агентов',
+    description:
+      'Токен даёт внешнему агенту (Claude Code, Codex, Cursor) доступ к пространству от вашего имени через MCP.',
+    mcp: 'MCP',
+    endpoint: 'Адрес MCP',
+    create: 'Новый токен',
+    createTitle: 'Новый токен',
+    createDescription:
+      'Агент получит не больше, чем ваш доступ в каждом проекте, и не больше выбранного уровня.',
+    name: 'Название',
+    namePlaceholder: 'Например, Claude Code на ноутбуке',
+    level: 'Уровень',
+    lifetime: 'Срок действия',
+    submit: 'Создать токен',
+    empty: 'Токенов пока нет.',
+    allTokens: 'Все токены пространства',
+    ownTokens: 'Ваши токены',
+    created: 'создан <mono>{{date}}</mono>',
+    expires: 'действует до <mono>{{date}}</mono>',
+    noExpiry: 'бессрочный',
+    lastUsed: 'использован <mono>{{date}}</mono>',
+    neverUsed: 'ещё не использован',
+    revoke: 'Отозвать',
+    revokeTitle: 'Отозвать токен «{{name}}»?',
+    revokeDescription:
+      'Агенты с этим токеном сразу потеряют доступ. Отменить нельзя.',
+    revokeConfirm: 'Отозвать',
+    secretTitle: 'Токен создан',
+    secretDescription:
+      'Скопируйте его сейчас: больше мы его не покажем. Храните как пароль.',
+    secretDone: 'Я сохранил токен',
+  },
+  lifetimes: {
+    days30: '30 дней',
+    days90: '90 дней',
+    days365: '1 год',
+    never: 'Без срока',
+  },
+  workspaceSettings: {
+    title: 'Настройки пространства',
+    about: 'Пространство',
+    aboutDescription: 'Название и адрес задаются при создании.',
+    leave: 'Покинуть пространство',
+    leaveDescription:
+      'Вы потеряете доступ к его проектам. Вернуться можно только по новому приглашению.',
+    leaveConfirmTitle: 'Покинуть «{{name}}»?',
+    leaveConfirm: 'Покинуть',
+    danger: 'Удаление',
+    delete: 'Удалить пространство',
+    deleteDescription:
+      'Удалятся все проекты, их знания, участники, приглашения и токены. Отменить нельзя.',
+  },
+  projectSettings: {
+    title: 'Настройки проекта',
+    about: 'Проект',
+    aboutDescription: 'Название и адрес задаются при создании.',
+    danger: 'Удаление',
+    delete: 'Удалить проект',
+    deleteDescription:
+      'Удалятся все знания проекта и доступы к нему. Отменить нельзя.',
+    deleteForbidden:
+      'Удалить проект может владелец пространства или менеджер, который его создал.',
+  },
+  confirmBySlug: {
+    label: 'Чтобы подтвердить, введите {{slug}}',
+  },
+  projectAccess: {
+    title: 'Доступ к проекту',
+    description:
+      'Что каждый участник пространства может делать в этом проекте. Без назначения участник только читает.',
+    roleLabel: 'Доступ {{email}}',
+    readOnly:
+      'Менять доступ может владелец пространства или тот, кто утверждает в этом проекте.',
+  },
+  overview: {
+    contents: 'Оглавление',
+    contentsDescription: 'Что уже записано о продукте, по видам знаний.',
+    approved: 'утверждено',
+    drafts_one: '{{count}} черновик',
+    drafts_few: '{{count}} черновика',
+    drafts_many: '{{count}} черновиков',
+    drafts_other: '{{count}} черновика',
+    nothing: '—',
+    awaiting: 'Ждут подписи',
+    awaitingDescription:
+      'Черновики, которые предложили люди и агенты. Знанием они станут только после утверждения.',
+    awaitingEmpty: 'Все записи подписаны.',
+    needsReview_one: '{{count}} запись требует проверки',
+    needsReview_few: '{{count}} записи требуют проверки',
+    needsReview_many: '{{count}} записей требуют проверки',
+    needsReview_other: '{{count}} записи требуют проверки',
+    empty:
+      'Журнал пока пуст. Знания появятся из интервью с агентом или от внешних агентов через MCP.',
+    truncated: 'Посчитаны первые {{shown}} записей из {{total}}.',
+    startInterview: 'Интервью',
+    recordedBy: '{{who}}, {{source}}',
+    version: 'v{{version}}',
+  },
+  knowledge: {
+    title: 'Знания',
+    pending:
+      'Здесь будет полный журнал знаний проекта: поиск, фильтры, ревью черновиков.',
+  },
+  interview: {
+    title: 'Интервью',
+    pending:
+      'Здесь будет разговор с агентом Intentra: он расспросит о продукте и запишет черновики знаний.',
+  },
   errors: {
     fallback: 'Что-то пошло не так. Попробуйте ещё раз',
     INVALID_CREDENTIALS: 'Неверный email или пароль',
@@ -44,5 +301,41 @@ export const ru = {
     UNAUTHENTICATED: 'Войдите снова',
     INTERNAL: 'На сервере что-то сломалось. Попробуйте позже',
     NETWORK_ERROR: 'Нет связи с сервером. Проверьте подключение',
+    INVALID_WORKSPACE_NAME: 'Введите название до 100 символов',
+    INVALID_WORKSPACE_SLUG:
+      'От 3 до 15 символов: латиница, цифры и дефисы между ними',
+    WORKSPACE_SLUG_TAKEN: 'Этот адрес уже занят',
+    WORKSPACE_SLUG_MISMATCH: 'Адрес не совпадает',
+    WORKSPACE_NOT_FOUND: 'Пространство не найдено',
+    INVALID_PROJECT_NAME: 'Введите название до 100 символов',
+    INVALID_PROJECT_SLUG:
+      'От 3 до 15 символов: латиница, цифры и дефисы между ними',
+    PROJECT_SLUG_TAKEN: 'В этом пространстве такой адрес уже есть',
+    PROJECT_SLUG_MISMATCH: 'Адрес не совпадает',
+    PROJECT_NOT_FOUND: 'Проект не найден',
+    PROJECT_CREATION_FORBIDDEN: 'Создавать проекты может владелец или менеджер',
+    PROJECT_DELETION_FORBIDDEN:
+      'Удалить этот проект может владелец или менеджер, который его создал',
+    PROJECT_ROLE_CHANGE_FORBIDDEN:
+      'Менять доступ может владелец или тот, кто утверждает в проекте',
+    OWNER_PROJECT_ROLE_FIXED:
+      'Владелец пространства всегда утверждает во всех проектах',
+    NOT_WORKSPACE_OWNER: 'Это может только владелец пространства',
+    LAST_OWNER_CANNOT_LEAVE:
+      'Вы последний владелец. Сначала сделайте владельцем кого-то ещё',
+    LAST_OWNER_CANNOT_STEP_DOWN:
+      'Это последний владелец. Сначала сделайте владельцем кого-то ещё',
+    MEMBER_NOT_FOUND: 'Участник не найден',
+    MEMBER_NOT_ACTIVE: 'Этот человек больше не участник пространства',
+    INVITATION_ALREADY_PENDING: 'Этот email уже приглашён',
+    ALREADY_WORKSPACE_MEMBER: 'Этот человек уже в пространстве',
+    INVITATION_EXPIRED: 'Срок приглашения истёк',
+    INVITATION_NOT_PENDING: 'На это приглашение уже ответили',
+    INVITATION_NOT_FOUND: 'Приглашение не найдено',
+    INVALID_PERSONAL_ACCESS_TOKEN_NAME: 'Введите название токена',
+    INVALID_PERSONAL_ACCESS_TOKEN_LIFETIME: 'Выберите срок действия',
+    PERSONAL_ACCESS_TOKEN_NOT_FOUND: 'Токен не найден',
+    PERSONAL_ACCESS_TOKEN_REVOCATION_FORBIDDEN:
+      'Отозвать этот токен может только его автор или владелец',
   },
 } as const;

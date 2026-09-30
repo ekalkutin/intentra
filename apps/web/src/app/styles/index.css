@@ -2,12 +2,17 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: 'Geist Variable', sans-serif;
+    --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+    --color-margin: var(--margin);
+    --color-graphite: var(--graphite);
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,73 +53,84 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * A laboratory record book: a cool near-white page, blue-black ink for what is
+ * signed and for controls, graphite for what is only proposed, and one
+ * record-book red that belongs to the margin rule and to destructive actions.
+ * The spine (sidebar) is dark cloth in both themes.
+ */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
+    --background: oklch(0.985 0.003 210);
+    --foreground: oklch(0.24 0.032 264);
+    --card: oklch(0.995 0.002 210);
+    --card-foreground: oklch(0.24 0.032 264);
+    --popover: oklch(0.995 0.002 210);
+    --popover-foreground: oklch(0.24 0.032 264);
+    --primary: oklch(0.27 0.04 264);
+    --primary-foreground: oklch(0.98 0.004 210);
+    --secondary: oklch(0.955 0.006 235);
+    --secondary-foreground: oklch(0.27 0.04 264);
+    --muted: oklch(0.955 0.006 235);
+    --muted-foreground: oklch(0.5 0.014 256);
+    --accent: oklch(0.945 0.009 240);
+    --accent-foreground: oklch(0.24 0.032 264);
+    --destructive: oklch(0.54 0.19 27);
+    --border: oklch(0.905 0.01 240);
+    --input: oklch(0.86 0.012 245);
+    --ring: oklch(0.45 0.09 264);
+    --margin: oklch(0.6 0.18 26);
+    --graphite: oklch(0.5 0.014 256);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --radius: 0.3rem;
+    --sidebar: oklch(0.225 0.014 264);
+    --sidebar-foreground: oklch(0.86 0.008 245);
+    --sidebar-primary: oklch(0.96 0.005 240);
+    --sidebar-primary-foreground: oklch(0.225 0.014 264);
+    --sidebar-accent: oklch(0.285 0.016 264);
+    --sidebar-accent-foreground: oklch(0.97 0.004 240);
+    --sidebar-border: oklch(1 0 0 / 8%);
+    --sidebar-ring: oklch(0.72 0.03 250);
 }
 
+/* The same book at night: the page darkens, the ink turns pale, the spine stays cloth. */
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
+    --background: oklch(0.195 0.013 264);
+    --foreground: oklch(0.93 0.006 240);
+    --card: oklch(0.22 0.014 264);
+    --card-foreground: oklch(0.93 0.006 240);
+    --popover: oklch(0.225 0.015 264);
+    --popover-foreground: oklch(0.93 0.006 240);
+    --primary: oklch(0.93 0.008 240);
+    --primary-foreground: oklch(0.2 0.014 264);
+    --secondary: oklch(0.26 0.015 264);
+    --secondary-foreground: oklch(0.93 0.006 240);
+    --muted: oklch(0.26 0.015 264);
+    --muted-foreground: oklch(0.71 0.013 252);
+    --accent: oklch(0.27 0.017 264);
+    --accent-foreground: oklch(0.95 0.005 240);
+    --destructive: oklch(0.68 0.17 25);
+    --border: oklch(1 0 0 / 9%);
     --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
+    --ring: oklch(0.75 0.06 264);
+    --margin: oklch(0.6 0.16 25);
+    --graphite: oklch(0.71 0.013 252);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --sidebar: oklch(0.155 0.011 264);
+    --sidebar-foreground: oklch(0.84 0.008 245);
+    --sidebar-primary: oklch(0.95 0.005 240);
+    --sidebar-primary-foreground: oklch(0.155 0.011 264);
+    --sidebar-accent: oklch(0.225 0.015 264);
+    --sidebar-accent-foreground: oklch(0.97 0.004 240);
+    --sidebar-border: oklch(1 0 0 / 7%);
+    --sidebar-ring: oklch(0.72 0.03 250);
 }
 
 @layer base {
@@ -129,5 +145,40 @@
     }
   html {
     @apply font-sans;
+    scrollbar-color: var(--border) transparent;
+    text-underline-offset: 0.2em;
     }
+  ::selection {
+    background: color-mix(in oklch, var(--ring) 22%, transparent);
+    }
+  input, textarea {
+    caret-color: var(--margin);
+    }
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+    }
+}
+
+/* The margin rule is drawn once, top to bottom, when the book opens. */
+@keyframes margin-rule-draw {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+/* A new page settles in while the rule stays where it is. */
+@keyframes page-settle {
+  from {
+    opacity: 0;
+    translate: 0 0.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

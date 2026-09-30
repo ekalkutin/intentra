@@ -1,0 +1,17 @@
+/**
+ * The kinds of cached data a change makes stale. RTK Query names tags with
+ * strings only, so they are named once here and referenced everywhere else.
+ */
+export const API_TAGS = {
+  workspace: 'Workspace',
+  access: 'Access',
+  project: 'Project',
+  projectRole: 'ProjectRole',
+  member: 'Member',
+  invitation: 'Invitation',
+  receivedInvitation: 'ReceivedInvitation',
+  personalAccessToken: 'PersonalAccessToken',
+  knowledge: 'Knowledge',
+} as const;
+
+export const API_TAG_TYPES = Object.values(API_TAGS);

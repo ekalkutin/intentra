@@ -11,6 +11,7 @@ import type { RefreshTokensDto, TokenPair } from '@intentra/contracts/iam';
 
 import { afterResponse } from './reauth';
 import { sessionTokens } from './session-tokens';
+import { API_TAG_TYPES } from './tags';
 
 const API_PREFIX = '/api';
 const REFRESH_PATH = '/iam/auth/refresh';
@@ -82,5 +83,6 @@ const baseQueryWithReauth: BaseQueryFn<
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
+  tagTypes: API_TAG_TYPES,
   endpoints: () => ({}),
 });
