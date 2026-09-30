@@ -4,6 +4,21 @@ export {
   type ProjectAccessDto,
   type WorkspaceAccessDto,
 } from './access/workspace-access.dto.js';
+export { type ChatEventDto } from './agents/chat-event.dto.js';
+export {
+  ChoiceOptionDtoSchema,
+  ChoicesDtoSchema,
+  type ChoiceOptionDto,
+  type ChoicesDto,
+} from './agents/choices.dto.js';
+export {
+  ChatMessageDtoSchema,
+  type ChatMessageDto,
+} from './agents/chat-message.dto.js';
+export {
+  ChatRequestDtoSchema,
+  type ChatRequestDto,
+} from './agents/chat-request.dto.js';
 export {
   CreateInvitationDtoSchema,
   type CreateInvitationDto,

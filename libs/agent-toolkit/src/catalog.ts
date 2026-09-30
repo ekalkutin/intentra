@@ -10,6 +10,7 @@ import {
   KIND_TOOLS,
   listKnowledgeTool,
   listProjectsTool,
+  offerChoicesTool,
   rejectKnowledgeItemTool,
   retireKnowledgeItemTool,
 } from './tools/index.js';
@@ -34,7 +35,19 @@ export const MCP_TOOLS = Object.fromEntries(
   ].map(tool => [tool.id, tool]),
 ) satisfies ToolsInput;
 
-/** Tools offered to Intentra's own agents. */
-export const AGENT_TOOLS = {
-  [echoTool.id]: echoTool,
-} satisfies ToolsInput;
+/**
+ * Tools of the Orchestrator, Intentra's own agent. Not approve, reject or
+ * retire: only a person approves knowledge; an Agent never does.
+ */
+export const ORCHESTRATOR_TOOLS = Object.fromEntries(
+  [
+    listProjectsTool,
+    listKnowledgeTool,
+    getKnowledgeItemTool,
+    getKnowledgeDependenciesTool,
+    ...KIND_TOOLS,
+    confirmKnowledgeItemTool,
+    deleteKnowledgeDraftTool,
+    offerChoicesTool,
+  ].map(tool => [tool.id, tool]),
+) satisfies ToolsInput;

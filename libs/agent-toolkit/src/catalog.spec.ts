@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { AGENT_TOOLS, MCP_TOOLS } from './catalog.js';
+import { MCP_TOOLS, ORCHESTRATOR_TOOLS } from './catalog.js';
 
 describe.each([
   ['MCP_TOOLS', MCP_TOOLS],
-  ['AGENT_TOOLS', AGENT_TOOLS],
+  ['ORCHESTRATOR_TOOLS', ORCHESTRATOR_TOOLS],
 ])('%s', (_name, tools) => {
   it('keys every tool by its snake_case id', () => {
     // Act
@@ -15,6 +15,21 @@ describe.each([
       expect(key).toBe(tool.id);
       expect(tool.id).toMatch(/^[a-z]+(_[a-z]+)*$/);
     }
+  });
+});
+
+describe('ORCHESTRATOR_TOOLS', () => {
+  // Only a person approves knowledge; an Agent never does.
+  it('cannot approve, reject or retire', () => {
+    // Act
+    const ids = Object.keys(ORCHESTRATOR_TOOLS);
+
+    // Assert
+    expect(ids).not.toContain('approve_knowledge_items');
+    expect(ids).not.toContain('reject_knowledge_item');
+    expect(ids).not.toContain('retire_knowledge_item');
+    expect(ids).toContain('record_requirement');
+    expect(ids).toContain('offer_choices');
   });
 });
 

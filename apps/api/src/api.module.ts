@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { GatewayModule } from '@intentra/gateway';
+import { GatewayModule, type GatewayModuleOptions } from '@intentra/gateway';
 import { IamModule, type IamModuleOptions } from '@intentra/iam';
 import { PersistenceModule } from '@intentra/platform-persistence';
 import { WorkspaceModule } from '@intentra/workspace';
@@ -38,7 +38,14 @@ const workspace = WorkspaceModule.register({});
       inject: [ConfigService],
     }),
     PersistenceModule,
-    GatewayModule.register({ contexts: [iam, workspace] }),
+    GatewayModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (
+        configService: ConfigService<Variables, true>,
+      ): GatewayModuleOptions => configService.get('gateway', { infer: true }),
+      contexts: [iam, workspace],
+    }),
   ],
 })
 export class ApiModule {}
