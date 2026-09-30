@@ -1,7 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { AgentsModule } from '@intentra/agents';
 import { GatewayModule } from '@intentra/gateway';
 import { IamModule } from '@intentra/iam';
 import { TestingApp } from '@intentra/platform-testing';
@@ -65,7 +64,6 @@ describe('POST /api/mcp', () => {
               refreshTokenTtlSeconds: 604800,
             }),
             WorkspaceModule.register({}),
-            AgentsModule.register({}),
           ],
         }),
       ],

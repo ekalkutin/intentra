@@ -1,4 +1,5 @@
 export { AccessApi } from './access/access.api.js';
+export { type AgentDto, type CallerDto } from './access/caller.dto.js';
 export {
   type ProjectAccessDto,
   type WorkspaceAccessDto,
@@ -12,6 +13,81 @@ export {
   type InvitationStatusDto,
 } from './invitations/invitation.dto.js';
 export { InvitationsApi } from './invitations/invitations.api.js';
+export {
+  EditKnowledgeItemDtoSchema,
+  type EditKnowledgeItemDto,
+} from './knowledge/edit-knowledge-item.dto.js';
+export {
+  BusinessRuleFieldsDtoSchema,
+  ConstraintFieldsDtoSchema,
+  DecisionFieldsDtoSchema,
+  GoalFieldsDtoSchema,
+  IntegrationFieldsDtoSchema,
+  KNOWLEDGE_FIELDS_DTO_SCHEMAS,
+  OpenQuestionFieldsDtoSchema,
+  PersonaFieldsDtoSchema,
+  ProductOverviewFieldsDtoSchema,
+  RequirementFieldsDtoSchema,
+  ScenarioFieldsDtoSchema,
+  TermFieldsDtoSchema,
+  type BusinessRuleFieldsDto,
+  type ConstraintFieldsDto,
+  type DecisionFieldsDto,
+  type GoalFieldsDto,
+  type IntegrationFieldsDto,
+  type KnowledgeFieldsDtoByKind,
+  type OpenQuestionFieldsDto,
+  type PersonaFieldsDto,
+  type ProductOverviewFieldsDto,
+  type RequirementFieldsDto,
+  type ScenarioFieldsDto,
+  type TermFieldsDto,
+} from './knowledge/knowledge-fields.dto.js';
+export {
+  ApproveKnowledgeItemDtoSchema,
+  ApproveKnowledgeItemsDtoSchema,
+  ConfirmKnowledgeItemDtoSchema,
+  DeleteKnowledgeItemDtoSchema,
+  RejectKnowledgeItemDtoSchema,
+  RetireKnowledgeItemDtoSchema,
+  type ApproveKnowledgeItemDto,
+  type ApproveKnowledgeItemsDto,
+  type ConfirmKnowledgeItemDto,
+  type DeleteKnowledgeItemDto,
+  type RejectKnowledgeItemDto,
+  type RetireKnowledgeItemDto,
+} from './knowledge/knowledge-item-change.dto.js';
+export {
+  type KnowledgeAccessDto,
+  type KnowledgeDependenciesDto,
+  type KnowledgeDependencyDto,
+  type KnowledgeItemAccessDto,
+  type KnowledgeItemDto,
+  type KnowledgeItemPageDto,
+} from './knowledge/knowledge-item.dto.js';
+export {
+  KnowledgeKindDtoSchema,
+  KnowledgeSourceDtoSchema,
+  KnowledgeStatusDtoSchema,
+  type KnowledgeKindDto,
+  type KnowledgeSourceDto,
+  type KnowledgeStatusDto,
+} from './knowledge/knowledge-kind.dto.js';
+export { KnowledgeApi } from './knowledge/knowledge.api.js';
+export {
+  KnowledgeLinkDtoSchema,
+  KnowledgeLinkTypeDtoSchema,
+  type KnowledgeLinkDto,
+  type KnowledgeLinkTypeDto,
+} from './knowledge/knowledge-link.dto.js';
+export {
+  ListKnowledgeItemsDtoSchema,
+  type ListKnowledgeItemsDto,
+} from './knowledge/list-knowledge-items.dto.js';
+export {
+  RecordKnowledgeItemDtoSchema,
+  type RecordKnowledgeItemDto,
+} from './knowledge/record-knowledge-item.dto.js';
 export {
   ChangeRoleDtoSchema,
   type ChangeRoleDto,

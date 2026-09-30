@@ -1,4 +1,3 @@
-import type { AgentsApi } from '@intentra/contracts/agents';
 import type { IamApi } from '@intentra/contracts/iam';
 import type { WorkspaceApi } from '@intentra/contracts/workspace';
 
@@ -9,5 +8,4 @@ import type { WorkspaceApi } from '@intentra/contracts/workspace';
 export type ToolApis = {
   readonly iam: IamApi;
   readonly workspace: WorkspaceApi;
-  readonly agents: AgentsApi;
 };

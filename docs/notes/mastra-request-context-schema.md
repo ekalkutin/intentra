@@ -1,6 +1,13 @@
 # Контекст вызова tools: Mastra `requestContextSchema`
 
-Статус: открытый вопрос (2026-09-29).
+Статус: решено (2026-09-30), `requestContextSchema` подошёл. Общая схема: `libs/agent-toolkit/src/tool-context.ts` (`toolContextSchema`: `apis`, `caller: CallerDto`, `workspaceId`); MCP-хендлер кладёт их в `RequestContext`.
+
+Что выяснилось на практике (`@mastra/core@1.71.0`):
+
+- внутри `execute` `requestContext` обязателен и типизирован по схеме: `requestContext.get('caller')` без проверок на `undefined`, свои хелперы не нужны;
+- Mastra подменяет значения результатом разбора: `z.object` срезает лишние поля, поэтому схема описывает объект целиком, а `apis` — через `z.custom<ToolApis>()` (приходит той же ссылкой);
+- неверный контекст — `{ error: true, message }` (ValidationError), а исключение из `execute` пробрасывается как есть: MCP-переходник отдаёт агенту `isError` с `CODE: message`;
+- tool с типизированным контекстом попадает в `MCP_TOOLS` (`satisfies ToolsInput`) и в переходник (`Tool<any, …>` на все семь параметров).
 
 ## Вопрос
 

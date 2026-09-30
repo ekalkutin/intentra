@@ -1,8 +1,11 @@
 import { Injectable, Provider } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { mongo, type Model } from 'mongoose';
+import type { Model } from 'mongoose';
 
-import { MongooseUnitOfWork } from '@intentra/platform-persistence';
+import {
+  isDuplicateKeyError,
+  MongooseUnitOfWork,
+} from '@intentra/platform-persistence';
 
 import { AccountAlreadyExistsException } from '../../../application/exceptions/index.js';
 import {
@@ -11,8 +14,6 @@ import {
 } from '../../../application/ports/outbound/index.js';
 import { Account } from '../../../domain/entities/index.js';
 import { AccountModel } from '../../database/index.js';
-
-const DUPLICATE_KEY_ERROR_CODE = 11000;
 
 @Injectable()
 export class AccountRepositoryAdapter implements AccountRepository {
@@ -35,10 +36,7 @@ export class AccountRepositoryAdapter implements AccountRepository {
         )
         .exec();
     } catch (error) {
-      if (
-        error instanceof mongo.MongoServerError &&
-        error.code === DUPLICATE_KEY_ERROR_CODE
-      ) {
+      if (isDuplicateKeyError(error)) {
         throw new AccountAlreadyExistsException();
       }
       throw error;
