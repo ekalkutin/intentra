@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
 import {
@@ -11,12 +11,11 @@ import {
 import { useLazyWorkspacesQuery } from '@/entities/workspace';
 import { toApiError } from '@/shared/api';
 import { workspacePath } from '@/shared/config';
-import { useDescribeError, useFormatDate } from '@/shared/i18n';
+import { useDescribeError, useFormatShortDate } from '@/shared/i18n';
 import {
   Button,
   List,
   ListEmpty,
-  ListRow,
   ListSkeleton,
   LoadError,
   Spinner,
@@ -65,7 +64,7 @@ export function ReceivedInvitations({
 
 function InvitationRow({ invitation }: { readonly invitation: InvitationDto }) {
   const { t } = useTranslation();
-  const formatDate = useFormatDate();
+  const formatDate = useFormatShortDate();
   const describeError = useDescribeError();
   const navigate = useNavigate();
   const [accept, { isLoading: accepting }] = useAcceptInvitationMutation();
@@ -96,43 +95,51 @@ function InvitationRow({ invitation }: { readonly invitation: InvitationDto }) {
   };
 
   return (
-    <ListRow
-      lead={formatDate(invitation.sentAt)}
-      actions={
-        <>
-          <Button
-            variant='ghost'
-            size='sm'
-            disabled={accepting || declining}
-            onClick={() => void onDecline()}
-          >
-            {declining && <Spinner />}
-            {t('receivedInvitations.decline')}
-          </Button>
-          <Button
-            size='sm'
-            disabled={accepting || declining}
-            onClick={() => void onAccept()}
-          >
-            {accepting && <Spinner />}
-            {t('receivedInvitations.accept')}
-          </Button>
-        </>
-      }
-    >
-      <p className='truncate text-sm font-medium'>{invitation.workspaceName}</p>
-      <p className='text-xs text-muted-foreground'>
-        <Trans
-          i18nKey='receivedInvitations.expires'
-          values={{ date: formatDate(invitation.expiresAt) }}
-          components={{ mono: <span className='font-mono' /> }}
-        />
-      </p>
+    <li className='flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3'>
+      <span className='flex min-w-0 flex-1 basis-56 items-center gap-3'>
+        <span
+          aria-hidden
+          className='flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-sm font-semibold text-foreground/80'
+        >
+          {invitation.workspaceName.trim().charAt(0).toUpperCase()}
+        </span>
+        <span className='min-w-0'>
+          <span className='block truncate text-sm font-medium'>
+            {invitation.workspaceName}
+          </span>
+          <span className='block text-xs text-muted-foreground tabular-nums'>
+            {t('receivedInvitations.dates', {
+              sent: formatDate(invitation.sentAt),
+              expires: formatDate(invitation.expiresAt),
+            })}
+          </span>
+        </span>
+      </span>
+      {/* Below 640px the buttons go under the name, lined up with it. */}
+      <span className='ml-11 flex shrink-0 items-center gap-2 sm:ml-0'>
+        <Button
+          variant='ghost'
+          size='sm'
+          disabled={accepting || declining}
+          onClick={() => void onDecline()}
+        >
+          {declining && <Spinner />}
+          {t('receivedInvitations.decline')}
+        </Button>
+        <Button
+          size='sm'
+          disabled={accepting || declining}
+          onClick={() => void onAccept()}
+        >
+          {accepting && <Spinner />}
+          {t('receivedInvitations.accept')}
+        </Button>
+      </span>
       {failure && (
-        <p role='alert' className='mt-1 text-xs text-destructive'>
+        <p role='alert' className='w-full pl-11 text-xs text-destructive'>
           {failure}
         </p>
       )}
-    </ListRow>
+    </li>
   );
 }

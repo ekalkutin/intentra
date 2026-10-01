@@ -15,16 +15,24 @@ import {
 import { Button } from '../primitives/button';
 import { Spinner } from '../primitives/spinner';
 
-/** Asks once before an action that cannot be undone. */
+/**
+ * Asks once before an action that cannot be undone. Opened by its trigger, or
+ * from outside with `open` (from a menu item, which would take a trigger away
+ * with it as the menu closes).
+ */
 export function ConfirmDialog({
   trigger,
+  open: openFromOutside,
+  onOpenChange,
   title,
   description,
   confirmLabel,
   error,
   onConfirm,
 }: {
-  readonly trigger: ReactElement;
+  readonly trigger?: ReactElement;
+  readonly open?: boolean;
+  readonly onOpenChange?: (open: boolean) => void;
   readonly title: ReactNode;
   readonly description: ReactNode;
   readonly confirmLabel: ReactNode;
@@ -33,7 +41,12 @@ export function ConfirmDialog({
   readonly onConfirm: () => Promise<boolean>;
 }) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const [openHere, setOpenHere] = useState(false);
+  const open = openFromOutside ?? openHere;
+  const setOpen = (next: boolean) => {
+    setOpenHere(next);
+    onOpenChange?.(next);
+  };
   const [pending, setPending] = useState(false);
 
   const confirm = async () => {
@@ -47,7 +60,7 @@ export function ConfirmDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger render={trigger} />
+      {trigger && <AlertDialogTrigger render={trigger} />}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

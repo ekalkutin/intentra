@@ -2,7 +2,7 @@ import type { UIMessage } from 'ai';
 import { MessagesSquare } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
 
 import { KnowledgeScopeProvider } from '@/entities/knowledge-item';
 import { useCurrentProject } from '@/entities/project';
@@ -12,6 +12,7 @@ import { toApiError } from '@/shared/api';
 import {
   conversationPath,
   knowledgeItemPath,
+  readInterviewOpening,
   ROUTE_PARAMS,
 } from '@/shared/config';
 import { useDescribeError } from '@/shared/i18n';
@@ -55,6 +56,9 @@ export function ProjectInterviewPage() {
   const describeError = useDescribeError();
   const navigate = useNavigate();
   const paramId = useParams()[ROUTE_PARAMS.conversationId] ?? null;
+  const { state } = useLocation();
+  // A link (such as a Passport chapter's) may open a new Conversation with its first message.
+  const opening = paramId === null ? readInterviewOpening(state) : null;
   const { workspace, access } = useCurrentWorkspace();
   const { project, access: projectAccess } = useCurrentProject(
     workspace?.id,
@@ -173,9 +177,11 @@ export function ProjectInterviewPage() {
         }
         projectName={project.name}
         notice={viewer ? t('interview.viewer') : undefined}
+        opening={opening}
         onFirstMessage={() => {
           if (paramId === null) {
-            void navigate(pathOf(chatId));
+            // Back must not return to the link that sent the first message.
+            void navigate(pathOf(chatId), { replace: opening !== null });
           }
         }}
         onMessages={onMessages}

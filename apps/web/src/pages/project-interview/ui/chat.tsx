@@ -61,6 +61,7 @@ export function Chat({
   initialMessages,
   projectName,
   notice,
+  opening = null,
   onFirstMessage,
   onMessages,
 }: {
@@ -71,6 +72,8 @@ export function Chat({
   readonly projectName: string;
   /** A note above the composer, such as a Viewer's. */
   readonly notice?: string;
+  /** A first message to send at once, for a new Conversation opened from a link. */
+  readonly opening?: string | null;
   /** Called once a new Conversation got its first message. */
   readonly onFirstMessage: () => void;
   /** The transcript as it changes, for what the page shows beside it. */
@@ -129,6 +132,16 @@ export function Chat({
     }
     void sendMessage({ text });
   };
+
+  // The link's first message goes out once, even when effects run twice.
+  const openingSent = useRef(false);
+  useEffect(() => {
+    if (opening && !openingSent.current && messages.length === 0) {
+      openingSent.current = true;
+      send(opening);
+    }
+    // Only a new Conversation's first render may send it, so nothing else re-runs this.
+  }, [opening]);
 
   /** Each choice card's reply: the Member's next message, if any. */
   const answers = useMemo(() => {

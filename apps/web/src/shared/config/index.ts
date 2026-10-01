@@ -11,6 +11,8 @@ export {
   ROUTES,
   WORKSPACE_PAGES,
   conversationPath,
+  readInterviewOpening,
+  type InterviewOpening,
   knowledgeItemPath,
   newKnowledgeItemPath,
   platformAgentPath,

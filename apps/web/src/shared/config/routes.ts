@@ -36,7 +36,7 @@ export const WORKSPACE_PAGES = {
 export type WorkspacePage =
   (typeof WORKSPACE_PAGES)[keyof typeof WORKSPACE_PAGES];
 
-/** The pages of a Project, relative to its path; the index is its overview. */
+/** The pages of a Project, relative to its path; the index is its Passport. */
 export const PROJECT_PAGES = {
   knowledge: 'knowledge',
   interview: 'interview',
@@ -92,6 +92,24 @@ export function conversationPath(
   return conversationId
     ? `${base}/${encodeURIComponent(conversationId)}`
     : base;
+}
+
+/**
+ * What a link into a new Interview may carry in its location state: a first
+ * message, sent at once. State, not the address, so a reload never sends it
+ * twice.
+ */
+export type InterviewOpening = { readonly opening: string };
+
+/** The first message a link brought along, if any. */
+export function readInterviewOpening(state: unknown): string | null {
+  return typeof state === 'object' &&
+    state !== null &&
+    'opening' in state &&
+    typeof state.opening === 'string' &&
+    state.opening.trim() !== ''
+    ? state.opening
+    : null;
 }
 
 /** The query parameters of the knowledge pages. */

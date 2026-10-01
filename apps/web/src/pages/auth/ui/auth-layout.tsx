@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
 
+import { LanguageSwitch } from '@/features/switch-language';
 import { ThemeSwitch } from '@/features/switch-theme';
 import { PageHeader } from '@/shared/ui';
 
 import { AuthMosaic } from './auth-mosaic';
-import { LanguageSwitch } from './language-switch';
 
 /**
  * The shared frame for sign-in and sign-up, drawn like the app shell: a

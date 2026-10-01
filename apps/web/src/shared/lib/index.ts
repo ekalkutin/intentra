@@ -11,3 +11,4 @@ export {
 } from './scroll-restoration';
 export { linkReferences } from './link-references';
 export { startFaviconAnimation } from './favicon-animation';
+export { useCopy } from './use-copy';

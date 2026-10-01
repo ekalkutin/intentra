@@ -47,7 +47,7 @@ export function ItemProperties({
           </Property>
           <Property label={t('knowledgeItem.version')}>
             <span className='font-mono text-xs tabular-nums'>
-              {t('overview.version', { version: item.version })}
+              {t('knowledgeItem.versionValue', { version: item.version })}
             </span>
           </Property>
           <Property label={t('knowledgeItem.source')}>

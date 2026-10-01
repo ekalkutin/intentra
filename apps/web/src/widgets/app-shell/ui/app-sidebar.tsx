@@ -12,6 +12,7 @@ import {
   workspacePath,
 } from '@/shared/config';
 import {
+  Brand,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -33,8 +34,8 @@ import type {
 
 import {
   PLATFORM_NAVIGATION,
-  PROJECT_NAVIGATION,
-  WORKSPACE_NAVIGATION,
+  projectNavigation,
+  workspaceNavigation,
 } from '../model/navigation';
 
 import { ProjectSwitcher } from './project-switcher';
@@ -125,20 +126,26 @@ export function AppSidebar({
             <SidebarGroupContent>
               {workspace && selected ? (
                 <SidebarMenu className='gap-0.5'>
-                  {PROJECT_NAVIGATION.map(entry => (
-                    <SidebarMenuItem key={entry.labelKey}>
-                      {link(
-                        projectPath(workspace.slug, selected.slug, entry.page),
-                        <>
-                          <entry.icon />
-                          <span>
-                            {t(`shell.projectPages.${entry.labelKey}`)}
-                          </span>
-                        </>,
-                        entry.page !== undefined,
-                      )}
-                    </SidebarMenuItem>
-                  ))}
+                  {projectNavigation(access?.projects[selected.id]).map(
+                    entry => (
+                      <SidebarMenuItem key={entry.labelKey}>
+                        {link(
+                          projectPath(
+                            workspace.slug,
+                            selected.slug,
+                            entry.page,
+                          ),
+                          <>
+                            <entry.icon />
+                            <span>
+                              {t(`shell.projectPages.${entry.labelKey}`)}
+                            </span>
+                          </>,
+                          entry.page !== undefined,
+                        )}
+                      </SidebarMenuItem>
+                    ),
+                  )}
                 </SidebarMenu>
               ) : (
                 !projectsLoading && (
@@ -157,7 +164,7 @@ export function AppSidebar({
             <SidebarGroupLabel>{t('shell.workspace')}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className='gap-0.5'>
-                {WORKSPACE_NAVIGATION.map(entry => (
+                {workspaceNavigation(access).map(entry => (
                   <SidebarMenuItem key={entry.labelKey}>
                     {link(
                       workspacePath(workspace.slug, entry.page),
@@ -202,16 +209,7 @@ export function AppSidebar({
         )}
       </SidebarContent>
       <SidebarFooter className='pb-3'>
-        <div className='pointer-events-none ml-2 w-32 select-none invert dark:invert-0'>
-          <img
-            src='/intentra-wordmark-inverse.svg'
-            alt={t('brand')}
-            width={854}
-            height={173}
-            draggable={false}
-            className='h-auto w-full animate-[intentra-wordmark-reassemble_12s_steps(1,end)_infinite] motion-reduce:animate-none'
-          />
-        </div>
+        <Brand className='ml-2 w-32' />
       </SidebarFooter>
     </Sidebar>
   );

@@ -28,10 +28,9 @@ import {
   usePersonalAccessTokensQuery,
   useRevokePersonalAccessTokenMutation,
 } from '../api/personal-access-token-api';
+import { mcpUrl } from '../model/mcp';
 
 import { CreateTokenDialog } from './create-token-dialog';
-
-const MCP_PATH = '/api/mcp';
 
 /** Personal Access Tokens through which external agents reach the Workspace over MCP. */
 export function WorkspaceTokensPage() {
@@ -59,10 +58,7 @@ export function WorkspaceTokensPage() {
       />
       <div className='flex max-w-lg flex-col gap-2'>
         <p className='text-sm font-medium'>{t('tokens.endpoint')}</p>
-        <CopyField
-          value={`${window.location.origin}${MCP_PATH}`}
-          label={t('tokens.endpoint')}
-        />
+        <CopyField value={mcpUrl()} label={t('tokens.endpoint')} />
       </div>
       <PageSection
         title={

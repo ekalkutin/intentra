@@ -41,6 +41,8 @@ import {
 
 import { useCreatePersonalAccessTokenMutation } from '../api/personal-access-token-api';
 
+import { AgentPrompt } from './agent-prompt';
+
 type FormInput = z.input<typeof CreatePersonalAccessTokenDtoSchema>;
 type FormOutput = z.output<typeof CreatePersonalAccessTokenDtoSchema>;
 type Lifetime = FormOutput['lifetimeDays'];
@@ -119,7 +121,7 @@ export function CreateTokenDialog({
           </Button>
         }
       />
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className={secret ? 'sm:max-w-2xl' : 'sm:max-w-md'}>
         {secret ? (
           <>
             <DialogHeader>
@@ -129,6 +131,7 @@ export function CreateTokenDialog({
               </DialogDescription>
             </DialogHeader>
             <CopyField value={secret} label={t('tokens.secretTitle')} />
+            <AgentPrompt secret={secret} />
             <DialogFooter>
               <DialogClose render={<Button />}>
                 {t('tokens.secretDone')}

@@ -7,7 +7,7 @@ import { KnowledgeItemPage } from '@/pages/knowledge-item';
 import { ProjectAccessPage } from '@/pages/project-access';
 import { ProjectInterviewPage } from '@/pages/project-interview';
 import { ProjectKnowledgePage } from '@/pages/project-knowledge';
-import { ProjectOverviewPage } from '@/pages/project-overview';
+import { ProjectPassportPage } from '@/pages/project-passport';
 import { ProjectSettingsPage } from '@/pages/project-settings';
 import { StartPage } from '@/pages/start';
 import { WorkspaceMembersPage } from '@/pages/workspace-members';
@@ -51,7 +51,7 @@ export const router = createBrowserRouter([
           {
             path: ROUTES.project,
             children: [
-              { index: true, Component: ProjectOverviewPage },
+              { index: true, Component: ProjectPassportPage },
               {
                 path: PROJECT_PAGES.knowledge,
                 children: [

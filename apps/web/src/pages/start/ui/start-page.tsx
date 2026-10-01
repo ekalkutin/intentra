@@ -1,10 +1,13 @@
-import { useTranslation } from 'react-i18next';
+import { MailOpen, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router';
 
 import {
   pendingInvitations,
   useReceivedInvitationsQuery,
 } from '@/entities/invitation';
+import { useMeQuery } from '@/entities/session';
 import {
   readLastWorkspaceSlug,
   useWorkspaceCreationQuery,
@@ -15,30 +18,55 @@ import { ReceivedInvitations } from '@/features/respond-to-invitation';
 import { toApiError } from '@/shared/api';
 import { workspacePath } from '@/shared/config';
 import { useDescribeError } from '@/shared/i18n';
+import { cn } from '@/shared/lib';
 import {
+  Button,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
   LoadError,
   Page,
   PageHeader,
-  PageSection,
   PageSkeleton,
 } from '@/shared/ui';
 import { CoverFrame } from '@/widgets/app-shell';
 
+/** While nothing waits for them, the page asks for new invitations this often. */
+const INVITATION_POLL_MS = 20_000;
+
 /**
  * Opens the Workspace the person was in last (or their first one). With none
- * yet: their invitations first, if any; creating a Workspace only when they
- * may (Open Workspace Creation, or a Platform Admin); otherwise how to get in.
+ * yet, one of three doorways: their invitations, if any (nothing else: they
+ * were asked in); otherwise creating a Workspace, when they may (Open
+ * Workspace Creation, or a Platform Admin); otherwise waiting for an
+ * invitation, which shows up on its own.
  */
 export function StartPage() {
   const { t } = useTranslation();
   const describeError = useDescribeError();
+  const { data: me } = useMeQuery();
   const { data: workspaces, isLoading, error, refetch } = useWorkspacesQuery();
   const creation = useWorkspaceCreationQuery();
-  const received = useReceivedInvitationsQuery();
-  const loadError = toApiError(error ?? creation.error);
+  const [polling, setPolling] = useState(true);
+  const received = useReceivedInvitationsQuery(undefined, {
+    pollingInterval: polling ? INVITATION_POLL_MS : 0,
+    skipPollingIfUnfocused: true,
+  });
+  const invitations = pendingInvitations(received.data ?? []);
+  const invited = invitations.length > 0;
+  if (polling === invited) {
+    // Only the empty doorways listen for invitations; a list on screen is enough.
+    setPolling(!invited);
+  }
+  const loadError = toApiError(error ?? creation.error ?? received.error);
   const canCreate = creation.data?.canCreate ?? false;
-  // An invitation comes first: it is why most people are here.
-  const invited = pendingInvitations(received.data ?? []).length > 0;
+  const title = me?.name
+    ? t('start.welcome', { name: me.name })
+    : t('start.welcomeAnonymous');
+  const email = me?.email ?? '';
 
   if (workspaces && workspaces.length > 0) {
     const last = readLastWorkspaceSlug();
@@ -49,59 +77,85 @@ export function StartPage() {
     }
   }
 
+  if (isLoading || creation.isLoading || received.isLoading) {
+    return (
+      <CoverFrame>
+        <PageSkeleton />
+      </CoverFrame>
+    );
+  }
+
   return (
     <CoverFrame>
-      {isLoading || creation.isLoading || received.isLoading ? (
-        <PageSkeleton />
-      ) : loadError ? (
-        <Page>
-          <div>
-            <LoadError
-              text={describeError(loadError).text}
-              onRetry={() => {
-                void refetch();
-                void creation.refetch();
-              }}
+      <Page className='max-w-xl pt-[12vh]'>
+        {loadError ? (
+          <LoadError
+            text={describeError(loadError).text}
+            onRetry={() => {
+              void refetch();
+              void creation.refetch();
+              void received.refetch();
+            }}
+          />
+        ) : invited ? (
+          <>
+            <PageHeader
+              title={title}
+              description={t('start.invitedDescription', {
+                count: invitations.length,
+              })}
             />
-          </div>
-        </Page>
-      ) : (
-        <Page className='max-w-2xl'>
-          {invited ? (
-            <>
-              <PageHeader
-                title={t('start.invitedTitle')}
-                description={t('start.invitedDescription')}
+            <ReceivedInvitations emptyText={t('start.noInvitations')} />
+          </>
+        ) : canCreate ? (
+          <>
+            <PageHeader
+              title={title}
+              description={t('start.createDescription')}
+            />
+            <CreateWorkspaceForm />
+            <p className='text-sm text-pretty text-muted-foreground'>
+              <Trans
+                i18nKey='start.inviteHint'
+                values={{ email }}
+                components={{ b: <span className='text-foreground' /> }}
               />
-              <ReceivedInvitations emptyText={t('start.noInvitations')} />
-              {canCreate && (
-                <PageSection title={t('start.orCreate')}>
-                  <CreateWorkspaceForm />
-                </PageSection>
-              )}
-            </>
-          ) : canCreate ? (
-            <>
-              <PageHeader
-                title={t('start.title')}
-                description={t('start.description')}
-              />
-              <CreateWorkspaceForm />
-              <PageSection title={t('start.or')}>
-                <ReceivedInvitations emptyText={t('start.noInvitations')} />
-              </PageSection>
-            </>
-          ) : (
-            <>
-              <PageHeader
-                title={t('start.waitTitle')}
-                description={t('start.waitDescription')}
-              />
-              <ReceivedInvitations emptyText={t('start.noInvitations')} />
-            </>
-          )}
-        </Page>
-      )}
+            </p>
+          </>
+        ) : (
+          <>
+            <PageHeader title={title} />
+            <Empty className='border border-dashed border-border'>
+              <EmptyHeader>
+                <EmptyMedia variant='icon'>
+                  <MailOpen />
+                </EmptyMedia>
+                <EmptyTitle>{t('start.waitTitle')}</EmptyTitle>
+                <EmptyDescription>
+                  <Trans
+                    i18nKey='start.waitDescription'
+                    values={{ email }}
+                    components={{ b: <span className='text-foreground' /> }}
+                  />
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  disabled={received.isFetching}
+                  onClick={() => void received.refetch()}
+                >
+                  <RefreshCw
+                    className={cn(received.isFetching && 'animate-spin')}
+                  />
+                  {t('start.check')}
+                </Button>
+              </EmptyContent>
+            </Empty>
+          </>
+        )}
+      </Page>
     </CoverFrame>
   );
 }

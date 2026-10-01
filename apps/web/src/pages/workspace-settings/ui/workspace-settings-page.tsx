@@ -1,9 +1,8 @@
-import { LogOut, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import { useLeaveWorkspaceMutation } from '@/entities/member';
 import {
   forgetLastWorkspaceSlug,
   useCurrentWorkspace,
@@ -15,7 +14,6 @@ import { useDescribeError } from '@/shared/i18n';
 import {
   Button,
   ConfirmBySlugDialog,
-  ConfirmDialog,
   List,
   ListRow,
   Page,
@@ -26,31 +24,18 @@ import {
 
 import { ProviderKeySection } from './provider-key-section';
 
-/** What the Workspace is, leaving it, and deleting it for good. */
+/** What the Workspace is, its Provider Key, and deleting it for good; for whoever may manage one of those. Leaving it is in the Workspace switcher. */
 export function WorkspaceSettingsPage() {
   const { t } = useTranslation();
   const describeError = useDescribeError();
   const navigate = useNavigate();
   const { workspace, access } = useCurrentWorkspace();
-  const [leave] = useLeaveWorkspaceMutation();
   const [deleteWorkspace] = useDeleteWorkspaceMutation();
-  const [leaveFailure, setLeaveFailure] = useState<string | null>(null);
   const [deleteFailure, setDeleteFailure] = useState<string | null>(null);
 
   if (!workspace || !access) {
     return <PageSkeleton />;
   }
-
-  const onLeave = async () => {
-    const result = await leave(workspace.id);
-    const error = toApiError(result.error);
-    setLeaveFailure(error ? describeError(error).text : null);
-    if (!error) {
-      forgetLastWorkspaceSlug();
-      void navigate(ROUTES.home, { replace: true });
-    }
-    return !error;
-  };
 
   const onDelete = async (slug: string) => {
     const result = await deleteWorkspace({
@@ -85,28 +70,6 @@ export function WorkspaceSettingsPage() {
         </List>
       </PageSection>
       <ProviderKeySection workspace={workspace} access={access} />
-      <PageSection
-        title={t('workspaceSettings.leave')}
-        description={t('workspaceSettings.leaveDescription')}
-      >
-        <div>
-          <ConfirmDialog
-            trigger={
-              <Button variant='outline'>
-                <LogOut />
-                {t('workspaceSettings.leave')}
-              </Button>
-            }
-            title={t('workspaceSettings.leaveConfirmTitle', {
-              name: workspace.name,
-            })}
-            description={t('workspaceSettings.leaveDescription')}
-            confirmLabel={t('workspaceSettings.leaveConfirm')}
-            error={leaveFailure}
-            onConfirm={onLeave}
-          />
-        </div>
-      </PageSection>
       {access.canDeleteWorkspace && (
         <PageSection
           title={t('workspaceSettings.danger')}

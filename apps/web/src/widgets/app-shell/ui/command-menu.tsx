@@ -13,12 +13,17 @@ import {
   CommandList,
   CommandShortcut,
 } from '@/shared/ui';
-import type { ProjectDto, WorkspaceDto } from '@intentra/contracts/workspace';
+import type {
+  ProjectAccessDto,
+  ProjectDto,
+  WorkspaceAccessDto,
+  WorkspaceDto,
+} from '@intentra/contracts/workspace';
 
 import {
   PLATFORM_NAVIGATION,
-  PROJECT_NAVIGATION,
-  WORKSPACE_NAVIGATION,
+  projectNavigation,
+  workspaceNavigation,
 } from '../model/navigation';
 
 import { InitialTile } from './initial-tile';
@@ -33,6 +38,8 @@ export function CommandMenu({
   workspaces,
   projects,
   currentProject,
+  workspaceAccess,
+  projectAccess,
   platform,
 }: {
   readonly open: boolean;
@@ -41,6 +48,10 @@ export function CommandMenu({
   readonly workspaces: readonly WorkspaceDto[];
   readonly projects: readonly ProjectDto[];
   readonly currentProject: ProjectDto | undefined;
+  /** What the person may do in the Workspace; it decides which of its pages are listed. */
+  readonly workspaceAccess: WorkspaceAccessDto | undefined;
+  /** What the person may do in the current Project; it decides which of its pages are listed. */
+  readonly projectAccess: ProjectAccessDto | undefined;
   /** Lists the Platform Admin's pages. */
   readonly platform: boolean;
 }) {
@@ -76,7 +87,7 @@ export function CommandMenu({
           <CommandEmpty>{t('shell.searchEmpty')}</CommandEmpty>
           {workspace && currentProject && (
             <CommandGroup heading={currentProject.name}>
-              {PROJECT_NAVIGATION.map(entry => (
+              {projectNavigation(projectAccess).map(entry => (
                 <CommandItem
                   key={entry.labelKey}
                   value={`${currentProject.name} ${t(`shell.projectPages.${entry.labelKey}`)}`}
@@ -115,7 +126,7 @@ export function CommandMenu({
           )}
           {workspace && (
             <CommandGroup heading={workspace.name}>
-              {WORKSPACE_NAVIGATION.map(entry => (
+              {workspaceNavigation(workspaceAccess).map(entry => (
                 <CommandItem
                   key={entry.labelKey}
                   value={`${workspace.name} ${t(`shell.workspacePages.${entry.labelKey}`)}`}

@@ -1,4 +1,4 @@
-import { Check, Plus, Triangle } from 'lucide-react';
+import { Check, LogOut, Plus, Triangle } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -29,6 +29,7 @@ import type {
 } from '@intentra/contracts/workspace';
 
 import { InitialTile } from './initial-tile';
+import { LeaveWorkspaceDialog } from './leave-workspace-dialog';
 
 /**
  * The Project the sidebar works in, and the way to another one; switching
@@ -53,6 +54,7 @@ export function ProjectSwitcher({
   const navigate = useNavigate();
   const [creatingProject, setCreatingProject] = useState(false);
   const [creatingWorkspace, setCreatingWorkspace] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const { data: creation } = useWorkspaceCreationQuery();
 
   if (!workspace || loading) {
@@ -134,15 +136,17 @@ export function ProjectSwitcher({
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
+              <DropdownMenuSeparator />
               {creation?.canCreate && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setCreatingWorkspace(true)}>
-                    <Plus />
-                    {t('shell.createWorkspace')}
-                  </DropdownMenuItem>
-                </>
+                <DropdownMenuItem onClick={() => setCreatingWorkspace(true)}>
+                  <Plus />
+                  {t('shell.createWorkspace')}
+                </DropdownMenuItem>
               )}
+              <DropdownMenuItem onClick={() => setLeaving(true)}>
+                <LogOut />
+                {t('shell.leaveWorkspace', { name: workspace.name })}
+              </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
         </DropdownMenuContent>
@@ -155,6 +159,11 @@ export function ProjectSwitcher({
       <CreateWorkspaceDialog
         open={creatingWorkspace}
         onOpenChange={setCreatingWorkspace}
+      />
+      <LeaveWorkspaceDialog
+        workspace={workspace}
+        open={leaving}
+        onOpenChange={setLeaving}
       />
     </SidebarMenuItem>
   );

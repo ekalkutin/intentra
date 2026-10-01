@@ -162,6 +162,14 @@ export {
   TableRow,
 } from './primitives/table';
 export { Tabs, TabsList, TabsTrigger } from './primitives/tabs';
+export {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from './primitives/empty';
 export { Switch } from './primitives/switch';
 export { ToggleGroup, ToggleGroupItem } from './primitives/toggle-group';
 export { Textarea } from './primitives/textarea';

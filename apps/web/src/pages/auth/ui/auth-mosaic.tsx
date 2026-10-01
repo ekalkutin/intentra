@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { LanguageSwitch } from '@/features/switch-language';
 import { ThemeSwitch } from '@/features/switch-theme';
 
 import { mountAuthMosaic } from './auth-mosaic-animation';
-import { LanguageSwitch } from './language-switch';
 
 type MosaicAnimation = ReturnType<typeof mountAuthMosaic>;
 

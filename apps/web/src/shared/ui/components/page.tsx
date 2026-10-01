@@ -35,7 +35,10 @@ export function PageHeader({
       )}
     >
       <div
-        className={cn('max-w-2xl min-w-0 flex-1', description && 'basis-64')}
+        className={cn(
+          'max-w-2xl min-w-0 flex-1',
+          description ? 'basis-64' : 'basis-40',
+        )}
       >
         <h1 className='text-2xl font-semibold tracking-[-0.02em] text-balance'>
           {title}

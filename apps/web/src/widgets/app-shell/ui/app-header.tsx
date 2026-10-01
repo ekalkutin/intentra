@@ -12,10 +12,17 @@ import {
 
 import { IS_APPLE } from '../model/shortcut';
 
-import { AccountMenu } from './account-menu';
+import { HeaderControls } from './header-controls';
 
-/** The sidebar toggle, the search in the middle and the account on the right. */
-export function AppHeader({ onSearch }: { readonly onSearch: () => void }) {
+/** The sidebar toggle, the search in the middle, and the language, theme and account on the right. */
+export function AppHeader({
+  workspaceSlug,
+  onSearch,
+}: {
+  /** The Workspace the person is in, for their own tokens in the account menu. */
+  readonly workspaceSlug: string | undefined;
+  readonly onSearch: () => void;
+}) {
   const { t } = useTranslation();
 
   return (
@@ -46,7 +53,7 @@ export function AppHeader({ onSearch }: { readonly onSearch: () => void }) {
         </Kbd>
       </Button>
       <div className='flex justify-end'>
-        <AccountMenu />
+        <HeaderControls workspaceSlug={workspaceSlug} />
       </div>
     </header>
   );
