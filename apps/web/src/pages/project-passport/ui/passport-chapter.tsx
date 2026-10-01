@@ -83,19 +83,11 @@ export function PassportChapter({
           </p>
         </div>
         {interviewPath && (
-          <Button
-            variant='ghost'
-            size='sm'
-            aria-label={t('passport.discussLabel', { chapter: name })}
-            className='-mt-1 -mr-2 shrink-0 text-muted-foreground hover:text-foreground'
-            // A new Conversation that opens with the chapter as its first message.
-            render={<Link to={interviewPath} state={opening} />}
-            nativeButton={false}
-          >
-            <MessagesSquare />
-            {/* Icon only below 640px, so the chapter's line keeps its width. */}
-            <span className='max-sm:hidden'>{t('passport.discuss')}</span>
-          </Button>
+          <DiscussButton
+            to={interviewPath}
+            opening={opening}
+            label={t('passport.discussLabel', { chapter: name })}
+          />
         )}
       </header>
       {chapter.count === 0 ? (
@@ -159,5 +151,38 @@ function Group({
         </Link>
       )}
     </div>
+  );
+}
+
+/**
+ * The way into the Interview: a quiet ghost button like the rest of the
+ * Passport. Only the page change it starts is animated, dissolving into the
+ * Conversation it opens (a view transition; still under reduced motion).
+ */
+function DiscussButton({
+  to,
+  opening,
+  label,
+}: {
+  readonly to: string;
+  readonly opening: InterviewOpening;
+  readonly label: string;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <Button
+      variant='ghost'
+      size='sm'
+      aria-label={label}
+      className='-mt-1 -mr-2 shrink-0 text-muted-foreground hover:text-foreground'
+      // A new Conversation that opens with the chapter as its first message.
+      render={<Link to={to} state={opening} viewTransition />}
+      nativeButton={false}
+    >
+      <MessagesSquare />
+      {/* Icon only below 640px, so the chapter's line keeps its width. */}
+      <span className='max-sm:hidden'>{t('passport.discuss')}</span>
+    </Button>
   );
 }

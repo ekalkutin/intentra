@@ -12,7 +12,10 @@ import {
   type ConversationQueryProps,
 } from '../../../application/ports/outbound/index.js';
 import { Conversation } from '../../../domain/entities/index.js';
-import type { ConversationId } from '../../../domain/value-objects/index.js';
+import {
+  ConversationTitle,
+  type ConversationId,
+} from '../../../domain/value-objects/index.js';
 
 /** What a Mastra thread keeps of a Conversation besides its Member (`resourceId`) and title. */
 type ConversationMetadata = {
@@ -125,7 +128,8 @@ function toDomain(thread: StorageThreadType): Conversation {
     workspaceId: metadata.workspaceId,
     projectId: metadata.projectId,
     memberId: thread.resourceId,
-    title: thread.title || null,
+    // Mastra writes the suggested title unchecked, so it is read as a suggestion.
+    title: ConversationTitle.fromSuggestion(thread.title ?? '')?.value ?? null,
     hidden: metadata.hidden,
     createdAt: Temporal.Instant.fromEpochMilliseconds(
       thread.createdAt.getTime(),

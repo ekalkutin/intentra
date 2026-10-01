@@ -1,5 +1,6 @@
 // Primitives are shadcn's, written by its CLI only; our own components build on them.
 export { BackLink } from './components/back-link';
+export { AgentSpark } from './components/agent-spark';
 export { Brand } from './components/brand';
 export { ConfirmBySlugDialog } from './components/confirm-by-slug-dialog';
 export { ConfirmDialog } from './components/confirm-dialog';

@@ -252,3 +252,37 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/*
+ * The page change a view transition asks for (only the Passport's "Обсудить"
+ * does): the page leaves into a blur and the next one comes out of it.
+ */
+::view-transition-old(root) {
+  animation: 180ms cubic-bezier(0.16, 1, 0.3, 1) both intentra-dissolve-out;
+}
+
+::view-transition-new(root) {
+  animation: 380ms cubic-bezier(0.16, 1, 0.3, 1) both intentra-dissolve-in;
+}
+
+@keyframes intentra-dissolve-out {
+  to {
+    filter: blur(8px);
+    opacity: 0;
+  }
+}
+
+@keyframes intentra-dissolve-in {
+  from {
+    filter: blur(8px);
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}

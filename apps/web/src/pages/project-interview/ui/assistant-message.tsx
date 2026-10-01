@@ -8,7 +8,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -19,6 +19,7 @@ import {
 import { DEFAULT_TONE, nextPhrase, useThinkingPhrases } from '@/shared/i18n';
 import { cn } from '@/shared/lib';
 import {
+  AgentSpark,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -35,6 +36,14 @@ import {
 } from '../model/message-parts';
 
 import { ChoicesCard } from './choices-card';
+import {
+  expectLanding,
+  flightDelay,
+  flyToCaptured,
+  landed,
+  markIncoming,
+} from './knowledge-flight';
+import { RecordWave } from './record-wave';
 
 const STEP_ICONS: Record<Activity, LucideIcon> = {
   thinking: Brain,
@@ -81,6 +90,7 @@ export function AssistantMessage({
       key={block.id}
       block={block}
       streaming={streaming && block === blocks.at(-1)}
+      live={streaming}
       answer={answers.get(block.id) ?? null}
       canAnswer={canAnswer}
       onAnswer={onAnswer}
@@ -125,12 +135,15 @@ export function AssistantMessage({
 function BlockView({
   block,
   streaming,
+  live,
   answer,
   canAnswer,
   onAnswer,
 }: {
   readonly block: Block;
   readonly streaming: boolean;
+  /** The message is still arriving, so a write in it happens before the Member's eyes. */
+  readonly live: boolean;
   readonly answer: string | null;
   readonly canAnswer: boolean;
   readonly onAnswer: (text: string) => void;
@@ -176,6 +189,54 @@ function BlockView({
     );
   }
 
+  return <WriteRow block={block} live={live} />;
+}
+
+/**
+ * One Draft the agent wrote or changed. Written while the Member watches, it
+ * materialises in turn: a brand colour wave runs over its key and title, and
+ * once it has passed the key flies off to the panel of what the Conversation
+ * recorded, whose tile shows only as it lands. A line from history just sits
+ * there.
+ */
+function WriteRow({
+  block,
+  live,
+}: {
+  readonly block: Extract<Block, { type: 'write' }>;
+  readonly live: boolean;
+}) {
+  const { t } = useTranslation();
+  const recordRef = useRef<HTMLSpanElement>(null);
+  const key = block.item?.key;
+  // Whether it appeared while the answer arrived: decided once, as it first
+  // renders, and said at once, so the panel never shows its tile early.
+  const [fresh] = useState(() => {
+    if (live && key) {
+      markIncoming(key);
+    }
+    return live;
+  });
+
+  // Before the panel draws the tile, so it waits for its key from the start.
+  useLayoutEffect(() => {
+    if (!fresh || !key) {
+      return;
+    }
+    expectLanding(key);
+    const timer = setTimeout(() => {
+      if (recordRef.current) {
+        flyToCaptured(recordRef.current, key);
+      } else {
+        landed(key);
+      }
+    }, flightDelay());
+    return () => {
+      clearTimeout(timer);
+      landed(key);
+    };
+  }, [fresh, key]);
+
   return (
     <p className='flex min-w-0 items-center gap-2 text-sm'>
       {block.item?.kind ? (
@@ -189,9 +250,18 @@ function BlockView({
       <span className='shrink-0 text-muted-foreground'>
         {t(`interview.writes.${block.action}`)}
       </span>
-      {block.item && <KnowledgeKeyLink itemKey={block.item.key} />}
-      {block.item?.title && (
-        <span className='min-w-0 truncate'>{block.item.title}</span>
+      {block.item && (
+        // The whole record is where the card takes off from.
+        <span ref={recordRef} className='flex min-w-0'>
+          <RecordWave play={fresh}>
+            <span className='inline-flex shrink-0'>
+              <KnowledgeKeyLink itemKey={block.item.key} />
+            </span>
+            {block.item.title && (
+              <span className='min-w-0 truncate'>{block.item.title}</span>
+            )}
+          </RecordWave>
+        </span>
       )}
     </p>
   );
@@ -199,10 +269,6 @@ function BlockView({
 
 /** How long a thinking phrase stays before another takes its place. */
 const PHRASE_MS = 5000;
-/** The spinner's frames and pace, as in Claude Code. */
-const SPINNER_FRAMES = ['·', '✢', '✳', '✶', '✻', '✽', '✻', '✶', '✳', '✢'];
-const SPINNER_MS = 120;
-const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
 /** What the agent is doing now, in one shimmering line. */
 function LiveStatus({
@@ -241,7 +307,6 @@ function LiveStatus({
 function ThinkingStatus() {
   const phrases = useThinkingPhrases(DEFAULT_TONE);
   const [phrase, setPhrase] = useState(() => nextPhrase(phrases, null));
-  const [frame, setFrame] = useState(0);
 
   useEffect(() => {
     const id = setInterval(
@@ -251,28 +316,12 @@ function ThinkingStatus() {
     return () => clearInterval(id);
   }, [phrases]);
 
-  useEffect(() => {
-    if (window.matchMedia(REDUCED_MOTION).matches) {
-      return;
-    }
-    const id = setInterval(
-      () => setFrame(current => (current + 1) % SPINNER_FRAMES.length),
-      SPINNER_MS,
-    );
-    return () => clearInterval(id);
-  }, []);
-
   return (
     <p
       role='status'
       className='flex items-center gap-2 text-sm text-muted-foreground'
     >
-      <span
-        aria-hidden
-        className='inline-flex w-4 shrink-0 justify-center font-mono text-foreground/70'
-      >
-        {SPINNER_FRAMES[frame]}
-      </span>
+      <AgentSpark active className='text-foreground/70' />
       <span className='shimmer'>{phrase}…</span>
     </p>
   );

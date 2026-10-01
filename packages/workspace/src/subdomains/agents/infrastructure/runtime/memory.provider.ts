@@ -27,6 +27,10 @@ function connectorHandler(connection: Connection): ConnectorHandler {
  * Where Conversations and their messages are kept: Mastra Memory, with only
  * its memory collections (`mastra_threads`, `mastra_messages`, …).
  */
+/** A model left alone sometimes answers instead of naming the Conversation. */
+const TITLE_INSTRUCTIONS =
+  'Name this conversation in at most six words, in the language the person writes in. Reply with the title alone: one line, no quotes, no Markdown, no punctuation at the end.';
+
 export const MEMORY_PROVIDER: Provider = {
   provide: Memory,
   inject: [getConnectionToken(), AGENTS_OPTIONS],
@@ -44,7 +48,7 @@ export const MEMORY_PROVIDER: Provider = {
         messageHistory: { maxTokens: options.historyTokens },
         // The answer waits for the title and streams it (`data-thread-title`),
         // so the title is kept before anything else may change the Conversation.
-        generateTitle: { emitEvent: true },
+        generateTitle: { emitEvent: true, instructions: TITLE_INSTRUCTIONS },
       },
     }),
 };
