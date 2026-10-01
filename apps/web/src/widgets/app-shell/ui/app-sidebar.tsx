@@ -1,5 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router';
 
@@ -7,11 +7,13 @@ import { countChanges, useAgentsChangesQuery } from '@/entities/platform-agent';
 import {
   PLATFORM_PAGES,
   platformPath,
+  PROJECT_PAGES,
   projectPath,
   ROUTES,
   workspacePath,
 } from '@/shared/config';
 import {
+  AgentSpark,
   Brand,
   Sidebar,
   SidebarContent,
@@ -127,24 +129,44 @@ export function AppSidebar({
               {workspace && selected ? (
                 <SidebarMenu className='gap-0.5'>
                   {projectNavigation(access?.projects[selected.id]).map(
-                    entry => (
-                      <SidebarMenuItem key={entry.labelKey}>
-                        {link(
-                          projectPath(
-                            workspace.slug,
-                            selected.slug,
-                            entry.page,
-                          ),
-                          <>
-                            <entry.icon />
-                            <span>
-                              {t(`shell.projectPages.${entry.labelKey}`)}
-                            </span>
-                          </>,
-                          entry.page !== undefined,
-                        )}
-                      </SidebarMenuItem>
-                    ),
+                    entry =>
+                      entry.page === PROJECT_PAGES.interview ? (
+                        <InterviewEntry key={entry.labelKey}>
+                          {mark =>
+                            link(
+                              projectPath(
+                                workspace.slug,
+                                selected.slug,
+                                entry.page,
+                              ),
+                              <>
+                                {mark}
+                                <span>
+                                  {t(`shell.projectPages.${entry.labelKey}`)}
+                                </span>
+                              </>,
+                              true,
+                            )
+                          }
+                        </InterviewEntry>
+                      ) : (
+                        <SidebarMenuItem key={entry.labelKey}>
+                          {link(
+                            projectPath(
+                              workspace.slug,
+                              selected.slug,
+                              entry.page,
+                            ),
+                            <>
+                              <entry.icon />
+                              <span>
+                                {t(`shell.projectPages.${entry.labelKey}`)}
+                              </span>
+                            </>,
+                            entry.page !== undefined,
+                          )}
+                        </SidebarMenuItem>
+                      ),
                   )}
                 </SidebarMenu>
               ) : (
@@ -212,5 +234,36 @@ export function AppSidebar({
         <Brand className='ml-2 w-32' />
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+/** How often the Interview's mark turns once at rest: now and then, never busy. */
+const INTERVIEW_TURN_EVERY_MS = 12_000;
+
+/**
+ * The Interview, the product's core, set apart from the other sections: the
+ * agent's mark in the brand hue instead of an icon, turning once now and then
+ * and all the while it is pointed at.
+ */
+function InterviewEntry({
+  children,
+}: {
+  readonly children: (mark: ReactNode) => ReactNode;
+}) {
+  const [pointed, setPointed] = useState(false);
+
+  return (
+    <SidebarMenuItem
+      onPointerEnter={() => setPointed(true)}
+      onPointerLeave={() => setPointed(false)}
+    >
+      {children(
+        <AgentSpark
+          active={pointed}
+          turnEvery={INTERVIEW_TURN_EVERY_MS}
+          className='text-[1.375rem] leading-none text-brand'
+        />,
+      )}
+    </SidebarMenuItem>
   );
 }

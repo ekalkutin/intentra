@@ -43,13 +43,14 @@ export const WORKSPACE_NAVIGATION = [
 
 /** The sections of a Project, in the order the sidebar lists them. */
 export const PROJECT_NAVIGATION = [
-  { page: undefined, icon: BookText, labelKey: 'passport' },
-  { page: PROJECT_PAGES.knowledge, icon: LayoutList, labelKey: 'knowledge' },
+  // The Interview is the product's core, so it leads.
   {
     page: PROJECT_PAGES.interview,
     icon: MessagesSquare,
     labelKey: 'interview',
   },
+  { page: undefined, icon: BookText, labelKey: 'passport' },
+  { page: PROJECT_PAGES.knowledge, icon: LayoutList, labelKey: 'knowledge' },
   { page: PROJECT_PAGES.roles, icon: UsersRound, labelKey: 'roles' },
   { page: PROJECT_PAGES.settings, icon: Settings, labelKey: 'settings' },
 ] as const satisfies readonly Entry<ProjectPage>[];
