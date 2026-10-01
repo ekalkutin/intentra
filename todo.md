@@ -98,7 +98,33 @@ Decided:
   - Decided: the answer waits for its title and streams it (`generateTitle: { emitEvent: true }`, chunk `data-thread-title`), so the title is kept before the answer ends; while an answer runs, a message, an edit and a deletion are all refused with 409 `CONVERSATION_BUSY`. Nothing overwrites anyone else's change.
   - Built: `updatedAt` is Mastra's: the last message, rename or hiding; the list sorts by it. Mastra pages by page number, so the adapter reads `offset + take` threads and drops the first `offset`.
 
-## Next, now: Platform Admin and Agents as data
+## Next, now: Context for agents
+
+Goal: an agent implementing a task (Claude Code, Codex, Cursor) gets a Context Pack, the Approved knowledge for that task, not the whole base. Grilled on 2026-10-02 (one question at a time). Glossary: `packages/workspace/src/subdomains/knowledge/CONTEXT.md` (Context Pack, Anchor, Project Frame, `concerns`). Deferred: `docs/notes/knowledge-open-questions.md` (anchors by the task's text and by Feature, `scope` for the Project Frame, several Anchors in the UI, `uses term` suggested automatically), `docs/notes/agents-open-questions.md` (Context Packs for the Orchestrator).
+
+Decided:
+- The agent picks the Anchors itself, by Knowledge Key, from the compact list; Intentra walks the Links deterministically (no embeddings, no model call). Later both the task's text and a Feature Kind feed the same walk.
+- The walk: `depends on` and `justified by` outwards at any depth (foundation); `uses term` one step (terms); incoming Links one step (may be affected); `conflicts with` both ways; Open Questions that `concerns` anything in the pack (unsettled).
+- Only Approved knowledge. An item under Needs Review is in it, marked. A Draft Anchor is refused (ask the person to approve it). Drafts linked to items in the pack are named on one line, never included. The interview (`list_knowledge` with `statuses`) is untouched.
+- Project Frame: Product Overview, every Approved Constraint, every Approved non-functional Requirement; nothing marked (`scope` deferred). Its own MCP tool `get_project_frame`, read once per session; the MCP server's instructions say to read it first, and every Context Pack ends with a line naming the frame's size and the tool.
+- The core is a structure (each item with its role: Anchor, foundation, may be affected, term, conflict, unsettled); Markdown is drawn from it. MCP answers both (`content` Markdown, `structuredContent` the structure).
+- Nothing is dropped: Anchors, conflicts, Open Questions and Needs Review items always in full; foundation and may-be-affected in full by distance from the Anchors while a budget lasts (about 40 items, a server constant); the rest one line each (key, Kind, title, main field), for `get_knowledge_item`.
+- Read by anyone who reads knowledge (Viewer and any Personal Access Token level).
+- Web UI: "Контекст для агента" on a Knowledge Item's page, one Anchor: the pack as the agent sees it, the Project Frame folded to one line, "Скопировать" the Markdown with "Включить рамку проекта" on by default.
+- New Link `concerns`: only from an Open Question, to any Kind; never sets Needs Review.
+- Links: concrete rules in the Orchestrator's instructions; an Approved item with no Link either way is shown as unlinked (to people, and to agents through `get_knowledge_summary`).
+- Proving the value: dogfooding, the Project "Intentra" in Intentra, its next feature built through Claude Code over MCP.
+
+Order (decided 2026-10-02): dogfooding as early as possible.
+- [x] **1. `concerns` Link.** Domain, contracts, MCP (generated), the Links form in the UI, texts.
+  - Built: `KnowledgeLinkType` gains the Kind it may start from (`allowsSource`), next to the one it may lead to; `concerns` starts only from an Open Question and leads to any Kind, checked with the item's other Links on recording and editing (400 `INVALID_LINK`). It is not in `MarkingForReview`, so it never sets Needs Review. The editor offers `concerns` only on an Open Question (`linkTypesFor`); the item's page lists incoming ones as "Открытые вопросы об этой записи".
+- [ ] **2. Context Pack and Project Frame on the server.** Gathering in Knowledge (roles, the walk, the budget, a Draft Anchor refused), REST, MCP `get_context` and `get_project_frame` with Markdown, MCP server instructions. E2e.
+- [ ] **3. The Orchestrator's instructions.** Link rules and `concerns` in `docs/agents/orchestrator.md`, then published in the admin area.
+- [ ] **4. Dogfooding.** The Project "Intentra" in Intentra, its knowledge carried over (glossaries, ADRs, decisions), the next feature built from `get_project_frame` and `get_context`.
+- [ ] **5. Unlinked.** A count in `get_knowledge_summary` and `/knowledge/summary`, a view on the Knowledge page.
+- [ ] **6. "Контекст для агента" in the UI.**
+
+## Paused for Context for agents: Platform Admin and Agents as data
 
 Goal: a Platform Admin edits Intentra's Agents in an admin area of `apps/web` (Unpublished Agents), tries them in their own Conversations and publishes them as numbered Agents Versions; Workspaces run their Agents on their own Provider Key. Grilled on 2026-10-01. Glossary: `packages/iam/CONTEXT.md` (Platform Admin, Blocked Account), `packages/workspace/src/subdomains/agents/CONTEXT.md` (Agents Version, Published / Unpublished Agents, Usage), `packages/workspace/src/subdomains/tenancy/CONTEXT.md` (Suspended Workspace). ADR `packages/workspace/src/subdomains/agents/docs/adr/0003-agents-are-versioned-data-edited-by-a-platform-admin.md`. Deferred: Plans, deleting an Account (`docs/notes/`).
 

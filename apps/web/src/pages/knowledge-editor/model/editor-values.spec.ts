@@ -5,6 +5,7 @@ import type { KnowledgeItemDto } from '@intentra/contracts/workspace';
 import {
   editorSchema,
   emptyValues,
+  linkTypesFor,
   toFieldsDto,
   valuesFrom,
 } from './editor-values';
@@ -150,5 +151,18 @@ describe('editorSchema', () => {
     expect(result.error?.issues.map(issue => issue.path.join('.'))).toEqual([
       'links.0.key',
     ]);
+  });
+});
+
+describe('linkTypesFor', () => {
+  it('offers concerns only to an Open Question', () => {
+    // Act
+    const question = linkTypesFor('open-question');
+    const requirement = linkTypesFor('requirement');
+
+    // Assert
+    expect(question).toContain('concerns');
+    expect(requirement).not.toContain('concerns');
+    expect(requirement).toContain('depends-on');
   });
 });

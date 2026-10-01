@@ -11,9 +11,12 @@ import {
 } from '@/shared/ui';
 import {
   KnowledgeLinkTypeDtoSchema,
+  type KnowledgeKindDto,
   type KnowledgeLinkDto,
   type KnowledgeLinkTypeDto,
 } from '@intentra/contracts/workspace';
+
+import { linkTypesFor } from '../model/editor-values';
 
 export type LinkTarget = {
   readonly key: string;
@@ -23,12 +26,15 @@ export type LinkTarget = {
 /** The item's Links: a type and a target each, added and removed one at a time. */
 export function LinksInput({
   id,
+  kind,
   value,
   onChange,
   targets,
   invalidRows,
 }: {
   readonly id: string;
+  /** The Kind of the item holding the Links, which decides the types offered. */
+  readonly kind: KnowledgeKindDto;
   readonly value: readonly KnowledgeLinkDto[];
   readonly onChange: (value: KnowledgeLinkDto[]) => void;
   /** The items a Link may lead to. */
@@ -37,7 +43,7 @@ export function LinksInput({
   readonly invalidRows: ReadonlySet<number>;
 }) {
   const { t } = useTranslation();
-  const types = KnowledgeLinkTypeDtoSchema.options.map(type => ({
+  const types = linkTypesFor(kind).map(type => ({
     value: type,
     label: t(`linkTypes.${type}`),
   }));

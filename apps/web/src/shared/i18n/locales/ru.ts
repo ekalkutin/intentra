@@ -599,6 +599,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     'uses-term': 'Использует термин',
     'justified-by': 'Обосновано решением',
     answers: 'Отвечает на',
+    concerns: 'Касается',
     'conflicts-with': 'Противоречит',
   },
   incomingLinkTypes: {
@@ -606,6 +607,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     'uses-term': 'Используют этот термин',
     'justified-by': 'Обоснованы этим решением',
     answers: 'Отвечают на этот вопрос',
+    concerns: 'Открытые вопросы об этой записи',
     'conflicts-with': 'Противоречат этой записи',
   },
   knowledge: {

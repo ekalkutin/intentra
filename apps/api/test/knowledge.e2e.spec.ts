@@ -642,6 +642,43 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
     });
   });
 
+  it('lets only an Open Question say what it concerns', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send(requirement)
+      .expect(HttpStatus.CREATED);
+
+    // Act
+    const question = await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send({
+        kind: 'open-question',
+        title: 'Revoking by a Manager',
+        fields: { question: 'May a Manager revoke an Invitation?' },
+        links: [{ type: 'concerns', key: 'REQ-1' }],
+      });
+    const fromRequirement = await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send({
+        ...requirement,
+        links: [{ type: 'concerns', key: 'REQ-1' }],
+      });
+
+    // Assert
+    expect(question.status).toBe(HttpStatus.CREATED);
+    expect(question.body.links).toEqual([{ type: 'concerns', key: 'REQ-1' }]);
+    expect(fromRequirement.body.code).toBe('INVALID_LINK');
+    expect(fromRequirement.status).toBe(HttpStatus.BAD_REQUEST);
+  });
+
   it('refuses a batch listing one item twice', async () => {
     // Arrange
     const { ada, path } = await setUp();

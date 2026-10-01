@@ -128,5 +128,5 @@ export const versionSchema = z
 export const linksSchema = z
   .array(KnowledgeLinkDtoSchema)
   .describe(
-    'Links to other items, Draft or Approved: depends-on (it holds only while the target holds; a Scenario depends on the Persona who performs it), uses-term (a Term), justified-by (a Decision), answers (an Open Question), conflicts-with.',
+    'Links to other items, Draft or Approved: depends-on (it holds only while the target holds; a Scenario depends on the Persona who performs it), uses-term (a Term), justified-by (a Decision), answers (an Open Question), concerns (only from an Open Question: what it is about), conflicts-with.',
   );

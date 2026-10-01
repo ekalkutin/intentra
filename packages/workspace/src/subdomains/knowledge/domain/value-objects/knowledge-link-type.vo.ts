@@ -5,23 +5,37 @@ import { KnowledgeKind } from './knowledge-kind.vo.js';
 /** How one Knowledge Item relates to another it links to. */
 export class KnowledgeLinkType {
   /** It holds only while the target holds. */
-  public static readonly DependsOn = new KnowledgeLinkType('depends-on', null);
+  public static readonly DependsOn = new KnowledgeLinkType(
+    'depends-on',
+    null,
+    null,
+  );
   public static readonly UsesTerm = new KnowledgeLinkType(
     'uses-term',
+    null,
     KnowledgeKind.Term,
   );
   /** A Decision is the reason for it. */
   public static readonly JustifiedBy = new KnowledgeLinkType(
     'justified-by',
+    null,
     KnowledgeKind.Decision,
   );
   /** It settles an Open Question. */
   public static readonly Answers = new KnowledgeLinkType(
     'answers',
+    null,
     KnowledgeKind.OpenQuestion,
+  );
+  /** An Open Question is about the target. */
+  public static readonly Concerns = new KnowledgeLinkType(
+    'concerns',
+    KnowledgeKind.OpenQuestion,
+    null,
   );
   public static readonly ConflictsWith = new KnowledgeLinkType(
     'conflicts-with',
+    null,
     null,
   );
 
@@ -30,6 +44,7 @@ export class KnowledgeLinkType {
     KnowledgeLinkType.UsesTerm,
     KnowledgeLinkType.JustifiedBy,
     KnowledgeLinkType.Answers,
+    KnowledgeLinkType.Concerns,
     KnowledgeLinkType.ConflictsWith,
   ];
 
@@ -40,10 +55,16 @@ export class KnowledgeLinkType {
   ];
 
   readonly #value: string;
+  readonly #sourceKind: KnowledgeKind | null;
   readonly #targetKind: KnowledgeKind | null;
 
-  private constructor(value: string, targetKind: KnowledgeKind | null) {
+  private constructor(
+    value: string,
+    sourceKind: KnowledgeKind | null,
+    targetKind: KnowledgeKind | null,
+  ) {
     this.#value = value;
+    this.#sourceKind = sourceKind;
     this.#targetKind = targetKind;
   }
 
@@ -60,6 +81,10 @@ export class KnowledgeLinkType {
 
   public get value(): string {
     return this.#value;
+  }
+
+  public allowsSource(kind: KnowledgeKind): boolean {
+    return this.#sourceKind === null || this.#sourceKind.equals(kind);
   }
 
   public allowsTarget(kind: KnowledgeKind): boolean {

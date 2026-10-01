@@ -14,6 +14,7 @@ import {
   KnowledgeLink,
   KnowledgeLinkType,
   KnowledgeSource,
+  OpenQuestionContent,
   RequirementContent,
 } from '../value-objects/index.js';
 
@@ -52,16 +53,61 @@ function recordRequirement(links: readonly KnowledgeLink[]): KnowledgeItem {
   });
 }
 
+function concerns(key: KnowledgeKey): KnowledgeLink {
+  return new KnowledgeLink(KnowledgeLinkType.Concerns, key);
+}
+
+/** TBD-2, recorded with the given Links. */
+function recordOpenQuestion(links: readonly KnowledgeLink[]): KnowledgeItem {
+  return KnowledgeItem.record({
+    workspaceId: new WorkspaceId().value,
+    projectId: new ProjectId().value,
+    source: KnowledgeSource.Manual,
+    number: 2,
+    title: 'Revoking by a Manager',
+    rationale: null,
+    content: new OpenQuestionContent({
+      question: 'May a Manager revoke an Invitation?',
+    }),
+    authorId: new MemberId().value,
+    supersedes: null,
+    links,
+  });
+}
+
 describe('KnowledgeItem Links', () => {
   it.each([
     ['to itself', [dependsOn(KnowledgeKey.parse('REQ-7'))]],
     ['twice', [dependsOn(REQ_12), dependsOn(REQ_12)]],
+    ['of concerns from anything but an Open Question', [concerns(REQ_12)]],
   ])('refuses a Link %s', (_case, links) => {
     // Act
     const recording = () => recordRequirement(links);
 
     // Assert
     expect(recording).toThrow(InvalidLinkException);
+  });
+
+  it('lets an Open Question say what it concerns, without resting on it', () => {
+    // Act
+    const question = recordOpenQuestion([concerns(REQ_12)]);
+
+    // Assert
+    expect(question.links).toEqual([concerns(REQ_12)]);
+    expect(question.dependencies()).toEqual([]);
+    expect(question.restsOn(REQ_12)).toBe(false);
+  });
+
+  it('refuses concerns when an edit gives it to another Kind', () => {
+    // Arrange
+    const item = recordRequirement([]);
+
+    // Act
+    const editing = () =>
+      item.edit(new MemberId(), item.version, { links: [concerns(REQ_12)] });
+
+    // Assert
+    expect(editing).toThrow(InvalidLinkException);
   });
 
   it('keeps the same target under two types', () => {

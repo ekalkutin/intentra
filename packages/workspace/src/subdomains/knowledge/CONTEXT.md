@@ -29,7 +29,7 @@ A choice the Project has made, why, and which alternatives were turned down. A D
 _Avoid_: ADR (that is one kind of document about a Decision), Choice
 
 **Open Question**:
-Something about the Project that is not settled yet. It is answered once an Approved Knowledge Item answers it; it has no status of its own for that.
+Something about the Project that is not settled yet. It names what it is about through **concerns** Links, and is answered once an Approved Knowledge Item answers it; it has no status of its own for that.
 _Avoid_: TBD (as a word; `TBD` is only its Key prefix), Issue, Unknown
 
 **Requirement**:
@@ -41,7 +41,7 @@ Something imposed on the Project from outside that is not up for discussion: a l
 _Avoid_: Limitation, Restriction, Non-functional requirement
 
 **Link**:
-A directed connection from one Knowledge Item to another, of one of these types: **depends on** (it holds only while the other holds), **uses term** (it uses a Term), **justified by** (a Decision is the reason for it), **answers** (it settles an Open Question) and **conflicts with** (the two contradict each other). A Link is recorded and approved together with the Knowledge Item it starts from.
+A directed connection from one Knowledge Item to another, of one of these types: **depends on** (it holds only while the other holds), **uses term** (it uses a Term), **justified by** (a Decision is the reason for it), **answers** (it settles an Open Question), **concerns** (an Open Question is about it; only an Open Question has this Link, and it never sets Needs Review, since a question cannot become untrue) and **conflicts with** (the two contradict each other). A Link is recorded and approved together with the Knowledge Item it starts from.
 _Avoid_: Relation, Reference, Dependency
 
 **Source**:
@@ -79,3 +79,17 @@ _Avoid_: Delete, Archive
 **Needs Review**:
 A mark that a Knowledge Item may no longer be true because a Knowledge Item it depends on, or a Decision it is justified by, was superseded, retired or rejected. A Term it merely uses does not mark it: terms are used widely, and marking everything on each refinement would bury the marks that matter. It does not change the status, and searches show it alongside the Knowledge Item. It is cleared by confirming the knowledge still holds, by editing a Draft's Links so that it no longer rests on what changed (other edits leave the mark), by rejecting it while it is a Draft, or by a Supersession or Retirement once it is Approved. Confirming also moves the Links that caused the mark: onto the replacement of a superseded target, or away altogether from a retired or rejected one, since the person has just checked that the knowledge holds on that basis. It is the one change an Approved Knowledge Item's Links ever get.
 _Avoid_: Stale, Suspect, Outdated
+
+### Context for agents
+
+**Context Pack**:
+The Approved knowledge an agent needs for one task, gathered from its Anchors along the Links: what they rest on, at any depth; what rests on them, one step back; the Terms they use; what conflicts with them; and the Open Questions about them. Each Knowledge Item in it has a role (Anchor, foundation, may be affected, term, conflict, unsettled), and one under Needs Review is marked as such. Drafts are never part of it, only named as being linked nearby.
+_Avoid_: Task Context, Brief, Bundle
+
+**Anchor**:
+An Approved Knowledge Item an agent picks as the subject of its task, from which a Context Pack is gathered. A Draft cannot be an Anchor: it has to be approved first.
+_Avoid_: Root, Seed, Entry point
+
+**Project Frame**:
+The knowledge that holds for every task in a Project, whatever it links to: the Product Overview, every Approved Constraint and every Approved non-functional Requirement. An agent reads it once per session, alongside the Context Packs of its tasks.
+_Avoid_: Project Context (that is a document), Global context

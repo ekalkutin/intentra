@@ -500,13 +500,17 @@ function toKey(value: string | null): KnowledgeKey | null {
   return value === null ? null : KnowledgeKey.parse(value);
 }
 
-/** A Link leads to another item, and each Link is there once. */
+/**
+ * A Link is of a type its item's Kind may hold, leads to another item, and is
+ * there once.
+ */
 function ensureValidLinks(
   key: KnowledgeKey,
   links: readonly KnowledgeLink[],
 ): void {
   const valid = links.every(
     (link, index) =>
+      link.type.allowsSource(key.kind) &&
       !link.target.equals(key) &&
       links.findIndex(other => other.equals(link)) === index,
   );

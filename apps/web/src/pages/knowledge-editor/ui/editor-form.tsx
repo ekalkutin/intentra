@@ -243,6 +243,7 @@ export function EditorForm({
             <Field data-invalid={invalidLinkRows.size > 0}>
               <LinksInput
                 id={`${id}-links`}
+                kind={kind}
                 value={field.value}
                 onChange={field.onChange}
                 targets={linkTargets}

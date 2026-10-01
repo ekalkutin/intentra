@@ -2,10 +2,13 @@ import { z } from 'zod';
 
 import { FIELD_CONTROLS, kindFields } from '@/entities/knowledge-item';
 import {
+  KnowledgeKindDtoSchema,
   KnowledgeLinkDtoSchema,
+  KnowledgeLinkTypeDtoSchema,
   type KnowledgeItemDto,
   type KnowledgeKindDto,
   type KnowledgeLinkDto,
+  type KnowledgeLinkTypeDto,
 } from '@intentra/contracts/workspace';
 
 /** The server's limits (the Knowledge domain's value objects). */
@@ -24,6 +27,15 @@ export type EditorValues = {
   fields: Record<string, FieldValue>;
   links: KnowledgeLinkDto[];
 };
+
+/** The types of Link an item of a Kind may hold: only an Open Question `concerns`. */
+export function linkTypesFor(kind: KnowledgeKindDto): KnowledgeLinkTypeDto[] {
+  return KnowledgeLinkTypeDtoSchema.options.filter(
+    type =>
+      type !== KnowledgeLinkTypeDtoSchema.enum.concerns ||
+      kind === KnowledgeKindDtoSchema.enum['open-question'],
+  );
+}
 
 /** What a new Draft of a Kind starts with. */
 export function emptyValues(kind: KnowledgeKindDto): EditorValues {

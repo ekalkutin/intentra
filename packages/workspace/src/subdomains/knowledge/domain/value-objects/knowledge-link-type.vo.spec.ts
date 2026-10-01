@@ -13,9 +13,23 @@ describe('KnowledgeLinkType', () => {
     [KnowledgeLinkType.Answers, KnowledgeKind.Decision, false],
     [KnowledgeLinkType.DependsOn, KnowledgeKind.Persona, true],
     [KnowledgeLinkType.ConflictsWith, KnowledgeKind.Goal, true],
+    [KnowledgeLinkType.Concerns, KnowledgeKind.Requirement, true],
   ])('%o allows a target of %o: %s', (type, kind, allowed) => {
     // Act
     const verdict = type.allowsTarget(kind);
+
+    // Assert
+    expect(verdict).toBe(allowed);
+  });
+
+  it.each([
+    [KnowledgeLinkType.Concerns, KnowledgeKind.OpenQuestion, true],
+    [KnowledgeLinkType.Concerns, KnowledgeKind.Requirement, false],
+    [KnowledgeLinkType.DependsOn, KnowledgeKind.OpenQuestion, true],
+    [KnowledgeLinkType.Answers, KnowledgeKind.Decision, true],
+  ])('%o allows a source of %o: %s', (type, kind, allowed) => {
+    // Act
+    const verdict = type.allowsSource(kind);
 
     // Assert
     expect(verdict).toBe(allowed);
@@ -28,6 +42,7 @@ describe('KnowledgeLinkType', () => {
       KnowledgeLinkType.UsesTerm,
       KnowledgeLinkType.JustifiedBy,
       KnowledgeLinkType.Answers,
+      KnowledgeLinkType.Concerns,
       KnowledgeLinkType.ConflictsWith,
     ].filter(type => type.marksForReview());
 

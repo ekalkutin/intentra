@@ -3,13 +3,16 @@ import { z } from 'zod';
 /**
  * `depends-on`: it holds only while the target holds; `uses-term`: it uses a
  * Term; `justified-by`: a Decision is the reason for it; `answers`: it
- * settles an Open Question; `conflicts-with`: the two contradict each other.
+ * settles an Open Question; `concerns`: an Open Question is about the target
+ * (only an Open Question holds it); `conflicts-with`: the two contradict each
+ * other.
  */
 export const KnowledgeLinkTypeDtoSchema = z.enum([
   'depends-on',
   'uses-term',
   'justified-by',
   'answers',
+  'concerns',
   'conflicts-with',
 ]);
 
