@@ -11,7 +11,11 @@ export type ModelOffers = {
   /** Undefined until loaded. */
   readonly offers: ModelOffer[] | undefined;
   readonly failed: boolean;
+  /** Asking OpenRouter right now, the old list still shown. */
+  readonly loading: boolean;
   readonly retry: () => void;
+  /** Asks OpenRouter again, past the cache. */
+  readonly refresh: () => void;
 };
 
 /** The models Agents can run on, asked of OpenRouter once `enabled`. */
@@ -21,6 +25,7 @@ export function useModelOffers(enabled: boolean): ModelOffers {
     fresh ?? undefined,
   );
   const [failed, setFailed] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -32,6 +37,7 @@ export function useModelOffers(enabled: boolean): ModelOffers {
     }
     const controller = new AbortController();
     setFailed(false);
+    setLoading(true);
     fetchModelOffers(controller.signal)
       .then(loaded => {
         cache = { at: Date.now(), offers: loaded };
@@ -43,11 +49,20 @@ export function useModelOffers(enabled: boolean): ModelOffers {
           console.warn(error);
           setFailed(true);
         }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       });
     return () => controller.abort();
   }, [enabled, attempt]);
 
   const retry = useCallback(() => setAttempt(count => count + 1), []);
+  const refresh = useCallback(() => {
+    cache = null;
+    setAttempt(count => count + 1);
+  }, []);
 
-  return { offers, failed, retry };
+  return { offers, failed, loading, retry, refresh };
 }

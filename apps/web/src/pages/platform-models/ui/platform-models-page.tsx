@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -19,6 +20,7 @@ import {
   LoadError,
   Page,
   PageHeader,
+  StatusBadge,
 } from '@/shared/ui';
 import type {
   AgentsChangeKindDto,
@@ -26,7 +28,11 @@ import type {
   PlatformAgentDto,
 } from '@intentra/contracts/workspace';
 
+import type { ModelOffer } from '../model/openrouter-models';
+import { useCatalog, useModelFormat, type Catalog } from '../model/use-catalog';
+
 import { ModelProfileDialog } from './model-profile-dialog';
+import { OpenRouterCatalog } from './openrouter-catalog';
 
 /** The built-in Model Profiles, each with its settings and the Agents on it. */
 export function PlatformModelsPage() {
@@ -37,6 +43,10 @@ export function PlatformModelsPage() {
   const error = toApiError(unpublished.error);
   const content = unpublished.data?.content;
   const kinds = changeKinds(changes?.modelProfiles);
+  const [preset, setPreset] = useState<ModelOffer | null>(null);
+  const catalog = useCatalog(
+    content?.modelProfiles.map(profile => profile.modelId) ?? [],
+  );
 
   const createAction = (
     <ModelProfileDialog
@@ -79,10 +89,24 @@ export function PlatformModelsPage() {
                     agent => agent.modelProfileId === profile.id,
                   )}
                   changeKind={kinds.get(profile.id) ?? null}
+                  catalog={catalog}
                 />
               ))
           )}
         </List>
+      )}
+      <OpenRouterCatalog
+        catalog={catalog}
+        profiles={content?.modelProfiles ?? []}
+        onChoose={setPreset}
+      />
+      {preset && (
+        <ModelProfileDialog
+          key={preset.id}
+          profile={null}
+          preset={preset}
+          onClosed={() => setPreset(null)}
+        />
       )}
     </Page>
   );
@@ -92,12 +116,19 @@ function ModelProfileRow({
   profile,
   users,
   changeKind,
+  catalog,
 }: {
   readonly profile: ModelProfileDto;
   readonly users: readonly PlatformAgentDto[];
   readonly changeKind: AgentsChangeKindDto | null;
+  readonly catalog: Catalog;
 }) {
   const { t, i18n } = useTranslation();
+  const format = useModelFormat();
+  const offer = catalog.offerOf(profile.modelId);
+  const stats = catalog.statsOf(profile.modelId);
+  /** The model left the list of those Agents run on, once the list is in. */
+  const missing = catalog.offers.offers !== undefined && !offer;
   const facts = [
     profile.temperature !== null &&
       t('platformModels.factTemperature', { value: profile.temperature }),
@@ -142,6 +173,39 @@ function ModelProfileRow({
       <p className='mt-0.5 truncate font-mono text-xs text-muted-foreground'>
         {profile.modelId}
       </p>
+      {missing ? (
+        <StatusBadge status='review' className='mt-1'>
+          {t('platformModels.notInCatalog')}
+        </StatusBadge>
+      ) : (
+        offer && (
+          <p className='mt-1 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-muted-foreground tabular-nums'>
+            <span>
+              {format.price(offer.inputPrice)} /{' '}
+              {format.price(offer.outputPrice)}
+            </span>
+            <span>{format.context(offer.contextLength)}</span>
+            {catalog.hasKey && (
+              <>
+                <span>
+                  {stats === undefined
+                    ? '…'
+                    : stats.throughput === null
+                      ? '—'
+                      : format.speed(stats.throughput)}
+                </span>
+                <span>
+                  {stats === undefined
+                    ? '…'
+                    : stats.latency === null
+                      ? '—'
+                      : format.latency(stats.latency)}
+                </span>
+              </>
+            )}
+          </p>
+        )
+      )}
       {facts.length > 0 && (
         <p className='mt-1 text-xs text-muted-foreground'>
           {facts.join(' · ')}

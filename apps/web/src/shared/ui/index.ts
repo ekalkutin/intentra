@@ -161,6 +161,7 @@ export {
   TableRow,
 } from './primitives/table';
 export { Tabs, TabsList, TabsTrigger } from './primitives/tabs';
+export { ToggleGroup, ToggleGroupItem } from './primitives/toggle-group';
 export { Textarea } from './primitives/textarea';
 export {
   Tooltip,

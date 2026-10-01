@@ -51,34 +51,55 @@ import {
   toSaveModelProfileDto,
   type ModelProfileFormValues,
 } from '../model/model-profile-form';
+import type { ModelOffer } from '../model/openrouter-models';
 import { useModelOffers } from '../model/use-model-offers';
 
 import { ModelPicker } from './model-picker';
 
 /**
  * Creates a built-in Model Profile, or edits or deletes one; empty settings
- * are the model's defaults.
+ * are the model's defaults. Opened by its trigger, or already open on a
+ * model chosen in the catalog.
  */
 export function ModelProfileDialog({
   profile,
   users = [],
   trigger,
+  preset,
+  onClosed,
 }: {
   /** Null to create one. */
   readonly profile: ModelProfileDto | null;
   /** The Agents on it, named when deleting it. */
   readonly users?: readonly PlatformAgentDto[];
-  readonly trigger: ReactElement;
+  readonly trigger?: ReactElement;
+  /** A model to create a profile on: the dialog opens with it chosen. */
+  readonly preset?: ModelOffer;
+  readonly onClosed?: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const id = useId();
   const describeError = useDescribeError();
-  const [open, setOpen] = useState(false);
+  const [open, setOpenState] = useState(preset !== undefined);
+  const setOpen = (next: boolean) => {
+    setOpenState(next);
+    if (!next) {
+      onClosed?.();
+    }
+  };
   const [create] = useCreateModelProfileMutation();
   const [edit] = useEditModelProfileMutation();
   const [remove] = useDeleteModelProfileMutation();
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const initial = profile ? modelProfileValues(profile) : EMPTY_MODEL_PROFILE;
+  const initial = profile
+    ? modelProfileValues(profile)
+    : preset
+      ? {
+          ...EMPTY_MODEL_PROFILE,
+          name: shortName(preset.name),
+          modelId: preset.id,
+        }
+      : EMPTY_MODEL_PROFILE;
   const form = useForm<ModelProfileFormValues>({
     resolver: zodResolver(modelProfileFormSchema),
     defaultValues: initial,
@@ -136,7 +157,7 @@ export function ModelProfileDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger render={trigger} />
+      {trigger && <DialogTrigger render={trigger} />}
       <DialogContent className='sm:max-w-md'>
         <form onSubmit={submit} noValidate className='flex flex-col gap-6'>
           <DialogHeader>

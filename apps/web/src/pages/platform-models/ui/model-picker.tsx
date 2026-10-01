@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,37 +12,12 @@ import {
   Spinner,
 } from '@/shared/ui';
 
-import {
-  findOffers,
-  SORT_KEYS,
-  type ModelOffer,
-  type Sort,
-  type SortKey,
-} from '../model/openrouter-models';
+import { findOffers, type ModelOffer } from '../model/openrouter-models';
 import type { ModelOffers } from '../model/use-model-offers';
 
-/** Narrow screens keep the name and the input price only. */
-const GRID =
-  'grid grid-cols-[minmax(0,1fr)_4.5rem] items-center gap-x-3 sm:grid-cols-[minmax(0,1fr)_4.5rem_4.5rem_4.5rem]';
-const WIDE_ONLY = 'hidden sm:flex';
-
-/** Cheap first, the longest context first. */
-const FIRST_ASCENDING: Record<SortKey, boolean> = {
-  name: true,
-  inputPrice: true,
-  outputPrice: true,
-  contextLength: false,
-};
-
-const COLUMNS = [
-  { key: SORT_KEYS.inputPrice, labelKey: 'inputPrice' },
-  { key: SORT_KEYS.outputPrice, labelKey: 'outputPrice' },
-  { key: SORT_KEYS.contextLength, labelKey: 'contextLength' },
-] as const;
-
 /**
- * Chooses an OpenRouter model Agents can run on: search by name or id, a
- * table of prices and context, sortable by each.
+ * Chooses an OpenRouter model Agents can run on: a search over a list as
+ * wide as the field, each model with its prices and context.
  */
 export function ModelPicker({
   id,
@@ -60,34 +35,22 @@ export function ModelPicker({
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<Sort>({
-    key: SORT_KEYS.inputPrice,
-    ascending: true,
-  });
-  const found = offers.offers ? findOffers(offers.offers, search, sort) : [];
+  const found = offers.offers ? findOffers(offers.offers, { search }) : [];
   const number = new Intl.NumberFormat(i18n.language, {
     maximumFractionDigits: 2,
   });
   const price = (value: number | null) =>
     value === null ? '—' : `$${number.format(value)}`;
-  const context = (value: number | null) =>
-    value === null
-      ? '—'
-      : value >= 1_000_000
-        ? `${number.format(value / 1_000_000)}M`
-        : `${Math.round(value / 1000)}K`;
+  const context = (value: number) =>
+    value >= 1_000_000
+      ? `${number.format(value / 1_000_000)}M`
+      : `${Math.round(value / 1000)}K`;
 
   const choose = (offer: ModelOffer) => {
     onChange(offer.id);
     setOpen(false);
     setSearch('');
   };
-  const sortBy = (key: SortKey) =>
-    setSort(current =>
-      current.key === key
-        ? { key, ascending: !current.ascending }
-        : { key, ascending: FIRST_ASCENDING[key] },
-    );
   const onSearchKey = (event: KeyboardEvent<HTMLInputElement>) => {
     const first = found[0];
     if (event.key === 'Enter' && first) {
@@ -95,12 +58,6 @@ export function ModelPicker({
       choose(first);
     }
   };
-  const sortMark = (key: SortKey) =>
-    sort.key !== key ? null : sort.ascending ? (
-      <ArrowUp aria-hidden className='size-3' />
-    ) : (
-      <ArrowDown aria-hidden className='size-3' />
-    );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -124,11 +81,8 @@ export function ModelPicker({
         )}
         <ChevronsUpDown className='text-muted-foreground' />
       </PopoverTrigger>
-      <PopoverContent
-        align='start'
-        className='w-[min(40rem,calc(100vw-2rem))] gap-0 p-0'
-      >
-        <div className='border-b border-border p-2'>
+      <PopoverContent align='start' className='w-(--anchor-width) gap-0 p-0'>
+        <div className='border-b border-border p-1.5'>
           <Input
             autoFocus
             value={search}
@@ -136,10 +90,11 @@ export function ModelPicker({
             onKeyDown={onSearchKey}
             placeholder={t('platformModels.picker.search')}
             aria-label={t('platformModels.picker.search')}
+            className='border-0 shadow-none focus-visible:ring-0 dark:bg-transparent'
           />
         </div>
         {offers.failed ? (
-          <div className='flex flex-wrap items-center gap-3 p-4 text-sm'>
+          <div className='flex flex-wrap items-center gap-3 p-3 text-sm'>
             <span className='text-muted-foreground'>
               {t('platformModels.picker.failed')}
             </span>
@@ -148,40 +103,16 @@ export function ModelPicker({
             </Button>
           </div>
         ) : !offers.offers ? (
-          <div className='flex items-center gap-2 p-4 text-sm text-muted-foreground'>
+          <div className='flex items-center gap-2 p-3 text-sm text-muted-foreground'>
             <Spinner />
             {t('platformModels.picker.loading')}
           </div>
         ) : (
           <>
-            <div
-              className={cn(
-                GRID,
-                'border-b border-border px-3 py-1.5 text-xs text-muted-foreground',
-              )}
-            >
-              <SortHeader onClick={() => sortBy(SORT_KEYS.name)}>
-                {t('platformModels.picker.model')}
-                {sortMark(SORT_KEYS.name)}
-              </SortHeader>
-              {COLUMNS.map(column => (
-                <SortHeader
-                  key={column.key}
-                  align='end'
-                  className={
-                    column.key === SORT_KEYS.inputPrice ? undefined : WIDE_ONLY
-                  }
-                  onClick={() => sortBy(column.key)}
-                >
-                  {sortMark(column.key)}
-                  {t(`platformModels.picker.${column.labelKey}`)}
-                </SortHeader>
-              ))}
-            </div>
             <ul
               role='listbox'
               aria-label={t('platformModels.modelId')}
-              className='max-h-[min(55vh,24rem)] overflow-y-auto p-1'
+              className='max-h-[min(50vh,20rem)] overflow-y-auto p-1'
             >
               {found.length === 0 ? (
                 <li className='px-2 py-6 text-center text-sm text-muted-foreground'>
@@ -195,34 +126,36 @@ export function ModelPicker({
                       role='option'
                       aria-selected={offer.id === value}
                       onClick={() => choose(offer)}
-                      className={cn(
-                        GRID,
-                        'w-full rounded-md px-2 py-1.5 text-left outline-none hover:bg-muted focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50',
-                      )}
+                      className='flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left outline-none hover:bg-muted focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50'
                     >
-                      <span className='flex min-w-0 items-start gap-1.5'>
-                        <span className='min-w-0'>
-                          <span className='block truncate text-sm'>
+                      <span className='min-w-0 flex-1'>
+                        <span className='flex items-baseline gap-3'>
+                          <span className='min-w-0 flex-1 truncate text-sm'>
                             {offer.name}
                           </span>
-                          <span className='block truncate font-mono text-xs text-muted-foreground'>
-                            {offer.id}
+                          <span className='shrink-0 font-mono text-xs text-muted-foreground tabular-nums'>
+                            {price(offer.inputPrice)} /{' '}
+                            {price(offer.outputPrice)}
                           </span>
                         </span>
-                        {offer.id === value && (
-                          <Check
-                            aria-hidden
-                            className='mt-0.5 size-3.5 shrink-0'
-                          />
-                        )}
+                        <span className='flex items-baseline gap-3 font-mono text-xs text-muted-foreground'>
+                          <span className='min-w-0 flex-1 truncate'>
+                            {offer.id}
+                          </span>
+                          {offer.contextLength !== null && (
+                            <span className='shrink-0 tabular-nums'>
+                              {context(offer.contextLength)}
+                            </span>
+                          )}
+                        </span>
                       </span>
-                      <Cell>{price(offer.inputPrice)}</Cell>
-                      <Cell className={WIDE_ONLY}>
-                        {price(offer.outputPrice)}
-                      </Cell>
-                      <Cell className={WIDE_ONLY}>
-                        {context(offer.contextLength)}
-                      </Cell>
+                      <Check
+                        aria-hidden
+                        className={cn(
+                          'mt-0.5 size-3.5 shrink-0',
+                          offer.id !== value && 'invisible',
+                        )}
+                      />
                     </button>
                   </li>
                 ))
@@ -237,50 +170,5 @@ export function ModelPicker({
         )}
       </PopoverContent>
     </Popover>
-  );
-}
-
-function SortHeader({
-  align = 'start',
-  className,
-  onClick,
-  children,
-}: {
-  readonly align?: 'start' | 'end';
-  readonly className?: string;
-  readonly onClick: () => void;
-  readonly children: React.ReactNode;
-}) {
-  return (
-    <button
-      type='button'
-      onClick={onClick}
-      className={cn(
-        'flex items-center gap-1 rounded-sm outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50',
-        align === 'end' && 'justify-end',
-        className,
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
-function Cell({
-  className,
-  children,
-}: {
-  readonly className?: string;
-  readonly children: React.ReactNode;
-}) {
-  return (
-    <span
-      className={cn(
-        'justify-end text-right font-mono text-xs text-muted-foreground tabular-nums',
-        className,
-      )}
-    >
-      {children}
-    </span>
   );
 }
