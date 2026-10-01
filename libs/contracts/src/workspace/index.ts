@@ -142,6 +142,45 @@ export {
   type PersonalAccessTokenDto,
 } from './personal-access-tokens/personal-access-token.dto.js';
 export { PersonalAccessTokensApi } from './personal-access-tokens/personal-access-tokens.api.js';
+export { type AgentToolDto } from './platform-agents/agent-tool.dto.js';
+export {
+  AgentsChangeKindDtoSchema,
+  type AgentsChangeDto,
+  type AgentsChangeKindDto,
+  type AgentsChangesDto,
+} from './platform-agents/agents-changes.dto.js';
+export {
+  AgentRoleDtoSchema,
+  ReasoningEffortDtoSchema,
+  type AgentRoleDto,
+  type AgentsContentDto,
+  type ModelProfileDto,
+  type PlatformAgentDto,
+  type ReasoningEffortDto,
+  type SkillDto,
+} from './platform-agents/agents-content.dto.js';
+export {
+  type AgentsVersionDto,
+  type AgentsVersionSummaryDto,
+  type UnpublishedAgentsDto,
+} from './platform-agents/agents-version.dto.js';
+export { PlatformAgentsApi } from './platform-agents/platform-agents.api.js';
+export {
+  PublishAgentsDtoSchema,
+  type PublishAgentsDto,
+} from './platform-agents/publish-agents.dto.js';
+export {
+  SaveAgentDtoSchema,
+  type SaveAgentDto,
+} from './platform-agents/save-agent.dto.js';
+export {
+  SaveModelProfileDtoSchema,
+  type SaveModelProfileDto,
+} from './platform-agents/save-model-profile.dto.js';
+export {
+  SaveSkillDtoSchema,
+  type SaveSkillDto,
+} from './platform-agents/save-skill.dto.js';
 export {
   ChangeProjectRoleDtoSchema,
   type ChangeProjectRoleDto,

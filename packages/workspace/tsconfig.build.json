@@ -10,5 +10,10 @@
     "tsBuildInfoFile": "./build/.tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "exclude": ["build", "node_modules", "src/**/*.spec.ts"]
+  "exclude": [
+    "build",
+    "node_modules",
+    "src/**/*.spec.ts",
+    "src/**/*.fixtures.ts"
+  ]
 }

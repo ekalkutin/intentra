@@ -4,6 +4,8 @@ import type { MastraModelConfig } from '@mastra/core/llm';
 export type AgentsOptions = {
   /** The one model every Agent runs on for now, on the Workspace's Provider Key. */
   readonly model: (providerKey: string) => MastraModelConfig;
+  /** The model of the built-in Model Profile in Agents Version 1, made the first time the Agents are needed. */
+  readonly firstModelId: string;
   /**
    * 32 bytes in base64 that encrypt every Provider Key; required to add or use
    * one. Changing it makes the stored keys unreadable.
@@ -22,6 +24,7 @@ export const DEFAULT_AGENTS_OPTIONS: AgentsOptions = {
     id: 'openrouter/anthropic/claude-sonnet-5',
     apiKey: providerKey,
   }),
+  firstModelId: 'openrouter/anthropic/claude-sonnet-5',
   providerKeyEncryptionKey: null,
   maxSteps: 25,
   timeoutMs: 3 * 60 * 1000,

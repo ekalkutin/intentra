@@ -38,11 +38,12 @@ export const MCP_TOOLS = Object.fromEntries(
 ) satisfies ToolsInput;
 
 /**
- * Tools of the Orchestrator, Intentra's own agent, working in one Project:
+ * The tools Intentra's own Agents may be given, each working in one Project:
  * no `list_projects`, and not approve, reject or retire, since only a person
- * approves knowledge; an Agent never does.
+ * approves knowledge; an Agent never does. A Platform Admin picks each
+ * Agent's tools from these.
  */
-export const ORCHESTRATOR_TOOLS = Object.fromEntries(
+export const AGENT_TOOLS = Object.fromEntries(
   [
     getKnowledgeSummaryTool,
     listKnowledgeTool,
@@ -54,3 +55,10 @@ export const ORCHESTRATOR_TOOLS = Object.fromEntries(
     offerChoicesTool,
   ].map(tool => [tool.id, tool]),
 ) satisfies ToolsInput;
+
+/** True for a tool that only reads; the code never gives the others to an Agent working with a Viewer. */
+export function isReadOnlyTool(tool: AgentTool): boolean {
+  return tool.mcp?.annotations?.readOnlyHint === true;
+}
+
+export type AgentTool = (typeof AGENT_TOOLS)[keyof typeof AGENT_TOOLS];

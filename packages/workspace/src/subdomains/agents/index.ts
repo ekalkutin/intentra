@@ -6,6 +6,7 @@ import { MEMORY_PROVIDER } from './infrastructure/runtime/index.js';
 
 export {
   ConversationsService,
+  PlatformAgentsService,
   ProviderKeyService,
 } from './application/services/index.js';
 export {

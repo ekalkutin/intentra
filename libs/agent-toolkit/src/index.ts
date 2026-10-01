@@ -1,4 +1,9 @@
-export { MCP_TOOLS, ORCHESTRATOR_TOOLS } from './catalog.js';
+export {
+  AGENT_TOOLS,
+  isReadOnlyTool,
+  MCP_TOOLS,
+  type AgentTool,
+} from './catalog.js';
 export * from './orchestrator/index.js';
 export { type ToolApis } from './tool-apis.js';
 export { toolContextSchema } from './tool-context.js';

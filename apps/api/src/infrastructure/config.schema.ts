@@ -64,6 +64,7 @@ export const EnvironmentSchema = z
           id: env.AGENT_MODEL,
           apiKey: providerKey,
         }),
+        firstModelId: env.AGENT_MODEL,
         providerKeyEncryptionKey: env.PROVIDER_KEY_ENCRYPTION_KEY,
       },
     },

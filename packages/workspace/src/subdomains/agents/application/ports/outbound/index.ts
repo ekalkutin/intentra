@@ -1,4 +1,8 @@
 export {
+  AgentsVersionRepository,
+  type AgentsVersionQueryProps,
+} from './agents-version-repository.port.js';
+export {
   ConversationStore,
   type ConversationDeleteProps,
   type ConversationListProps,
@@ -6,6 +10,7 @@ export {
   type ConversationPage,
   type ConversationQueryProps,
 } from './conversation-store.port.js';
+export { FirstAgentsVersion } from './first-agents-version.port.js';
 export {
   Orchestrator,
   type AnswerStream,
@@ -18,3 +23,5 @@ export {
   type ProviderKeyQueryProps,
 } from './provider-key-repository.port.js';
 export { ProviderKeyVerifier } from './provider-key-verifier.port.js';
+export { ToolCatalog, type CatalogTool } from './tool-catalog.port.js';
+export { UnpublishedAgentsRepository } from './unpublished-agents-repository.port.js';

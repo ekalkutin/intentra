@@ -3,10 +3,14 @@ import type { MastraModelConfig } from '@mastra/core/llm';
 import type { MastraMemory } from '@mastra/core/memory';
 import { ToolCallFilter } from '@mastra/core/processors';
 
-import { ORCHESTRATOR_TOOLS } from '../catalog.js';
+import { AGENT_TOOLS } from '../catalog.js';
 
 import { orchestratorContextSchema } from './orchestrator-context.js';
-import { orchestratorInstructions } from './orchestrator-instructions.js';
+import {
+  frameInstructions,
+  ORCHESTRATOR_DESCRIPTION,
+  ORCHESTRATOR_INSTRUCTIONS,
+} from './orchestrator-instructions.js';
 import {
   reportingFailures,
   type UnexpectedErrorListener,
@@ -35,13 +39,15 @@ export function createOrchestrator({
   return new Agent({
     id: 'orchestrator',
     name: 'orchestrator',
-    description:
-      'Interviews a person about their product and records what it learns as Drafts of Project Knowledge.',
+    description: ORCHESTRATOR_DESCRIPTION,
     instructions: ({ requestContext }) =>
-      orchestratorInstructions(requestContext.get('project')),
+      frameInstructions(
+        requestContext.get('project'),
+        ORCHESTRATOR_INSTRUCTIONS,
+      ),
     model,
     memory,
-    tools: reportingFailures(ORCHESTRATOR_TOOLS, onUnexpectedError),
+    tools: reportingFailures(AGENT_TOOLS, onUnexpectedError),
     inputProcessors: [new ToolCallFilter()],
     requestContextSchema: orchestratorContextSchema,
   });
