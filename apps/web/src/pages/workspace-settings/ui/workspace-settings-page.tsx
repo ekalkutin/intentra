@@ -24,6 +24,8 @@ import {
   PageSkeleton,
 } from '@/shared/ui';
 
+import { ProviderKeySection } from './provider-key-section';
+
 /** What the Workspace is, leaving it, and deleting it for good. */
 export function WorkspaceSettingsPage() {
   const { t } = useTranslation();
@@ -82,6 +84,7 @@ export function WorkspaceSettingsPage() {
           </ListRow>
         </List>
       </PageSection>
+      <ProviderKeySection workspace={workspace} access={access} />
       <PageSection
         title={t('workspaceSettings.leave')}
         description={t('workspaceSettings.leaveDescription')}

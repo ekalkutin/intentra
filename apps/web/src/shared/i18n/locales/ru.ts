@@ -703,6 +703,22 @@ export const ru = {
       'Пока вы правили, черновик изменил кто-то ещё. Скопируйте свои правки, откройте черновик заново и повторите.',
     missingSuperseded: 'Заменяемая запись не найдена.',
   },
+  providerKey: {
+    title: 'Ключ OpenRouter',
+    description: 'На нём работают агенты пространства.',
+    key: 'Ключ',
+    keyHint:
+      'Создаётся на openrouter.ai/keys. Хранится зашифрованным и больше не показывается.',
+    checking: 'Проверяю в OpenRouter',
+    none: 'Ключа нет, агенты не работают. Добавить его может владелец.',
+    added: '{{who}}, {{date}}',
+    formerMember: 'бывший участник',
+    replace: 'Заменить',
+    remove: 'Удалить ключ',
+    removeTitle: 'Удалить ключ OpenRouter?',
+    removeDescription:
+      'Агенты пространства перестанут отвечать, пока не добавят новый ключ.',
+  },
   unsavedChanges: {
     title: 'Уйти без сохранения?',
     description: 'Введённое на этой странице пропадёт.',
@@ -1057,6 +1073,14 @@ export const ru = {
     LINK_TARGET_NOT_FOUND: 'Запись, на которую ведёт связь, не найдена',
     LINK_TARGET_NOT_CURRENT:
       'Связь ведёт на отклонённую или устаревшую запись. Выберите актуальную',
+    INVALID_PROVIDER_KEY: 'Это не похоже на ключ OpenRouter',
+    PROVIDER_KEY_REJECTED: 'OpenRouter не принял ключ',
+    PROVIDER_UNAVAILABLE: 'OpenRouter не ответил. Попробуйте ещё раз',
+    PROVIDER_KEY_MANAGEMENT_FORBIDDEN: 'Ключом управляет только владелец',
+    PROVIDER_KEY_NOT_FOUND: 'Ключа нет',
+    PROVIDER_KEY_MISSING:
+      'В пространстве нет ключа OpenRouter. Владелец добавит его в настройках',
+    WORKSPACE_SUSPENDED: 'Пространство приостановлено',
     NOT_PLATFORM_ADMIN: 'Это может только администратор платформы',
     AGENT_NOT_FOUND: 'Такого агента нет',
     SKILL_NOT_FOUND: 'Такого Skill нет',
