@@ -41,6 +41,10 @@ export const ru = {
     noAccount: 'Нет аккаунта?',
     toSignUp: 'Регистрация',
   },
+  authArtwork: {
+    line1: 'Общее понимание.',
+    line2: 'Ясное направление.',
+  },
   signUp: {
     title: 'Создайте аккаунт',
     description: 'Живой контекст ваших программных проектов.',
