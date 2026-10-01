@@ -3,7 +3,7 @@ services:
     image: mongo:7
     restart: unless-stopped
     ports:
-      - '27017:27017'
+      - "27017:27017"
     env_file: .env
     # Transactions need a replica set, and a replica set with auth needs a keyFile.
     entrypoint:
@@ -25,6 +25,27 @@ services:
           "try { rs.status().ok } catch { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok }"
       interval: 10s
       retries: 5
+
+  api:
+    image: ekalkutin/intentra-api:latest
+    restart: always
+    ports:
+      - "6060:3000"
+    env_file: .env
+    environment:
+      # Inside the network Mongo is `mongo`, not the host's localhost.
+      DB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/intentra?authSource=admin&replicaSet=rs0&directConnection=true
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  web:
+    image: ekalkutin/intentra-web:latest
+    restart: always
+    ports:
+      - "6061:80"
+    depends_on:
+      - api
 
 volumes:
   mongo-data:
