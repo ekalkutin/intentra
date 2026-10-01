@@ -72,4 +72,37 @@ export const en = {
     INTERNAL: 'Something broke on the server. Try later',
     NETWORK_ERROR: 'No connection to the server. Check your network',
   },
+  passport: {
+    chapters: {
+      overview: 'Overview',
+      goals: 'Goals',
+      users: 'Users',
+      capabilities: 'Capabilities and scenarios',
+      rules: 'Rules and glossary',
+      integrations: 'Integrations',
+      qualities: 'Qualities and constraints',
+      decisions: 'Decisions and open questions',
+    },
+    chapterDescriptions: {
+      overview:
+        'What the product is, which problem it solves, for whom, and what they get.',
+      goals: 'What the project wants to achieve and how to tell it has.',
+      users: 'Who uses the product and what they need from it.',
+      capabilities:
+        'What can be done in the product and what result to expect.',
+      rules: 'The rules the product works by and the words used for it.',
+      integrations: 'Which outside systems the product exchanges data with.',
+      qualities: 'What the product must be like and what is set from outside.',
+      decisions: 'What is decided and why, and what is not decided yet.',
+    },
+    discuss: 'Discuss',
+    discussLabel: 'Discuss the “{{chapter}}” chapter with the agent',
+    // The first message to the agent follows the interface's language.
+    discussPrompt:
+      "Let's fill in the passport chapter “{{chapter}}”: {{about}} It is empty for now. Ask me one question at a time, suggest answer options, and record what we find out as drafts.",
+    discussMorePrompt:
+      "Let's add to the passport chapter “{{chapter}}”: {{about}} It already has: {{items}}. Look for what is missing and what contradicts itself, ask me one question at a time, suggest answer options, and record anything new as drafts.",
+    discussMore_one: 'and {{count}} more',
+    discussMore_other: 'and {{count}} more',
+  },
 } as const satisfies PartialTexts<typeof ru>;

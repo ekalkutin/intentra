@@ -173,12 +173,13 @@ function MultipleChoices({
       className='gap-3'
       onSubmit={event => {
         event.preventDefault();
-        if (reply.length > 0) {
+        if (!disabled && reply.length > 0) {
           onAnswer(reply.join(JOIN));
         }
       }}
     >
-      <QuestionnaireItem name={FIELD} multiple disabled={disabled}>
+      {/* Not `disabled` on the item: a disabled item hides itself and may not come back. */}
+      <QuestionnaireItem name={FIELD} multiple>
         <QuestionnaireChoices
           className={cn(choices.options.length > 3 && 'sm:grid-cols-2')}
         >
@@ -186,6 +187,7 @@ function MultipleChoices({
             <QuestionnaireChoice
               key={option.label}
               value={option.label}
+              disabled={disabled}
               checked={picked.includes(option.label)}
               onChange={event =>
                 setPicked(current =>

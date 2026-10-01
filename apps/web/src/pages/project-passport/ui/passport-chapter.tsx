@@ -6,6 +6,7 @@ import { KindIcon } from '@/entities/knowledge-item';
 import type { InterviewOpening } from '@/shared/config';
 import { Button } from '@/shared/ui';
 
+import { chapterItems } from '../model/chapter-items';
 import {
   REQUIREMENT_SORTS,
   type PassportChapter as Chapter,
@@ -19,9 +20,10 @@ import { PassportEntry } from './passport-entry';
 export const ENTRIES_SHOWN = 10;
 
 /**
- * One chapter of the Passport: its number and title, what it covers, then
- * its items group by group; an empty chapter says so and may lead to the
- * Interview, which starts a new Conversation about it right away.
+ * One chapter of the Passport: its number and title, what it covers, and a
+ * quiet "Обсудить" at the title's end; then its items group by group, or a
+ * line saying it is empty. "Обсудить" opens a new Conversation that has
+ * already asked the agent to fill the chapter in, or to add to what it holds.
  */
 export function PassportChapter({
   chapter,
@@ -38,12 +40,25 @@ export function PassportChapter({
 }) {
   const { t } = useTranslation();
   const titleId = `${chapterAnchor(chapter.id)}-title`;
+  const name = t(`passport.chapters.${chapter.id}`);
   const about = t(`passport.chapterDescriptions.${chapter.id}`);
+  const { named, rest } = chapterItems(chapter);
+  const values = {
+    chapter: name,
+    about: about.charAt(0).toLowerCase() + about.slice(1),
+  };
+  // An empty chapter is filled in; a written one is added to, naming what it holds.
   const opening: InterviewOpening = {
-    opening: t('passport.discussPrompt', {
-      chapter: t(`passport.chapters.${chapter.id}`),
-      about: about.charAt(0).toLowerCase() + about.slice(1),
-    }),
+    opening:
+      chapter.count === 0
+        ? t('passport.discussPrompt', values)
+        : t('passport.discussMorePrompt', {
+            ...values,
+            items: [
+              ...named,
+              ...(rest > 0 ? [t('passport.discussMore', { count: rest })] : []),
+            ].join(', '),
+          }),
   };
 
   return (
@@ -52,38 +67,41 @@ export function PassportChapter({
       aria-labelledby={titleId}
       className='flex scroll-mt-8 flex-col gap-6 border-t border-border pt-12 first:border-t-0 first:pt-0'
     >
-      <header>
-        <h2
-          id={titleId}
-          className='flex items-baseline gap-2.5 text-sm font-semibold'
-        >
-          <span className='font-mono text-xs font-normal text-muted-foreground tabular-nums'>
-            {number}
-          </span>
-          {t(`passport.chapters.${chapter.id}`)}
-        </h2>
-        <p className='mt-0.5 max-w-2xl text-sm text-pretty text-muted-foreground'>
-          {t(`passport.chapterDescriptions.${chapter.id}`)}
-        </p>
+      <header className='flex items-start justify-between gap-4'>
+        <div className='min-w-0'>
+          <h2
+            id={titleId}
+            className='flex items-baseline gap-2.5 text-sm font-semibold'
+          >
+            <span className='font-mono text-xs font-normal text-muted-foreground tabular-nums'>
+              {number}
+            </span>
+            {name}
+          </h2>
+          <p className='mt-0.5 max-w-2xl text-sm text-pretty text-muted-foreground'>
+            {about}
+          </p>
+        </div>
+        {interviewPath && (
+          <Button
+            variant='ghost'
+            size='sm'
+            aria-label={t('passport.discussLabel', { chapter: name })}
+            className='-mt-1 -mr-2 shrink-0 text-muted-foreground hover:text-foreground'
+            // A new Conversation that opens with the chapter as its first message.
+            render={<Link to={interviewPath} state={opening} />}
+            nativeButton={false}
+          >
+            <MessagesSquare />
+            {/* Icon only below 640px, so the chapter's line keeps its width. */}
+            <span className='max-sm:hidden'>{t('passport.discuss')}</span>
+          </Button>
+        )}
       </header>
       {chapter.count === 0 ? (
-        <div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
-          <p className='text-sm text-muted-foreground'>
-            {t('passport.notDescribed')}
-          </p>
-          {interviewPath && (
-            <Button
-              variant='outline'
-              size='sm'
-              // A new Conversation that opens with the chapter as its first message.
-              render={<Link to={interviewPath} state={opening} />}
-              nativeButton={false}
-            >
-              <MessagesSquare />
-              {t('passport.discuss')}
-            </Button>
-          )}
-        </div>
+        <p className='text-sm text-muted-foreground'>
+          {t('passport.notDescribed')}
+        </p>
       ) : (
         chapter.groups.map(group => (
           <Group

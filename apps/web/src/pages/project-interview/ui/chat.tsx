@@ -133,13 +133,18 @@ export function Chat({
     void sendMessage({ text });
   };
 
-  // The link's first message goes out once, even when effects run twice.
+  // The link's first message goes out once, after the chat is really mounted:
+  // a mount that is undone at once (React's strict check) would abort the request.
   const openingSent = useRef(false);
   useEffect(() => {
-    if (opening && !openingSent.current && messages.length === 0) {
+    if (!opening || openingSent.current || messages.length > 0) {
+      return;
+    }
+    const timer = setTimeout(() => {
       openingSent.current = true;
       send(opening);
-    }
+    }, 0);
+    return () => clearTimeout(timer);
     // Only a new Conversation's first render may send it, so nothing else re-runs this.
   }, [opening]);
 
@@ -185,7 +190,12 @@ export function Chat({
             <MessageScrollerContent className='mx-auto w-full max-w-3xl gap-8 px-4 pt-8 pb-6 md:px-8'>
               {messages.length === 0 ? (
                 <MessageScrollerItem messageId='empty' className={ITEM_CLASS}>
-                  <EmptyChat projectName={projectName} onStart={send} />
+                  <EmptyChat
+                    workspaceId={workspaceId}
+                    projectId={projectId}
+                    projectName={projectName}
+                    onStart={send}
+                  />
                 </MessageScrollerItem>
               ) : (
                 messages.map(message => (
