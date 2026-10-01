@@ -17,9 +17,38 @@ export type AgentsChangeDto = {
   readonly fields: readonly string[];
 };
 
-/** What publishing would change, object by object. */
+export const PublishingProblemCodeDtoSchema = z.enum([
+  'orchestrator-count',
+  'duplicate-skill-name',
+  'tool-unavailable',
+  'skill-missing',
+  'model-profile-missing',
+  'specialist-calls-agents',
+  'calls-non-specialist',
+]);
+
+export type PublishingProblemCodeDto = z.infer<
+  typeof PublishingProblemCodeDtoSchema
+>;
+
+/** One thing that keeps the Unpublished Agents from being published. */
+export type PublishingProblemDto = {
+  readonly code: PublishingProblemCodeDto;
+  /** The Agent or Skill it is about; null for the whole, such as the Orchestrator's count. */
+  readonly subject: {
+    /** Null when it names several objects, such as two Skills with one name. */
+    readonly id: string | null;
+    readonly name: string;
+  } | null;
+  /** The tool, for a tool the code no longer has. */
+  readonly tool: string | null;
+};
+
+/** What publishing would change, object by object, and what keeps it from being published. */
 export type AgentsChangesDto = {
   readonly agents: readonly AgentsChangeDto[];
   readonly skills: readonly AgentsChangeDto[];
   readonly modelProfiles: readonly AgentsChangeDto[];
+  /** Empty when the Unpublished Agents could be published. */
+  readonly problems: readonly PublishingProblemDto[];
 };

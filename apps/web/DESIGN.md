@@ -212,6 +212,10 @@ The canvas header is 3rem tall with a hairline under it, a three-column grid: th
 
 Content sits in a page column up to 72rem, padded 1rem (2rem from 768px), 2rem top and 4rem bottom, with 2rem between blocks and 0.75rem between a section's heading and its list. Descriptions (page header and sections) are held to 42rem; inline forms and single fields (the invite form, the MCP address) to 32rem; form dialogs to 28rem. The page header puts the title and one description line left and the page's actions right, wrapping below when narrow. Two-column layouts appear only from 1280px (the Project overview splits 2fr / 3fr).
 
+The Platform Admin's pages live in the same shell: a third sidebar group "Платформа" under "Пространство", shown only to a Platform Admin, and a group in ⌘K. On those pages the switcher and the first two groups stay on the Workspace opened last; someone in no Workspace sees a "← К пространствам" item in place of the switcher and no "Работа" group.
+
+An object worth a page of text (a Knowledge Item, an Agent, a Skill) is edited on an **editor page**: a quiet back link above the page header, then the texts in the main column and its properties in a 17rem column on the right from 1280px, separated by a hairline rule (stacked below the texts when narrower). Saving is explicit, from a save bar pinned to the bottom of the canvas. A small object with a handful of fields (a Model Profile) is edited in a form dialog opened from its row instead.
+
 Pages outside a Workspace (first steps, received invitations) use a plain frame: a 3rem header with the brand left and the avatar menu right, and the page below it, in a 42rem column.
 
 ### Scales
@@ -269,6 +273,8 @@ There are no content cards. The container is the **List**: a 1px-bordered, 0.5re
 - **Sidebar items:** 2rem, 0.4rem radius, 16px icon plus word in muted text. Hover washes with frame-active at 70%; the active item takes frame-active fully, medium weight and ink text.
 - **Project switcher:** large menu button with an initial tile (2rem), the Project name (600) over the Workspace name (label), and a small filled triangle pointing down.
 - **Command menu:** ⌘K / Ctrl K opens a command dialog with the current Project's pages, Projects (with mono slugs), the Workspace's pages and other Workspaces.
+- **Pending count:** a count of pending work (the platform's unpublished changes) sits on its sidebar item's right in Geist Mono, muted, and disappears at zero.
+- **Back link:** a small ghost button in muted text with a left arrow, sitting tight above the page header of a nested page; its label is the parent's name (mono when it is a key).
 - **Mobile:** the sidebar becomes a sheet and closes after navigation.
 
 ### Initial Tile
@@ -281,6 +287,19 @@ A square with the first letter of a name (hairline border, canvas fill, muted 60
 - **Dependency Tree:** the `depends-on` cascade as indented rows inside one bordered block, joined by hairline elbows.
 - **Markdown:** item texts render as Markdown at body size (14px, 1.5rem leading, measure 68ch): lists, emphasis, inline code on muted, code blocks and tables in hairline blocks. Knowledge Keys in text become mono links with a hover preview of the item.
 - **History:** a hairline timeline with small dots; only the approval (green) and the rejection (red) dots take colour, and a reason sits under its event.
+
+### Editor Page
+- **Properties column:** each property is a Title with its control or chosen values under it; a choice is changed by a quiet ghost "+ choose" button on the title's right. Chosen values list one per line (mono for ids and names a machine reads, linked when they open somewhere); a long set folds into groups under a chevron, a word and a mono count.
+- **Save bar:** sticky to the bottom of the canvas, hairline above it, canvas fill, actions right (cancel as a ghost button, primary save). Leaving with unsaved changes asks first in an alert dialog (stay, or leave as destructive); closing the tab asks the browser's way.
+
+### Markdown Editor
+A long Markdown text (instructions, a Skill's body) in a growing field at least 24rem tall with 1.5rem leading. A small outline toggle beside the label switches between writing and reading; the reading view renders through the Markdown component in a hairline block, held to 72ch. A mono length counter against the limit sits under it on the right and turns red past the limit.
+
+### Multi-Picker
+Chooses any number of options: a quiet ghost trigger opens a 20rem popover with a search field and a command list, grouped under headings; each option is a label (mono for machine values) with an optional short mark and one muted hint line, chosen ones carry a tick. A "Done" ghost button under a hairline closes it. The chosen values are shown outside the popover, never inside the trigger.
+
+### Change Marks
+An object that differs from its published version carries a StatusBadge with the word: New and Changed as pending (dashed circle, not live yet), Removed as inactive (slashed circle). Marks sit in the row meta and in the editor page's properties column; they never take a colour of their own.
 
 ### Navigating Row
 A list row that leads somewhere takes `interactive`: its link stretches over the row, the row washes with muted grey at 60% on hover and on focus-within, and keyboard focus draws an inset indigo ring (2px at 50%, the same strength as the primitives) on the whole row.
@@ -296,6 +315,7 @@ A list row that leads somewhere takes `interactive`: its link stretches over the
 - **Do** give hover feedback only to rows that navigate, and give the same row a visible keyboard focus.
 - **Do** take every visible string from i18n and let layouts wrap for longer English or Russian strings.
 - **Do** reuse the closed scales (sizes, weights, radii, row density, menu width, measure) instead of adding a step.
+- **Do** edit long texts on an editor page (texts left, 17rem properties column right, sticky save bar, ask before leaving unsaved) and small objects in a form dialog.
 - **Do** keep the page settle (220ms, ease-out-expo, 0.25rem rise) as the only page-level motion, collapsed under reduced motion.
 
 ### Don't:

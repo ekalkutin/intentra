@@ -1,4 +1,8 @@
-import { AgentsChangeKind, type ToolName } from '../value-objects/index.js';
+import {
+  AgentsChangeKind,
+  PublishingProblem,
+  type ToolName,
+} from '../value-objects/index.js';
 
 import { Agent } from './agent.entity.js';
 import { changedFields, type Comparable } from './changed-fields.js';
@@ -108,28 +112,24 @@ export class AgentsContent {
     );
   }
 
-  /** What keeps this from being published, in words; empty when nothing does. */
-  public problems(availableTools: readonly ToolName[]): string[] {
-    const problems: string[] = [];
+  /** What keeps this from being published; empty when nothing does. */
+  public problems(availableTools: readonly ToolName[]): PublishingProblem[] {
+    const problems: PublishingProblem[] = [];
     const orchestrators = this.#agents.filter(agent => agent.isOrchestrator());
     if (orchestrators.length !== 1) {
-      problems.push(
-        `there must be exactly one Orchestrator, not ${orchestrators.length}`,
-      );
+      problems.push(PublishingProblem.orchestratorCount());
     }
     const skillNames = this.#skills.map(skill => skill.name.value);
     for (const name of new Set(skillNames)) {
       if (skillNames.filter(other => other === name).length > 1) {
-        problems.push(`more than one Skill is called "${name}"`);
+        problems.push(PublishingProblem.duplicateSkillName(name));
       }
     }
     for (const agent of this.#agents) {
-      const name = agent.name.value;
+      const subject = { id: agent.id.value, name: agent.name.value };
       for (const tool of agent.tools) {
         if (!availableTools.some(available => available.equals(tool))) {
-          problems.push(
-            `${name} uses the tool ${tool.value}, which the code no longer has`,
-          );
+          problems.push(PublishingProblem.toolUnavailable(subject, tool.value));
         }
       }
       if (
@@ -137,17 +137,17 @@ export class AgentsContent {
           this.#skills.some(skill => skill.id.equals(id)),
         )
       ) {
-        problems.push(`${name} uses a Skill that does not exist`);
+        problems.push(PublishingProblem.skillMissing(subject));
       }
       if (
         !this.#modelProfiles.some(profile =>
           profile.id.equals(agent.modelProfileId),
         )
       ) {
-        problems.push(`${name} is on a Model Profile that does not exist`);
+        problems.push(PublishingProblem.modelProfileMissing(subject));
       }
       if (!agent.isOrchestrator() && agent.specialistIds.length > 0) {
-        problems.push(`${name} is a Specialist and cannot call other Agents`);
+        problems.push(PublishingProblem.specialistCallsAgents(subject));
       }
       const callable = agent.specialistIds.every(id =>
         this.#agents.some(
@@ -155,7 +155,7 @@ export class AgentsContent {
         ),
       );
       if (!callable) {
-        problems.push(`${name} may call an Agent that is not a Specialist`);
+        problems.push(PublishingProblem.callsNonSpecialist(subject));
       }
     }
 

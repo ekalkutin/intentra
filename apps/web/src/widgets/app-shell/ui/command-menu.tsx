@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import { projectPath, workspacePath } from '@/shared/config';
+import { platformPath, projectPath, workspacePath } from '@/shared/config';
 import {
   Command,
   CommandDialog,
@@ -15,13 +15,17 @@ import {
 } from '@/shared/ui';
 import type { ProjectDto, WorkspaceDto } from '@intentra/contracts/workspace';
 
-import { PROJECT_NAVIGATION, WORKSPACE_NAVIGATION } from '../model/navigation';
+import {
+  PLATFORM_NAVIGATION,
+  PROJECT_NAVIGATION,
+  WORKSPACE_NAVIGATION,
+} from '../model/navigation';
 
 import { InitialTile } from './initial-tile';
 
 const OPEN_KEY = 'k';
 
-/** ⌘K: jump to a Project, a page, or another Workspace by typing. */
+/** ⌘K: jump to a Project, a page, another Workspace or, for a Platform Admin, the platform's pages by typing. */
 export function CommandMenu({
   open,
   onOpenChange,
@@ -29,6 +33,7 @@ export function CommandMenu({
   workspaces,
   projects,
   currentProject,
+  platform,
 }: {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
@@ -36,6 +41,8 @@ export function CommandMenu({
   readonly workspaces: readonly WorkspaceDto[];
   readonly projects: readonly ProjectDto[];
   readonly currentProject: ProjectDto | undefined;
+  /** Lists the Platform Admin's pages. */
+  readonly platform: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -116,6 +123,20 @@ export function CommandMenu({
                 >
                   <entry.icon />
                   {t(`shell.workspacePages.${entry.labelKey}`)}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+          {platform && (
+            <CommandGroup heading={t('platform.title')}>
+              {PLATFORM_NAVIGATION.map(entry => (
+                <CommandItem
+                  key={entry.labelKey}
+                  value={`${t('platform.title')} ${t(`platform.pages.${entry.labelKey}`)}`}
+                  onSelect={() => go(platformPath(entry.page))}
+                >
+                  <entry.icon />
+                  {t(`platform.pages.${entry.labelKey}`)}
                 </CommandItem>
               ))}
             </CommandGroup>

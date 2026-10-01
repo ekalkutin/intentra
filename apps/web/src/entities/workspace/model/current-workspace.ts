@@ -25,9 +25,14 @@ export type CurrentWorkspace = {
   readonly isMissing: boolean;
 };
 
-/** The Workspace named in the address, remembered as the last one opened. */
-export function useCurrentWorkspace(): CurrentWorkspace {
-  const slug = useParams()[ROUTE_PARAMS.workspaceSlug];
+/**
+ * The Workspace named in the address, remembered as the last one opened;
+ * on a page outside any Workspace, the one `fallbackSlug` names.
+ */
+export function useCurrentWorkspace(
+  fallbackSlug: string | null = null,
+): CurrentWorkspace {
+  const slug = useParams()[ROUTE_PARAMS.workspaceSlug] ?? fallbackSlug;
   const { data: workspaces = [], isLoading } = useWorkspacesQuery();
   const workspace = workspaces.find(candidate => candidate.slug === slug);
   const { data: access, isLoading: isAccessLoading } = useWorkspaceAccessQuery(

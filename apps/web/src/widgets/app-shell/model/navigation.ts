@@ -1,9 +1,13 @@
 import {
+  Bot,
+  Cpu,
+  GitCompareArrows,
   KeyRound,
   LayoutList,
   Library,
   ListTree,
   MessagesSquare,
+  NotebookText,
   Settings,
   ShieldCheck,
   Users,
@@ -11,8 +15,10 @@ import {
 } from 'lucide-react';
 
 import {
+  PLATFORM_PAGES,
   PROJECT_PAGES,
   WORKSPACE_PAGES,
+  type PlatformPage,
   type ProjectPage,
   type WorkspacePage,
 } from '@/shared/config';
@@ -44,3 +50,11 @@ export const PROJECT_NAVIGATION = [
   { page: PROJECT_PAGES.roles, icon: ShieldCheck, labelKey: 'roles' },
   { page: PROJECT_PAGES.settings, icon: Settings, labelKey: 'settings' },
 ] as const satisfies readonly Entry<ProjectPage>[];
+
+/** The pages of the Platform Admin's section, in the order the sidebar lists them. */
+export const PLATFORM_NAVIGATION = [
+  { page: PLATFORM_PAGES.agents, icon: Bot, labelKey: 'agents' },
+  { page: PLATFORM_PAGES.skills, icon: NotebookText, labelKey: 'skills' },
+  { page: PLATFORM_PAGES.modelProfiles, icon: Cpu, labelKey: 'modelProfiles' },
+  { page: PLATFORM_PAGES.changes, icon: GitCompareArrows, labelKey: 'changes' },
+] as const satisfies readonly Entry<PlatformPage>[];

@@ -1,4 +1,5 @@
 // Primitives are shadcn's, written by its CLI only; our own components build on them.
+export { BackLink } from './components/back-link';
 export { Brand } from './components/brand';
 export { ConfirmBySlugDialog } from './components/confirm-by-slug-dialog';
 export { ConfirmDialog } from './components/confirm-dialog';
@@ -12,6 +13,12 @@ export {
 } from './components/list';
 export { LoadError } from './components/load-error';
 export { InlineMarkdown, Markdown, type Linkify } from './components/markdown';
+export { MarkdownEditor } from './components/markdown-editor';
+export {
+  MultiPicker,
+  type PickerGroup,
+  type PickerOption,
+} from './components/multi-picker';
 export {
   NameSlugForm,
   type NameSlug,
@@ -19,6 +26,7 @@ export {
 } from './components/name-slug-form';
 export { Page, PageHeader, PageSection, PageSkeleton } from './components/page';
 export { StatusBadge } from './components/status-badge';
+export { UnsavedChangesGuard } from './components/unsaved-changes-guard';
 export { Avatar, AvatarFallback } from './primitives/avatar';
 export { Badge } from './primitives/badge';
 export {
@@ -105,6 +113,7 @@ export {
   HoverCardTrigger,
 } from './primitives/hover-card';
 export { Input } from './primitives/input';
+export { Popover, PopoverContent, PopoverTrigger } from './primitives/popover';
 export { Kbd, KbdGroup } from './primitives/kbd';
 export { Label } from './primitives/label';
 export {

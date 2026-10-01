@@ -12,6 +12,7 @@ import {
   AgentRole,
   AgentsChangeKind,
   ModelProfileId,
+  PublishingProblemKind,
   ToolName,
 } from '../value-objects/index.js';
 
@@ -252,6 +253,38 @@ describe('UnpublishedAgents', () => {
           fields: [],
         },
       ]);
+    });
+  });
+
+  describe('problems', () => {
+    it('names the Agent and the tool when the code no longer has a tool', () => {
+      // Arrange
+      const unpublished = unpublishedWithOrchestrator();
+      const orchestrator = orchestratorOf(unpublished.content);
+      const remaining = [TOOLS[1]!];
+
+      // Act
+      const problems = unpublished.content.problems(remaining);
+
+      // Assert
+      expect(problems).toHaveLength(1);
+      expect(problems[0]!.kind).toBe(PublishingProblemKind.ToolUnavailable);
+      expect(problems[0]!.subject).toEqual({
+        id: orchestrator.id.value,
+        name: 'Orchestrator',
+      });
+      expect(problems[0]!.tool).toBe('list_knowledge');
+    });
+
+    it('finds nothing in Agents that could be published', () => {
+      // Arrange
+      const unpublished = unpublishedWithOrchestrator();
+
+      // Act
+      const problems = unpublished.content.problems(TOOLS);
+
+      // Assert
+      expect(problems).toEqual([]);
     });
   });
 });

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useId, useMemo, useRef } from 'react';
+import { useId, useMemo, useRef } from 'react';
 import {
   Controller,
   useForm,
@@ -7,7 +7,7 @@ import {
   type FieldErrors,
 } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Link, useBlocker, useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 import {
   FIELD_CONTROLS,
@@ -25,13 +25,6 @@ import { useDescribeError } from '@/shared/i18n';
 import {
   Alert,
   AlertDescription,
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
   Button,
   Field,
   FieldDescription,
@@ -47,6 +40,7 @@ import {
   SelectValue,
   Spinner,
   Textarea,
+  UnsavedChangesGuard,
 } from '@/shared/ui';
 import {
   EditKnowledgeItemDtoSchema,
@@ -116,22 +110,6 @@ export function EditorForm({
     defaultValues: initial,
   });
   const { errors, isSubmitting, isDirty } = form.formState;
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      isDirty &&
-      !saved.current &&
-      currentLocation.pathname !== nextLocation.pathname,
-  );
-
-  useEffect(() => {
-    if (!isDirty) {
-      return;
-    }
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [isDirty]);
-
   /** Sends the form as the API takes it; null when it does not fit the contract. */
   const save = async (frame: Record<string, unknown>) => {
     if (target.mode === 'record') {
@@ -293,34 +271,7 @@ export function EditorForm({
           {submitLabel}
         </Button>
       </div>
-      <AlertDialog
-        open={blocker.state === 'blocked'}
-        onOpenChange={open => {
-          if (!open && blocker.state === 'blocked') {
-            blocker.reset();
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t('knowledgeEditor.leaveTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('knowledgeEditor.leaveDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('knowledgeEditor.stay')}</AlertDialogCancel>
-            <Button
-              variant='destructive'
-              onClick={() => blocker.state === 'blocked' && blocker.proceed()}
-            >
-              {t('knowledgeEditor.leave')}
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <UnsavedChangesGuard when={isDirty} saved={saved} />
     </form>
   );
 }

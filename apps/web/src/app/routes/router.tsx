@@ -16,11 +16,14 @@ import { WorkspaceSettingsPage } from '@/pages/workspace-settings';
 import { WorkspaceTokensPage } from '@/pages/workspace-tokens';
 import {
   KNOWLEDGE_PAGES,
+  PLATFORM_OBJECT_PAGES,
+  PLATFORM_PAGES,
+  platformPath,
   PROJECT_PAGES,
   ROUTES,
   WORKSPACE_PAGES,
 } from '@/shared/config';
-import { AppShell } from '@/widgets/app-shell';
+import { AppShell, PlatformGate } from '@/widgets/app-shell';
 
 import { requireNoSession, requireSession } from './guards';
 import { SessionRedirects } from './session-redirects';
@@ -66,6 +69,89 @@ export const router = createBrowserRouter([
               },
               { path: PROJECT_PAGES.roles, Component: ProjectAccessPage },
               { path: PROJECT_PAGES.settings, Component: ProjectSettingsPage },
+            ],
+          },
+        ],
+      },
+      {
+        path: ROUTES.platform,
+        loader: requireSession,
+        Component: AppShell,
+        children: [
+          {
+            Component: PlatformGate,
+            // Only a Platform Admin opens these pages, so nobody else loads them.
+            children: [
+              {
+                index: true,
+                loader: () => redirect(platformPath(PLATFORM_PAGES.agents)),
+              },
+              {
+                path: PLATFORM_PAGES.agents,
+                children: [
+                  {
+                    index: true,
+                    lazy: async () => ({
+                      Component: (await import('@/pages/platform-agents'))
+                        .PlatformAgentsPage,
+                    }),
+                  },
+                  {
+                    path: PLATFORM_OBJECT_PAGES.new,
+                    lazy: async () => ({
+                      Component: (await import('@/pages/platform-agent'))
+                        .PlatformAgentPage,
+                    }),
+                  },
+                  {
+                    path: PLATFORM_OBJECT_PAGES.agent,
+                    lazy: async () => ({
+                      Component: (await import('@/pages/platform-agent'))
+                        .PlatformAgentPage,
+                    }),
+                  },
+                ],
+              },
+              {
+                path: PLATFORM_PAGES.skills,
+                children: [
+                  {
+                    index: true,
+                    lazy: async () => ({
+                      Component: (await import('@/pages/platform-skills'))
+                        .PlatformSkillsPage,
+                    }),
+                  },
+                  {
+                    path: PLATFORM_OBJECT_PAGES.new,
+                    lazy: async () => ({
+                      Component: (await import('@/pages/platform-skill'))
+                        .PlatformSkillPage,
+                    }),
+                  },
+                  {
+                    path: PLATFORM_OBJECT_PAGES.skill,
+                    lazy: async () => ({
+                      Component: (await import('@/pages/platform-skill'))
+                        .PlatformSkillPage,
+                    }),
+                  },
+                ],
+              },
+              {
+                path: PLATFORM_PAGES.modelProfiles,
+                lazy: async () => ({
+                  Component: (await import('@/pages/platform-models'))
+                    .PlatformModelsPage,
+                }),
+              },
+              {
+                path: PLATFORM_PAGES.changes,
+                lazy: async () => ({
+                  Component: (await import('@/pages/platform-changes'))
+                    .PlatformChangesPage,
+                }),
+              },
             ],
           },
         ],

@@ -3,9 +3,12 @@ export const ROUTE_PARAMS = {
   workspaceSlug: 'workspaceSlug',
   projectSlug: 'projectSlug',
   knowledgeKey: 'knowledgeKey',
+  agentId: 'agentId',
+  skillId: 'skillId',
 } as const;
 
 const WORKSPACE_BASE = '/w';
+const PLATFORM_BASE = '/platform';
 const PROJECT_BASE = 'p';
 
 /** The app's paths, in one place. */
@@ -16,6 +19,8 @@ export const ROUTES = {
   signUp: '/auth/sign-up',
   invitations: '/invitations',
   workspace: `${WORKSPACE_BASE}/:${ROUTE_PARAMS.workspaceSlug}`,
+  /** The Platform Admin's section. */
+  platform: PLATFORM_BASE,
   /** Relative to a Workspace's path. */
   project: `${PROJECT_BASE}/:${ROUTE_PARAMS.projectSlug}`,
 } as const;
@@ -104,6 +109,56 @@ export function newKnowledgeItemPath(
   }
 
   return `${projectPath(workspaceSlug, projectSlug, PROJECT_PAGES.knowledge)}/${KNOWLEDGE_PAGES.new}?${params.toString()}`;
+}
+
+/** The pages of the Platform Admin's section, relative to it. */
+export const PLATFORM_PAGES = {
+  agents: 'agents',
+  skills: 'skills',
+  modelProfiles: 'models',
+  changes: 'changes',
+} as const;
+
+export type PlatformPage = (typeof PLATFORM_PAGES)[keyof typeof PLATFORM_PAGES];
+
+const NEW_SEGMENT = 'new';
+
+/** The pages under the Agents and the Skills, relative to their list. */
+export const PLATFORM_OBJECT_PAGES = {
+  new: NEW_SEGMENT,
+  agent: `:${ROUTE_PARAMS.agentId}`,
+  skill: `:${ROUTE_PARAMS.skillId}`,
+} as const;
+
+/** The query parameters of the Platform Admin's pages. */
+export const PLATFORM_SEARCH_PARAMS = {
+  /** The role of a new Agent. */
+  role: 'role',
+} as const;
+
+/** The path of a page of the Platform Admin's section. */
+export function platformPath(page: PlatformPage): string {
+  return `${PLATFORM_BASE}/${page}`;
+}
+
+/** The path of one Agent, or of the page creating one with a role. */
+export function platformAgentPath(
+  agent: { readonly id: string } | { readonly newRole: string },
+): string {
+  const base = platformPath(PLATFORM_PAGES.agents);
+  if ('id' in agent) {
+    return `${base}/${encodeURIComponent(agent.id)}`;
+  }
+  const params = new URLSearchParams({
+    [PLATFORM_SEARCH_PARAMS.role]: agent.newRole,
+  });
+
+  return `${base}/${NEW_SEGMENT}?${params.toString()}`;
+}
+
+/** The path of one Skill, or, with no id, of the page creating one. */
+export function platformSkillPath(skillId?: string): string {
+  return `${platformPath(PLATFORM_PAGES.skills)}/${skillId ? encodeURIComponent(skillId) : NEW_SEGMENT}`;
 }
 
 /** The query parameter that carries where to go back to after signing in. */

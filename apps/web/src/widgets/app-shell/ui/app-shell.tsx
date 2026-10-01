@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useParams } from 'react-router';
 
 import { useCurrentProject } from '@/entities/project';
-import { useCurrentWorkspace } from '@/entities/workspace';
+import { useMeQuery } from '@/entities/session';
+import {
+  readLastWorkspaceSlug,
+  useCurrentWorkspace,
+} from '@/entities/workspace';
 import { ROUTE_PARAMS, ROUTES, workspacePath } from '@/shared/config';
 import { useScrollRestoration } from '@/shared/lib';
 import {
@@ -21,6 +25,8 @@ import { CommandMenu } from './command-menu';
 /**
  * The signed-in app: the sidebar on a quiet grey frame, and beside it the
  * work area as a rounded canvas with the search and the account on top.
+ * Pages outside any Workspace (the Platform Admin's) keep the sidebar on
+ * the Workspace opened last.
  */
 export function AppShell() {
   const { t } = useTranslation();
@@ -28,7 +34,11 @@ export function AppShell() {
   const [searching, setSearching] = useState(false);
   const canvas = useRef<HTMLDivElement>(null);
   useScrollRestoration(canvas);
-  const current = useCurrentWorkspace();
+  const { data: me } = useMeQuery();
+  const inWorkspace = params[ROUTE_PARAMS.workspaceSlug] !== undefined;
+  const current = useCurrentWorkspace(
+    inWorkspace ? null : readLastWorkspaceSlug(),
+  );
   const currentProject = useCurrentProject(
     current.workspace?.id,
     current.access,
@@ -45,6 +55,8 @@ export function AppShell() {
         projects={currentProject.projects}
         projectsLoading={current.isLoading || currentProject.isLoading}
         selected={currentProject.selected}
+        workspaceLoading={current.isLoading}
+        isPlatformAdmin={me?.isPlatformAdmin ?? false}
       />
       <SidebarInset className='min-w-0 overflow-hidden md:shadow-(--canvas-shadow) md:ring-1 md:ring-border'>
         <AppHeader onSearch={() => setSearching(true)} />
@@ -52,7 +64,7 @@ export function AppShell() {
           ref={canvas}
           className='min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto'
         >
-          {current.isMissing ? (
+          {inWorkspace && current.isMissing ? (
             <Missing
               title={t('shell.workspaceMissing')}
               hint={t('shell.workspaceMissingHint')}
@@ -94,6 +106,7 @@ export function AppShell() {
         workspaces={current.workspaces}
         projects={currentProject.projects}
         currentProject={project}
+        platform={me?.isPlatformAdmin ?? false}
       />
     </SidebarProvider>
   );

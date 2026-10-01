@@ -1,6 +1,9 @@
 export {
   KNOWLEDGE_PAGES,
   KNOWLEDGE_SEARCH_PARAMS,
+  PLATFORM_OBJECT_PAGES,
+  PLATFORM_PAGES,
+  PLATFORM_SEARCH_PARAMS,
   PROJECT_PAGES,
   RETURN_TO_PARAM,
   ROUTE_PARAMS,
@@ -8,8 +11,12 @@ export {
   WORKSPACE_PAGES,
   knowledgeItemPath,
   newKnowledgeItemPath,
+  platformAgentPath,
+  platformPath,
+  platformSkillPath,
   projectPath,
   workspacePath,
+  type PlatformPage,
   type ProjectPage,
   type WorkspacePage,
 } from './routes';

@@ -165,6 +165,25 @@ describe('/api/platform/agents', () => {
       expect(versions.body).toEqual([]);
     });
 
+    it('lists what keeps the Agents from being published with the changes', async () => {
+      // Arrange
+      const profileId = await createModelProfile('Default');
+
+      // Act
+      const response = await get(`${UNPUBLISHED_PATH}/changes`);
+
+      // Assert
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toEqual({
+        agents: [],
+        skills: [],
+        modelProfiles: [
+          { id: profileId, name: 'Default', kind: 'added', fields: [] },
+        ],
+        problems: [{ code: 'orchestrator-count', subject: null, tool: null }],
+      });
+    });
+
     it('refuses to publish without an Orchestrator', async () => {
       // Arrange
       await createModelProfile('Default');
@@ -278,6 +297,7 @@ describe('/api/platform/agents', () => {
         modelProfiles: [
           { id: fastId, name: 'Fast', kind: 'added', fields: [] },
         ],
+        problems: [],
       });
       expect(response.status).toBe(HttpStatus.CREATED);
       expect(response.body).toEqual({
@@ -287,7 +307,12 @@ describe('/api/platform/agents', () => {
         publishedAt: expect.any(String),
       });
       const after = await get(`${UNPUBLISHED_PATH}/changes`);
-      expect(after.body).toEqual({ agents: [], skills: [], modelProfiles: [] });
+      expect(after.body).toEqual({
+        agents: [],
+        skills: [],
+        modelProfiles: [],
+        problems: [],
+      });
       const versions = await get(VERSIONS_PATH);
       expect(
         versions.body.map((version: { number: number }) => version.number),

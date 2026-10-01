@@ -12,6 +12,8 @@ export const API_TAGS = {
   receivedInvitation: 'ReceivedInvitation',
   personalAccessToken: 'PersonalAccessToken',
   knowledge: 'Knowledge',
+  /** The Unpublished Agents and what they change: one whole, edited object by object. */
+  platformAgents: 'PlatformAgents',
 } as const;
 
 export const API_TAG_TYPES = Object.values(API_TAGS);

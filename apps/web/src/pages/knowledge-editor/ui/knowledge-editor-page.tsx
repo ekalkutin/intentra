@@ -1,4 +1,4 @@
-import { ArrowLeft, Replace } from 'lucide-react';
+import { Replace } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router';
@@ -22,7 +22,14 @@ import {
   ROUTE_PARAMS,
 } from '@/shared/config';
 import { useDescribeError } from '@/shared/i18n';
-import { Button, LoadError, Page, PageHeader, PageSkeleton } from '@/shared/ui';
+import {
+  BackLink,
+  Button,
+  LoadError,
+  Page,
+  PageHeader,
+  PageSkeleton,
+} from '@/shared/ui';
 import {
   KnowledgeStatusDtoSchema,
   type KnowledgeItemDto,
@@ -94,7 +101,7 @@ export function KnowledgeEditorPage() {
     action?: ReactNode,
   ) => (
     <Page>
-      <BackLink back={back} />
+      <BackLink {...back} />
       <PageHeader title={title} description={description} actions={action} />
     </Page>
   );
@@ -120,7 +127,7 @@ export function KnowledgeEditorPage() {
       )
     ) : (
       <Page>
-        <BackLink back={toList} />
+        <BackLink {...toList} />
         <LoadError
           text={describeError(loadError).text}
           onRetry={() => void source.refetch()}
@@ -265,25 +272,6 @@ type Back = {
   readonly mono?: boolean;
 };
 
-function BackLink({ back }: { readonly back: Back }) {
-  return (
-    <div className='-mt-4 -mb-4'>
-      <Button
-        variant='ghost'
-        size='sm'
-        className='-ml-2 text-muted-foreground'
-        render={<Link to={back.to} />}
-        nativeButton={false}
-      >
-        <ArrowLeft />
-        <span className={back.mono ? 'font-mono text-xs' : undefined}>
-          {back.label}
-        </span>
-      </Button>
-    </div>
-  );
-}
-
 function EditorPage({
   back,
   title,
@@ -297,7 +285,7 @@ function EditorPage({
 }) {
   return (
     <Page className='pb-0'>
-      <BackLink back={back} />
+      <BackLink {...back} />
       <PageHeader title={title} description={description} />
       {children}
     </Page>

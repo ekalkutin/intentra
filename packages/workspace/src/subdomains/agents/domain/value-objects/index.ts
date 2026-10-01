@@ -18,6 +18,11 @@ export { ProviderKeyId } from './provider-key-id.vo.js';
 export { ProviderKeySecret } from './provider-key-secret.vo.js';
 export { Publisher } from './publisher.vo.js';
 export { PublishingNote } from './publishing-note.vo.js';
+export {
+  PublishingProblem,
+  PublishingProblemKind,
+  type PublishingProblemSubject,
+} from './publishing-problem.vo.js';
 export { ReasoningEffort } from './reasoning-effort.vo.js';
 export { SkillDescription } from './skill-description.vo.js';
 export { SkillId } from './skill-id.vo.js';

@@ -197,6 +197,7 @@ export class PlatformAgentsService implements PlatformAgentsApi {
         unpublished.content.changesSince(
           published?.content ?? AgentsContent.empty(),
         ),
+        unpublished.content.problems(this.availableTools()),
       ),
     );
   }

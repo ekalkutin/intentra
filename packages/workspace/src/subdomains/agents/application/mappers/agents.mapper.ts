@@ -9,6 +9,8 @@ import type {
   AgentToolDto,
   ModelProfileDto,
   PlatformAgentDto,
+  PublishingProblemCodeDto,
+  PublishingProblemDto,
   ReasoningEffortDto,
   SaveAgentDto,
   SaveModelProfileDto,
@@ -46,6 +48,7 @@ import {
   SkillName,
   Temperature,
   ToolName,
+  type PublishingProblem,
 } from '../../domain/value-objects/index.js';
 import type { CatalogTool } from '../ports/outbound/index.js';
 
@@ -162,11 +165,25 @@ export function toAgentsVersionDto(version: AgentsVersion): AgentsVersionDto {
   };
 }
 
-export function toAgentsChangesDto(changes: AgentsChanges): AgentsChangesDto {
+export function toAgentsChangesDto(
+  changes: AgentsChanges,
+  problems: readonly PublishingProblem[],
+): AgentsChangesDto {
   return {
     agents: changes.agents.map(toAgentsChangeDto),
     skills: changes.skills.map(toAgentsChangeDto),
     modelProfiles: changes.modelProfiles.map(toAgentsChangeDto),
+    problems: problems.map(toPublishingProblemDto),
+  };
+}
+
+function toPublishingProblemDto(
+  problem: PublishingProblem,
+): PublishingProblemDto {
+  return {
+    code: problem.kind.value as PublishingProblemCodeDto,
+    subject: problem.subject,
+    tool: problem.tool,
   };
 }
 

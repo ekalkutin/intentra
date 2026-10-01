@@ -149,9 +149,12 @@ export { PersonalAccessTokensApi } from './personal-access-tokens/personal-acces
 export { type AgentToolDto } from './platform-agents/agent-tool.dto.js';
 export {
   AgentsChangeKindDtoSchema,
+  PublishingProblemCodeDtoSchema,
   type AgentsChangeDto,
   type AgentsChangeKindDto,
   type AgentsChangesDto,
+  type PublishingProblemCodeDto,
+  type PublishingProblemDto,
 } from './platform-agents/agents-changes.dto.js';
 export {
   AgentRoleDtoSchema,
