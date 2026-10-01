@@ -4,15 +4,22 @@ import { APPLICATION_SERVICES } from './application/services/index.js';
 import { ADAPTERS } from './infrastructure/adapters/index.js';
 import { MEMORY_PROVIDER } from './infrastructure/runtime/index.js';
 
-export { ConversationsService } from './application/services/index.js';
-export { ConversationStore } from './application/ports/outbound/index.js';
+export {
+  ConversationsService,
+  ProviderKeyService,
+} from './application/services/index.js';
+export {
+  ConversationStore,
+  ProviderKeyRepository,
+} from './application/ports/outbound/index.js';
+export { DatabaseModule as AgentsDatabaseModule } from './infrastructure/database/index.js';
 export {
   AGENTS_OPTIONS,
   DEFAULT_AGENTS_OPTIONS,
   type AgentsOptions,
 } from './infrastructure/runtime/index.js';
 
-/** Intentra's own Agents: Conversations with the Orchestrator. */
+/** Intentra's own Agents: Conversations with the Orchestrator, on the Workspace's Provider Key. */
 export const AGENTS_PROVIDERS: Provider[] = [
   ...APPLICATION_SERVICES,
   ...ADAPTERS,

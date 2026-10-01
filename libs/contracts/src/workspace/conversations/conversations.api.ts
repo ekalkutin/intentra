@@ -57,8 +57,8 @@ export abstract class ConversationsApi {
    * (a UUID); its first message creates it, and a message to a hidden one
    * shows it again. The answer runs to the end even if nobody reads the
    * stream. Refused while an answer in the Conversation
-   * is still running (409 `CONVERSATION_BUSY`) and when the server has no
-   * model for its Agents (503 `AGENT_NOT_CONFIGURED`).
+   * is still running (409 `CONVERSATION_BUSY`) and while the Workspace has
+   * no Provider Key (412 `PROVIDER_KEY_MISSING`).
    */
   abstract send(
     actor: Actor,

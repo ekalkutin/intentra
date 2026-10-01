@@ -27,7 +27,12 @@ export {
   ProjectRoleAssignmentRepository,
 } from './application/ports/outbound/index.js';
 export { Member, Project } from './domain/entities/index.js';
-export { MemberId, ProjectRole } from './domain/value-objects/index.js';
+export { AccessPolicyService } from './domain/services/index.js';
+export {
+  MemberId,
+  MemberStatus,
+  ProjectRole,
+} from './domain/value-objects/index.js';
 export { DatabaseModule as TenancyDatabaseModule } from './infrastructure/database/index.js';
 
 /** Who is in a Workspace and what they may do: Workspaces, Members, Roles, Invitations, Projects, Project Roles, Personal Access Tokens. */

@@ -19,7 +19,6 @@ import {
 
 import { KnowledgeService } from '../../../../knowledge/index.js';
 import { AccessService, ProjectsService } from '../../../../tenancy/index.js';
-import { AgentNotConfiguredException } from '../../../application/exceptions/index.js';
 import {
   Orchestrator,
   type AnswerStream,
@@ -33,19 +32,18 @@ const AGENT_FAILED = 'The Orchestrator could not answer. Try again later';
 
 /**
  * Runs the Orchestrator from `@intentra/agent-toolkit` on the configured
- * model. Its tools call back into Knowledge, Projects and Access through
+ * model, built for each answer on the Workspace's Provider Key. Its tools call back into Knowledge, Projects and Access through
  * their published sub-APIs, as an external agent does over MCP (Agents ADR
  * 0002).
  */
 @Injectable()
 export class OrchestratorAdapter implements Orchestrator {
   readonly #logger = new Logger(OrchestratorAdapter.name);
-  readonly #orchestrator: ReturnType<typeof createOrchestrator> | null;
   readonly #apis: ToolApis;
 
   constructor(
     @Inject(AGENTS_OPTIONS) private readonly options: AgentsOptions,
-    memory: Memory,
+    private readonly memory: Memory,
     knowledgeService: KnowledgeService,
     projectsService: ProjectsService,
     accessService: AccessService,
@@ -55,17 +53,6 @@ export class OrchestratorAdapter implements Orchestrator {
       projects: projectsService,
       access: accessService,
     };
-    this.#orchestrator = options.model
-      ? createOrchestrator({
-          model: options.model,
-          memory,
-          onUnexpectedError: error => this.#logger.error(error),
-        })
-      : null;
-  }
-
-  public isAvailable(): boolean {
-    return this.#orchestrator !== null;
   }
 
   public async answer({
@@ -74,10 +61,13 @@ export class OrchestratorAdapter implements Orchestrator {
     project,
     projectRole,
     message,
+    providerKey,
   }: OrchestratorQuestion): Promise<OrchestratorAnswer> {
-    if (!this.#orchestrator) {
-      throw new AgentNotConfiguredException();
-    }
+    const orchestrator = createOrchestrator({
+      model: this.options.model(providerKey.value),
+      memory: this.memory,
+      onUnexpectedError: error => this.#logger.error(error),
+    });
     const requestContext = new RequestContext<OrchestratorContext>();
     requestContext.set('apis', this.#apis);
     // At most a Contributor, and only in the Conversation's Project.
@@ -96,7 +86,7 @@ export class OrchestratorAdapter implements Orchestrator {
       role: projectRole.value as ProjectRoleDto,
     });
 
-    const output = await this.#orchestrator.stream(
+    const output = await orchestrator.stream(
       [{ id: message.id ?? randomUUID(), role: 'user', parts: message.parts }],
       {
         requestContext,

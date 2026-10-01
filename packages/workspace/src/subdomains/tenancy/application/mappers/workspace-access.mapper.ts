@@ -32,6 +32,7 @@ export function toWorkspaceAccessDto(
     canDeleteWorkspace: accessPolicyService.canDeleteWorkspace(member),
     canSeeAllPersonalAccessTokens:
       accessPolicyService.canSeeAllPersonalAccessTokens(member),
+    canManageProviderKey: accessPolicyService.canManageProviderKey(member),
     projects: Object.fromEntries(
       projects.map(project => [
         project.id.value,

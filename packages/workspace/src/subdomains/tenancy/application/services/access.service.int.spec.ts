@@ -81,6 +81,7 @@ describe('AccessService integration', () => {
       canCreateProjects: true,
       canDeleteWorkspace: true,
       canSeeAllPersonalAccessTokens: true,
+      canManageProviderKey: true,
       projects: {
         [projectId]: {
           role: 'maintainer',
@@ -107,6 +108,7 @@ describe('AccessService integration', () => {
       canCreateProjects: false,
       canDeleteWorkspace: false,
       canSeeAllPersonalAccessTokens: false,
+      canManageProviderKey: false,
       projects: {
         [projectId]: {
           role: 'viewer',

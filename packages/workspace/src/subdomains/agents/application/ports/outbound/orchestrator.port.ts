@@ -6,6 +6,7 @@ import type {
 
 import type { Project, ProjectRole } from '../../../../tenancy/index.js';
 import type { Conversation } from '../../../domain/entities/index.js';
+import type { ProviderKeySecret } from '../../../domain/value-objects/index.js';
 
 /** The Orchestrator's answer as the client reads it. */
 export type AnswerStream = Awaited<ReturnType<ConversationsApi['send']>>;
@@ -17,6 +18,8 @@ export type OrchestratorQuestion = {
   /** The Member's own Project Role; the Orchestrator works at most as a Contributor. */
   readonly projectRole: ProjectRole;
   readonly message: SendMessageDto['message'];
+  /** The Workspace's key; every model call of the answer runs on it. */
+  readonly providerKey: ProviderKeySecret;
 };
 
 export type OrchestratorAnswer = {
@@ -27,7 +30,5 @@ export type OrchestratorAnswer = {
 
 /** Intentra's Orchestrator, run by the Agents' runtime on a model. */
 export abstract class Orchestrator {
-  /** False when the server has no model for its Agents. */
-  abstract isAvailable(): boolean;
   abstract answer(question: OrchestratorQuestion): Promise<OrchestratorAnswer>;
 }

@@ -8,6 +8,7 @@ import { MembersController } from './members.controller.js';
 import { PersonalAccessTokensController } from './personal-access-tokens.controller.js';
 import { ProjectRolesController } from './project-roles.controller.js';
 import { ProjectsController } from './projects.controller.js';
+import { ProviderKeyController } from './provider-key.controller.js';
 import { ReceivedInvitationsController } from './received-invitations.controller.js';
 import { WorkspacesController } from './workspaces.controller.js';
 
@@ -22,4 +23,5 @@ export const WORKSPACE_CONTROLLERS: Type[] = [
   AccessController,
   KnowledgeController,
   ConversationsController,
+  ProviderKeyController,
 ];

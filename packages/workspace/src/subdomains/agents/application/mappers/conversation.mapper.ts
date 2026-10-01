@@ -10,10 +10,7 @@ import type {
   ConversationPage,
 } from '../ports/outbound/index.js';
 
-/** Mongo keeps milliseconds: a date must read the same before and after a round trip. */
-function toIsoString(instant: Temporal.Instant): string {
-  return instant.toString({ smallestUnit: 'millisecond' });
-}
+import { toIsoString } from './instant.mapper.js';
 
 export function toConversationDto(conversation: Conversation): ConversationDto {
   return {

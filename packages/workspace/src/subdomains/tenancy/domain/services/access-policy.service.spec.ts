@@ -86,10 +86,11 @@ describe('AccessPolicyService', () => {
         service.canCreateProjects(owner),
         service.canDeleteWorkspace(owner),
         service.canSeeAllPersonalAccessTokens(owner),
+        service.canManageProviderKey(owner),
       ];
 
       // Assert
-      expect(answers).toEqual([true, true, true, true, true]);
+      expect(answers).toEqual([true, true, true, true, true, true]);
     });
 
     it('lets a Manager only create Projects', () => {
@@ -104,10 +105,11 @@ describe('AccessPolicyService', () => {
         service.canCreateProjects(manager),
         service.canDeleteWorkspace(manager),
         service.canSeeAllPersonalAccessTokens(manager),
+        service.canManageProviderKey(manager),
       ];
 
       // Assert
-      expect(answers).toEqual([false, false, true, false, false]);
+      expect(answers).toEqual([false, false, true, false, false, false]);
     });
 
     it('lets a Member without a Role manage nothing', () => {
@@ -122,10 +124,11 @@ describe('AccessPolicyService', () => {
         service.canCreateProjects(member),
         service.canDeleteWorkspace(member),
         service.canSeeAllPersonalAccessTokens(member),
+        service.canManageProviderKey(member),
       ];
 
       // Assert
-      expect(answers).toEqual([false, false, false, false, false]);
+      expect(answers).toEqual([false, false, false, false, false, false]);
     });
   });
 

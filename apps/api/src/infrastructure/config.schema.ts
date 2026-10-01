@@ -16,9 +16,13 @@ export const EnvironmentSchema = z
       .int()
       .positive()
       .default(604800),
-    /** Without it, Intentra's own Agents answer 503 `AGENT_NOT_CONFIGURED`. */
-    OPENROUTER_API_KEY: z.string().optional(),
-    /** A Mastra model router id on OpenRouter. */
+    /** 32 random bytes in base64 that encrypt every Workspace's Provider Key. */
+    PROVIDER_KEY_ENCRYPTION_KEY: z
+      .base64()
+      .refine(value => Buffer.from(value, 'base64').length === 32, {
+        message: 'PROVIDER_KEY_ENCRYPTION_KEY must be 32 bytes in base64',
+      }),
+    /** A Mastra model router id on OpenRouter, run on each Workspace's Provider Key. */
     AGENT_MODEL: z
       .templateLiteral(['openrouter/', z.string(), '/', z.string()])
       .default('openrouter/anthropic/claude-sonnet-5'),
@@ -37,9 +41,11 @@ export const EnvironmentSchema = z
     },
     workspace: {
       agents: {
-        model: env.OPENROUTER_API_KEY
-          ? { id: env.AGENT_MODEL, apiKey: env.OPENROUTER_API_KEY }
-          : null,
+        model: (providerKey: string) => ({
+          id: env.AGENT_MODEL,
+          apiKey: providerKey,
+        }),
+        providerKeyEncryptionKey: env.PROVIDER_KEY_ENCRYPTION_KEY,
       },
     },
   }));

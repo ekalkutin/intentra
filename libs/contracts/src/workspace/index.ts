@@ -162,6 +162,12 @@ export {
 } from './projects/delete-project.dto.js';
 export { type ProjectDto } from './projects/project.dto.js';
 export { ProjectsApi } from './projects/projects.api.js';
+export { ProviderKeyApi } from './provider-key/provider-key.api.js';
+export { type ProviderKeyDto } from './provider-key/provider-key.dto.js';
+export {
+  SetProviderKeyDtoSchema,
+  type SetProviderKeyDto,
+} from './provider-key/set-provider-key.dto.js';
 export { WorkspaceApi } from './workspace.api.js';
 export {
   CreateWorkspaceDtoSchema,

@@ -94,6 +94,7 @@ describe('/api/workspaces/:workspaceId/access', () => {
         canCreateProjects: true,
         canDeleteWorkspace: true,
         canSeeAllPersonalAccessTokens: true,
+        canManageProviderKey: true,
         projects: {
           [projectId]: {
             role: 'maintainer',

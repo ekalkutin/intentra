@@ -15,10 +15,7 @@ import { WorkspaceApi } from '@intentra/contracts/workspace';
 import { GatewayModule } from '@intentra/gateway';
 import { IamModule } from '@intentra/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import {
-  WorkspaceModule,
-  type WorkspaceModuleOptions,
-} from '@intentra/workspace';
+import { WorkspaceModule } from '@intentra/workspace';
 
 const SIGN_UP_PATH = '/api/iam/auth/sign-up';
 const SIGN_IN_PATH = '/api/iam/auth/sign-in';
@@ -110,13 +107,17 @@ function message(text: string) {
   };
 }
 
+/** Encrypts the Provider Keys in these tests. */
+const ENCRYPTION_KEY = Buffer.alloc(32, 7).toString('base64');
+
 const requirement = {
   title: 'PDF export',
   rationale: 'Ada: "customers print reports"',
   fields: { statement: 'Export a report to PDF' },
 };
 
-function createApp(agents: WorkspaceModuleOptions['agents']) {
+/** Agents run on the stand-in model, whatever the Provider Key. */
+function createApp() {
   return TestingApp.create({
     imports: [
       GatewayModule.register({
@@ -127,7 +128,12 @@ function createApp(agents: WorkspaceModuleOptions['agents']) {
             accessTokenTtlSeconds: 900,
             refreshTokenTtlSeconds: 604800,
           }),
-          WorkspaceModule.register({ agents }),
+          WorkspaceModule.register({
+            agents: {
+              model: () => scriptedModel,
+              providerKeyEncryptionKey: ENCRYPTION_KEY,
+            },
+          }),
         ],
       }),
     ],
@@ -157,7 +163,24 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
     base: string;
   };
 
-  /** Ada owns the Workspace and the Project; Bob joined by Invitation and is a Viewer. */
+  /** Ada adds a Provider Key, which OpenRouter accepts. */
+  async function addProviderKey(ada: string, workspaceId: string) {
+    const fetch = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response('{}', { status: HttpStatus.OK }));
+    await app
+      .request()
+      .put(`${WORKSPACES_PATH}/${workspaceId}/provider-key`)
+      .set('Authorization', ada)
+      .send({ key: 'sk-or-v1-0123456789abcdef' })
+      .expect(HttpStatus.OK);
+    fetch.mockRestore();
+  }
+
+  /**
+   * Ada owns the Workspace and the Project and has added a Provider Key; Bob
+   * joined by Invitation and is a Viewer.
+   */
   async function setUp(): Promise<Setup> {
     const ada = await signIn('ada@example.com');
     const bob = await signIn('bob@example.com');
@@ -185,6 +208,8 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
       .send({ name: 'Billing', slug: 'billing' })
       .expect(HttpStatus.CREATED);
 
+    await addProviderKey(ada, workspace.body.id);
+
     return {
       ada,
       bob,
@@ -194,596 +219,588 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
     };
   }
 
-  describe('with a model', () => {
-    beforeAll(async () => {
-      app = await createApp({ model: scriptedModel });
+  beforeAll(async () => {
+    app = await createApp();
+  });
+
+  afterEach(async () => {
+    turns = [];
+    gate = null;
+    titleGate = null;
+    await app.clearDatabase();
+  });
+
+  afterAll(() => app?.close());
+
+  it('starts a Conversation with its first message and streams the answer', async () => {
+    // Arrange
+    const { ada, base } = await setUp();
+    const id = randomUUID();
+    turns = [answer('Hello, Ada.')];
+
+    // Act
+    const response = await app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Hi'));
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.OK);
+    expect(response.headers['content-type']).toMatch(/^text\/event-stream/);
+    expect(readChunks(response.text)).toContainEqual(
+      expect.objectContaining({ type: 'text-delta', delta: 'Hello, Ada.' }),
+    );
+  });
+
+  it('keeps the messages and a suggested title', async () => {
+    // Arrange
+    const { ada, base } = await setUp();
+    const id = randomUUID();
+    turns = [answer('Hello, Ada.')];
+    await app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Hi'))
+      .expect(HttpStatus.OK);
+
+    // Act
+    const { body: conversation } = await app
+      .request()
+      .get(`${base}/conversations/${id}`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+
+    // Assert
+    expect(conversation).toMatchObject({ id, title: TITLE, hidden: false });
+    expect(conversation.messages).toMatchObject([
+      { role: 'user', parts: [{ type: 'text', text: 'Hi' }] },
+      {
+        role: 'assistant',
+        parts: expect.arrayContaining([
+          expect.objectContaining({ type: 'text', text: 'Hello, Ada.' }),
+        ]),
+      },
+    ]);
+  });
+
+  it('keeps when it started once the title comes', async () => {
+    // Arrange
+    const { ada, base } = await setUp();
+    const id = randomUUID();
+    let release = (): void => undefined;
+    titleGate = new Promise(resolve => {
+      release = resolve;
     });
-
-    afterEach(async () => {
-      turns = [];
-      gate = null;
-      titleGate = null;
-      await app.clearDatabase();
-    });
-
-    afterAll(() => app?.close());
-
-    it('starts a Conversation with its first message and streams the answer', async () => {
-      // Arrange
-      const { ada, base } = await setUp();
-      const id = randomUUID();
-      turns = [answer('Hello, Ada.')];
-
-      // Act
+    turns = [answer('Hello, Ada.')];
+    // The answer waits for its title, held back here.
+    const answering = app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Hi'))
+      .then(response => response);
+    const untitled = await vi.waitFor(async () => {
       const response = await app
-        .request()
-        .post(`${base}/conversations/${id}/messages`)
-        .set('Authorization', ada)
-        .send(message('Hi'));
-
-      // Assert
-      expect(response.status).toBe(HttpStatus.OK);
-      expect(response.headers['content-type']).toMatch(/^text\/event-stream/);
-      expect(readChunks(response.text)).toContainEqual(
-        expect.objectContaining({ type: 'text-delta', delta: 'Hello, Ada.' }),
-      );
-    });
-
-    it('keeps the messages and a suggested title', async () => {
-      // Arrange
-      const { ada, base } = await setUp();
-      const id = randomUUID();
-      turns = [answer('Hello, Ada.')];
-      await app
-        .request()
-        .post(`${base}/conversations/${id}/messages`)
-        .set('Authorization', ada)
-        .send(message('Hi'))
-        .expect(HttpStatus.OK);
-
-      // Act
-      const { body: conversation } = await app
         .request()
         .get(`${base}/conversations/${id}`)
         .set('Authorization', ada)
         .expect(HttpStatus.OK);
-
-      // Assert
-      expect(conversation).toMatchObject({ id, title: TITLE, hidden: false });
-      expect(conversation.messages).toMatchObject([
-        { role: 'user', parts: [{ type: 'text', text: 'Hi' }] },
-        {
-          role: 'assistant',
-          parts: expect.arrayContaining([
-            expect.objectContaining({ type: 'text', text: 'Hello, Ada.' }),
-          ]),
-        },
-      ]);
+      return response.body;
     });
 
-    it('keeps when it started once the title comes', async () => {
-      // Arrange
-      const { ada, base } = await setUp();
-      const id = randomUUID();
-      let release = (): void => undefined;
-      titleGate = new Promise(resolve => {
-        release = resolve;
-      });
-      turns = [answer('Hello, Ada.')];
-      // The answer waits for its title, held back here.
-      const answering = app
-        .request()
-        .post(`${base}/conversations/${id}/messages`)
-        .set('Authorization', ada)
-        .send(message('Hi'))
-        .then(response => response);
-      const untitled = await vi.waitFor(async () => {
-        const response = await app
-          .request()
-          .get(`${base}/conversations/${id}`)
-          .set('Authorization', ada)
-          .expect(HttpStatus.OK);
-        return response.body;
-      });
+    // Act
+    release();
+    await answering;
 
-      // Act
-      release();
-      await answering;
+    // Assert
+    const { body: titled } = await app
+      .request()
+      .get(`${base}/conversations/${id}`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(untitled.title).toBeNull();
+    expect(titled.title).toBe(TITLE);
+    expect(titled.createdAt).toBe(untitled.createdAt);
+  });
 
-      // Assert
-      const { body: titled } = await app
-        .request()
-        .get(`${base}/conversations/${id}`)
-        .set('Authorization', ada)
-        .expect(HttpStatus.OK);
-      expect(untitled.title).toBeNull();
-      expect(titled.title).toBe(TITLE);
-      expect(titled.createdAt).toBe(untitled.createdAt);
+  it('streams the suggested title before the answer ends', async () => {
+    // Arrange
+    const { ada, base } = await setUp();
+    const id = randomUUID();
+    turns = [answer('Hello, Ada.')];
+
+    // Act
+    const response = await app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Hi'));
+
+    // Assert
+    const chunks = readChunks(response.text);
+    const title = chunks.findIndex(({ type }) => type === 'data-thread-title');
+    expect(chunks[title]).toMatchObject({
+      data: { threadId: id, title: TITLE },
     });
+    expect(title).toBeLessThan(
+      chunks.findIndex(({ type }) => type === 'finish'),
+    );
+  });
 
-    it('streams the suggested title before the answer ends', async () => {
-      // Arrange
-      const { ada, base } = await setUp();
-      const id = randomUUID();
-      turns = [answer('Hello, Ada.')];
-
-      // Act
-      const response = await app
-        .request()
-        .post(`${base}/conversations/${id}/messages`)
-        .set('Authorization', ada)
-        .send(message('Hi'));
-
-      // Assert
-      const chunks = readChunks(response.text);
-      const title = chunks.findIndex(
-        ({ type }) => type === 'data-thread-title',
-      );
-      expect(chunks[title]).toMatchObject({
-        data: { threadId: id, title: TITLE },
-      });
-      expect(title).toBeLessThan(
-        chunks.findIndex(({ type }) => type === 'finish'),
-      );
-    });
-
-    it("lists a Member's Conversations, the hidden ones apart", async () => {
-      // Arrange
-      const { ada, bob, base } = await setUp();
-      const [shownId, hiddenId] = [randomUUID(), randomUUID()];
-      for (const id of [shownId, hiddenId]) {
-        await app
-          .request()
-          .post(`${base}/conversations/${id}/messages`)
-          .set('Authorization', ada)
-          .send(message('Hi'))
-          .expect(HttpStatus.OK);
-      }
-      await app
-        .request()
-        .patch(`${base}/conversations/${hiddenId}`)
-        .set('Authorization', ada)
-        .send({ hidden: true })
-        .expect(HttpStatus.OK);
-
-      // Act
-      const [shown, hidden, bobs] = await Promise.all([
-        app.request().get(`${base}/conversations`).set('Authorization', ada),
-        app
-          .request()
-          .get(`${base}/conversations?hidden=true`)
-          .set('Authorization', ada),
-        app.request().get(`${base}/conversations`).set('Authorization', bob),
-      ]);
-
-      // Assert
-      expect(shown.body).toMatchObject({
-        items: [{ id: shownId, title: TITLE, hidden: false }],
-        total: 1,
-      });
-      expect(hidden.body).toMatchObject({
-        items: [{ id: hiddenId, hidden: true }],
-        total: 1,
-      });
-      expect(bobs.body).toEqual({ items: [], total: 0 });
-    });
-
-    it('shows a hidden Conversation again once the Member writes in it', async () => {
-      // Arrange
-      const { ada, base } = await setUp();
-      const id = randomUUID();
+  it("lists a Member's Conversations, the hidden ones apart", async () => {
+    // Arrange
+    const { ada, bob, base } = await setUp();
+    const [shownId, hiddenId] = [randomUUID(), randomUUID()];
+    for (const id of [shownId, hiddenId]) {
       await app
         .request()
         .post(`${base}/conversations/${id}/messages`)
         .set('Authorization', ada)
         .send(message('Hi'))
         .expect(HttpStatus.OK);
-      await app
-        .request()
-        .patch(`${base}/conversations/${id}`)
-        .set('Authorization', ada)
-        .send({ hidden: true })
-        .expect(HttpStatus.OK);
+    }
+    await app
+      .request()
+      .patch(`${base}/conversations/${hiddenId}`)
+      .set('Authorization', ada)
+      .send({ hidden: true })
+      .expect(HttpStatus.OK);
 
-      // Act
-      await app
+    // Act
+    const [shown, hidden, bobs] = await Promise.all([
+      app.request().get(`${base}/conversations`).set('Authorization', ada),
+      app
         .request()
-        .post(`${base}/conversations/${id}/messages`)
-        .set('Authorization', ada)
-        .send(message('Back again'))
-        .expect(HttpStatus.OK);
+        .get(`${base}/conversations?hidden=true`)
+        .set('Authorization', ada),
+      app.request().get(`${base}/conversations`).set('Authorization', bob),
+    ]);
 
-      // Assert
-      const { body } = await app
-        .request()
-        .get(`${base}/conversations`)
-        .set('Authorization', ada)
-        .expect(HttpStatus.OK);
-      expect(body.items).toMatchObject([{ id, hidden: false }]);
+    // Assert
+    expect(shown.body).toMatchObject({
+      items: [{ id: shownId, title: TITLE, hidden: false }],
+      total: 1,
     });
-
-    it('takes the title the Member gives', async () => {
-      // Arrange
-      const { ada, base } = await setUp();
-      const id = randomUUID();
-      await app
-        .request()
-        .post(`${base}/conversations/${id}/messages`)
-        .set('Authorization', ada)
-        .send(message('Hi'))
-        .expect(HttpStatus.OK);
-
-      // Act
-      const response = await app
-        .request()
-        .patch(`${base}/conversations/${id}`)
-        .set('Authorization', ada)
-        .send({ title: ' Invoices ' });
-
-      // Assert
-      expect(response.status).toBe(HttpStatus.OK);
-      expect(response.body).toMatchObject({ id, title: 'Invoices' });
-      const { body } = await app
-        .request()
-        .get(`${base}/conversations/${id}`)
-        .set('Authorization', ada)
-        .expect(HttpStatus.OK);
-      expect(body.title).toBe('Invoices');
+    expect(hidden.body).toMatchObject({
+      items: [{ id: hiddenId, hidden: true }],
+      total: 1,
     });
+    expect(bobs.body).toEqual({ items: [], total: 0 });
+  });
 
-    it('refuses an edit that changes nothing', async () => {
-      // Arrange
-      const { ada, base } = await setUp();
+  it('shows a hidden Conversation again once the Member writes in it', async () => {
+    // Arrange
+    const { ada, base } = await setUp();
+    const id = randomUUID();
+    await app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Hi'))
+      .expect(HttpStatus.OK);
+    await app
+      .request()
+      .patch(`${base}/conversations/${id}`)
+      .set('Authorization', ada)
+      .send({ hidden: true })
+      .expect(HttpStatus.OK);
 
-      // Act
-      const response = await app
-        .request()
-        .patch(`${base}/conversations/${randomUUID()}`)
-        .set('Authorization', ada)
-        .send({});
+    // Act
+    await app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Back again'))
+      .expect(HttpStatus.OK);
 
-      // Assert
-      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(response.body.code).toBe('VALIDATION_FAILED');
-    });
+    // Assert
+    const { body } = await app
+      .request()
+      .get(`${base}/conversations`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(body.items).toMatchObject([{ id, hidden: false }]);
+  });
 
-    it('deletes a Conversation with its messages, and only its Member may', async () => {
-      // Arrange
-      const { ada, bob, base } = await setUp();
-      const id = randomUUID();
-      await app
-        .request()
-        .post(`${base}/conversations/${id}/messages`)
-        .set('Authorization', ada)
-        .send(message('Hi'))
-        .expect(HttpStatus.OK);
-      const bobs = await app
-        .request()
-        .delete(`${base}/conversations/${id}`)
-        .set('Authorization', bob);
+  it('takes the title the Member gives', async () => {
+    // Arrange
+    const { ada, base } = await setUp();
+    const id = randomUUID();
+    await app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Hi'))
+      .expect(HttpStatus.OK);
 
-      // Act
-      const response = await app
-        .request()
-        .delete(`${base}/conversations/${id}`)
-        .set('Authorization', ada);
+    // Act
+    const response = await app
+      .request()
+      .patch(`${base}/conversations/${id}`)
+      .set('Authorization', ada)
+      .send({ title: ' Invoices ' });
 
-      // Assert
-      expect(bobs.status).toBe(HttpStatus.NOT_FOUND);
-      expect(response.status).toBe(HttpStatus.NO_CONTENT);
-      const reading = await app
-        .request()
-        .get(`${base}/conversations/${id}`)
-        .set('Authorization', ada);
-      expect(reading.status).toBe(HttpStatus.NOT_FOUND);
-      expect(reading.body.code).toBe('CONVERSATION_NOT_FOUND');
-    });
+    // Assert
+    expect(response.status).toBe(HttpStatus.OK);
+    expect(response.body).toMatchObject({ id, title: 'Invoices' });
+    const { body } = await app
+      .request()
+      .get(`${base}/conversations/${id}`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(body.title).toBe('Invoices');
+  });
 
-    it('records a Draft with the Source intentra-agent', async () => {
-      // Arrange
-      const { ada, base, projectId } = await setUp();
-      turns = [
-        toolCall('record_requirement', { projectId, ...requirement }),
-        answer('Recorded REQ-1; it awaits approval.'),
-      ];
+  it('refuses an edit that changes nothing', async () => {
+    // Arrange
+    const { ada, base } = await setUp();
 
-      // Act
-      const response = await app
-        .request()
-        .post(`${base}/conversations/${randomUUID()}/messages`)
-        .set('Authorization', ada)
-        .send(message('We need PDF export'));
+    // Act
+    const response = await app
+      .request()
+      .patch(`${base}/conversations/${randomUUID()}`)
+      .set('Authorization', ada)
+      .send({});
 
-      // Assert
-      expect(readChunks(response.text)).toContainEqual(
-        expect.objectContaining({
-          type: 'tool-output-available',
-          output: expect.objectContaining({
-            key: 'REQ-1',
-            status: 'draft',
-            source: 'intentra-agent',
-          }),
+    // Assert
+    expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+    expect(response.body.code).toBe('VALIDATION_FAILED');
+  });
+
+  it('deletes a Conversation with its messages, and only its Member may', async () => {
+    // Arrange
+    const { ada, bob, base } = await setUp();
+    const id = randomUUID();
+    await app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Hi'))
+      .expect(HttpStatus.OK);
+    const bobs = await app
+      .request()
+      .delete(`${base}/conversations/${id}`)
+      .set('Authorization', bob);
+
+    // Act
+    const response = await app
+      .request()
+      .delete(`${base}/conversations/${id}`)
+      .set('Authorization', ada);
+
+    // Assert
+    expect(bobs.status).toBe(HttpStatus.NOT_FOUND);
+    expect(response.status).toBe(HttpStatus.NO_CONTENT);
+    const reading = await app
+      .request()
+      .get(`${base}/conversations/${id}`)
+      .set('Authorization', ada);
+    expect(reading.status).toBe(HttpStatus.NOT_FOUND);
+    expect(reading.body.code).toBe('CONVERSATION_NOT_FOUND');
+  });
+
+  it('records a Draft with the Source intentra-agent', async () => {
+    // Arrange
+    const { ada, base, projectId } = await setUp();
+    turns = [
+      toolCall('record_requirement', { projectId, ...requirement }),
+      answer('Recorded REQ-1; it awaits approval.'),
+    ];
+
+    // Act
+    const response = await app
+      .request()
+      .post(`${base}/conversations/${randomUUID()}/messages`)
+      .set('Authorization', ada)
+      .send(message('We need PDF export'));
+
+    // Assert
+    expect(readChunks(response.text)).toContainEqual(
+      expect.objectContaining({
+        type: 'tool-output-available',
+        output: expect.objectContaining({
+          key: 'REQ-1',
+          status: 'draft',
+          source: 'intentra-agent',
         }),
-      );
-      const knowledge = await app
-        .request()
-        .get(`${base}/knowledge/REQ-1`)
-        .set('Authorization', ada)
-        .expect(HttpStatus.OK);
-      expect(knowledge.body).toMatchObject({ source: 'intentra-agent' });
-    });
+      }),
+    );
+    const knowledge = await app
+      .request()
+      .get(`${base}/knowledge/REQ-1`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(knowledge.body).toMatchObject({ source: 'intentra-agent' });
+  });
 
-    it('records nothing for a Viewer', async () => {
-      // Arrange
-      const { ada, bob, base, projectId } = await setUp();
-      turns = [
-        toolCall('record_requirement', { projectId, ...requirement }),
-        answer('A Contributor can record that.'),
-      ];
+  it('records nothing for a Viewer', async () => {
+    // Arrange
+    const { ada, bob, base, projectId } = await setUp();
+    turns = [
+      toolCall('record_requirement', { projectId, ...requirement }),
+      answer('A Contributor can record that.'),
+    ];
 
-      // Act
-      const response = await app
+    // Act
+    const response = await app
+      .request()
+      .post(`${base}/conversations/${randomUUID()}/messages`)
+      .set('Authorization', bob)
+      .send(message('We need PDF export'));
+
+    // Assert
+    expect(readChunks(response.text)).toContainEqual(
+      expect.objectContaining({
+        type: 'tool-output-error',
+        errorText: expect.stringMatching(/^KNOWLEDGE_RECORDING_FORBIDDEN: /),
+      }),
+    );
+    const knowledge = await app
+      .request()
+      .get(`${base}/knowledge`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(knowledge.body.total).toBe(0);
+  });
+
+  it("works in no Project but the Conversation's", async () => {
+    // Arrange
+    const { ada, base, workspaceId } = await setUp();
+    const payroll = await app
+      .request()
+      .post(`${WORKSPACES_PATH}/${workspaceId}/projects`)
+      .set('Authorization', ada)
+      .send({ name: 'Payroll', slug: 'payroll' })
+      .expect(HttpStatus.CREATED);
+    turns = [
+      toolCall('record_requirement', {
+        projectId: payroll.body.id,
+        ...requirement,
+      }),
+      answer('I cannot reach that Project.'),
+    ];
+
+    // Act
+    const response = await app
+      .request()
+      .post(`${base}/conversations/${randomUUID()}/messages`)
+      .set('Authorization', ada)
+      .send(message('Record it in Payroll'));
+
+    // Assert
+    expect(readChunks(response.text)).toContainEqual(
+      expect.objectContaining({
+        type: 'tool-output-error',
+        errorText: expect.stringMatching(/^PROJECT_NOT_FOUND: /),
+      }),
+    );
+    const knowledge = await app
+      .request()
+      .get(
+        `${WORKSPACES_PATH}/${workspaceId}/projects/${payroll.body.id}/knowledge`,
+      )
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(knowledge.body.total).toBe(0);
+  });
+
+  it("hides a Member's Conversation from everyone else", async () => {
+    // Arrange
+    const { ada, bob, base } = await setUp();
+    const id = randomUUID();
+    turns = [answer('Hello, Ada.')];
+    await app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Hi'))
+      .expect(HttpStatus.OK);
+
+    // Act
+    const [reading, writing] = await Promise.all([
+      app
         .request()
-        .post(`${base}/conversations/${randomUUID()}/messages`)
+        .get(`${base}/conversations/${id}`)
+        .set('Authorization', bob),
+      app
+        .request()
+        .post(`${base}/conversations/${id}/messages`)
         .set('Authorization', bob)
-        .send(message('We need PDF export'));
+        .send(message('Hi')),
+    ]);
 
-      // Assert
-      expect(readChunks(response.text)).toContainEqual(
-        expect.objectContaining({
-          type: 'tool-output-error',
-          errorText: expect.stringMatching(/^KNOWLEDGE_RECORDING_FORBIDDEN: /),
-        }),
-      );
-      const knowledge = await app
-        .request()
-        .get(`${base}/knowledge`)
-        .set('Authorization', ada)
-        .expect(HttpStatus.OK);
-      expect(knowledge.body.total).toBe(0);
-    });
-
-    it("works in no Project but the Conversation's", async () => {
-      // Arrange
-      const { ada, base, workspaceId } = await setUp();
-      const payroll = await app
-        .request()
-        .post(`${WORKSPACES_PATH}/${workspaceId}/projects`)
-        .set('Authorization', ada)
-        .send({ name: 'Payroll', slug: 'payroll' })
-        .expect(HttpStatus.CREATED);
-      turns = [
-        toolCall('record_requirement', {
-          projectId: payroll.body.id,
-          ...requirement,
-        }),
-        answer('I cannot reach that Project.'),
-      ];
-
-      // Act
-      const response = await app
-        .request()
-        .post(`${base}/conversations/${randomUUID()}/messages`)
-        .set('Authorization', ada)
-        .send(message('Record it in Payroll'));
-
-      // Assert
-      expect(readChunks(response.text)).toContainEqual(
-        expect.objectContaining({
-          type: 'tool-output-error',
-          errorText: expect.stringMatching(/^PROJECT_NOT_FOUND: /),
-        }),
-      );
-      const knowledge = await app
-        .request()
-        .get(
-          `${WORKSPACES_PATH}/${workspaceId}/projects/${payroll.body.id}/knowledge`,
-        )
-        .set('Authorization', ada)
-        .expect(HttpStatus.OK);
-      expect(knowledge.body.total).toBe(0);
-    });
-
-    it("hides a Member's Conversation from everyone else", async () => {
-      // Arrange
-      const { ada, bob, base } = await setUp();
-      const id = randomUUID();
-      turns = [answer('Hello, Ada.')];
-      await app
-        .request()
-        .post(`${base}/conversations/${id}/messages`)
-        .set('Authorization', ada)
-        .send(message('Hi'))
-        .expect(HttpStatus.OK);
-
-      // Act
-      const [reading, writing] = await Promise.all([
-        app
-          .request()
-          .get(`${base}/conversations/${id}`)
-          .set('Authorization', bob),
-        app
-          .request()
-          .post(`${base}/conversations/${id}/messages`)
-          .set('Authorization', bob)
-          .send(message('Hi')),
-      ]);
-
-      // Assert
-      for (const response of [reading, writing]) {
-        expect(response.status).toBe(HttpStatus.NOT_FOUND);
-        expect(response.body.code).toBe('CONVERSATION_NOT_FOUND');
-      }
-    });
-
-    it('refuses another message while an answer runs', async () => {
-      // Arrange
-      const { ada, base } = await setUp();
-      const path = `${base}/conversations/${randomUUID()}/messages`;
-      let release = (): void => undefined;
-      gate = new Promise(resolve => {
-        release = resolve;
-      });
-      turns = [answer('Hello, Ada.')];
-      const first = app
-        .request()
-        .post(path)
-        .set('Authorization', ada)
-        .send(message('Hi'))
-        .then(response => response);
-      await vi.waitFor(() => expect(turns).toHaveLength(0));
-
-      // Act
-      const second = await app
-        .request()
-        .post(path)
-        .set('Authorization', ada)
-        .send(message('Are you there?'));
-
-      // Assert
-      release();
-      expect(second.status).toBe(HttpStatus.CONFLICT);
-      expect(second.body.code).toBe('CONVERSATION_BUSY');
-      expect((await first).status).toBe(HttpStatus.OK);
-    });
-
-    it('refuses to edit or delete a Conversation while an answer runs', async () => {
-      // Arrange
-      const { ada, base } = await setUp();
-      const id = randomUUID();
-      await app
-        .request()
-        .post(`${base}/conversations/${id}/messages`)
-        .set('Authorization', ada)
-        .send(message('Hi'))
-        .expect(HttpStatus.OK);
-      let release = (): void => undefined;
-      gate = new Promise(resolve => {
-        release = resolve;
-      });
-      turns = [answer('Still here.')];
-      const running = app
-        .request()
-        .post(`${base}/conversations/${id}/messages`)
-        .set('Authorization', ada)
-        .send(message('Are you there?'))
-        .then(response => response);
-      await vi.waitFor(() => expect(turns).toHaveLength(0));
-
-      // Act
-      const [editing, deleting] = await Promise.all([
-        app
-          .request()
-          .patch(`${base}/conversations/${id}`)
-          .set('Authorization', ada)
-          .send({ hidden: true }),
-        app
-          .request()
-          .delete(`${base}/conversations/${id}`)
-          .set('Authorization', ada),
-      ]);
-
-      // Assert
-      release();
-      for (const response of [editing, deleting]) {
-        expect(response.status).toBe(HttpStatus.CONFLICT);
-        expect(response.body.code).toBe('CONVERSATION_BUSY');
-      }
-      expect((await running).status).toBe(HttpStatus.OK);
-    });
-
-    it('runs the answer to the end when nobody reads it', async () => {
-      // Arrange
-      const { ada, base, workspaceId, projectId } = await setUp();
-      const id = randomUUID();
-      turns = [answer('Hello, Ada.')];
-      const me = await app
-        .request()
-        .get('/api/iam/me')
-        .set('Authorization', ada)
-        .expect(HttpStatus.OK);
-      const stream = await app
-        .get(WorkspaceApi)
-        .conversations.send(me.body, workspaceId, projectId, id, message('Hi'));
-
-      // Act
-      await stream.cancel();
-
-      // Assert
-      await vi.waitFor(async () => {
-        const response = await app
-          .request()
-          .get(`${base}/conversations/${id}`)
-          .set('Authorization', ada)
-          .expect(HttpStatus.OK);
-        expect(response.body.messages).toContainEqual(
-          expect.objectContaining({ role: 'assistant' }),
-        );
-      });
-    });
-
-    it('rejects a message that is too long', async () => {
-      // Arrange
-      const { ada, base } = await setUp();
-
-      // Act
-      const response = await app
-        .request()
-        .post(`${base}/conversations/${randomUUID()}/messages`)
-        .set('Authorization', ada)
-        .send(message('x'.repeat(20_001)));
-
-      // Assert
-      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
-      expect(response.body.code).toBe('VALIDATION_FAILED');
-    });
-
-    it('hides the Workspace from an outsider', async () => {
-      // Arrange
-      const { base } = await setUp();
-      const eve = await signIn('eve@example.com');
-
-      // Act
-      const response = await app
-        .request()
-        .post(`${base}/conversations/${randomUUID()}/messages`)
-        .set('Authorization', eve)
-        .send(message('Hi'));
-
-      // Assert
+    // Assert
+    for (const response of [reading, writing]) {
       expect(response.status).toBe(HttpStatus.NOT_FOUND);
-      expect(response.body.code).toBe('WORKSPACE_NOT_FOUND');
+      expect(response.body.code).toBe('CONVERSATION_NOT_FOUND');
+    }
+  });
+
+  it('refuses another message while an answer runs', async () => {
+    // Arrange
+    const { ada, base } = await setUp();
+    const path = `${base}/conversations/${randomUUID()}/messages`;
+    let release = (): void => undefined;
+    gate = new Promise(resolve => {
+      release = resolve;
+    });
+    turns = [answer('Hello, Ada.')];
+    const first = app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send(message('Hi'))
+      .then(response => response);
+    await vi.waitFor(() => expect(turns).toHaveLength(0));
+
+    // Act
+    const second = await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send(message('Are you there?'));
+
+    // Assert
+    release();
+    expect(second.status).toBe(HttpStatus.CONFLICT);
+    expect(second.body.code).toBe('CONVERSATION_BUSY');
+    expect((await first).status).toBe(HttpStatus.OK);
+  });
+
+  it('refuses to edit or delete a Conversation while an answer runs', async () => {
+    // Arrange
+    const { ada, base } = await setUp();
+    const id = randomUUID();
+    await app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Hi'))
+      .expect(HttpStatus.OK);
+    let release = (): void => undefined;
+    gate = new Promise(resolve => {
+      release = resolve;
+    });
+    turns = [answer('Still here.')];
+    const running = app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Are you there?'))
+      .then(response => response);
+    await vi.waitFor(() => expect(turns).toHaveLength(0));
+
+    // Act
+    const [editing, deleting] = await Promise.all([
+      app
+        .request()
+        .patch(`${base}/conversations/${id}`)
+        .set('Authorization', ada)
+        .send({ hidden: true }),
+      app
+        .request()
+        .delete(`${base}/conversations/${id}`)
+        .set('Authorization', ada),
+    ]);
+
+    // Assert
+    release();
+    for (const response of [editing, deleting]) {
+      expect(response.status).toBe(HttpStatus.CONFLICT);
+      expect(response.body.code).toBe('CONVERSATION_BUSY');
+    }
+    expect((await running).status).toBe(HttpStatus.OK);
+  });
+
+  it('runs the answer to the end when nobody reads it', async () => {
+    // Arrange
+    const { ada, base, workspaceId, projectId } = await setUp();
+    const id = randomUUID();
+    turns = [answer('Hello, Ada.')];
+    const me = await app
+      .request()
+      .get('/api/iam/me')
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    const stream = await app
+      .get(WorkspaceApi)
+      .conversations.send(me.body, workspaceId, projectId, id, message('Hi'));
+
+    // Act
+    await stream.cancel();
+
+    // Assert
+    await vi.waitFor(async () => {
+      const response = await app
+        .request()
+        .get(`${base}/conversations/${id}`)
+        .set('Authorization', ada)
+        .expect(HttpStatus.OK);
+      expect(response.body.messages).toContainEqual(
+        expect.objectContaining({ role: 'assistant' }),
+      );
     });
   });
 
-  describe('without a model', () => {
-    beforeAll(async () => {
-      app = await createApp(undefined);
-    });
+  it('rejects a message that is too long', async () => {
+    // Arrange
+    const { ada, base } = await setUp();
 
-    afterEach(() => app.clearDatabase());
+    // Act
+    const response = await app
+      .request()
+      .post(`${base}/conversations/${randomUUID()}/messages`)
+      .set('Authorization', ada)
+      .send(message('x'.repeat(20_001)));
 
-    afterAll(() => app?.close());
+    // Assert
+    expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+    expect(response.body.code).toBe('VALIDATION_FAILED');
+  });
 
-    it('answers that Agents are not configured', async () => {
-      // Arrange
-      const { ada, base } = await setUp();
+  it('hides the Workspace from an outsider', async () => {
+    // Arrange
+    const { base } = await setUp();
+    const eve = await signIn('eve@example.com');
 
-      // Act
-      const response = await app
-        .request()
-        .post(`${base}/conversations/${randomUUID()}/messages`)
-        .set('Authorization', ada)
-        .send(message('Hi'));
+    // Act
+    const response = await app
+      .request()
+      .post(`${base}/conversations/${randomUUID()}/messages`)
+      .set('Authorization', eve)
+      .send(message('Hi'));
 
-      // Assert
-      expect(response.status).toBe(HttpStatus.SERVICE_UNAVAILABLE);
-      expect(response.body).toEqual({
-        message: 'Agents are not configured on this server',
-        code: 'AGENT_NOT_CONFIGURED',
-        status: HttpStatus.SERVICE_UNAVAILABLE,
-        retryable: false,
-      });
+    // Assert
+    expect(response.status).toBe(HttpStatus.NOT_FOUND);
+    expect(response.body.code).toBe('WORKSPACE_NOT_FOUND');
+  });
+
+  it('asks for a Provider Key once an Owner has removed it', async () => {
+    // Arrange
+    const { ada, workspaceId, base } = await setUp();
+    await app
+      .request()
+      .delete(`${WORKSPACES_PATH}/${workspaceId}/provider-key`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.NO_CONTENT);
+
+    // Act
+    const response = await app
+      .request()
+      .post(`${base}/conversations/${randomUUID()}/messages`)
+      .set('Authorization', ada)
+      .send(message('Hi'));
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.PRECONDITION_FAILED);
+    expect(response.body).toEqual({
+      message:
+        'Agents need a provider key; an owner of the workspace can add one',
+      code: 'PROVIDER_KEY_MISSING',
+      status: HttpStatus.PRECONDITION_FAILED,
+      retryable: false,
     });
   });
 });

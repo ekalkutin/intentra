@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 
 import type { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 
-import { ConversationStore } from './subdomains/agents/index.js';
+import {
+  ConversationStore,
+  ProviderKeyRepository,
+} from './subdomains/agents/index.js';
 import {
   KnowledgeItemRepository,
   KnowledgeKeyCounter,
@@ -34,10 +37,12 @@ export class CleanupAdapter implements Cleanup {
     private readonly knowledgeItemRepository: KnowledgeItemRepository,
     private readonly knowledgeKeyCounter: KnowledgeKeyCounter,
     private readonly conversationStore: ConversationStore,
+    private readonly providerKeyRepository: ProviderKeyRepository,
   ) {}
 
   public async afterWorkspaceDeleted(workspaceId: WorkspaceId): Promise<void> {
     await this.conversationStore.deleteMany({ workspaceId });
+    await this.providerKeyRepository.deleteMany({ workspaceId });
     await this.knowledgeItemRepository.deleteMany({ workspaceId });
     await this.knowledgeKeyCounter.deleteMany({ workspaceId });
     await this.personalAccessTokenRepository.deleteMany({ workspaceId });

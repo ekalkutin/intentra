@@ -23,6 +23,8 @@ export type WorkspaceAccessDto = {
   readonly canCreateProjects: boolean;
   readonly canDeleteWorkspace: boolean;
   readonly canSeeAllPersonalAccessTokens: boolean;
+  /** Adding, replacing and removing the Provider Key. */
+  readonly canManageProviderKey: boolean;
   /** Every Project in the Workspace, by its id. */
   readonly projects: Readonly<Record<string, ProjectAccessDto>>;
 };

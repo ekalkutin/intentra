@@ -53,6 +53,11 @@ export class AccessPolicyService {
     return member.isOwner();
   }
 
+  /** Adding, replacing and removing the Workspace's key to its LLM provider. */
+  public canManageProviderKey(member: Member): boolean {
+    return member.isOwner();
+  }
+
   public canRevokePersonalAccessToken(
     member: Member,
     token: PersonalAccessToken,

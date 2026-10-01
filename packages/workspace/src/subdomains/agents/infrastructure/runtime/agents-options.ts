@@ -2,8 +2,13 @@ import type { MastraModelConfig } from '@mastra/core/llm';
 
 /** How the server runs Intentra's own Agents. */
 export type AgentsOptions = {
-  /** The one model every Agent runs on for now; null when the server has none (503 `AGENT_NOT_CONFIGURED`). */
-  readonly model: MastraModelConfig | null;
+  /** The one model every Agent runs on for now, on the Workspace's Provider Key. */
+  readonly model: (providerKey: string) => MastraModelConfig;
+  /**
+   * 32 bytes in base64 that encrypt every Provider Key; required to add or use
+   * one. Changing it makes the stored keys unreadable.
+   */
+  readonly providerKeyEncryptionKey: string | null;
   /** The most steps (tool calls or text) in one answer. */
   readonly maxSteps: number;
   /** The longest one answer may run, in milliseconds. */
@@ -13,7 +18,11 @@ export type AgentsOptions = {
 };
 
 export const DEFAULT_AGENTS_OPTIONS: AgentsOptions = {
-  model: null,
+  model: providerKey => ({
+    id: 'openrouter/anthropic/claude-sonnet-5',
+    apiKey: providerKey,
+  }),
+  providerKeyEncryptionKey: null,
   maxSteps: 25,
   timeoutMs: 3 * 60 * 1000,
   historyTokens: 64_000,

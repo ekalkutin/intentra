@@ -19,9 +19,9 @@ import {
 import { Conversation } from '../../domain/entities/index.js';
 import { ConversationId } from '../../domain/value-objects/index.js';
 import {
-  AgentNotConfiguredException,
   ConversationBusyException,
   ConversationNotFoundException,
+  ProviderKeyMissingException,
 } from '../exceptions/index.js';
 import {
   toConversationDto,
@@ -31,6 +31,8 @@ import {
 import {
   ConversationStore,
   Orchestrator,
+  ProviderKeyCipher,
+  ProviderKeyRepository,
   type AnswerStream,
 } from '../ports/outbound/index.js';
 
@@ -48,6 +50,8 @@ export class ConversationsService implements ConversationsApi {
     private readonly accessResolver: AccessResolver,
     private readonly conversationStore: ConversationStore,
     private readonly orchestrator: Orchestrator,
+    private readonly providerKeyRepository: ProviderKeyRepository,
+    private readonly providerKeyCipher: ProviderKeyCipher,
   ) {}
 
   public async list(
@@ -139,11 +143,17 @@ export class ConversationsService implements ConversationsApi {
     conversationId: string,
     data: SendMessageDto,
   ): Promise<AnswerStream> {
-    const membership = await this.resolve(actor, workspaceId, projectId);
-    if (!this.orchestrator.isAvailable()) {
-      throw new AgentNotConfiguredException();
+    const { member, project, projectRole } = await this.resolve(
+      actor,
+      workspaceId,
+      projectId,
+    );
+    const providerKey = await this.providerKeyRepository.findOne({
+      workspaceId: project.workspaceId,
+    });
+    if (!providerKey) {
+      throw new ProviderKeyMissingException();
     }
-    const { member, project, projectRole } = membership;
     const id = new ConversationId(conversationId);
     const found = await this.conversationStore.findOne({ id });
     if (found && !found.isOf(member.id, project.id)) {
@@ -174,6 +184,7 @@ export class ConversationsService implements ConversationsApi {
         project,
         projectRole,
         message: data.message,
+        providerKey: this.providerKeyCipher.decrypt(providerKey.encryptedKey),
       });
       void answer.done.finally(() => this.#answering.delete(id.value));
 

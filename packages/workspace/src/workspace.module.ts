@@ -6,6 +6,7 @@ import { CleanupAdapter } from './cleanup.adapter.js';
 import {
   AGENTS_OPTIONS,
   AGENTS_PROVIDERS,
+  AgentsDatabaseModule,
   DEFAULT_AGENTS_OPTIONS,
   type AgentsOptions,
 } from './subdomains/agents/index.js';
@@ -27,7 +28,11 @@ import {
 
 /** One context, one database: every subdomain is wired here (docs/adr/0001-knowledge-and-agents-are-subdomains-of-workspace.md). */
 @Module({
-  imports: [TenancyDatabaseModule, KnowledgeDatabaseModule],
+  imports: [
+    TenancyDatabaseModule,
+    KnowledgeDatabaseModule,
+    AgentsDatabaseModule,
+  ],
   providers: [
     ...TENANCY_PROVIDERS,
     ...KNOWLEDGE_PROVIDERS,
