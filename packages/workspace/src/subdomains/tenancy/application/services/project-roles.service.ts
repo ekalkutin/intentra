@@ -83,7 +83,7 @@ export class ProjectRolesService implements ProjectRolesApi {
 
     return this.unitOfWork.run(async () => {
       await this.workspaceRepository.lock(id);
-      const changer = await this.accessResolver.resolve(actor, id);
+      const changer = await this.accessResolver.resolveForChange(actor, id);
       const project = await this.projectRepository.getOne({
         workspaceId: id,
         id: new ProjectId(projectId),

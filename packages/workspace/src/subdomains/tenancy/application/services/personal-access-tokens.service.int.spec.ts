@@ -2,8 +2,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import { AccountId, UnitOfWork } from '@intentra/shared-kernel';
+import { UnitOfWork } from '@intentra/shared-kernel';
 
+import { givenAccount } from '../../../../testing/account.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import { Member, PersonalAccessToken } from '../../domain/entities/index.js';
 import { PersonalAccessTokenRevocationForbiddenException } from '../../domain/exceptions/index.js';
@@ -18,10 +19,6 @@ import {
 import { MembersService } from './members.service.js';
 import { PersonalAccessTokensService } from './personal-access-tokens.service.js';
 import { WorkspacesService } from './workspaces.service.js';
-
-function actor(email: string): Actor {
-  return { accountId: new AccountId().value, email, isPlatformAdmin: false };
-}
 
 describe('PersonalAccessTokensService integration', () => {
   let app: TestingApp;
@@ -41,8 +38,8 @@ describe('PersonalAccessTokensService integration', () => {
     bob: Actor;
     bobMember: Member;
   }> {
-    const ada = actor('ada@example.com');
-    const bob = actor('bob@example.com');
+    const ada = await givenAccount(app, 'ada@example.com');
+    const bob = await givenAccount(app, 'bob@example.com');
     const workspace = await app
       .get(WorkspacesService)
       .create(ada, { name: 'Acme', slug: 'acme' });
@@ -50,6 +47,7 @@ describe('PersonalAccessTokensService integration', () => {
       workspaceId: workspace.id,
       accountId: bob.accountId,
       email: bob.email,
+      name: bob.name,
     });
     await app
       .get(UnitOfWork)

@@ -11,13 +11,17 @@ import {
   vi,
 } from 'vitest';
 
-import { WorkspaceApi } from '@intentra/contracts/workspace';
+import {
+  AGENTS_IN_USE_CHUNK_TYPE,
+  WorkspaceApi,
+} from '@intentra/contracts/workspace';
 import { GatewayModule } from '@intentra/gateway';
 import { IamModule } from '@intentra/iam';
 import { TestingApp } from '@intentra/platform-testing';
 import { WorkspaceModule } from '@intentra/workspace';
 
-const SIGN_UP_PATH = '/api/iam/auth/sign-up';
+import { restoreAccount, signUp } from './support/sign-up.js';
+
 const SIGN_IN_PATH = '/api/iam/auth/sign-in';
 const WORKSPACES_PATH = '/api/workspaces';
 
@@ -27,6 +31,9 @@ type StreamPart = { readonly type: string } & Record<string, unknown>;
 
 /** What the stand-in model streams, one list per answering step. */
 let turns: StreamPart[][] = [];
+
+/** The tools the stand-in model was offered, one list per answering step. */
+let offeredTools: string[][] = [];
 
 /** Holds the next step back until released, to keep an answer running. */
 let gate: Promise<void> | null = null;
@@ -86,7 +93,11 @@ const scriptedModel = {
       warnings: [],
     };
   },
-  doStream: async () => streamOf(turns.shift() ?? answer('…')),
+  doStream: async ({ tools }: { tools?: readonly { name: string }[] }) => {
+    offeredTools.push((tools ?? []).map(tool => tool.name));
+
+    return streamOf(turns.shift() ?? answer('…'));
+  },
 } as const;
 
 /** The chunks of an AI SDK UI message stream. */
@@ -116,7 +127,16 @@ const requirement = {
   fields: { statement: 'Export a report to PDF' },
 };
 
-/** Agents run on the stand-in model, whatever the Provider Key. */
+/** The Platform Admin who publishes the Agents. */
+const PLATFORM_ADMIN = {
+  email: 'admin@example.com',
+  name: 'Grace Hopper',
+  password: 'correct-horse-battery-staple',
+};
+
+const AGENTS_PATH = '/api/platform/agents';
+
+/** Agents run on the stand-in model, whatever their Model Profile and the Provider Key. */
 function createApp() {
   return TestingApp.create({
     imports: [
@@ -127,6 +147,7 @@ function createApp() {
             refreshTokenSecret: 'test-refresh-secret',
             accessTokenTtlSeconds: 900,
             refreshTokenTtlSeconds: 604800,
+            platformAdmin: PLATFORM_ADMIN,
           }),
           WorkspaceModule.register({
             agents: {
@@ -142,10 +163,47 @@ function createApp() {
 
 describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () => {
   let app: TestingApp;
+  /** The Platform Admin's; an access token keeps working after its Account is cleared away. */
+  let admin: string;
+
+  /** An Orchestrator with every tool, on one Model Profile, published as Agents Version 1. */
+  async function publishAgents(): Promise<void> {
+    const tools = await app
+      .request()
+      .get(`${AGENTS_PATH}/tools`)
+      .set('Authorization', admin)
+      .expect(HttpStatus.OK);
+    const profile = await app
+      .request()
+      .post(`${AGENTS_PATH}/unpublished/model-profiles`)
+      .set('Authorization', admin)
+      .send({ name: 'Default', modelId: 'openrouter/test/scripted' })
+      .expect(HttpStatus.CREATED);
+    await app
+      .request()
+      .post(`${AGENTS_PATH}/unpublished/agents`)
+      .set('Authorization', admin)
+      .send({
+        role: 'orchestrator',
+        name: 'Orchestrator',
+        description: 'Interviews a person',
+        instructions: 'Interview the person.',
+        tools: tools.body.map((tool: { id: string }) => tool.id),
+        skillIds: [],
+        modelProfileId: profile.body.id,
+      })
+      .expect(HttpStatus.CREATED);
+    await app
+      .request()
+      .post(`${AGENTS_PATH}/versions`)
+      .set('Authorization', admin)
+      .send({})
+      .expect(HttpStatus.CREATED);
+  }
 
   async function signIn(email: string): Promise<string> {
     const credentials = { email, password: 'correct-horse-battery-staple' };
-    await app.request().post(SIGN_UP_PATH).send(credentials);
+    await signUp(app, credentials);
     const response = await app
       .request()
       .post(SIGN_IN_PATH)
@@ -179,9 +237,10 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
 
   /**
    * Ada owns the Workspace and the Project and has added a Provider Key; Bob
-   * joined by Invitation and is a Viewer.
+   * joined by Invitation and is a Viewer. The Agents are published unless
+   * told otherwise.
    */
-  async function setUp(): Promise<Setup> {
+  async function setUp({ publish = true } = {}): Promise<Setup> {
     const ada = await signIn('ada@example.com');
     const bob = await signIn('bob@example.com');
     const workspace = await app
@@ -209,6 +268,9 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
       .expect(HttpStatus.CREATED);
 
     await addProviderKey(ada, workspace.body.id);
+    if (publish) {
+      await publishAgents();
+    }
 
     return {
       ada,
@@ -221,10 +283,17 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
 
   beforeAll(async () => {
     app = await createApp();
+    const signedIn = await app
+      .request()
+      .post(SIGN_IN_PATH)
+      .send(PLATFORM_ADMIN)
+      .expect(HttpStatus.OK);
+    admin = `Bearer ${signedIn.body.accessToken}`;
   });
 
   afterEach(async () => {
     turns = [];
+    offeredTools = [];
     gate = null;
     titleGate = null;
     await app.clearDatabase();
@@ -535,13 +604,10 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
     expect(knowledge.body).toMatchObject({ source: 'intentra-agent' });
   });
 
-  it('records nothing for a Viewer', async () => {
+  it('offers a Viewer only the tools that read', async () => {
     // Arrange
-    const { ada, bob, base, projectId } = await setUp();
-    turns = [
-      toolCall('record_requirement', { projectId, ...requirement }),
-      answer('A Contributor can record that.'),
-    ];
+    const { bob, base } = await setUp();
+    turns = [answer('A Contributor can record that.')];
 
     // Act
     const response = await app
@@ -551,18 +617,10 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
       .send(message('We need PDF export'));
 
     // Assert
-    expect(readChunks(response.text)).toContainEqual(
-      expect.objectContaining({
-        type: 'tool-output-error',
-        errorText: expect.stringMatching(/^KNOWLEDGE_RECORDING_FORBIDDEN: /),
-      }),
-    );
-    const knowledge = await app
-      .request()
-      .get(`${base}/knowledge`)
-      .set('Authorization', ada)
-      .expect(HttpStatus.OK);
-    expect(knowledge.body.total).toBe(0);
+    expect(response.status).toBe(HttpStatus.OK);
+    expect(offeredTools[0]).toContain('list_knowledge');
+    expect(offeredTools[0]).not.toContain('record_requirement');
+    expect(offeredTools[0]).not.toContain('delete_knowledge_draft');
   });
 
   it("works in no Project but the Conversation's", async () => {
@@ -801,6 +859,104 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
       code: 'PROVIDER_KEY_MISSING',
       status: HttpStatus.PRECONDITION_FAILED,
       retryable: false,
+    });
+  });
+
+  describe('which Agents answer', () => {
+    /** A Workspace and Project of the Platform Admin's own, with a Provider Key. */
+    async function adminProject(): Promise<string> {
+      await restoreAccount(app, admin);
+      const workspace = await app
+        .request()
+        .post(WORKSPACES_PATH)
+        .set('Authorization', admin)
+        .send({ name: 'Intentra', slug: 'intentra' })
+        .expect(HttpStatus.CREATED);
+      const project = await app
+        .request()
+        .post(`${WORKSPACES_PATH}/${workspace.body.id}/projects`)
+        .set('Authorization', admin)
+        .send({ name: 'Trials', slug: 'trials' })
+        .expect(HttpStatus.CREATED);
+      await addProviderKey(admin, workspace.body.id);
+
+      return `${WORKSPACES_PATH}/${workspace.body.id}/projects/${project.body.id}`;
+    }
+
+    it('tells a Member that the Published Agents answer', async () => {
+      // Arrange
+      const { ada, base } = await setUp();
+      turns = [answer('Hello, Ada.')];
+
+      // Act
+      const response = await app
+        .request()
+        .post(`${base}/conversations/${randomUUID()}/messages`)
+        .set('Authorization', ada)
+        .send(message('Hi'));
+
+      // Assert
+      expect(readChunks(response.text)[0]).toEqual({
+        type: AGENTS_IN_USE_CHUNK_TYPE,
+        data: { versionNumber: 1 },
+        transient: true,
+      });
+    });
+
+    it('refuses while no Agents are published', async () => {
+      // Arrange
+      const { ada, base } = await setUp({ publish: false });
+
+      // Act
+      const response = await app
+        .request()
+        .post(`${base}/conversations/${randomUUID()}/messages`)
+        .set('Authorization', ada)
+        .send(message('Hi'));
+
+      // Assert
+      expect(response.status).toBe(HttpStatus.PRECONDITION_FAILED);
+      expect(response.body.code).toBe('AGENTS_NOT_PUBLISHED');
+    });
+
+    it("runs the Unpublished Agents in a Platform Admin's own Conversation", async () => {
+      // Arrange
+      await setUp();
+      const base = await adminProject();
+      turns = [answer('Hello.')];
+
+      // Act
+      const response = await app
+        .request()
+        .post(`${base}/conversations/${randomUUID()}/messages`)
+        .set('Authorization', admin)
+        .send(message('Hi'));
+
+      // Assert
+      expect(readChunks(response.text)[0]).toMatchObject({
+        type: AGENTS_IN_USE_CHUNK_TYPE,
+        data: { versionNumber: null },
+      });
+    });
+
+    it('tells a Platform Admin why the Unpublished Agents cannot run', async () => {
+      // Arrange
+      await setUp({ publish: false });
+      const base = await adminProject();
+
+      // Act
+      const response = await app
+        .request()
+        .post(`${base}/conversations/${randomUUID()}/messages`)
+        .set('Authorization', admin)
+        .send(message('Hi'));
+
+      // Assert
+      expect(response.status).toBe(HttpStatus.CONFLICT);
+      expect(response.body).toMatchObject({
+        code: 'AGENTS_NOT_PUBLISHABLE',
+        message: expect.stringContaining('exactly one Orchestrator'),
+      });
     });
   });
 });

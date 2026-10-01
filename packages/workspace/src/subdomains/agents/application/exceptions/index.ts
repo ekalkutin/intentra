@@ -1,6 +1,6 @@
+export { AgentsNotPublishedException } from './agents-not-published.exception.js';
 export { ConversationBusyException } from './conversation-busy.exception.js';
 export { ConversationNotFoundException } from './conversation-not-found.exception.js';
-export { NotPlatformAdminException } from './not-platform-admin.exception.js';
 export { ProviderKeyMissingException } from './provider-key-missing.exception.js';
 export { ProviderKeyNotFoundException } from './provider-key-not-found.exception.js';
 export { ProviderKeyRejectedException } from './provider-key-rejected.exception.js';

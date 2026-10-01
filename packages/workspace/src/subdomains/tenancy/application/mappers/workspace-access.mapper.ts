@@ -9,6 +9,7 @@ import {
   Member,
   Project,
   ProjectRoleAssignment,
+  Workspace,
 } from '../../domain/entities/index.js';
 import {
   AccessPolicyService,
@@ -19,12 +20,14 @@ const accessPolicyService = new AccessPolicyService();
 const projectRoleResolutionService = new ProjectRoleResolutionService();
 
 export function toWorkspaceAccessDto(
+  workspace: Workspace,
   member: Member,
   projects: readonly Project[],
   assignments: readonly ProjectRoleAssignment[],
 ): WorkspaceAccessDto {
   return {
     memberId: member.id.value,
+    suspended: workspace.isSuspended,
     role: (member.role?.value ?? null) as RoleDto | null,
     canManageInvitations: accessPolicyService.canManageInvitations(member),
     canManageMembers: accessPolicyService.canManageMembers(member),

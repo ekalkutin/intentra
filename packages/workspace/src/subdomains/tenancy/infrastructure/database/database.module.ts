@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import {
+  AccountNameModel,
+  AccountNameSchema,
   InvitationModel,
   InvitationSchema,
   MemberModel,
@@ -20,6 +22,7 @@ import {
   imports: [
     MongooseModule.forFeature([
       { name: WorkspaceModel.name, schema: WorkspaceSchema },
+      { name: AccountNameModel.name, schema: AccountNameSchema },
       { name: MemberModel.name, schema: MemberSchema },
       { name: ProjectModel.name, schema: ProjectSchema },
       { name: InvitationModel.name, schema: InvitationSchema },

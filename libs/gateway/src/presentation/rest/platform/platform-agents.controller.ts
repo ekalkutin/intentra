@@ -14,6 +14,7 @@ import {
 
 import type { Actor } from '@intentra/contracts/iam';
 import {
+  CreateAgentDtoSchema,
   PublishAgentsDtoSchema,
   SaveAgentDtoSchema,
   SaveModelProfileDtoSchema,
@@ -23,6 +24,7 @@ import {
   type AgentsVersionDto,
   type AgentsVersionSummaryDto,
   type AgentToolDto,
+  type CreateAgentDto,
   type ModelProfileDto,
   type PlatformAgentDto,
   type PublishAgentsDto,
@@ -58,7 +60,7 @@ export class PlatformAgentsController {
   @Post('unpublished/agents')
   public async createAgent(
     @CurrentActor() actor: Actor,
-    @Body({ schema: SaveAgentDtoSchema }) data: SaveAgentDto,
+    @Body({ schema: CreateAgentDtoSchema }) data: CreateAgentDto,
   ): Promise<PlatformAgentDto> {
     return this.workspace.platformAgents.createAgent(actor, data);
   }

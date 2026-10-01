@@ -16,11 +16,14 @@ export class InvitationAcceptanceService {
       workspaceId: invitation.workspaceId.value,
       accountId: props.accountId,
       email: invitation.email.value,
+      name: props.name,
     });
   }
 }
 
 type InvitationAcceptanceProps = {
   readonly accountId: string;
+  /** The Account's name, as the Actor carries it. */
+  readonly name: string;
   readonly member: Member | null;
 };

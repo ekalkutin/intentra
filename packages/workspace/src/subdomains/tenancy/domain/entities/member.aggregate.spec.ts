@@ -19,6 +19,7 @@ describe('Member', () => {
       workspaceId: workspaceId.value,
       accountId: new AccountId().value,
       email: 'member@example.com',
+      name: 'member',
     });
   }
 
@@ -31,6 +32,7 @@ describe('Member', () => {
       workspaceId: workspaceId.value,
       accountId: accountId.value,
       email: 'member@example.com',
+      name: 'member',
     });
 
     // Assert
@@ -47,6 +49,7 @@ describe('Member', () => {
       workspaceId: workspaceId.value,
       accountId: new AccountId().value,
       email: 'member@example.com',
+      name: 'member',
     });
 
     // Assert

@@ -21,6 +21,7 @@ export const toolContextSchema = z.object({
     actor: z.object({
       accountId: z.string(),
       email: z.string(),
+      name: z.string(),
       isPlatformAdmin: z.boolean(),
     }),
     agent: z

@@ -2,6 +2,7 @@ import {
   AccountId,
   Aggregate,
   Email,
+  PersonName,
   WorkspaceId,
 } from '@intentra/shared-kernel';
 
@@ -16,6 +17,7 @@ export class Member extends Aggregate<MemberId> {
   readonly #workspaceId: WorkspaceId;
   readonly #accountId: AccountId;
   readonly #email: Email;
+  readonly #name: PersonName;
   #role: Role | null;
   #status: MemberStatus;
 
@@ -24,6 +26,7 @@ export class Member extends Aggregate<MemberId> {
     this.#workspaceId = state.workspaceId;
     this.#accountId = state.accountId;
     this.#email = state.email;
+    this.#name = state.name;
     this.#role = state.role;
     this.#status = state.status;
   }
@@ -40,6 +43,11 @@ export class Member extends Aggregate<MemberId> {
     return this.#email;
   }
 
+  /** Its Account's name: read anew from IAM whenever the Member is read. */
+  get name(): PersonName {
+    return this.#name;
+  }
+
   /** Null for a Member without a Role. */
   get role(): Role | null {
     return this.#role;
@@ -54,6 +62,7 @@ export class Member extends Aggregate<MemberId> {
       workspaceId: new WorkspaceId(props.workspaceId),
       accountId: new AccountId(props.accountId),
       email: new Email(props.email),
+      name: new PersonName(props.name),
       role: null,
       status: MemberStatus.Active,
     });
@@ -64,6 +73,7 @@ export class Member extends Aggregate<MemberId> {
       workspaceId: new WorkspaceId(props.workspaceId),
       accountId: new AccountId(props.accountId),
       email: new Email(props.email),
+      name: new PersonName(props.name),
       role: Role.Owner,
       status: MemberStatus.Active,
     });
@@ -74,6 +84,7 @@ export class Member extends Aggregate<MemberId> {
       workspaceId: new WorkspaceId(props.workspaceId),
       accountId: new AccountId(props.accountId),
       email: new Email(props.email),
+      name: new PersonName(props.name),
       role: props.role === null ? null : Role.from(props.role),
       status: MemberStatus.from(props.status),
     });
@@ -131,6 +142,7 @@ type MemberState = {
   readonly workspaceId: WorkspaceId;
   readonly accountId: AccountId;
   readonly email: Email;
+  readonly name: PersonName;
   readonly role: Role | null;
   readonly status: MemberStatus;
 };
@@ -138,17 +150,21 @@ type MemberJoinProps = {
   readonly workspaceId: string;
   readonly accountId: string;
   readonly email: string;
+  readonly name: string;
 };
 type MemberCreateOwnerProps = {
   readonly workspaceId: string;
   readonly accountId: string;
   readonly email: string;
+  readonly name: string;
 };
 type MemberRestoreProps = {
   readonly id: string;
   readonly workspaceId: string;
   readonly accountId: string;
   readonly email: string;
+  /** Its Account's current name, read from IAM. */
+  readonly name: string;
   readonly role: string | null;
   readonly status: string;
 };

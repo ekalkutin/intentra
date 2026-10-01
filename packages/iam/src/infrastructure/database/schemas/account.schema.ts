@@ -12,10 +12,16 @@ export class AccountModel {
   readonly email: string;
 
   @Prop({ type: String, required: true })
+  readonly name: string;
+
+  @Prop({ type: String, required: true })
   readonly passwordHash: string;
 
   @Prop({ type: Boolean, required: true, default: false })
   readonly isPlatformAdmin: boolean;
+
+  @Prop({ type: Boolean, required: true, default: false })
+  readonly isBlocked: boolean;
 }
 
 export const AccountSchema = SchemaFactory.createForClass(AccountModel);

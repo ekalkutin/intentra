@@ -9,3 +9,4 @@ export {
   type AccessTokenClaims,
   type RefreshTokenClaims,
 } from './token-signer.port.js';
+export { SignUpSettingsRepository } from './sign-up-settings-repository.port.js';

@@ -2,8 +2,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import { AccountId, ProjectId, UnitOfWork } from '@intentra/shared-kernel';
+import { ProjectId, UnitOfWork } from '@intentra/shared-kernel';
 
+import { givenAccount } from '../../../../testing/account.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import { Member } from '../../domain/entities/index.js';
 import {
@@ -21,10 +22,6 @@ import { MembersService } from './members.service.js';
 import { ProjectRolesService } from './project-roles.service.js';
 import { ProjectsService } from './projects.service.js';
 import { WorkspacesService } from './workspaces.service.js';
-
-function actor(email: string): Actor {
-  return { accountId: new AccountId().value, email, isPlatformAdmin: false };
-}
 
 describe('ProjectRolesService integration', () => {
   let app: TestingApp;
@@ -47,8 +44,8 @@ describe('ProjectRolesService integration', () => {
 
   /** Ada owns the Workspace and the Project; Bob is a Member without a Role. */
   async function setUp(bobRole: Role | null = null): Promise<Setup> {
-    const ada = actor('ada@example.com');
-    const bob = actor('bob@example.com');
+    const ada = await givenAccount(app, 'ada@example.com');
+    const bob = await givenAccount(app, 'bob@example.com');
     const workspace = await app
       .get(WorkspacesService)
       .create(ada, { name: 'Acme', slug: 'acme' });
@@ -56,6 +53,7 @@ describe('ProjectRolesService integration', () => {
       workspaceId: workspace.id,
       accountId: bob.accountId,
       email: bob.email,
+      name: bob.name,
     });
     member.changeRole(bobRole);
     await app.get(UnitOfWork).run(() => app.get(MemberRepository).save(member));
@@ -87,9 +85,15 @@ describe('ProjectRolesService integration', () => {
         {
           memberId: expect.any(String),
           email: 'ada@example.com',
+          name: 'ada',
           role: 'maintainer',
         },
-        { memberId: bobId, email: 'bob@example.com', role: 'viewer' },
+        {
+          memberId: bobId,
+          email: 'bob@example.com',
+          name: 'bob',
+          role: 'viewer',
+        },
       ]);
     });
 
@@ -109,6 +113,7 @@ describe('ProjectRolesService integration', () => {
       expect(roles).toContainEqual({
         memberId: bobId,
         email: 'bob@example.com',
+        name: 'bob',
         role: 'maintainer',
       });
     });
@@ -141,6 +146,7 @@ describe('ProjectRolesService integration', () => {
       expect(changed).toEqual({
         memberId: bobId,
         email: 'bob@example.com',
+        name: 'bob',
         role: 'contributor',
       });
       const roles = await app

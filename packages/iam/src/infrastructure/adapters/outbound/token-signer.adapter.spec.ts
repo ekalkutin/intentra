@@ -16,6 +16,7 @@ describe('TokenSignerAdapter', () => {
   const claims = {
     accountId: new AccountId().value,
     email: 'ada@example.com',
+    name: 'Ada',
     isPlatformAdmin: true,
   };
 
@@ -59,20 +60,6 @@ describe('TokenSignerAdapter', () => {
     // Assert
     expect(refreshAsAccess).toBeNull();
     expect(accessAsRefresh).toBeNull();
-  });
-
-  it('reads a token signed before the Platform Admin mark as not a Platform Admin', async () => {
-    // Arrange
-    const token = await new JwtService().signAsync(
-      { sub: claims.accountId, email: claims.email },
-      { secret: options.accessTokenSecret },
-    );
-
-    // Act
-    const verified = await signer.verifyAccessToken(token);
-
-    // Assert
-    expect(verified?.isPlatformAdmin).toBe(false);
   });
 
   it('rejects a token signed with another secret', async () => {

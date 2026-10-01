@@ -17,11 +17,11 @@ export class AgentsVersionModel {
   @Prop({ type: String, default: null })
   readonly note: string | null;
 
-  @Prop({ type: SchemaTypes.UUID, default: null })
-  readonly publisherAccountId: Types.UUID | null;
+  @Prop({ type: SchemaTypes.UUID, required: true })
+  readonly publisherAccountId: Types.UUID;
 
-  @Prop({ type: String, default: null })
-  readonly publisherEmail: string | null;
+  @Prop({ type: String, required: true })
+  readonly publisherEmail: string;
 
   @Prop({ type: Date, required: true })
   readonly publishedAt: Date;

@@ -45,7 +45,7 @@ export class ProjectsService implements ProjectsApi {
 
     return this.unitOfWork.run(async () => {
       await this.workspaceRepository.lock(id);
-      const creator = await this.accessResolver.resolve(actor, id);
+      const creator = await this.accessResolver.resolveForChange(actor, id);
       const workspace = await this.workspaceRepository.getOne({ id });
 
       const { project, assignment } = this.#projectCreationService.create(
@@ -78,7 +78,7 @@ export class ProjectsService implements ProjectsApi {
 
     await this.unitOfWork.run(async () => {
       await this.workspaceRepository.lock(id);
-      const deleter = await this.accessResolver.resolve(actor, id);
+      const deleter = await this.accessResolver.resolveForChange(actor, id);
       const workspace = await this.workspaceRepository.getOne({ id });
       const project = await this.projectRepository.getOne({
         workspaceId: id,

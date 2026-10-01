@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   InvalidWorkspaceNameException,
   InvalidWorkspaceSlugException,
+  WorkspaceSuspendedException,
 } from '../exceptions/index.js';
 
 import { Workspace } from './workspace.aggregate.js';
@@ -36,6 +37,34 @@ describe('Workspace', () => {
 
       // Assert
       expect(creating).toThrow(InvalidWorkspaceSlugException);
+    });
+  });
+
+  describe('suspension', () => {
+    it('refuses changes while suspended', () => {
+      // Arrange
+      const workspace = Workspace.create({ name: 'Acme', slug: 'acme' });
+
+      // Act
+      workspace.suspend();
+
+      // Assert
+      expect(workspace.isSuspended).toBe(true);
+      expect(() => workspace.ensureChangeable()).toThrow(
+        WorkspaceSuspendedException,
+      );
+    });
+
+    it('takes changes again once resumed', () => {
+      // Arrange
+      const workspace = Workspace.create({ name: 'Acme', slug: 'acme' });
+      workspace.suspend();
+
+      // Act
+      workspace.resume();
+
+      // Assert
+      expect(() => workspace.ensureChangeable()).not.toThrow();
     });
   });
 });

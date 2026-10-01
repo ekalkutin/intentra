@@ -33,8 +33,10 @@ export class AccountRepositoryAdapter extends AccountRepository {
           { _id: account.id.value },
           {
             email: account.email.value,
+            name: account.name.value,
             passwordHash: account.passwordHash,
             isPlatformAdmin: account.isPlatformAdmin,
+            isBlocked: account.isBlocked,
           },
           { upsert: true, session: this.unitOfWork.requireSession() },
         )
@@ -60,12 +62,15 @@ export class AccountRepositoryAdapter extends AccountRepository {
   }
 
   public async findMany(props: AccountListProps): Promise<Account[]> {
-    // Accounts saved before the mark existed have no such field: they are not Platform Admins.
-    const filter = props.isPlatformAdmin
-      ? { isPlatformAdmin: true }
-      : { isPlatformAdmin: { $ne: true } };
+    const filter =
+      props.isPlatformAdmin === undefined
+        ? {}
+        : props.isPlatformAdmin
+          ? { isPlatformAdmin: true }
+          : { isPlatformAdmin: false };
     const documents = await this.accountModel
       .find(filter)
+      .sort({ email: 1 })
       .session(this.unitOfWork.session)
       .lean()
       .exec();
@@ -77,9 +82,10 @@ export class AccountRepositoryAdapter extends AccountRepository {
     return Account.restore({
       id: document._id.toHexString(),
       email: document.email,
+      name: document.name,
       passwordHash: document.passwordHash,
-      // Accounts saved before the mark existed have no such field.
-      isPlatformAdmin: document.isPlatformAdmin === true,
+      isPlatformAdmin: document.isPlatformAdmin,
+      isBlocked: document.isBlocked,
     });
   }
 }

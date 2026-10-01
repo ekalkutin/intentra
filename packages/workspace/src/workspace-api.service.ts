@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import type { WorkspaceApi } from '@intentra/contracts/workspace';
 
+import { PlatformWorkspacesService } from './platform-workspaces.service.js';
 import {
   ConversationsService,
   PlatformAgentsService,
@@ -44,5 +45,7 @@ export class WorkspaceApiService implements WorkspaceApi {
     public readonly providerKey: ProviderKeyService,
     @Inject(PlatformAgentsService)
     public readonly platformAgents: PlatformAgentsService,
+    @Inject(PlatformWorkspacesService)
+    public readonly platformWorkspaces: PlatformWorkspacesService,
   ) {}
 }

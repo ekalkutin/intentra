@@ -2,8 +2,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import { AccountId, UnitOfWork } from '@intentra/shared-kernel';
+import { UnitOfWork } from '@intentra/shared-kernel';
 
+import { givenAccount } from '../../../../testing/account.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import { Member } from '../../domain/entities/index.js';
 import { Role } from '../../domain/value-objects/index.js';
@@ -14,10 +15,6 @@ import { AccessService } from './access.service.js';
 import { ProjectRolesService } from './project-roles.service.js';
 import { ProjectsService } from './projects.service.js';
 import { WorkspacesService } from './workspaces.service.js';
-
-function actor(email: string): Actor {
-  return { accountId: new AccountId().value, email, isPlatformAdmin: false };
-}
 
 describe('AccessService integration', () => {
   let app: TestingApp;
@@ -40,8 +37,8 @@ describe('AccessService integration', () => {
 
   /** Ada owns the Workspace and the Project; Bob joins with the given Role. */
   async function setUp(bobRole: Role | null = null): Promise<Setup> {
-    const ada = actor('ada@example.com');
-    const bob = actor('bob@example.com');
+    const ada = await givenAccount(app, 'ada@example.com');
+    const bob = await givenAccount(app, 'bob@example.com');
     const workspace = await app
       .get(WorkspacesService)
       .create(ada, { name: 'Acme', slug: 'acme' });
@@ -49,6 +46,7 @@ describe('AccessService integration', () => {
       workspaceId: workspace.id,
       accountId: bob.accountId,
       email: bob.email,
+      name: bob.name,
     });
     member.changeRole(bobRole);
     await app.get(UnitOfWork).run(() => app.get(MemberRepository).save(member));
@@ -75,6 +73,7 @@ describe('AccessService integration', () => {
     // Assert
     expect(access).toEqual({
       memberId: expect.any(String),
+      suspended: false,
       role: 'owner',
       canManageInvitations: true,
       canManageMembers: true,
@@ -102,6 +101,7 @@ describe('AccessService integration', () => {
     // Assert
     expect(access).toEqual({
       memberId: bobId,
+      suspended: false,
       role: null,
       canManageInvitations: false,
       canManageMembers: false,
@@ -160,7 +160,7 @@ describe('AccessService integration', () => {
     // Act
     const getting = app
       .get(AccessService)
-      .get(actor('eve@example.com'), workspaceId);
+      .get(await givenAccount(app, 'eve@example.com'), workspaceId);
 
     // Assert
     await expect(getting).rejects.toBeInstanceOf(WorkspaceNotFoundException);

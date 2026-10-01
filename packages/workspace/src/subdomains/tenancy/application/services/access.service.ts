@@ -12,6 +12,7 @@ import { toWorkspaceAccessDto } from '../mappers/index.js';
 import {
   ProjectRepository,
   ProjectRoleAssignmentRepository,
+  WorkspaceRepository,
 } from '../ports/outbound/index.js';
 
 @Injectable()
@@ -20,6 +21,7 @@ export class AccessService implements AccessApi {
     private readonly accessResolver: AccessResolver,
     private readonly projectRepository: ProjectRepository,
     private readonly projectRoleAssignmentRepository: ProjectRoleAssignmentRepository,
+    private readonly workspaceRepository: WorkspaceRepository,
   ) {}
 
   public async get(
@@ -28,11 +30,12 @@ export class AccessService implements AccessApi {
   ): Promise<WorkspaceAccessDto> {
     const id = new WorkspaceId(workspaceId);
     const member = await this.accessResolver.resolve(actor, id);
+    const workspace = await this.workspaceRepository.getOne({ id });
     const projects = await this.projectRepository.findMany({ workspaceId: id });
     const assignments = await this.projectRoleAssignmentRepository.findMany({
       memberId: member.id,
     });
 
-    return toWorkspaceAccessDto(member, projects, assignments);
+    return toWorkspaceAccessDto(workspace, member, projects, assignments);
   }
 }

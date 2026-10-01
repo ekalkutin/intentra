@@ -29,6 +29,7 @@ function createWorkspace(): {
     slug: 'acme-corp',
     accountId: new AccountId().value,
     email: 'ada@example.com',
+    ownerName: 'Ada',
   });
   const project = Project.create({
     workspaceId: workspace.id.value,
@@ -45,6 +46,7 @@ function joinMember(workspaceId: WorkspaceId): Member {
     workspaceId: workspaceId.value,
     accountId: new AccountId().value,
     email: 'bob@example.com',
+    name: 'bob',
   });
 }
 

@@ -12,6 +12,9 @@ export class WorkspaceModel {
   @Prop({ type: String, required: true, unique: true })
   readonly slug: string;
 
+  @Prop({ type: Boolean, required: true, default: false })
+  readonly isSuspended: boolean;
+
   /** Bumped by `WorkspaceRepository.lock`; carries no meaning of its own. */
   @Prop({ type: Number, default: 0 })
   readonly lockVersion: number;

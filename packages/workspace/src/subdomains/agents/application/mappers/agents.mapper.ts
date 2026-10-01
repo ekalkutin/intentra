@@ -133,11 +133,13 @@ export function toAgentsContentDto(content: AgentsContent): AgentsContentDto {
   };
 }
 
+/** `published` is null until the first publishing. */
 export function toUnpublishedAgentsDto(
   unpublished: UnpublishedAgents,
+  published: AgentsVersion | null,
 ): UnpublishedAgentsDto {
   return {
-    publishedNumber: unpublished.publishedNumber.value,
+    publishedNumber: published?.number.value ?? null,
     content: toAgentsContentDto(unpublished.content),
   };
 }
@@ -148,7 +150,7 @@ export function toAgentsVersionSummaryDto(
   return {
     number: version.number.value,
     note: version.note?.value ?? null,
-    publishedByEmail: version.publisher?.email.value ?? null,
+    publishedByEmail: version.publisher.email.value,
     publishedAt: toIsoString(version.publishedAt),
   };
 }

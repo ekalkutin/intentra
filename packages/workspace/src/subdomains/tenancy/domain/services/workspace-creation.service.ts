@@ -7,6 +7,7 @@ export class WorkspaceCreationService {
       workspaceId: workspace.id.value,
       accountId: props.accountId,
       email: props.email,
+      name: props.ownerName,
     });
 
     return { workspace, owner };
@@ -18,6 +19,8 @@ type WorkspaceCreationProps = {
   readonly slug: string;
   readonly accountId: string;
   readonly email: string;
+  /** The Account's name, as the Actor carries it. */
+  readonly ownerName: string;
 };
 type WorkspaceCreation = {
   readonly workspace: Workspace;

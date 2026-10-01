@@ -5,6 +5,7 @@ import type { KnowledgeApi } from './knowledge/knowledge.api.js';
 import type { MembersApi } from './members/members.api.js';
 import type { PersonalAccessTokensApi } from './personal-access-tokens/personal-access-tokens.api.js';
 import type { PlatformAgentsApi } from './platform-agents/platform-agents.api.js';
+import type { PlatformWorkspacesApi } from './platform-workspaces/platform-workspaces.api.js';
 import type { ProjectRolesApi } from './project-roles/project-roles.api.js';
 import type { ProjectsApi } from './projects/projects.api.js';
 import type { ProviderKeyApi } from './provider-key/provider-key.api.js';
@@ -23,4 +24,6 @@ export abstract class WorkspaceApi {
   abstract readonly providerKey: ProviderKeyApi;
   /** Only for a Platform Admin. */
   abstract readonly platformAgents: PlatformAgentsApi;
+  /** Only for a Platform Admin. */
+  abstract readonly platformWorkspaces: PlatformWorkspacesApi;
 }

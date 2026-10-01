@@ -44,6 +44,7 @@ export class WorkspacesService implements WorkspacesApi {
       slug: data.slug,
       accountId: actor.accountId,
       email: actor.email,
+      ownerName: actor.name,
     });
 
     await this.unitOfWork.run(async () => {

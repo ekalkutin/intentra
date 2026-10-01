@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
-/** A Specialist to add, or an Agent's new content. Its role never changes. */
+import { AgentRoleDtoSchema } from './agents-content.dto.js';
+
+/** An Agent's content; its role is set when it is created and never changes. */
 export const SaveAgentDtoSchema = z.object({
   name: z.string(),
   description: z.string(),
@@ -12,3 +14,10 @@ export const SaveAgentDtoSchema = z.object({
 });
 
 export type SaveAgentDto = z.infer<typeof SaveAgentDtoSchema>;
+
+/** A new Agent: any number of Specialists, but only one Orchestrator. */
+export const CreateAgentDtoSchema = SaveAgentDtoSchema.extend({
+  role: AgentRoleDtoSchema,
+});
+
+export type CreateAgentDto = z.infer<typeof CreateAgentDtoSchema>;

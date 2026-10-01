@@ -23,3 +23,4 @@ export { UnknownMemberStatusException } from './unknown-member-status.exception.
 export { UnknownProjectRoleException } from './unknown-project-role.exception.js';
 export { UnknownRoleException } from './unknown-role.exception.js';
 export { WorkspaceSlugMismatchException } from './workspace-slug-mismatch.exception.js';
+export { WorkspaceSuspendedException } from './workspace-suspended.exception.js';

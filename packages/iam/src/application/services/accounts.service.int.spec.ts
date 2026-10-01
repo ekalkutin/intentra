@@ -7,10 +7,13 @@ import { IamModule } from '../../iam.module.js';
 import { AccountsService } from './accounts.service.js';
 import { AuthService } from './auth.service.js';
 
+/** Signing up is closed until a Platform Admin opens it; these Accounts are invited. */
+const INVITED = { invited: true };
 describe('AccountsService integration', () => {
   let app: TestingApp;
 
   const ada = {
+    name: 'Ada',
     email: 'ada@example.com',
     password: 'correct-horse-battery-staple',
   };
@@ -40,7 +43,7 @@ describe('AccountsService integration', () => {
 
   it('starts every Account as not a Platform Admin', async () => {
     // Arrange
-    await app.get(AuthService).register(ada);
+    await app.get(AuthService).register(ada, INVITED);
 
     // Act
     const actor = await signIn(ada);
@@ -60,11 +63,12 @@ describe('AccountsService integration', () => {
 
     it('appoints an existing Account, which keeps its own password', async () => {
       // Arrange
-      await app.get(AuthService).register(ada);
+      await app.get(AuthService).register(ada, INVITED);
 
       // Act
       await app.get(AccountsService).syncPlatformAdmin({
         email: 'Ada@Example.com',
+        name: 'Another Name',
         password: 'another-password',
       });
 
@@ -74,7 +78,7 @@ describe('AccountsService integration', () => {
 
     it('dismisses every other Platform Admin', async () => {
       // Arrange
-      const bob = { email: 'bob@example.com', password: ada.password };
+      const bob = { ...ada, email: 'bob@example.com' };
       await app.get(AccountsService).syncPlatformAdmin(bob);
 
       // Act

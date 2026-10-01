@@ -24,6 +24,7 @@ function joinMember(): Member {
     workspaceId: workspaceId.value,
     accountId: accountId.value,
     email: 'bob@example.com',
+    name: 'bob',
   });
 }
 
@@ -37,6 +38,7 @@ describe('InvitationAcceptanceService', () => {
     // Act
     const member = service.accept(invitation, {
       accountId: accountId.value,
+      name: 'Bob',
       member: null,
     });
 
@@ -57,6 +59,7 @@ describe('InvitationAcceptanceService', () => {
     // Act
     const member = service.accept(invitation, {
       accountId: accountId.value,
+      name: 'Bob',
       member: removed,
     });
 
@@ -74,6 +77,7 @@ describe('InvitationAcceptanceService', () => {
     const accepting = () =>
       service.accept(invitation, {
         accountId: accountId.value,
+        name: 'Bob',
         member,
       });
 

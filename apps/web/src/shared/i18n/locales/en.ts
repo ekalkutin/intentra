@@ -17,6 +17,7 @@ export const en = {
     repeatPassword: 'Repeat password',
     passwordHint: 'At least 8 characters.',
     passwordsDiffer: 'Passwords do not match',
+    personName: 'Name',
   },
   validation: {
     required: 'Fill in this field',
@@ -62,6 +63,10 @@ export const en = {
     fallback: 'Something went wrong. Try again',
     INVALID_CREDENTIALS: 'Wrong email or password',
     ACCOUNT_ALREADY_EXISTS: 'An account with this email already exists',
+    ACCOUNT_BLOCKED: 'This account is blocked',
+    SIGN_UP_CLOSED:
+      'Signing up is by invitation only for now: ask a workspace owner to invite this email',
+    INVALID_PERSON_NAME: 'Enter a name of up to 100 characters',
     VALIDATION_FAILED: 'Check what you entered',
     UNAUTHENTICATED: 'Sign in again',
     INTERNAL: 'Something broke on the server. Try later',

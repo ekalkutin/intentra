@@ -34,6 +34,7 @@ export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
           {
             name: workspace.name.value,
             slug: workspace.slug.value,
+            isSuspended: workspace.isSuspended,
           },
           { upsert: true, session: this.unitOfWork.requireSession() },
         )
@@ -93,6 +94,7 @@ export class WorkspaceRepositoryAdapter extends WorkspaceRepository {
       id: document._id.toHexString(),
       name: document.name,
       slug: document.slug,
+      suspended: document.isSuspended,
     });
   }
 }

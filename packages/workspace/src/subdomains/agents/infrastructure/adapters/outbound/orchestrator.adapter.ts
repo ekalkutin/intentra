@@ -8,13 +8,17 @@ import { Inject, Injectable, Logger, type Provider } from '@nestjs/common';
 
 import {
   createOrchestrator,
+  type AgentDefinition,
   type OrchestratorContext,
   type ToolApis,
 } from '@intentra/agent-toolkit';
 import {
   AgentKindDtoSchema,
+  AGENTS_IN_USE_CHUNK_TYPE,
   ProjectRoleDtoSchema,
+  type AgentsInUseDto,
   type ProjectRoleDto,
+  type ReasoningEffortDto,
 } from '@intentra/contracts/workspace';
 
 import { KnowledgeService } from '../../../../knowledge/index.js';
@@ -25,14 +29,17 @@ import {
   type OrchestratorAnswer,
   type OrchestratorQuestion,
 } from '../../../application/ports/outbound/index.js';
+import type { Agent, AgentsContent } from '../../../domain/entities/index.js';
+import type { ProviderKeySecret } from '../../../domain/value-objects/index.js';
 import { AGENTS_OPTIONS, type AgentsOptions } from '../../runtime/index.js';
 
 /** What the client is told when the Orchestrator itself fails; the cause stays in the logs. */
 const AGENT_FAILED = 'The Orchestrator could not answer. Try again later';
 
 /**
- * Runs the Orchestrator from `@intentra/agent-toolkit` on the configured
- * model, built for each answer on the Workspace's Provider Key. Its tools call back into Knowledge, Projects and Access through
+ * Runs the Orchestrator and its Specialists from `@intentra/agent-toolkit`,
+ * built for each answer from the Agents given, each on its Model Profile and
+ * the Workspace's Provider Key. Their tools call back into Knowledge, Projects and Access through
  * their published sub-APIs, as an external agent does over MCP (Agents ADR
  * 0002).
  */
@@ -62,9 +69,18 @@ export class OrchestratorAdapter implements Orchestrator {
     projectRole,
     message,
     providerKey,
+    agents,
+    agentsVersion,
   }: OrchestratorQuestion): Promise<OrchestratorAnswer> {
+    const orchestratorAgent = agents.orchestrator();
+    if (!orchestratorAgent) {
+      throw new Error('The Agents to run hold no Orchestrator');
+    }
     const orchestrator = createOrchestrator({
-      model: this.options.model(providerKey.value),
+      orchestrator: this.toDefinition(agents, orchestratorAgent, providerKey),
+      specialists: agents
+        .specialistsOf(orchestratorAgent)
+        .map(specialist => this.toDefinition(agents, specialist, providerKey)),
       memory: this.memory,
       onUnexpectedError: error => this.#logger.error(error),
     });
@@ -108,7 +124,46 @@ export class OrchestratorAdapter implements Orchestrator {
       onError: error => this.describeFailure(error),
     });
 
-    return { stream: stream as unknown as AnswerStream, done };
+    const agentsInUse: AgentsInUseDto = {
+      versionNumber: agentsVersion?.value ?? null,
+    };
+
+    return {
+      stream: prepend(stream as unknown as AnswerStream, {
+        type: AGENTS_IN_USE_CHUNK_TYPE,
+        data: agentsInUse,
+        transient: true,
+      }),
+      done,
+    };
+  }
+
+  private toDefinition(
+    agents: AgentsContent,
+    agent: Agent,
+    providerKey: ProviderKeySecret,
+  ): AgentDefinition {
+    const profile = agents.modelProfileOf(agent);
+    if (!profile) {
+      throw new Error(`${agent.name.value} is on no Model Profile`);
+    }
+
+    return {
+      name: agent.name.value,
+      description: agent.description.value,
+      instructions: agent.instructions.value,
+      toolIds: agent.tools.map(tool => tool.value),
+      skills: agents.skillsOf(agent).map(skill => ({
+        name: skill.name.value,
+        description: skill.description.value,
+        instructions: skill.instructions.value,
+      })),
+      model: this.options.model(profile.modelId.value, providerKey.value),
+      temperature: profile.temperature?.value ?? null,
+      reasoningEffort: (profile.reasoningEffort?.value ??
+        null) as ReasoningEffortDto | null,
+      maxOutputTokens: profile.maxOutputTokens?.value ?? null,
+    };
   }
 
   /**
@@ -130,6 +185,18 @@ export class OrchestratorAdapter implements Orchestrator {
 
     return AGENT_FAILED;
   }
+}
+
+/** The stream with `chunk` first. */
+function prepend(
+  stream: AnswerStream,
+  chunk: AnswerStream extends ReadableStream<infer T> ? T : never,
+): AnswerStream {
+  return stream.pipeThrough(
+    new TransformStream({
+      start: controller => controller.enqueue(chunk),
+    }),
+  );
 }
 
 export const ORCHESTRATOR_PROVIDER: Provider = {

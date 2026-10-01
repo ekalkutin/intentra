@@ -9,6 +9,7 @@ export type PersonalAccessTokenDto = {
   readonly level: ProjectRoleDto;
   readonly memberId: string;
   readonly memberEmail: string;
+  readonly memberName: string;
   /** ISO 8601 */
   readonly createdAt: string;
   /** ISO 8601, or null for a token that never expires. */

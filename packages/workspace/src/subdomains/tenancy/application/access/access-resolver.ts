@@ -19,6 +19,7 @@ import {
   MemberRepository,
   ProjectRepository,
   ProjectRoleAssignmentRepository,
+  WorkspaceRepository,
 } from '../ports/outbound/index.js';
 
 /**
@@ -40,6 +41,7 @@ export class AccessResolver {
     private readonly memberRepository: MemberRepository,
     private readonly projectRepository: ProjectRepository,
     private readonly projectRoleAssignmentRepository: ProjectRoleAssignmentRepository,
+    private readonly workspaceRepository: WorkspaceRepository,
   ) {}
 
   public resolveOrNull(
@@ -63,6 +65,33 @@ export class AccessResolver {
     }
 
     return member;
+  }
+
+  /** Like `resolve`, for a use case that changes something: refused while the Workspace is suspended. */
+  public async resolveForChange(
+    actor: Actor,
+    workspaceId: WorkspaceId,
+  ): Promise<Member> {
+    const member = await this.resolve(actor, workspaceId);
+    await this.ensureChangeable(workspaceId);
+
+    return member;
+  }
+
+  /** Like `resolveInProject`, for a use case that changes something: refused while the Workspace is suspended. */
+  public async resolveInProjectForChange(
+    caller: CallerDto,
+    workspaceId: WorkspaceId,
+    projectId: ProjectId,
+  ): Promise<ProjectMembership> {
+    const membership = await this.resolveInProject(
+      caller,
+      workspaceId,
+      projectId,
+    );
+    await this.ensureChangeable(workspaceId);
+
+    return membership;
   }
 
   /**
@@ -100,5 +129,12 @@ export class AccessResolver {
         ? projectRole.atMost(ProjectRole.from(caller.agent.level))
         : projectRole,
     };
+  }
+
+  private async ensureChangeable(workspaceId: WorkspaceId): Promise<void> {
+    const workspace = await this.workspaceRepository.getOne({
+      id: workspaceId,
+    });
+    workspace.ensureChangeable();
   }
 }

@@ -6,7 +6,8 @@ import { IamModule } from '@intentra/iam';
 import { TestingApp } from '@intentra/platform-testing';
 import { WorkspaceModule } from '@intentra/workspace';
 
-const SIGN_UP_PATH = '/api/iam/auth/sign-up';
+import { signUp } from './support/sign-up.js';
+
 const SIGN_IN_PATH = '/api/iam/auth/sign-in';
 const WORKSPACES_PATH = '/api/workspaces';
 
@@ -41,7 +42,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/roles', () => {
 
   async function signIn(email: string): Promise<string> {
     const credentials = { email, password: 'correct-horse-battery-staple' };
-    await app.request().post(SIGN_UP_PATH).send(credentials);
+    await signUp(app, credentials);
     const response = await app
       .request()
       .post(SIGN_IN_PATH)
@@ -124,11 +125,13 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/roles', () => {
         {
           memberId: expect.any(String),
           email: 'ada@example.com',
+          name: 'ada',
           role: 'maintainer',
         },
         {
           memberId: expect.any(String),
           email: 'bob@example.com',
+          name: 'bob',
           role: 'viewer',
         },
       ]),
@@ -151,6 +154,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/roles', () => {
       expect(res.body).toEqual({
         memberId: bobId,
         email: 'bob@example.com',
+        name: 'bob',
         role: 'contributor',
       }),
     );

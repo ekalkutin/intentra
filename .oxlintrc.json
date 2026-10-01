@@ -147,7 +147,8 @@
     },
     {
       "files": [
-        "packages/**/*.spec.ts"
+        "packages/**/*.spec.ts",
+        "packages/**/*.fixtures.ts"
       ],
       "rules": {
         "no-restricted-imports": [
@@ -162,7 +163,7 @@
                   "!@intentra/contracts/**",
                   "!@intentra/platform-testing"
                 ],
-                "message": "A context may depend only on contracts and the shared kernel; its tests may also use the platform testing harness. Contexts integrate through published events, not through each other's packages."
+                "message": "A context may depend only on contracts and the shared kernel; its tests and test fixtures may also use the platform testing harness. Contexts integrate through published events, not through each other's packages."
               }
             ]
           }

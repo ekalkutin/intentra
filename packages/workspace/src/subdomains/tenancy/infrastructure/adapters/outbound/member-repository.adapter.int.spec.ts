@@ -23,6 +23,7 @@ describe('MemberRepositoryAdapter integration', () => {
       workspaceId: new WorkspaceId().value,
       accountId: new AccountId().value,
       email: 'member@example.com',
+      name: 'member',
     });
 
     // Act

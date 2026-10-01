@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { WorkspaceApi } from '@intentra/contracts/workspace';
 
 import { CleanupAdapter } from './cleanup.adapter.js';
+import { PlatformWorkspacesService } from './platform-workspaces.service.js';
 import {
   AGENTS_OPTIONS,
   AGENTS_PROVIDERS,
@@ -45,6 +46,7 @@ import {
         ...agents,
       }),
     },
+    PlatformWorkspacesService,
     WorkspaceApiService,
     { provide: WorkspaceApi, useExisting: WorkspaceApiService },
     { provide: Cleanup, useClass: CleanupAdapter },

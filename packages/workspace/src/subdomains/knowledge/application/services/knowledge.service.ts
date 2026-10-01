@@ -97,7 +97,7 @@ export class KnowledgeService implements KnowledgeApi {
     data: RecordKnowledgeItemDto,
   ): Promise<KnowledgeItemDto> {
     return this.unitOfWork.run(async () => {
-      const { member, project, projectRole } = await this.resolve(
+      const { member, project, projectRole } = await this.resolveForChange(
         caller,
         workspaceId,
         projectId,
@@ -256,7 +256,7 @@ export class KnowledgeService implements KnowledgeApi {
     data: EditKnowledgeItemDto,
   ): Promise<KnowledgeItemDto> {
     return this.unitOfWork.run(async () => {
-      const { member, project, projectRole } = await this.resolve(
+      const { member, project, projectRole } = await this.resolveForChange(
         caller,
         workspaceId,
         projectId,
@@ -295,7 +295,7 @@ export class KnowledgeService implements KnowledgeApi {
     data: DeleteKnowledgeItemDto,
   ): Promise<void> {
     await this.unitOfWork.run(async () => {
-      const { project, projectRole } = await this.resolve(
+      const { project, projectRole } = await this.resolveForChange(
         caller,
         workspaceId,
         projectId,
@@ -341,7 +341,7 @@ export class KnowledgeService implements KnowledgeApi {
     data: ApproveKnowledgeItemsDto,
   ): Promise<KnowledgeItemDto[]> {
     return this.unitOfWork.run(async () => {
-      const { member, project, projectRole } = await this.resolve(
+      const { member, project, projectRole } = await this.resolveForChange(
         caller,
         workspaceId,
         projectId,
@@ -405,7 +405,7 @@ export class KnowledgeService implements KnowledgeApi {
     data: RejectKnowledgeItemDto,
   ): Promise<KnowledgeItemDto> {
     return this.unitOfWork.run(async () => {
-      const { member, project, projectRole } = await this.resolve(
+      const { member, project, projectRole } = await this.resolveForChange(
         caller,
         workspaceId,
         projectId,
@@ -434,7 +434,7 @@ export class KnowledgeService implements KnowledgeApi {
     data: RetireKnowledgeItemDto,
   ): Promise<KnowledgeItemDto> {
     return this.unitOfWork.run(async () => {
-      const { member, project, projectRole } = await this.resolve(
+      const { member, project, projectRole } = await this.resolveForChange(
         caller,
         workspaceId,
         projectId,
@@ -463,7 +463,7 @@ export class KnowledgeService implements KnowledgeApi {
     data: ConfirmKnowledgeItemDto,
   ): Promise<KnowledgeItemDto> {
     return this.unitOfWork.run(async () => {
-      const { project, projectRole } = await this.resolve(
+      const { project, projectRole } = await this.resolveForChange(
         caller,
         workspaceId,
         projectId,
@@ -492,6 +492,19 @@ export class KnowledgeService implements KnowledgeApi {
     projectId: string,
   ): Promise<ProjectMembership> {
     return this.accessResolver.resolveInProject(
+      caller,
+      new WorkspaceId(workspaceId),
+      new ProjectId(projectId),
+    );
+  }
+
+  /** Refused while the Workspace is suspended. */
+  private resolveForChange(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+  ): Promise<ProjectMembership> {
+    return this.accessResolver.resolveInProjectForChange(
       caller,
       new WorkspaceId(workspaceId),
       new ProjectId(projectId),

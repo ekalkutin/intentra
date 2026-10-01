@@ -25,4 +25,7 @@ export abstract class InvitationsApi {
 
   abstract accept(actor: Actor, invitationId: string): Promise<InvitationDto>;
   abstract decline(actor: Actor, invitationId: string): Promise<InvitationDto>;
+
+  /** Whether the email has a pending Invitation to some Workspace, so it may sign up while Open Sign-up is off. */
+  abstract hasPending(email: string): Promise<boolean>;
 }

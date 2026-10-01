@@ -13,6 +13,7 @@ export function toMemberProjectRoleDto(
   return {
     memberId: member.id.value,
     email: member.email.value,
+    name: member.name.value,
     role: role.value as ProjectRoleDto,
   };
 }

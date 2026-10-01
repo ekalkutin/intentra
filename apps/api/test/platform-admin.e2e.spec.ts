@@ -14,6 +14,7 @@ describe('Platform Admin from the configuration', () => {
 
   const admin = {
     email: 'admin@example.com',
+    name: 'Grace Hopper',
     password: 'correct-horse-battery-staple',
   };
 
@@ -57,6 +58,7 @@ describe('Platform Admin from the configuration', () => {
     expect(response.body).toEqual({
       accountId: expect.any(String),
       email: admin.email,
+      name: 'Grace Hopper',
       isPlatformAdmin: true,
     });
   });

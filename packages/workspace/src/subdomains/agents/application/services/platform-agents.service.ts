@@ -6,6 +6,7 @@ import type {
   AgentsVersionDto,
   AgentsVersionSummaryDto,
   AgentToolDto,
+  CreateAgentDto,
   ModelProfileDto,
   PlatformAgentDto,
   PlatformAgentsApi,
@@ -16,15 +17,22 @@ import type {
   SkillDto,
   UnpublishedAgentsDto,
 } from '@intentra/contracts/workspace';
-import { AccountId, Email, UnitOfWork } from '@intentra/shared-kernel';
+import {
+  AccountId,
+  Email,
+  NotPlatformAdminException,
+  UnitOfWork,
+} from '@intentra/shared-kernel';
 
 import {
+  AgentsContent,
   AgentsVersion,
   UnpublishedAgents,
 } from '../../domain/entities/index.js';
 import { AgentsPublishingService } from '../../domain/services/index.js';
 import {
   AgentId,
+  AgentRole,
   AgentsVersionNumber,
   ModelProfileId,
   Publisher,
@@ -32,7 +40,6 @@ import {
   SkillId,
   type ToolName,
 } from '../../domain/value-objects/index.js';
-import { NotPlatformAdminException } from '../exceptions/index.js';
 import {
   toAgentsChangesDto,
   toAgentSpec,
@@ -48,19 +55,20 @@ import {
 } from '../mappers/index.js';
 import {
   AgentsVersionRepository,
-  FirstAgentsVersion,
   ToolCatalog,
   UnpublishedAgentsRepository,
 } from '../ports/outbound/index.js';
 
 type AgentsState = {
   readonly unpublished: UnpublishedAgents;
-  readonly published: AgentsVersion;
+  /** Null until the first publishing. */
+  readonly published: AgentsVersion | null;
 };
 
 /**
- * A Platform Admin's work on Intentra's Agents. Agents Version 1 is made
- * from what the code held, the first time anything asks for the Agents.
+ * A Platform Admin's work on Intentra's Agents. They start from nothing:
+ * the Platform Admin creates the Orchestrator and the rest, then publishes
+ * Agents Version 1.
  */
 @Injectable()
 export class PlatformAgentsService implements PlatformAgentsApi {
@@ -71,24 +79,24 @@ export class PlatformAgentsService implements PlatformAgentsApi {
     private readonly unpublishedAgentsRepository: UnpublishedAgentsRepository,
     private readonly agentsVersionRepository: AgentsVersionRepository,
     private readonly toolCatalog: ToolCatalog,
-    private readonly firstAgentsVersion: FirstAgentsVersion,
   ) {}
 
   public async getUnpublished(actor: Actor): Promise<UnpublishedAgentsDto> {
-    return this.withAgents(actor, ({ unpublished }) =>
-      toUnpublishedAgentsDto(unpublished),
+    return this.withAgents(actor, ({ unpublished, published }) =>
+      toUnpublishedAgentsDto(unpublished, published),
     );
   }
 
   public async createAgent(
     actor: Actor,
-    data: SaveAgentDto,
+    data: CreateAgentDto,
   ): Promise<PlatformAgentDto> {
+    const role = AgentRole.from(data.role);
     const spec = toAgentSpec(data);
 
     return this.edit(actor, unpublished =>
       toPlatformAgentDto(
-        unpublished.addSpecialist(spec, this.availableTools()),
+        unpublished.addAgent(role, spec, this.availableTools()),
       ),
     );
   }
@@ -185,7 +193,11 @@ export class PlatformAgentsService implements PlatformAgentsApi {
 
   public async getChanges(actor: Actor): Promise<AgentsChangesDto> {
     return this.withAgents(actor, ({ unpublished, published }) =>
-      toAgentsChangesDto(unpublished.content.changesSince(published.content)),
+      toAgentsChangesDto(
+        unpublished.content.changesSince(
+          published?.content ?? AgentsContent.empty(),
+        ),
+      ),
     );
   }
 
@@ -237,12 +249,13 @@ export class PlatformAgentsService implements PlatformAgentsApi {
     const note = toNote(data);
 
     return this.withAgents(actor, async ({ unpublished, published }) => {
+      // An earlier Agents Version found means one is published.
       const earlier = await this.agentsVersionRepository.getOne({
         number: new AgentsVersionNumber(number),
       });
       const version = this.#agentsPublishingService.republish(
         unpublished,
-        published,
+        published ?? earlier,
         earlier,
         this.availableTools(),
         toPublisher(actor),
@@ -286,26 +299,15 @@ export class PlatformAgentsService implements PlatformAgentsApi {
     });
   }
 
-  /** The Unpublished and Published Agents, made from the code's Agents the first time. */
+  /** The Unpublished Agents, empty until a Platform Admin first changes them, and the Published Agents. */
   private async load(): Promise<AgentsState> {
-    const published =
-      (await this.agentsVersionRepository.findOne({ latest: true })) ??
-      (await this.saveFirstVersion());
-    const unpublished =
-      (await this.unpublishedAgentsRepository.findOne()) ??
-      UnpublishedAgents.startFrom(published.content, published.number);
+    // One after the other: a transaction's session takes one operation at a time.
+    const unpublished = await this.unpublishedAgentsRepository.findOne();
+    const published = await this.agentsVersionRepository.findOne({
+      latest: true,
+    });
 
-    return { unpublished, published };
-  }
-
-  private async saveFirstVersion(): Promise<AgentsVersion> {
-    const first = AgentsVersion.first(this.firstAgentsVersion.content());
-    await this.agentsVersionRepository.save(first);
-    await this.unpublishedAgentsRepository.save(
-      UnpublishedAgents.startFrom(first.content, first.number),
-    );
-
-    return first;
+    return { unpublished: unpublished ?? UnpublishedAgents.empty(), published };
   }
 
   private availableTools(): ToolName[] {

@@ -10,6 +10,10 @@ export {
   type WorkspaceAccessDto,
 } from './access/workspace-access.dto.js';
 export {
+  AGENTS_IN_USE_CHUNK_TYPE,
+  type AgentsInUseDto,
+} from './conversations/agents-in-use.dto.js';
+export {
   ChoiceOptionDtoSchema,
   ChoicesDtoSchema,
   type ChoiceOptionDto,
@@ -170,7 +174,9 @@ export {
   type PublishAgentsDto,
 } from './platform-agents/publish-agents.dto.js';
 export {
+  CreateAgentDtoSchema,
   SaveAgentDtoSchema,
+  type CreateAgentDto,
   type SaveAgentDto,
 } from './platform-agents/save-agent.dto.js';
 export {
@@ -181,6 +187,8 @@ export {
   SaveSkillDtoSchema,
   type SaveSkillDto,
 } from './platform-agents/save-skill.dto.js';
+export { type PlatformWorkspaceDto } from './platform-workspaces/platform-workspace.dto.js';
+export { PlatformWorkspacesApi } from './platform-workspaces/platform-workspaces.api.js';
 export {
   ChangeProjectRoleDtoSchema,
   type ChangeProjectRoleDto,

@@ -6,13 +6,12 @@ import { IamModule } from '@intentra/iam';
 import { TestingApp } from '@intentra/platform-testing';
 import { WorkspaceModule } from '@intentra/workspace';
 
-const SIGN_UP_PATH = '/api/iam/auth/sign-up';
+import { signUp } from './support/sign-up.js';
+
 const SIGN_IN_PATH = '/api/iam/auth/sign-in';
 const AGENTS_PATH = '/api/platform/agents';
 const UNPUBLISHED_PATH = `${AGENTS_PATH}/unpublished`;
 const VERSIONS_PATH = `${AGENTS_PATH}/versions`;
-
-const FIRST_MODEL_ID = 'openrouter/anthropic/claude-sonnet-5';
 
 describe('/api/platform/agents', () => {
   let app: TestingApp;
@@ -21,6 +20,7 @@ describe('/api/platform/agents', () => {
 
   const adminCredentials = {
     email: 'admin@example.com',
+    name: 'Grace Hopper',
     password: 'correct-horse-battery-staple',
   };
 
@@ -36,9 +36,7 @@ describe('/api/platform/agents', () => {
               refreshTokenTtlSeconds: 604800,
               platformAdmin: adminCredentials,
             }),
-            WorkspaceModule.register({
-              agents: { firstModelId: FIRST_MODEL_ID },
-            }),
+            WorkspaceModule.register({}),
           ],
         }),
       ],
@@ -55,9 +53,9 @@ describe('/api/platform/agents', () => {
 
   afterAll(() => app?.close());
 
-  async function signUp(email: string): Promise<string> {
+  async function signUpAndIn(email: string): Promise<string> {
     const credentials = { email, password: 'correct-horse-battery-staple' };
-    await app.request().post(SIGN_UP_PATH).send(credentials);
+    await signUp(app, credentials);
     const response = await app
       .request()
       .post(SIGN_IN_PATH)
@@ -103,9 +101,29 @@ describe('/api/platform/agents', () => {
       tools: ['list_knowledge'],
       skillIds: [],
       modelProfileId,
+      role: 'specialist',
     }).expect(HttpStatus.CREATED);
 
     return response.body.id;
+  }
+
+  /** A Model Profile and an Orchestrator on it, published as Agents Version 1. */
+  async function publishOrchestrator(): Promise<string> {
+    const profileId = await createModelProfile('Default');
+    const orchestrator = await post(`${UNPUBLISHED_PATH}/agents`, {
+      name: 'Orchestrator',
+      description: 'Interviews a person',
+      instructions: 'Interview the person.',
+      tools: ['list_knowledge', 'record_goal'],
+      skillIds: [],
+      modelProfileId: profileId,
+      role: 'orchestrator',
+    }).expect(HttpStatus.CREATED);
+    await post(VERSIONS_PATH, { note: 'The Orchestrator' }).expect(
+      HttpStatus.CREATED,
+    );
+
+    return orchestrator.body.id;
   }
 
   describe('access', () => {
@@ -119,7 +137,7 @@ describe('/api/platform/agents', () => {
 
     it('refuses an Account that is not a Platform Admin', async () => {
       // Arrange
-      const ada = await signUp('ada@example.com');
+      const ada = await signUpAndIn('ada@example.com');
 
       // Act
       const response = await app
@@ -133,35 +151,67 @@ describe('/api/platform/agents', () => {
     });
   });
 
-  describe('Agents Version 1', () => {
-    it('is made from the code: the Orchestrator with every tool, on the configured model', async () => {
+  describe('from nothing', () => {
+    it('starts with no Agents and nothing published', async () => {
       // Act
       const unpublished = await getUnpublished();
 
       // Assert
-      expect(unpublished.publishedNumber).toBe(1);
-      expect(unpublished.content.agents).toEqual([
-        expect.objectContaining({
-          role: 'orchestrator',
-          name: 'Orchestrator',
-          instructions: expect.stringContaining('Interview the person'),
-          tools: expect.arrayContaining(['list_knowledge', 'offer_choices']),
-          skillIds: [],
-          specialistIds: [],
-        }),
-      ]);
-      expect(unpublished.content.modelProfiles).toEqual([
-        expect.objectContaining({ name: 'Default', modelId: FIRST_MODEL_ID }),
-      ]);
+      expect(unpublished).toEqual({
+        publishedNumber: null,
+        content: { agents: [], skills: [], modelProfiles: [] },
+      });
+      const versions = await get(VERSIONS_PATH).expect(HttpStatus.OK);
+      expect(versions.body).toEqual([]);
+    });
+
+    it('refuses to publish without an Orchestrator', async () => {
+      // Arrange
+      await createModelProfile('Default');
+
+      // Act
+      const response = await post(VERSIONS_PATH, {});
+
+      // Assert
+      expect(response.status).toBe(HttpStatus.CONFLICT);
+      expect(response.body).toMatchObject({
+        code: 'AGENTS_NOT_PUBLISHABLE',
+        message: expect.stringContaining('exactly one Orchestrator'),
+      });
+    });
+
+    it('publishes the first Orchestrator as Agents Version 1', async () => {
+      // Act
+      await publishOrchestrator();
+
+      // Assert
       const versions = await get(VERSIONS_PATH).expect(HttpStatus.OK);
       expect(versions.body).toEqual([
         {
           number: 1,
-          note: null,
-          publishedByEmail: null,
+          note: 'The Orchestrator',
+          publishedByEmail: adminCredentials.email,
           publishedAt: expect.any(String),
         },
       ]);
+      const unpublished = await getUnpublished();
+      expect(unpublished.publishedNumber).toBe(1);
+    });
+
+    it('refuses a second Orchestrator', async () => {
+      // Arrange
+      await publishOrchestrator();
+      const { content } = await getUnpublished();
+
+      // Act
+      const response = await post(`${UNPUBLISHED_PATH}/agents`, {
+        ...content.agents[0],
+        role: 'orchestrator',
+      });
+
+      // Assert
+      expect(response.status).toBe(HttpStatus.CONFLICT);
+      expect(response.body.code).toBe('ORCHESTRATOR_EXISTS');
     });
   });
 
@@ -184,6 +234,7 @@ describe('/api/platform/agents', () => {
   describe('editing and publishing', () => {
     it('publishes the edits as Agents Version 2, listing the changes first', async () => {
       // Arrange
+      await publishOrchestrator();
       const fastId = await createModelProfile('Fast');
       const skill = await post(`${UNPUBLISHED_PATH}/skills`, {
         name: 'intentra-interviewing',
@@ -244,6 +295,9 @@ describe('/api/platform/agents', () => {
     });
 
     it('refuses to publish when nothing changed', async () => {
+      // Arrange
+      await publishOrchestrator();
+
       // Act
       const response = await post(VERSIONS_PATH, {});
 
@@ -273,7 +327,7 @@ describe('/api/platform/agents', () => {
 
     it('refuses a tool the code does not have', async () => {
       // Arrange
-      const { content } = await getUnpublished();
+      const modelProfileId = await createModelProfile('Default');
 
       // Act
       const response = await post(`${UNPUBLISHED_PATH}/agents`, {
@@ -282,7 +336,8 @@ describe('/api/platform/agents', () => {
         instructions: 'Send them.',
         tools: ['send_email'],
         skillIds: [],
-        modelProfileId: content.modelProfiles[0].id,
+        modelProfileId,
+        role: 'specialist',
       });
 
       // Assert
@@ -307,6 +362,7 @@ describe('/api/platform/agents', () => {
   describe('republishing', () => {
     it('publishes an earlier Agents Version again as the next one', async () => {
       // Arrange
+      await publishOrchestrator();
       await createModelProfile('Fast');
       await post(VERSIONS_PATH, {}).expect(HttpStatus.CREATED);
 
@@ -332,6 +388,7 @@ describe('/api/platform/agents', () => {
 
     it('refuses while the Unpublished Agents hold changes', async () => {
       // Arrange
+      await publishOrchestrator();
       await createModelProfile('Fast');
       await post(VERSIONS_PATH, {}).expect(HttpStatus.CREATED);
       await createModelProfile('Smart');

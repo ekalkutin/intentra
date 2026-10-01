@@ -16,6 +16,7 @@ describe('ProjectRoleResolutionService', () => {
       workspaceId: workspaceId.value,
       accountId: new AccountId().value,
       email: 'bob@example.com',
+      name: 'bob',
     });
   }
 

@@ -4,18 +4,22 @@ import { AccountId, Email } from '@intentra/shared-kernel';
 
 import {
   agentSpec,
-  firstContent,
   profileSpec,
   TOOLS,
   unpublishedFrom,
+  unpublishedWithOrchestrator,
 } from '../entities/agents.fixtures.js';
-import { AgentsVersion } from '../entities/index.js';
+import { UnpublishedAgents } from '../entities/index.js';
 import {
   AgentsNotPublishableException,
   AgentsUnchangedException,
   UnpublishedAgentsChangedException,
 } from '../exceptions/index.js';
-import { Publisher, PublishingNote } from '../value-objects/index.js';
+import {
+  AgentRole,
+  Publisher,
+  PublishingNote,
+} from '../value-objects/index.js';
 
 import { AgentsPublishingService } from './agents-publishing.service.js';
 
@@ -27,36 +31,78 @@ const publisher = new Publisher(
 describe('AgentsPublishingService', () => {
   const service = new AgentsPublishingService();
 
+  /** Agents Version 1 and the Unpublished Agents right after it. */
+  function publishVersionOne() {
+    const unpublished = unpublishedWithOrchestrator();
+    const versionOne = service.publish(
+      unpublished,
+      null,
+      TOOLS,
+      publisher,
+      null,
+    );
+
+    return { versionOne, unpublished: unpublishedFrom(versionOne.content) };
+  }
+
+  it('publishes Agents Version 1 when nothing was published yet', () => {
+    // Arrange
+    const unpublished = unpublishedWithOrchestrator();
+
+    // Act
+    const version = service.publish(
+      unpublished,
+      null,
+      TOOLS,
+      publisher,
+      new PublishingNote('The Orchestrator'),
+    );
+
+    // Assert
+    expect(version.number.value).toBe(1);
+    expect(version.note?.value).toBe('The Orchestrator');
+    expect(version.publisher.email.value).toBe('admin@example.com');
+  });
+
+  it('refuses to publish Agents without an Orchestrator', () => {
+    // Arrange
+    const unpublished = UnpublishedAgents.empty();
+    unpublished.addModelProfile(profileSpec());
+
+    // Act
+    const publishing = () =>
+      service.publish(unpublished, null, TOOLS, publisher, null);
+
+    // Assert
+    expect(publishing).toThrow(AgentsNotPublishableException);
+    expect(publishing).toThrow(/exactly one Orchestrator/);
+  });
+
   it('publishes the changes as the next Agents Version', () => {
     // Arrange
-    const first = AgentsVersion.first(firstContent());
-    const unpublished = unpublishedFrom(first.content);
+    const { versionOne, unpublished } = publishVersionOne();
     unpublished.addModelProfile(profileSpec('Fast'));
 
     // Act
     const version = service.publish(
       unpublished,
-      first,
+      versionOne,
       TOOLS,
       publisher,
-      new PublishingNote('A faster profile'),
+      null,
     );
 
     // Assert
     expect(version.number.value).toBe(2);
-    expect(version.note?.value).toBe('A faster profile');
-    expect(version.publisher?.email.value).toBe('admin@example.com');
-    expect(unpublished.publishedNumber.value).toBe(2);
   });
 
   it('refuses to publish nothing new', () => {
     // Arrange
-    const first = AgentsVersion.first(firstContent());
-    const unpublished = unpublishedFrom(first.content);
+    const { versionOne, unpublished } = publishVersionOne();
 
     // Act
     const publishing = () =>
-      service.publish(unpublished, first, TOOLS, publisher, null);
+      service.publish(unpublished, versionOne, TOOLS, publisher, null);
 
     // Assert
     expect(publishing).toThrow(AgentsUnchangedException);
@@ -64,17 +110,17 @@ describe('AgentsPublishingService', () => {
 
   it('refuses Agents using a tool the code no longer has', () => {
     // Arrange
-    const first = AgentsVersion.first(firstContent());
-    const unpublished = unpublishedFrom(first.content);
-    unpublished.addSpecialist(
-      agentSpec(first.content.modelProfiles[0]!.id),
+    const { versionOne, unpublished } = publishVersionOne();
+    unpublished.addAgent(
+      AgentRole.Specialist,
+      agentSpec(versionOne.content.modelProfiles[0]!.id),
       TOOLS,
     );
     const fewerTools = [TOOLS[1]!];
 
     // Act
     const publishing = () =>
-      service.publish(unpublished, first, fewerTools, publisher, null);
+      service.publish(unpublished, versionOne, fewerTools, publisher, null);
 
     // Assert
     expect(publishing).toThrow(AgentsNotPublishableException);
@@ -84,41 +130,39 @@ describe('AgentsPublishingService', () => {
   describe('republish', () => {
     it('publishes an earlier Agents Version again as the next one', () => {
       // Arrange
-      const first = AgentsVersion.first(firstContent());
-      const unpublished = unpublishedFrom(first.content);
+      const { versionOne, unpublished } = publishVersionOne();
       unpublished.addModelProfile(profileSpec('Fast'));
-      const second = service.publish(
+      const versionTwo = service.publish(
         unpublished,
-        first,
+        versionOne,
         TOOLS,
         publisher,
         null,
       );
 
       // Act
-      const third = service.republish(
+      const versionThree = service.republish(
         unpublished,
-        second,
-        first,
+        versionTwo,
+        versionOne,
         TOOLS,
         publisher,
         null,
       );
 
       // Assert
-      expect(third.number.value).toBe(3);
-      expect(third.content.isSameAs(first.content)).toBe(true);
-      expect(unpublished.content.isSameAs(first.content)).toBe(true);
+      expect(versionThree.number.value).toBe(3);
+      expect(versionThree.content.isSameAs(versionOne.content)).toBe(true);
+      expect(unpublished.content.isSameAs(versionOne.content)).toBe(true);
     });
 
     it('refuses while the Unpublished Agents hold changes', () => {
       // Arrange
-      const first = AgentsVersion.first(firstContent());
-      const unpublished = unpublishedFrom(first.content);
+      const { versionOne, unpublished } = publishVersionOne();
       unpublished.addModelProfile(profileSpec('Fast'));
-      const second = service.publish(
+      const versionTwo = service.publish(
         unpublished,
-        first,
+        versionOne,
         TOOLS,
         publisher,
         null,
@@ -127,7 +171,14 @@ describe('AgentsPublishingService', () => {
 
       // Act
       const republishing = () =>
-        service.republish(unpublished, second, first, TOOLS, publisher, null);
+        service.republish(
+          unpublished,
+          versionTwo,
+          versionOne,
+          TOOLS,
+          publisher,
+          null,
+        );
 
       // Assert
       expect(republishing).toThrow(UnpublishedAgentsChangedException);

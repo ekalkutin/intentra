@@ -16,9 +16,14 @@ import {
   AccessResolver,
   type ProjectMembership,
 } from '../../../tenancy/index.js';
-import { Conversation } from '../../domain/entities/index.js';
-import { ConversationId } from '../../domain/value-objects/index.js';
+import { AgentsContent, Conversation } from '../../domain/entities/index.js';
+import { AgentsNotPublishableException } from '../../domain/exceptions/index.js';
 import {
+  ConversationId,
+  type AgentsVersionNumber,
+} from '../../domain/value-objects/index.js';
+import {
+  AgentsNotPublishedException,
   ConversationBusyException,
   ConversationNotFoundException,
   ProviderKeyMissingException,
@@ -29,10 +34,13 @@ import {
   toConversationWithMessagesDto,
 } from '../mappers/index.js';
 import {
+  AgentsVersionRepository,
   ConversationStore,
   Orchestrator,
   ProviderKeyCipher,
   ProviderKeyRepository,
+  ToolCatalog,
+  UnpublishedAgentsRepository,
   type AnswerStream,
 } from '../ports/outbound/index.js';
 
@@ -52,6 +60,9 @@ export class ConversationsService implements ConversationsApi {
     private readonly orchestrator: Orchestrator,
     private readonly providerKeyRepository: ProviderKeyRepository,
     private readonly providerKeyCipher: ProviderKeyCipher,
+    private readonly unpublishedAgentsRepository: UnpublishedAgentsRepository,
+    private readonly agentsVersionRepository: AgentsVersionRepository,
+    private readonly toolCatalog: ToolCatalog,
   ) {}
 
   public async list(
@@ -99,7 +110,11 @@ export class ConversationsService implements ConversationsApi {
     conversationId: string,
     data: EditConversationDto,
   ): Promise<ConversationDto> {
-    const membership = await this.resolve(actor, workspaceId, projectId);
+    const membership = await this.resolveForChange(
+      actor,
+      workspaceId,
+      projectId,
+    );
     const conversation = await this.getConversation(
       membership,
       new ConversationId(conversationId),
@@ -126,7 +141,11 @@ export class ConversationsService implements ConversationsApi {
     projectId: string,
     conversationId: string,
   ): Promise<void> {
-    const membership = await this.resolve(actor, workspaceId, projectId);
+    const membership = await this.resolveForChange(
+      actor,
+      workspaceId,
+      projectId,
+    );
     const conversation = await this.getConversation(
       membership,
       new ConversationId(conversationId),
@@ -143,7 +162,7 @@ export class ConversationsService implements ConversationsApi {
     conversationId: string,
     data: SendMessageDto,
   ): Promise<AnswerStream> {
-    const { member, project, projectRole } = await this.resolve(
+    const { member, project, projectRole } = await this.resolveForChange(
       actor,
       workspaceId,
       projectId,
@@ -154,6 +173,7 @@ export class ConversationsService implements ConversationsApi {
     if (!providerKey) {
       throw new ProviderKeyMissingException();
     }
+    const { agents, agentsVersion } = await this.agentsFor(actor);
     const id = new ConversationId(conversationId);
     const found = await this.conversationStore.findOne({ id });
     if (found && !found.isOf(member.id, project.id)) {
@@ -185,6 +205,8 @@ export class ConversationsService implements ConversationsApi {
         projectRole,
         message: data.message,
         providerKey: this.providerKeyCipher.decrypt(providerKey.encryptedKey),
+        agents,
+        agentsVersion,
       });
       void answer.done.finally(() => this.#answering.delete(id.value));
 
@@ -205,6 +227,50 @@ export class ConversationsService implements ConversationsApi {
       new WorkspaceId(workspaceId),
       new ProjectId(projectId),
     );
+  }
+
+  /** Refused while the Workspace is suspended: no AI works with it. */
+  private resolveForChange(
+    actor: Actor,
+    workspaceId: string,
+    projectId: string,
+  ): Promise<ProjectMembership> {
+    return this.accessResolver.resolveInProjectForChange(
+      { actor, agent: null },
+      new WorkspaceId(workspaceId),
+      new ProjectId(projectId),
+    );
+  }
+
+  /**
+   * The Published Agents, as at the moment of the message; in a Platform
+   * Admin's own Conversation, the Unpublished Agents, which must be
+   * publishable to run.
+   */
+  private async agentsFor(actor: Actor): Promise<{
+    agents: AgentsContent;
+    agentsVersion: AgentsVersionNumber | null;
+  }> {
+    if (actor.isPlatformAdmin) {
+      const unpublished = await this.unpublishedAgentsRepository.findOne();
+      const agents = unpublished?.content ?? AgentsContent.empty();
+      const problems = agents.problems(
+        this.toolCatalog.list().map(tool => tool.name),
+      );
+      if (problems.length > 0) {
+        throw new AgentsNotPublishableException(problems);
+      }
+
+      return { agents, agentsVersion: null };
+    }
+    const published = await this.agentsVersionRepository.findOne({
+      latest: true,
+    });
+    if (!published) {
+      throw new AgentsNotPublishedException();
+    }
+
+    return { agents: published.content, agentsVersion: published.number };
   }
 
   private ensureIdle(id: ConversationId): void {

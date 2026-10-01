@@ -18,6 +18,7 @@ export function toPersonalAccessTokenDto(
     level: token.level.value as ProjectRoleDto,
     memberId: token.memberId.value,
     memberEmail: member.email.value,
+    memberName: member.name.value,
     createdAt: toIsoString(token.createdAt),
     expiresAt: token.expiresAt && toIsoString(token.expiresAt),
     lastUsedAt: token.lastUsedAt && toIsoString(token.lastUsedAt),

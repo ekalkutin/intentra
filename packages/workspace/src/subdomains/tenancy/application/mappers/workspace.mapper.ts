@@ -7,5 +7,6 @@ export function toWorkspaceDto(workspace: Workspace): WorkspaceDto {
     id: workspace.id.value,
     name: workspace.name.value,
     slug: workspace.slug.value,
+    suspended: workspace.isSuspended,
   };
 }

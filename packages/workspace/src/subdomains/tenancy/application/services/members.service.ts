@@ -60,7 +60,7 @@ export class MembersService implements MembersApi {
 
     await this.unitOfWork.run(async () => {
       await this.workspaceRepository.lock(id);
-      const remover = await this.accessResolver.resolve(actor, id);
+      const remover = await this.accessResolver.resolveForChange(actor, id);
       const workspace = await this.workspaceRepository.getOne({ id });
       const member = await this.memberRepository.getOne({
         id: new MemberId(memberId),
@@ -100,7 +100,7 @@ export class MembersService implements MembersApi {
 
     return this.unitOfWork.run(async () => {
       await this.workspaceRepository.lock(id);
-      const changer = await this.accessResolver.resolve(actor, id);
+      const changer = await this.accessResolver.resolveForChange(actor, id);
       const workspace = await this.workspaceRepository.getOne({ id });
       const member = await this.memberRepository.getOne({
         id: new MemberId(memberId),

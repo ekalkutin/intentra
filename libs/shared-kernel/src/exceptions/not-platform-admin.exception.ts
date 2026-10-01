@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@intentra/shared-kernel';
+import { ForbiddenException } from './forbidden.exception.js';
 
 export class NotPlatformAdminException extends ForbiddenException<'NOT_PLATFORM_ADMIN'> {
   constructor() {

@@ -37,7 +37,7 @@ export class TestingApp {
     return new TestingApp(moduleRef, http);
   }
 
-  public get<T>(token: Type<T> | Abstract<T>): T {
+  public get<T>(token: Type<T> | Abstract<T> | string | symbol): T {
     return this.moduleRef.get(token);
   }
 

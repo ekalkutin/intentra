@@ -45,6 +45,11 @@ export class AgentsContent {
     this.#modelProfiles = modelProfiles;
   }
 
+  /** No Agents, Skills or Model Profiles: where a Platform Admin starts. */
+  public static empty(): AgentsContent {
+    return new AgentsContent([], [], []);
+  }
+
   get agents(): readonly Agent[] {
     return this.#agents;
   }
@@ -55,6 +60,33 @@ export class AgentsContent {
 
   get modelProfiles(): readonly ModelProfile[] {
     return this.#modelProfiles;
+  }
+
+  /** Null until a Platform Admin creates it. */
+  public orchestrator(): Agent | null {
+    return this.#agents.find(agent => agent.isOrchestrator()) ?? null;
+  }
+
+  /** The Specialists the Agent may call. */
+  public specialistsOf(agent: Agent): Agent[] {
+    return this.#agents.filter(other =>
+      agent.specialistIds.some(id => id.equals(other.id)),
+    );
+  }
+
+  public skillsOf(agent: Agent): Skill[] {
+    return this.#skills.filter(skill =>
+      agent.skillIds.some(id => id.equals(skill.id)),
+    );
+  }
+
+  /** Null only for content that could not be published. */
+  public modelProfileOf(agent: Agent): ModelProfile | null {
+    return (
+      this.#modelProfiles.find(profile =>
+        profile.id.equals(agent.modelProfileId),
+      ) ?? null
+    );
   }
 
   /** Object by object, what this has that `earlier` does not, or has otherwise. */

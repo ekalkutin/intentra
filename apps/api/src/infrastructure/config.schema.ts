@@ -16,8 +16,9 @@ export const EnvironmentSchema = z
       .int()
       .positive()
       .default(604800),
-    /** Both or neither: the Account made the only Platform Admin on start, created with this password if missing. */
+    /** All or none: the Account made the only Platform Admin on start, created with this name and password if missing. */
     PLATFORM_ADMIN_EMAIL: z.email().optional(),
+    PLATFORM_ADMIN_NAME: z.string().trim().min(1).max(100).optional(),
     PLATFORM_ADMIN_PASSWORD: z.string().min(8).optional(),
     /** 32 random bytes in base64 that encrypt every Workspace's Provider Key. */
     PROVIDER_KEY_ENCRYPTION_KEY: z
@@ -25,21 +26,20 @@ export const EnvironmentSchema = z
       .refine(value => Buffer.from(value, 'base64').length === 32, {
         message: 'PROVIDER_KEY_ENCRYPTION_KEY must be 32 bytes in base64',
       }),
-    /** A Mastra model router id on OpenRouter, run on each Workspace's Provider Key. */
-    AGENT_MODEL: z
-      .templateLiteral(['openrouter/', z.string(), '/', z.string()])
-      .default('openrouter/anthropic/claude-sonnet-5'),
   })
   .refine(env => env.IAM_ACCESS_TOKEN_SECRET !== env.IAM_REFRESH_TOKEN_SECRET, {
     message: 'IAM_ACCESS_TOKEN_SECRET and IAM_REFRESH_TOKEN_SECRET must differ',
   })
   .refine(
     env =>
-      (env.PLATFORM_ADMIN_EMAIL === undefined) ===
-      (env.PLATFORM_ADMIN_PASSWORD === undefined),
+      new Set([
+        env.PLATFORM_ADMIN_EMAIL === undefined,
+        env.PLATFORM_ADMIN_NAME === undefined,
+        env.PLATFORM_ADMIN_PASSWORD === undefined,
+      ]).size === 1,
     {
       message:
-        'PLATFORM_ADMIN_EMAIL and PLATFORM_ADMIN_PASSWORD go together: set both or neither',
+        'PLATFORM_ADMIN_EMAIL, PLATFORM_ADMIN_NAME and PLATFORM_ADMIN_PASSWORD go together: set all or none',
     },
   )
   .transform(env => ({
@@ -51,20 +51,18 @@ export const EnvironmentSchema = z
       accessTokenTtlSeconds: env.IAM_ACCESS_TOKEN_TTL_SECONDS,
       refreshTokenTtlSeconds: env.IAM_REFRESH_TOKEN_TTL_SECONDS,
       platformAdmin:
-        env.PLATFORM_ADMIN_EMAIL && env.PLATFORM_ADMIN_PASSWORD
+        env.PLATFORM_ADMIN_EMAIL &&
+        env.PLATFORM_ADMIN_NAME &&
+        env.PLATFORM_ADMIN_PASSWORD
           ? {
               email: env.PLATFORM_ADMIN_EMAIL,
+              name: env.PLATFORM_ADMIN_NAME,
               password: env.PLATFORM_ADMIN_PASSWORD,
             }
           : null,
     },
     workspace: {
       agents: {
-        model: (providerKey: string) => ({
-          id: env.AGENT_MODEL,
-          apiKey: providerKey,
-        }),
-        firstModelId: env.AGENT_MODEL,
         providerKeyEncryptionKey: env.PROVIDER_KEY_ENCRYPTION_KEY,
       },
     },

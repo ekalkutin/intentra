@@ -23,6 +23,7 @@ import { RegisterAccountDtoSchema } from '@intentra/contracts/iam';
 
 /** The contract's fields, plus the password typed twice: there is no password reset yet. */
 const SignUpFormSchema = RegisterAccountDtoSchema.extend({
+  name: z.string().trim().min(1).max(100),
   repeatPassword: z.string(),
 }).refine(data => data.password === data.repeatPassword, {
   path: ['repeatPassword'],
@@ -32,7 +33,10 @@ const SignUpFormSchema = RegisterAccountDtoSchema.extend({
 type SignUpFormValues = z.infer<typeof SignUpFormSchema>;
 
 /** Codes that concern one field, shown under it. */
-const FIELDS_BY_CODE = { ACCOUNT_ALREADY_EXISTS: 'email' } as const;
+const FIELDS_BY_CODE = {
+  ACCOUNT_ALREADY_EXISTS: 'email',
+  INVALID_PERSON_NAME: 'name',
+} as const;
 
 /** Creates the Account and signs in with it right away. */
 export function SignUpForm() {
@@ -42,12 +46,12 @@ export function SignUpForm() {
   const [signIn] = useSignInMutation();
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(SignUpFormSchema),
-    defaultValues: { email: '', password: '', repeatPassword: '' },
+    defaultValues: { name: '', email: '', password: '', repeatPassword: '' },
   });
   const { errors, isSubmitting } = form.formState;
 
-  const submit = form.handleSubmit(async ({ email, password }) => {
-    const error = toApiError((await signUp({ email, password })).error);
+  const submit = form.handleSubmit(async ({ name, email, password }) => {
+    const error = toApiError((await signUp({ name, email, password })).error);
     if (error) {
       const { field, text } = describeError(error, FIELDS_BY_CODE);
       form.setError(field ?? 'root', { message: text });
@@ -62,6 +66,16 @@ export function SignUpForm() {
   return (
     <form onSubmit={submit} noValidate>
       <FieldGroup>
+        <Field data-invalid={Boolean(errors.name)}>
+          <FieldLabel htmlFor='name'>{t('fields.personName')}</FieldLabel>
+          <Input
+            id='name'
+            autoComplete='name'
+            aria-invalid={Boolean(errors.name)}
+            {...form.register('name')}
+          />
+          <FieldError errors={[errors.name]} />
+        </Field>
         <Field data-invalid={Boolean(errors.email)}>
           <FieldLabel htmlFor='email'>{t('fields.email')}</FieldLabel>
           <Input

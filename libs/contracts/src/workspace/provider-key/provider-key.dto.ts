@@ -5,6 +5,8 @@ export type ProviderKeyDto = {
   readonly addedByMemberId: string;
   /** Null once the Member who added it has left the Workspace. */
   readonly addedByEmail: string | null;
+  /** Null once the Member who added it has left the Workspace. */
+  readonly addedByName: string | null;
   /** ISO 8601 */
   readonly addedAt: string;
 };

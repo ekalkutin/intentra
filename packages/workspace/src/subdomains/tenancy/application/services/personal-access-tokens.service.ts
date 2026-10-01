@@ -58,7 +58,7 @@ export class PersonalAccessTokensService implements PersonalAccessTokensApi {
 
     return this.unitOfWork.run(async () => {
       await this.workspaceRepository.lock(id);
-      const creator = await this.accessResolver.resolve(actor, id);
+      const creator = await this.accessResolver.resolveForChange(actor, id);
       const workspace = await this.workspaceRepository.getOne({ id });
 
       const token = this.#personalAccessTokenCreationService.create(
@@ -149,6 +149,11 @@ export class PersonalAccessTokensService implements PersonalAccessTokensApi {
       if (!member) {
         throw new InvalidPersonalAccessTokenException();
       }
+      // No AI works with a suspended Workspace, external agents included.
+      const workspace = await this.workspaceRepository.getOne({
+        id: token.workspaceId,
+      });
+      workspace.ensureChangeable();
 
       token.markUsed();
       await this.personalAccessTokenRepository.save(token);
@@ -158,6 +163,7 @@ export class PersonalAccessTokensService implements PersonalAccessTokensApi {
         actor: {
           accountId: member.accountId.value,
           email: member.email.value,
+          name: member.name.value,
           isPlatformAdmin: false,
         },
         workspaceId: token.workspaceId.value,

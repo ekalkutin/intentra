@@ -1,22 +1,21 @@
 import {
   AgentDescription,
-  AgentId,
   AgentInstructions,
   AgentName,
   AgentRole,
-  AgentsVersionNumber,
   ModelId,
-  ModelProfileId,
   ModelProfileName,
   SkillDescription,
   SkillInstructions,
   SkillName,
   ToolName,
+  UnpublishedAgentsId,
+  type ModelProfileId,
 } from '../value-objects/index.js';
 
-import { Agent, type AgentSpec } from './agent.entity.js';
-import { AgentsContent } from './agents-content.js';
-import { ModelProfile, type ModelProfileSpec } from './model-profile.entity.js';
+import type { Agent, AgentSpec } from './agent.entity.js';
+import type { AgentsContent } from './agents-content.js';
+import type { ModelProfileSpec } from './model-profile.entity.js';
 import type { SkillSpec } from './skill.entity.js';
 import { UnpublishedAgents } from './unpublished-agents.aggregate.js';
 
@@ -60,20 +59,25 @@ export function agentSpec(
   };
 }
 
-/** Agents Version 1's content: an Orchestrator on one Model Profile. */
-export function firstContent(): AgentsContent {
-  const profile = ModelProfile.create(new ModelProfileId(), profileSpec());
-  const orchestrator = Agent.create(
-    new AgentId(),
+/** Unpublished Agents holding an Orchestrator on one Model Profile, the least that can be published. */
+export function unpublishedWithOrchestrator(): UnpublishedAgents {
+  const unpublished = UnpublishedAgents.empty();
+  const profile = unpublished.addModelProfile(profileSpec());
+  unpublished.addAgent(
     AgentRole.Orchestrator,
     agentSpec(profile.id, { name: new AgentName('Orchestrator') }),
+    TOOLS,
   );
 
-  return new AgentsContent([orchestrator], [], [profile]);
+  return unpublished;
 }
 
+/** Another Unpublished Agents holding the same content, such as after publishing it. */
 export function unpublishedFrom(content: AgentsContent): UnpublishedAgents {
-  return UnpublishedAgents.startFrom(content, AgentsVersionNumber.First);
+  return UnpublishedAgents.restore({
+    id: new UnpublishedAgentsId().value,
+    content,
+  });
 }
 
 export function orchestratorOf(content: AgentsContent): Agent {

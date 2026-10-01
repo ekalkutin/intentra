@@ -4,39 +4,41 @@ import {
   AgentsUnchangedException,
   UnpublishedAgentsChangedException,
 } from '../exceptions/index.js';
-import type {
-  Publisher,
-  PublishingNote,
-  ToolName,
+import {
+  AgentsVersionNumber,
+  type Publisher,
+  type PublishingNote,
+  type ToolName,
 } from '../value-objects/index.js';
 
 /** Turns the Unpublished Agents into the next Agents Version. */
 export class AgentsPublishingService {
-  /** Checks the whole, then publishes; the Unpublished Agents are then the same as the Published Agents. */
+  /**
+   * Checks the whole, then publishes it as the next Agents Version, or as
+   * Agents Version 1 when nothing was published yet.
+   */
   public publish(
     unpublished: UnpublishedAgents,
-    published: AgentsVersion,
+    published: AgentsVersion | null,
     availableTools: readonly ToolName[],
     publisher: Publisher,
     note: PublishingNote | null,
   ): AgentsVersion {
-    if (unpublished.content.isSameAs(published.content)) {
+    if (published && unpublished.content.isSameAs(published.content)) {
       throw new AgentsUnchangedException();
     }
     const problems = unpublished.content.problems(availableTools);
     if (problems.length > 0) {
       throw new AgentsNotPublishableException(problems);
     }
-    const version = AgentsVersion.publish({
-      number: published.number.next().value,
+
+    return AgentsVersion.publish({
+      number: (published?.number.next() ?? AgentsVersionNumber.One).value,
       content: unpublished.content,
       note: note?.value ?? null,
       publisherAccountId: publisher.accountId.value,
       publisherEmail: publisher.email.value,
     });
-    unpublished.markPublished(version.number);
-
-    return version;
   }
 
   /** Publishes an earlier Agents Version again as the next one; refused while unpublished changes would be lost. */

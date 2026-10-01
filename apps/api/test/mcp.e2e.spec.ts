@@ -6,7 +6,8 @@ import { IamModule } from '@intentra/iam';
 import { TestingApp } from '@intentra/platform-testing';
 import { WorkspaceModule } from '@intentra/workspace';
 
-const SIGN_UP_PATH = '/api/iam/auth/sign-up';
+import { signUp } from './support/sign-up.js';
+
 const SIGN_IN_PATH = '/api/iam/auth/sign-in';
 const WORKSPACES_PATH = '/api/workspaces';
 const MCP_PATH = '/api/mcp';
@@ -29,7 +30,7 @@ describe('POST /api/mcp', () => {
       email: 'ada@example.com',
       password: 'correct-horse-battery-staple',
     };
-    await app.request().post(SIGN_UP_PATH).send(credentials);
+    await signUp(app, credentials);
     const session = await app
       .request()
       .post(SIGN_IN_PATH)

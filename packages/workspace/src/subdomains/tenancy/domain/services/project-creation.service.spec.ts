@@ -19,6 +19,7 @@ function createWorkspace(): { workspace: Workspace; owner: Member } {
     slug: 'acme-corp',
     accountId: new AccountId().value,
     email: 'member@example.com',
+    ownerName: 'Ada',
   });
 }
 
@@ -27,6 +28,7 @@ function joinMember(workspaceId: WorkspaceId): Member {
     workspaceId: workspaceId.value,
     accountId: new AccountId().value,
     email: 'member@example.com',
+    name: 'member',
   });
 }
 

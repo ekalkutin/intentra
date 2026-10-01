@@ -15,6 +15,12 @@ export type ProjectAccessDto = {
  */
 export type WorkspaceAccessDto = {
   readonly memberId: string;
+  /**
+   * While true, nothing that changes the Workspace is allowed, whatever the
+   * other answers say (403 `WORKSPACE_SUSPENDED`), except deleting it,
+   * leaving it and revoking a Personal Access Token.
+   */
+  readonly suspended: boolean;
   /** Null for a Member without a Role. */
   readonly role: RoleDto | null;
   readonly canManageInvitations: boolean;

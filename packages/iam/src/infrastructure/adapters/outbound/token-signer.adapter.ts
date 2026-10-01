@@ -14,6 +14,7 @@ import {
 type AccessTokenPayload = {
   readonly sub: string;
   readonly email: string;
+  readonly name: string;
   readonly platformAdmin: boolean;
 };
 type RefreshTokenPayload = { readonly sub: string };
@@ -32,6 +33,7 @@ export class TokenSignerAdapter extends TokenSigner {
     const payload: AccessTokenPayload = {
       sub: claims.accountId,
       email: claims.email,
+      name: claims.name,
       platformAdmin: claims.isPlatformAdmin,
     };
 
@@ -57,15 +59,20 @@ export class TokenSignerAdapter extends TokenSigner {
       token,
       this.options.accessTokenSecret,
     );
-    if (typeof payload?.sub !== 'string' || typeof payload.email !== 'string') {
+    if (
+      typeof payload?.sub !== 'string' ||
+      typeof payload.email !== 'string' ||
+      typeof payload.name !== 'string' ||
+      typeof payload.platformAdmin !== 'boolean'
+    ) {
       return null;
     }
 
     return {
       accountId: payload.sub,
       email: payload.email,
-      // Tokens signed before the mark existed have no such claim.
-      isPlatformAdmin: payload.platformAdmin === true,
+      name: payload.name,
+      isPlatformAdmin: payload.platformAdmin,
     };
   }
 

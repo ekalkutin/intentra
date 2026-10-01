@@ -2,7 +2,7 @@ import { AgentsVersionNotFoundException } from '../exceptions/index.js';
 
 /** An Agents Version's number: 1, 2, 3… in the order they were published. */
 export class AgentsVersionNumber {
-  public static readonly First = new AgentsVersionNumber(1);
+  public static readonly One = new AgentsVersionNumber(1);
 
   readonly #value: number;
 

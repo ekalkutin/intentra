@@ -10,7 +10,6 @@ export {
   type ConversationPage,
   type ConversationQueryProps,
 } from './conversation-store.port.js';
-export { FirstAgentsVersion } from './first-agents-version.port.js';
 export {
   Orchestrator,
   type AnswerStream,

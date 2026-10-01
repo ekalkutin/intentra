@@ -53,7 +53,7 @@ export class ProviderKeyService implements ProviderKeyApi {
   ): Promise<ProviderKeyDto> {
     const id = new WorkspaceId(workspaceId);
     const secret = new ProviderKeySecret(data.key);
-    const owner = await this.accessResolver.resolve(actor, id);
+    const owner = await this.accessResolver.resolveForChange(actor, id);
     this.#providerKeyManagementService.ensureCanManage(owner);
     // Asked before the transaction: it is a call over the network.
     if (!(await this.providerKeyVerifier.isAccepted(secret))) {
@@ -81,7 +81,7 @@ export class ProviderKeyService implements ProviderKeyApi {
 
   public async remove(actor: Actor, workspaceId: string): Promise<void> {
     const id = new WorkspaceId(workspaceId);
-    const owner = await this.accessResolver.resolve(actor, id);
+    const owner = await this.accessResolver.resolveForChange(actor, id);
     this.#providerKeyManagementService.ensureCanManage(owner);
 
     await this.unitOfWork.run(async () => {

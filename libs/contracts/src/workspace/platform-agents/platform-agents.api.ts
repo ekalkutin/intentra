@@ -13,7 +13,7 @@ import type {
   UnpublishedAgentsDto,
 } from './agents-version.dto.js';
 import type { PublishAgentsDto } from './publish-agents.dto.js';
-import type { SaveAgentDto } from './save-agent.dto.js';
+import type { CreateAgentDto, SaveAgentDto } from './save-agent.dto.js';
 import type { SaveModelProfileDto } from './save-model-profile.dto.js';
 import type { SaveSkillDto } from './save-skill.dto.js';
 
@@ -25,10 +25,10 @@ import type { SaveSkillDto } from './save-skill.dto.js';
 export abstract class PlatformAgentsApi {
   abstract getUnpublished(actor: Actor): Promise<UnpublishedAgentsDto>;
 
-  /** Adds a Specialist; there is only ever one Orchestrator. */
+  /** 409 `ORCHESTRATOR_EXISTS` for a second Orchestrator. */
   abstract createAgent(
     actor: Actor,
-    data: SaveAgentDto,
+    data: CreateAgentDto,
   ): Promise<PlatformAgentDto>;
   abstract editAgent(
     actor: Actor,
@@ -68,7 +68,11 @@ export abstract class PlatformAgentsApi {
   /** What publishing now would change against the Published Agents. */
   abstract getChanges(actor: Actor): Promise<AgentsChangesDto>;
 
-  /** Publishes the Unpublished Agents as the next Agents Version, after checking them as a whole. */
+  /**
+   * Publishes the Unpublished Agents as the next Agents Version (Agents
+   * Version 1 the first time), after checking them as a whole. Until then
+   * no Workspace's Agents work.
+   */
   abstract publish(
     actor: Actor,
     data: PublishAgentsDto,

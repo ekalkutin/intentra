@@ -25,9 +25,13 @@ export {
   PersonalAccessTokenRepository,
   ProjectRepository,
   ProjectRoleAssignmentRepository,
+  WorkspaceRepository,
 } from './application/ports/outbound/index.js';
 export { Member, Project } from './domain/entities/index.js';
-export { AccessPolicyService } from './domain/services/index.js';
+export {
+  AccessPolicyService,
+  WorkspaceDeletionService,
+} from './domain/services/index.js';
 export {
   MemberId,
   MemberStatus,

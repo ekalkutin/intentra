@@ -8,15 +8,10 @@ import {
   vi,
 } from 'vitest';
 
-import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import {
-  AccountId,
-  ProjectId,
-  UnitOfWork,
-  WorkspaceId,
-} from '@intentra/shared-kernel';
+import { ProjectId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
+import { givenAccount } from '../../../../../testing/account.fixtures.js';
 import { WorkspaceModule } from '../../../../../workspace.module.js';
 import {
   Member,
@@ -29,10 +24,6 @@ import {
 import { ConversationStore } from '../../../application/ports/outbound/index.js';
 import { Conversation } from '../../../domain/entities/index.js';
 import { ConversationId } from '../../../domain/value-objects/index.js';
-
-function actor(email: string): Actor {
-  return { accountId: new AccountId().value, email, isPlatformAdmin: false };
-}
 
 type Owner = {
   readonly workspaceId: WorkspaceId;
@@ -176,7 +167,7 @@ describe('ConversationStore on Mastra Memory', () => {
   describe('cleanup', () => {
     it('deletes the Conversations of a deleted Project', async () => {
       // Arrange
-      const ada = actor('ada@example.com');
+      const ada = await givenAccount(app, 'ada@example.com');
       const workspace = await app
         .get(WorkspacesService)
         .create(ada, { name: 'Acme', slug: 'acme' });
@@ -219,7 +210,7 @@ describe('ConversationStore on Mastra Memory', () => {
 
     it('deletes the Conversations of a deleted Workspace', async () => {
       // Arrange
-      const ada = actor('ada@example.com');
+      const ada = await givenAccount(app, 'ada@example.com');
       const workspace = await app
         .get(WorkspacesService)
         .create(ada, { name: 'Acme', slug: 'acme' });
@@ -244,8 +235,8 @@ describe('ConversationStore on Mastra Memory', () => {
 
     it('deletes the Conversations of a Member who leaves', async () => {
       // Arrange
-      const ada = actor('ada@example.com');
-      const bob = actor('bob@example.com');
+      const ada = await givenAccount(app, 'ada@example.com');
+      const bob = await givenAccount(app, 'bob@example.com');
       const workspace = await app
         .get(WorkspacesService)
         .create(ada, { name: 'Acme', slug: 'acme' });
@@ -253,6 +244,7 @@ describe('ConversationStore on Mastra Memory', () => {
         workspaceId: workspace.id,
         accountId: bob.accountId,
         email: bob.email,
+        name: bob.name,
       });
       await app
         .get(UnitOfWork)

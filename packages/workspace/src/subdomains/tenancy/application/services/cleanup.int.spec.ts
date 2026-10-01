@@ -10,8 +10,9 @@ import {
 
 import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import { AccountId, UnitOfWork } from '@intentra/shared-kernel';
+import { UnitOfWork } from '@intentra/shared-kernel';
 
+import { givenAccount } from '../../../../testing/account.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import { Member } from '../../domain/entities/index.js';
 import { Cleanup, MemberRepository } from '../ports/outbound/index.js';
@@ -19,10 +20,6 @@ import { Cleanup, MemberRepository } from '../ports/outbound/index.js';
 import { MembersService } from './members.service.js';
 import { ProjectsService } from './projects.service.js';
 import { WorkspacesService } from './workspaces.service.js';
-
-function actor(email: string): Actor {
-  return { accountId: new AccountId().value, email, isPlatformAdmin: false };
-}
 
 describe('Cleanup integration', () => {
   let app: TestingApp;
@@ -48,7 +45,7 @@ describe('Cleanup integration', () => {
 
   it('cleans up after a deleted Project', async () => {
     // Arrange
-    const ada = actor('ada@example.com');
+    const ada = await givenAccount(app, 'ada@example.com');
     const workspaceId = await createWorkspace(ada);
     const project = await app
       .get(ProjectsService)
@@ -66,7 +63,7 @@ describe('Cleanup integration', () => {
 
   it('cleans up after a deleted Workspace', async () => {
     // Arrange
-    const ada = actor('ada@example.com');
+    const ada = await givenAccount(app, 'ada@example.com');
     const workspaceId = await createWorkspace(ada);
     const cleaningUp = vi.spyOn(app.get(Cleanup), 'afterWorkspaceDeleted');
 
@@ -81,13 +78,14 @@ describe('Cleanup integration', () => {
 
   it('cleans up after a Member who leaves', async () => {
     // Arrange
-    const ada = actor('ada@example.com');
-    const bob = actor('bob@example.com');
+    const ada = await givenAccount(app, 'ada@example.com');
+    const bob = await givenAccount(app, 'bob@example.com');
     const workspaceId = await createWorkspace(ada);
     const member = Member.join({
       workspaceId,
       accountId: bob.accountId,
       email: bob.email,
+      name: bob.name,
     });
     await app.get(UnitOfWork).run(() => app.get(MemberRepository).save(member));
     const cleaningUp = vi.spyOn(app.get(Cleanup), 'afterMemberRemoved');

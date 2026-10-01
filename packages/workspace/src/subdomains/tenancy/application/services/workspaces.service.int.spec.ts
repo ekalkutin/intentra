@@ -8,10 +8,10 @@ import {
   vi,
 } from 'vitest';
 
-import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import { AccountId, UnitOfWork } from '@intentra/shared-kernel';
+import { UnitOfWork } from '@intentra/shared-kernel';
 
+import { givenAccount } from '../../../../testing/account.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import { Member } from '../../domain/entities/index.js';
 import { WorkspaceSlugMismatchException } from '../../domain/exceptions/index.js';
@@ -21,14 +21,6 @@ import { MemberRepository } from '../ports/outbound/index.js';
 import { InvitationsService } from './invitations.service.js';
 import { ProjectsService } from './projects.service.js';
 import { WorkspacesService } from './workspaces.service.js';
-
-function actor(): Actor {
-  return {
-    accountId: new AccountId().value,
-    email: 'ada@example.com',
-    isPlatformAdmin: false,
-  };
-}
 
 describe('WorkspacesService integration', () => {
   let app: TestingApp;
@@ -48,7 +40,7 @@ describe('WorkspacesService integration', () => {
     it('lists the new Workspace for its creator', async () => {
       // Arrange
       const service = app.get(WorkspacesService);
-      const ada = actor();
+      const ada = await givenAccount(app);
 
       // Act
       const created = await service.create(ada, {
@@ -61,6 +53,7 @@ describe('WorkspacesService integration', () => {
         id: expect.any(String),
         name: 'Acme Corp',
         slug: 'acme-corp',
+        suspended: false,
       });
       await expect(service.list(ada)).resolves.toEqual([created]);
     });
@@ -68,10 +61,13 @@ describe('WorkspacesService integration', () => {
     it('rejects a slug another Workspace already has', async () => {
       // Arrange
       const service = app.get(WorkspacesService);
-      await service.create(actor(), { name: 'Acme', slug: 'acme' });
+      await service.create(await givenAccount(app), {
+        name: 'Acme',
+        slug: 'acme',
+      });
 
       // Act
-      const creation = service.create(actor(), {
+      const creation = service.create(await givenAccount(app), {
         name: 'Other Acme',
         slug: 'acme',
       });
@@ -85,7 +81,7 @@ describe('WorkspacesService integration', () => {
     it('keeps nothing when saving the Owner fails', async () => {
       // Arrange
       const service = app.get(WorkspacesService);
-      const ada = actor();
+      const ada = await givenAccount(app);
       vi.spyOn(app.get(MemberRepository), 'save').mockRejectedValueOnce(
         new Error('Owner not saved'),
       );
@@ -105,10 +101,13 @@ describe('WorkspacesService integration', () => {
     it('shows only the Actor’s Workspaces, sorted by name', async () => {
       // Arrange
       const service = app.get(WorkspacesService);
-      const ada = actor();
+      const ada = await givenAccount(app);
       await service.create(ada, { name: 'Zeta', slug: 'zeta' });
       await service.create(ada, { name: 'Alpha', slug: 'alpha' });
-      await service.create(actor(), { name: 'Beta', slug: 'beta' });
+      await service.create(await givenAccount(app), {
+        name: 'Beta',
+        slug: 'beta',
+      });
 
       // Act
       const workspaces = await service.list(ada);
@@ -123,8 +122,8 @@ describe('WorkspacesService integration', () => {
     it('hides a Workspace the Actor was removed from', async () => {
       // Arrange
       const service = app.get(WorkspacesService);
-      const ada = actor();
-      const bob = actor();
+      const ada = await givenAccount(app);
+      const bob = await givenAccount(app);
       const workspace = await service.create(ada, {
         name: 'Acme',
         slug: 'acme',
@@ -133,6 +132,7 @@ describe('WorkspacesService integration', () => {
         workspaceId: workspace.id,
         accountId: bob.accountId,
         email: bob.email,
+        name: bob.name,
       });
       member.remove();
       await app
@@ -151,7 +151,7 @@ describe('WorkspacesService integration', () => {
     it('deletes the Workspace with everything in it and frees its slug', async () => {
       // Arrange
       const service = app.get(WorkspacesService);
-      const ada = actor();
+      const ada = await givenAccount(app);
       const workspace = await service.create(ada, {
         name: 'Acme',
         slug: 'acme',
@@ -171,7 +171,7 @@ describe('WorkspacesService integration', () => {
       await expect(
         app
           .get(InvitationsService)
-          .listReceived({ ...actor(), email: 'bob@example.com' }),
+          .listReceived({ ...ada, email: 'bob@example.com' }),
       ).resolves.toEqual([]);
       const recreated = await service.create(ada, {
         name: 'Acme',
@@ -185,7 +185,7 @@ describe('WorkspacesService integration', () => {
     it('keeps everything when the slug does not match', async () => {
       // Arrange
       const service = app.get(WorkspacesService);
-      const ada = actor();
+      const ada = await givenAccount(app);
       const workspace = await service.create(ada, {
         name: 'Acme',
         slug: 'acme',

@@ -6,6 +6,7 @@ import type {
   RefreshTokensDto,
   RegisterAccountDto,
   SignInDto,
+  SignUpContext,
   TokenPair,
 } from '@intentra/contracts/iam';
 import { AccountId, Email, UnitOfWork } from '@intentra/shared-kernel';
@@ -19,6 +20,7 @@ import {
 import {
   AccountRepository,
   PasswordHasher,
+  SignUpSettingsRepository,
   TokenSigner,
 } from '../ports/outbound/index.js';
 
@@ -29,11 +31,21 @@ export class AuthService implements AuthApi {
     private readonly accountRepository: AccountRepository,
     private readonly passwordHasher: PasswordHasher,
     private readonly tokenSigner: TokenSigner,
+    private readonly signUpSettingsRepository: SignUpSettingsRepository,
   ) {}
 
-  public async register(data: RegisterAccountDto): Promise<void> {
+  public async register(
+    data: RegisterAccountDto,
+    { invited }: SignUpContext,
+  ): Promise<void> {
+    const settings = await this.signUpSettingsRepository.getOne();
+    settings.ensureAllows(invited);
     const passwordHash = await this.passwordHasher.hash(data.password);
-    const account = Account.register({ email: data.email, passwordHash });
+    const account = Account.register({
+      email: data.email,
+      name: data.name,
+      passwordHash,
+    });
 
     await this.unitOfWork.run(() => this.accountRepository.save(account));
   }
@@ -49,6 +61,7 @@ export class AuthService implements AuthApi {
     if (!account || !passwordMatches) {
       throw new InvalidCredentialsException();
     }
+    account.ensureNotBlocked();
 
     return this.issueTokens(account);
   }
@@ -64,6 +77,7 @@ export class AuthService implements AuthApi {
     if (!account) {
       throw new InvalidRefreshTokenException();
     }
+    account.ensureNotBlocked();
 
     return this.issueTokens(account);
   }
@@ -78,6 +92,7 @@ export class AuthService implements AuthApi {
     return {
       accountId: claims.accountId,
       email: claims.email,
+      name: claims.name,
       isPlatformAdmin: claims.isPlatformAdmin,
     };
   }
@@ -88,6 +103,7 @@ export class AuthService implements AuthApi {
       this.tokenSigner.signAccessToken({
         accountId,
         email: account.email.value,
+        name: account.name.value,
         isPlatformAdmin: account.isPlatformAdmin,
       }),
       this.tokenSigner.signRefreshToken({ accountId }),

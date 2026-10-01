@@ -2,10 +2,8 @@ import type { MastraModelConfig } from '@mastra/core/llm';
 
 /** How the server runs Intentra's own Agents. */
 export type AgentsOptions = {
-  /** The one model every Agent runs on for now, on the Workspace's Provider Key. */
-  readonly model: (providerKey: string) => MastraModelConfig;
-  /** The model of the built-in Model Profile in Agents Version 1, made the first time the Agents are needed. */
-  readonly firstModelId: string;
+  /** A Model Profile's model on the Workspace's Provider Key. */
+  readonly model: (modelId: string, providerKey: string) => MastraModelConfig;
   /**
    * 32 bytes in base64 that encrypt every Provider Key; required to add or use
    * one. Changing it makes the stored keys unreadable.
@@ -20,11 +18,11 @@ export type AgentsOptions = {
 };
 
 export const DEFAULT_AGENTS_OPTIONS: AgentsOptions = {
-  model: providerKey => ({
-    id: 'openrouter/anthropic/claude-sonnet-5',
+  // A Model Profile's model id always reads `openrouter/<vendor>/<model>`.
+  model: (modelId, providerKey) => ({
+    id: modelId as `${string}/${string}`,
     apiKey: providerKey,
   }),
-  firstModelId: 'openrouter/anthropic/claude-sonnet-5',
   providerKeyEncryptionKey: null,
   maxSteps: 25,
   timeoutMs: 3 * 60 * 1000,

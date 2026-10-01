@@ -1,6 +1,6 @@
 import { baseApi, sessionTokens } from '@/shared/api';
 import type {
-  Actor,
+  MeDto,
   RegisterAccountDto,
   SignInDto,
   TokenPair,
@@ -19,7 +19,7 @@ export const sessionApi = baseApi.injectEndpoints({
         sessionTokens.set(data);
       },
     }),
-    me: build.query<Actor, void>({
+    me: build.query<MeDto, void>({
       query: () => '/iam/me',
     }),
   }),

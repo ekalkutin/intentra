@@ -10,13 +10,9 @@ import {
   type RecordKnowledgeItemDto,
 } from '@intentra/contracts/workspace';
 import { TestingApp } from '@intentra/platform-testing';
-import {
-  AccountId,
-  ProjectId,
-  UnitOfWork,
-  WorkspaceId,
-} from '@intentra/shared-kernel';
+import { ProjectId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
+import { givenAccount } from '../../../../testing/account.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import {
   Member,
@@ -50,10 +46,6 @@ import {
 } from '../ports/outbound/index.js';
 
 import { KnowledgeService } from './knowledge.service.js';
-
-function actor(email: string): Actor {
-  return { accountId: new AccountId().value, email, isPlatformAdmin: false };
-}
 
 function person(actor: Actor): CallerDto {
   return { actor, agent: null };
@@ -156,8 +148,8 @@ describe('KnowledgeService integration', () => {
   async function setUp(
     bobRole: ProjectRole = ProjectRole.Viewer,
   ): Promise<Setup> {
-    const ada = actor('ada@example.com');
-    const bob = actor('bob@example.com');
+    const ada = await givenAccount(app, 'ada@example.com');
+    const bob = await givenAccount(app, 'bob@example.com');
     const workspace = await app
       .get(WorkspacesService)
       .create(ada, { name: 'Acme', slug: 'acme' });
@@ -165,6 +157,7 @@ describe('KnowledgeService integration', () => {
       workspaceId: workspace.id,
       accountId: bob.accountId,
       email: bob.email,
+      name: bob.name,
     });
     await app.get(UnitOfWork).run(() => app.get(MemberRepository).save(member));
     const project = await app
@@ -310,7 +303,7 @@ describe('KnowledgeService integration', () => {
       const recording = app
         .get(KnowledgeService)
         .record(
-          person(actor('eve@example.com')),
+          person(await givenAccount(app, 'eve@example.com')),
           workspaceId,
           projectId,
           term('Invoice'),

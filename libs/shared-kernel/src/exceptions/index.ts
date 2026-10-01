@@ -5,6 +5,8 @@ export { DomainException } from './domain.exception.js';
 export { ForbiddenException } from './forbidden.exception.js';
 export { InvalidEmailException } from './invalid-email.exception.js';
 export { InvalidEntityIdException } from './invalid-entity-id.exception.js';
+export { InvalidPersonNameException } from './invalid-person-name.exception.js';
 export { NotFoundException } from './not-found.exception.js';
+export { NotPlatformAdminException } from './not-platform-admin.exception.js';
 export { UnauthorizedException } from './unauthorized.exception.js';
 export { UnavailableException } from './unavailable.exception.js';

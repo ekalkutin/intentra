@@ -10,8 +10,9 @@ import {
 
 import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import { AccountId, WorkspaceId } from '@intentra/shared-kernel';
+import { WorkspaceId } from '@intentra/shared-kernel';
 
+import { givenAccount } from '../../../../testing/account.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import { WorkspacesService } from '../../../tenancy/index.js';
 import {
@@ -22,10 +23,6 @@ import {
 import { ProviderKeyService } from './provider-key.service.js';
 
 const KEY = 'sk-or-v1-0123456789abcdef';
-
-function actor(email: string): Actor {
-  return { accountId: new AccountId().value, email, isPlatformAdmin: false };
-}
 
 describe('ProviderKeyService integration', () => {
   let app: TestingApp;
@@ -51,7 +48,7 @@ describe('ProviderKeyService integration', () => {
 
   /** Ada owns the Workspace and has added a key that OpenRouter accepted. */
   async function setUp(): Promise<{ ada: Actor; workspaceId: string }> {
-    const ada = actor('ada@example.com');
+    const ada = await givenAccount(app, 'ada@example.com');
     const workspace = await app
       .get(WorkspacesService)
       .create(ada, { name: 'Acme', slug: 'acme' });

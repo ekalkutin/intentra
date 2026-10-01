@@ -7,6 +7,7 @@ export const ru = {
     repeatPassword: 'Повторите пароль',
     passwordHint: 'Не меньше 8 символов.',
     passwordsDiffer: 'Пароли не совпадают',
+    personName: 'Имя',
     name: 'Название',
     slug: 'Адрес',
     slugHint:
@@ -704,6 +705,10 @@ export const ru = {
     fallback: 'Что-то пошло не так. Попробуйте ещё раз',
     INVALID_CREDENTIALS: 'Неверный email или пароль',
     ACCOUNT_ALREADY_EXISTS: 'Аккаунт с этим email уже есть',
+    ACCOUNT_BLOCKED: 'Аккаунт заблокирован',
+    SIGN_UP_CLOSED:
+      'Регистрация пока только по приглашению: попросите владельца пространства пригласить этот email',
+    INVALID_PERSON_NAME: 'Введите имя до 100 символов',
     VALIDATION_FAILED: 'Проверьте введённые данные',
     UNAUTHENTICATED: 'Войдите снова',
     INTERNAL: 'На сервере что-то сломалось. Попробуйте позже',

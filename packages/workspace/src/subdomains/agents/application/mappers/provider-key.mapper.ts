@@ -14,6 +14,7 @@ export function toProviderKeyDto(
     hint: key.hint.value,
     addedByMemberId: key.addedBy.value,
     addedByEmail: addedBy?.email.value ?? null,
+    addedByName: addedBy?.name.value ?? null,
     addedAt: toIsoString(key.addedAt),
   };
 }

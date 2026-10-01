@@ -28,7 +28,6 @@ export class UnpublishedAgentsRepositoryAdapter extends UnpublishedAgentsReposit
         { _id: unpublished.id.value },
         {
           content: toAgentsContentDocument(unpublished.content),
-          publishedNumber: unpublished.publishedNumber.value,
         },
         { upsert: true, session: this.unitOfWork.requireSession() },
       )
@@ -49,7 +48,6 @@ export class UnpublishedAgentsRepositoryAdapter extends UnpublishedAgentsReposit
     return UnpublishedAgents.restore({
       id: document._id.toHexString(),
       content: toAgentsContent(document.content),
-      publishedNumber: document.publishedNumber,
     });
   }
 }

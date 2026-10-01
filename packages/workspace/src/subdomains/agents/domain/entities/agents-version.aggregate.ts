@@ -14,7 +14,7 @@ export class AgentsVersion extends Aggregate<AgentsVersionId> {
   readonly #number: AgentsVersionNumber;
   readonly #content: AgentsContent;
   readonly #note: PublishingNote | null;
-  readonly #publisher: Publisher | null;
+  readonly #publisher: Publisher;
   readonly #publishedAt: Temporal.Instant;
 
   private constructor(id: AgentsVersionId, state: AgentsVersionState) {
@@ -38,24 +38,12 @@ export class AgentsVersion extends Aggregate<AgentsVersionId> {
     return this.#note;
   }
 
-  /** Null for Agents Version 1, made from what the code held before. */
-  get publisher(): Publisher | null {
+  get publisher(): Publisher {
     return this.#publisher;
   }
 
   get publishedAt(): Temporal.Instant {
     return this.#publishedAt;
-  }
-
-  /** Agents Version 1: the Agents as the code held them before they became data. */
-  public static first(content: AgentsContent): AgentsVersion {
-    return new AgentsVersion(new AgentsVersionId(), {
-      number: AgentsVersionNumber.First,
-      content,
-      note: null,
-      publisher: null,
-      publishedAt: Temporal.Now.instant(),
-    });
   }
 
   public static publish(props: AgentsVersionPublishProps): AgentsVersion {
@@ -76,13 +64,10 @@ export class AgentsVersion extends Aggregate<AgentsVersionId> {
       number: new AgentsVersionNumber(props.number),
       content: props.content,
       note: props.note === null ? null : new PublishingNote(props.note),
-      publisher:
-        props.publisherAccountId === null || props.publisherEmail === null
-          ? null
-          : new Publisher(
-              new AccountId(props.publisherAccountId),
-              new Email(props.publisherEmail),
-            ),
+      publisher: new Publisher(
+        new AccountId(props.publisherAccountId),
+        new Email(props.publisherEmail),
+      ),
       publishedAt: props.publishedAt,
     });
   }
@@ -92,7 +77,7 @@ type AgentsVersionState = {
   readonly number: AgentsVersionNumber;
   readonly content: AgentsContent;
   readonly note: PublishingNote | null;
-  readonly publisher: Publisher | null;
+  readonly publisher: Publisher;
   readonly publishedAt: Temporal.Instant;
 };
 type AgentsVersionPublishProps = {
@@ -102,12 +87,7 @@ type AgentsVersionPublishProps = {
   readonly publisherAccountId: string;
   readonly publisherEmail: string;
 };
-type AgentsVersionRestoreProps = {
+type AgentsVersionRestoreProps = AgentsVersionPublishProps & {
   readonly id: string;
-  readonly number: number;
-  readonly content: AgentsContent;
-  readonly note: string | null;
-  readonly publisherAccountId: string | null;
-  readonly publisherEmail: string | null;
   readonly publishedAt: Temporal.Instant;
 };

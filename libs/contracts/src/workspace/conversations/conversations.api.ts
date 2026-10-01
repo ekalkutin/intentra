@@ -53,12 +53,17 @@ export abstract class ConversationsApi {
 
   /**
    * Sends the Member's message and streams the Orchestrator's answer as AI
-   * SDK UI message chunks. The client chooses the id of a new Conversation
+   * SDK UI message chunks, the first one (`AGENTS_IN_USE_CHUNK_TYPE`,
+   * transient) telling which Agents make it: the Published Agents, or in a
+   * Platform Admin's own Conversation the Unpublished Agents. The client chooses the id of a new Conversation
    * (a UUID); its first message creates it, and a message to a hidden one
    * shows it again. The answer runs to the end even if nobody reads the
    * stream. Refused while an answer in the Conversation
-   * is still running (409 `CONVERSATION_BUSY`) and while the Workspace has
-   * no Provider Key (412 `PROVIDER_KEY_MISSING`).
+   * is still running (409 `CONVERSATION_BUSY`), while the Workspace has
+   * no Provider Key (412 `PROVIDER_KEY_MISSING`), while no Agents are
+   * published (412 `AGENTS_NOT_PUBLISHED`), and for a Platform Admin while
+   * the Unpublished Agents could not be published (409
+   * `AGENTS_NOT_PUBLISHABLE`).
    */
   abstract send(
     actor: Actor,

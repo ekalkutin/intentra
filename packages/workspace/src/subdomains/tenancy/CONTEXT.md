@@ -13,7 +13,7 @@ A short, globally unique, human-readable handle of a Workspace used in its addre
 _Avoid_: Handle, Alias, Subdomain
 
 **Suspended Workspace**:
-A Workspace a Platform Admin has suspended, until a Platform Admin resumes it. Its people can still sign in and see everything in it, but nothing in it can be changed: no Knowledge, no Members, Roles or Invitations, no Projects, and no AI works with it: its Agents do not run and external agents cannot reach it over MCP at all. Its Owners can still delete it.
+A Workspace a Platform Admin has suspended, until a Platform Admin resumes it. Its people can still sign in and see everything in it, but nothing in it can be changed: no Knowledge, no Members, Roles or Invitations, no Projects, and no AI works with it: its Agents do not run and external agents cannot reach it over MCP at all. What only takes access away still works: its Owners can delete it, a Member can leave it, and a Personal Access Token can be revoked.
 _Avoid_: Blocked, Frozen, Disabled, Banned
 
 **Member**:

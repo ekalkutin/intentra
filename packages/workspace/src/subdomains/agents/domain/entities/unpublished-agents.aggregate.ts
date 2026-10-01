@@ -5,6 +5,7 @@ import {
   InvalidAgentException,
   ModelProfileInUseException,
   ModelProfileNotFoundException,
+  OrchestratorExistsException,
   OrchestratorNotRemovableException,
   SkillNameTakenException,
   SkillNotFoundException,
@@ -12,7 +13,6 @@ import {
 import {
   AgentId,
   AgentRole,
-  AgentsVersionNumber,
   ModelProfileId,
   SkillId,
   ToolName,
@@ -30,31 +30,20 @@ import { Skill, type SkillSpec } from './skill.entity.js';
  */
 export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
   #content: AgentsContent;
-  #publishedNumber: AgentsVersionNumber;
 
   private constructor(id: UnpublishedAgentsId, state: UnpublishedAgentsState) {
     super(id);
     this.#content = state.content;
-    this.#publishedNumber = state.publishedNumber;
   }
 
   get content(): AgentsContent {
     return this.#content;
   }
 
-  /** The Published Agents' number, which this started from. */
-  get publishedNumber(): AgentsVersionNumber {
-    return this.#publishedNumber;
-  }
-
-  /** Starts as the same as the Agents Version given, normally the first. */
-  public static startFrom(
-    content: AgentsContent,
-    publishedNumber: AgentsVersionNumber,
-  ): UnpublishedAgents {
+  /** Nothing yet: a Platform Admin creates the Orchestrator and the rest. */
+  public static empty(): UnpublishedAgents {
     return new UnpublishedAgents(new UnpublishedAgentsId(), {
-      content,
-      publishedNumber,
+      content: AgentsContent.empty(),
     });
   }
 
@@ -63,15 +52,22 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
   ): UnpublishedAgents {
     return new UnpublishedAgents(new UnpublishedAgentsId(props.id), {
       content: props.content,
-      publishedNumber: new AgentsVersionNumber(props.publishedNumber),
     });
   }
 
-  public addSpecialist(
+  /** Any number of Specialists, but only one Orchestrator. */
+  public addAgent(
+    role: AgentRole,
     spec: AgentSpec,
     availableTools: readonly ToolName[],
   ): Agent {
-    const agent = Agent.create(new AgentId(), AgentRole.Specialist, spec);
+    const agent = Agent.create(new AgentId(), role, spec);
+    if (
+      agent.isOrchestrator() &&
+      this.#content.agents.some(other => other.isOrchestrator())
+    ) {
+      throw new OrchestratorExistsException();
+    }
     this.ensureSound(agent, availableTools);
     this.replace({ agents: [...this.#content.agents, agent] });
 
@@ -174,11 +170,6 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
     });
   }
 
-  /** Now the same as the Agents Version just published. */
-  public markPublished(number: AgentsVersionNumber): void {
-    this.#publishedNumber = number;
-  }
-
   /** Replaces everything, such as with an earlier Agents Version to publish again. */
   public resetTo(content: AgentsContent): void {
     this.#content = content;
@@ -268,10 +259,8 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
 
 type UnpublishedAgentsState = {
   readonly content: AgentsContent;
-  readonly publishedNumber: AgentsVersionNumber;
 };
 type UnpublishedAgentsRestoreProps = {
   readonly id: string;
   readonly content: AgentsContent;
-  readonly publishedNumber: number;
 };

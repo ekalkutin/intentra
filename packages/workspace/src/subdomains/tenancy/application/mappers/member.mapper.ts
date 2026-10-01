@@ -6,6 +6,7 @@ export function toMemberDto(member: Member): MemberDto {
   return {
     id: member.id.value,
     email: member.email.value,
+    name: member.name.value,
     role: (member.role?.value ?? null) as RoleDto | null,
   };
 }

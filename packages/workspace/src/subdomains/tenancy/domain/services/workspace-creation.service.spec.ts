@@ -19,6 +19,7 @@ describe('WorkspaceCreationService', () => {
       slug: 'acme-corp',
       accountId: accountId.value,
       email: 'member@example.com',
+      ownerName: 'Ada',
     });
 
     // Assert
@@ -36,6 +37,7 @@ describe('WorkspaceCreationService', () => {
         slug: 'Acme Corp',
         accountId: new AccountId().value,
         email: 'member@example.com',
+        ownerName: 'Ada',
       });
 
     // Assert

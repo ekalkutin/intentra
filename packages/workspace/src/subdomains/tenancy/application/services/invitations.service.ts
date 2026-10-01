@@ -57,7 +57,7 @@ export class InvitationsService implements InvitationsApi {
 
     return this.unitOfWork.run(async () => {
       await this.workspaceRepository.lock(id);
-      const inviter = await this.accessResolver.resolve(actor, id);
+      const inviter = await this.accessResolver.resolveForChange(actor, id);
       const workspace = await this.workspaceRepository.getOne({ id });
       const invitee = await this.memberRepository.findOne({
         workspaceId: id,
@@ -103,7 +103,7 @@ export class InvitationsService implements InvitationsApi {
     invitationId: string,
   ): Promise<InvitationDto> {
     const id = new WorkspaceId(workspaceId);
-    const member = await this.accessResolver.resolve(actor, id);
+    const member = await this.accessResolver.resolveForChange(actor, id);
 
     return this.unitOfWork.run(async () => {
       this.ensureOwner(member);
@@ -160,6 +160,8 @@ export class InvitationsService implements InvitationsApi {
       const workspace = await this.workspaceRepository.getOne({
         id: invitation.workspaceId,
       });
+      // Joining changes who is in it; declining only turns access down.
+      workspace.ensureChangeable();
       const member = await this.memberRepository.findOne({
         workspaceId: invitation.workspaceId,
         accountId: new AccountId(actor.accountId),
@@ -167,6 +169,7 @@ export class InvitationsService implements InvitationsApi {
 
       const joined = this.#invitationAcceptanceService.accept(invitation, {
         accountId: actor.accountId,
+        name: actor.name,
         member,
       });
       await this.invitationRepository.save(invitation);
@@ -191,6 +194,16 @@ export class InvitationsService implements InvitationsApi {
 
       return toInvitationDto(invitation, workspace);
     });
+  }
+
+  public async hasPending(email: string): Promise<boolean> {
+    const invitations = await this.invitationRepository.findMany({
+      email: new Email(email),
+      status: InvitationStatus.Pending,
+    });
+
+    // One past its expiry is stored as pending but is no longer.
+    return invitations.some(invitation => invitation.isPending());
   }
 
   /** Someone else's Invitation is reported as missing, not as forbidden. */

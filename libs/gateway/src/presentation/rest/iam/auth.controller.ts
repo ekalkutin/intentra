@@ -17,16 +17,25 @@ import {
   type SignInDto,
   type TokenPair,
 } from '@intentra/contracts/iam';
+import { WorkspaceApi } from '@intentra/contracts/workspace';
 
 @Controller('iam/auth')
 export class AuthController {
-  constructor(@Inject(IamApi) private readonly iam: IamApi) {}
+  constructor(
+    @Inject(IamApi) private readonly iam: IamApi,
+    @Inject(WorkspaceApi) private readonly workspace: WorkspaceApi,
+  ) {}
 
+  /**
+   * IAM never reads Invitations: while Open Sign-up is off, Workspace is
+   * asked whether the email was invited, and IAM gets only the answer.
+   */
   @Post('sign-up')
   public async signUp(
     @Body({ schema: RegisterAccountDtoSchema }) data: RegisterAccountDto,
   ): Promise<void> {
-    await this.iam.auth.register(data);
+    const invited = await this.workspace.invitations.hasPending(data.email);
+    await this.iam.auth.register(data, { invited });
   }
 
   @Post('sign-in')

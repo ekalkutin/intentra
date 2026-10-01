@@ -6,7 +6,8 @@ import { IamModule } from '@intentra/iam';
 import { TestingApp } from '@intentra/platform-testing';
 import { WorkspaceModule } from '@intentra/workspace';
 
-const SIGN_UP_PATH = '/api/iam/auth/sign-up';
+import { signUp } from './support/sign-up.js';
+
 const SIGN_IN_PATH = '/api/iam/auth/sign-in';
 const REFRESH_PATH = '/api/iam/auth/refresh';
 const ME_PATH = '/api/iam/me';
@@ -45,7 +46,7 @@ describe('IAM authentication', () => {
     accessToken: string;
     refreshToken: string;
   }> {
-    await app.request().post(SIGN_UP_PATH).send(credentials);
+    await signUp(app, credentials);
     const response = await app
       .request()
       .post(SIGN_IN_PATH)
@@ -58,7 +59,7 @@ describe('IAM authentication', () => {
   describe('POST /api/iam/auth/sign-in', () => {
     it('returns a token pair', async () => {
       // Arrange
-      await app.request().post(SIGN_UP_PATH).send(credentials);
+      await signUp(app, credentials);
 
       // Act
       const response = app.request().post(SIGN_IN_PATH).send(credentials);
@@ -72,7 +73,7 @@ describe('IAM authentication', () => {
 
     it('rejects a wrong password', async () => {
       // Arrange
-      await app.request().post(SIGN_UP_PATH).send(credentials);
+      await signUp(app, credentials);
 
       // Act
       const response = app
@@ -133,6 +134,7 @@ describe('IAM authentication', () => {
         expect(res.body).toEqual({
           accountId: expect.any(String),
           email: credentials.email,
+          name: 'ada',
           isPlatformAdmin: false,
         }),
       );

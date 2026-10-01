@@ -12,5 +12,7 @@ export type ProjectRoleDto = z.infer<typeof ProjectRoleDtoSchema>;
 export type MemberProjectRoleDto = {
   readonly memberId: string;
   readonly email: string;
+  /** Its Account's current name. */
+  readonly name: string;
   readonly role: ProjectRoleDto;
 };

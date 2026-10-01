@@ -2,13 +2,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
-import {
-  AccountId,
-  ProjectId,
-  UnitOfWork,
-  WorkspaceId,
-} from '@intentra/shared-kernel';
+import { ProjectId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
+import { givenAccount } from '../../../../testing/account.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import { Member } from '../../domain/entities/index.js';
 import {
@@ -26,14 +22,6 @@ import { MemberRepository } from '../ports/outbound/index.js';
 
 import { ProjectsService } from './projects.service.js';
 import { WorkspacesService } from './workspaces.service.js';
-
-function actor(): Actor {
-  return {
-    accountId: new AccountId().value,
-    email: 'ada@example.com',
-    isPlatformAdmin: false,
-  };
-}
 
 describe('ProjectsService integration', () => {
   let app: TestingApp;
@@ -58,11 +46,12 @@ describe('ProjectsService integration', () => {
     workspaceId: string,
     role: Role | null = null,
   ): Promise<Actor> {
-    const joiner = actor();
+    const joiner = await givenAccount(app);
     const member = Member.join({
       workspaceId,
       accountId: joiner.accountId,
       email: joiner.email,
+      name: joiner.name,
     });
     member.changeRole(role);
     await app.get(UnitOfWork).run(() => app.get(MemberRepository).save(member));
@@ -73,7 +62,7 @@ describe('ProjectsService integration', () => {
   describe('create', () => {
     it('lets the Owner create a Project', async () => {
       // Arrange
-      const owner = actor();
+      const owner = await givenAccount(app);
       const workspaceId = await createWorkspace(owner);
 
       // Act
@@ -91,7 +80,7 @@ describe('ProjectsService integration', () => {
 
     it('rejects a Member without a Role', async () => {
       // Arrange
-      const workspaceId = await createWorkspace(actor());
+      const workspaceId = await createWorkspace(await givenAccount(app));
       const member = await addMember(workspaceId);
 
       // Act
@@ -107,7 +96,7 @@ describe('ProjectsService integration', () => {
 
     it('lets a Manager create a Project', async () => {
       // Arrange
-      const workspaceId = await createWorkspace(actor());
+      const workspaceId = await createWorkspace(await givenAccount(app));
       const manager = await addMember(workspaceId, Role.Manager);
 
       // Act
@@ -121,12 +110,15 @@ describe('ProjectsService integration', () => {
 
     it('hides the Workspace from an outsider', async () => {
       // Arrange
-      const workspaceId = await createWorkspace(actor());
+      const workspaceId = await createWorkspace(await givenAccount(app));
 
       // Act
       const creation = app
         .get(ProjectsService)
-        .create(actor(), workspaceId, { name: 'Billing', slug: 'billing' });
+        .create(await givenAccount(app), workspaceId, {
+          name: 'Billing',
+          slug: 'billing',
+        });
 
       // Assert
       await expect(creation).rejects.toBeInstanceOf(WorkspaceNotFoundException);
@@ -134,7 +126,7 @@ describe('ProjectsService integration', () => {
 
     it('rejects a slug taken in the same Workspace', async () => {
       // Arrange
-      const owner = actor();
+      const owner = await givenAccount(app);
       const workspaceId = await createWorkspace(owner);
       const service = app.get(ProjectsService);
       await service.create(owner, workspaceId, {
@@ -154,8 +146,8 @@ describe('ProjectsService integration', () => {
 
     it('allows the same slug in another Workspace', async () => {
       // Arrange
-      const ada = actor();
-      const bob = actor();
+      const ada = await givenAccount(app);
+      const bob = await givenAccount(app);
       const service = app.get(ProjectsService);
       const adaWorkspaceId = await createWorkspace(ada);
       const bobWorkspace = await app
@@ -180,7 +172,7 @@ describe('ProjectsService integration', () => {
   describe('list', () => {
     it('shows the Projects to every Member, sorted by name', async () => {
       // Arrange
-      const owner = actor();
+      const owner = await givenAccount(app);
       const workspaceId = await createWorkspace(owner);
       const member = await addMember(workspaceId);
       const service = app.get(ProjectsService);
@@ -196,10 +188,12 @@ describe('ProjectsService integration', () => {
 
     it('hides the Workspace from an outsider', async () => {
       // Arrange
-      const workspaceId = await createWorkspace(actor());
+      const workspaceId = await createWorkspace(await givenAccount(app));
 
       // Act
-      const listing = app.get(ProjectsService).list(actor(), workspaceId);
+      const listing = app
+        .get(ProjectsService)
+        .list(await givenAccount(app), workspaceId);
 
       // Assert
       await expect(listing).rejects.toBeInstanceOf(WorkspaceNotFoundException);
@@ -209,7 +203,7 @@ describe('ProjectsService integration', () => {
       // Act
       const listing = app
         .get(ProjectsService)
-        .list(actor(), new WorkspaceId().value);
+        .list(await givenAccount(app), new WorkspaceId().value);
 
       // Assert
       await expect(listing).rejects.toBeInstanceOf(WorkspaceNotFoundException);
@@ -219,7 +213,7 @@ describe('ProjectsService integration', () => {
   describe('delete', () => {
     it('lets the Owner delete a Project, freeing its slug', async () => {
       // Arrange
-      const owner = actor();
+      const owner = await givenAccount(app);
       const workspaceId = await createWorkspace(owner);
       const service = app.get(ProjectsService);
       const project = await service.create(owner, workspaceId, {
@@ -242,7 +236,7 @@ describe('ProjectsService integration', () => {
 
     it('keeps the Project when the slug does not match', async () => {
       // Arrange
-      const owner = actor();
+      const owner = await givenAccount(app);
       const workspaceId = await createWorkspace(owner);
       const service = app.get(ProjectsService);
       const project = await service.create(owner, workspaceId, {
@@ -266,7 +260,7 @@ describe('ProjectsService integration', () => {
 
     it('lets a Manager delete a Project they created', async () => {
       // Arrange
-      const workspaceId = await createWorkspace(actor());
+      const workspaceId = await createWorkspace(await givenAccount(app));
       const manager = await addMember(workspaceId, Role.Manager);
       const service = app.get(ProjectsService);
       const project = await service.create(manager, workspaceId, {
@@ -285,7 +279,7 @@ describe('ProjectsService integration', () => {
 
     it('rejects a Manager deleting a Project someone else created', async () => {
       // Arrange
-      const owner = actor();
+      const owner = await givenAccount(app);
       const workspaceId = await createWorkspace(owner);
       const manager = await addMember(workspaceId, Role.Manager);
       const service = app.get(ProjectsService);
@@ -307,7 +301,7 @@ describe('ProjectsService integration', () => {
 
     it('reports an unknown Project as not found', async () => {
       // Arrange
-      const owner = actor();
+      const owner = await givenAccount(app);
       const workspaceId = await createWorkspace(owner);
 
       // Act

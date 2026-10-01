@@ -11,9 +11,6 @@ export class UnpublishedAgentsModel {
 
   @Prop({ type: Object, required: true })
   readonly content: AgentsContentDocument;
-
-  @Prop({ type: Number, required: true })
-  readonly publishedNumber: number;
 }
 
 export const UnpublishedAgentsSchema = SchemaFactory.createForClass(

@@ -3,6 +3,8 @@ import { ConfigurableModuleBuilder } from '@nestjs/common';
 /** The Account made the only Platform Admin when the server starts. */
 export type PlatformAdminCredentials = {
   readonly email: string;
+  /** Used only to create the Account; an existing Account keeps its own name. */
+  readonly name: string;
   /** Used only to create the Account; an existing Account keeps its own password. */
   readonly password: string;
 };

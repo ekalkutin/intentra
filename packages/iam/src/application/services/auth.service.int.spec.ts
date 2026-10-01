@@ -12,10 +12,13 @@ import {
 
 import { AuthService } from './auth.service.js';
 
+/** Signing up is closed until a Platform Admin opens it; these Accounts are invited. */
+const INVITED = { invited: true };
 describe('AuthService integration', () => {
   let app: TestingApp;
 
   const data = {
+    name: 'Ada',
     email: 'ada@example.com',
     password: 'correct-horse-battery-staple',
   };
@@ -41,10 +44,10 @@ describe('AuthService integration', () => {
     it('rejects a duplicate email', async () => {
       // Arrange
       const authService = app.get(AuthService);
-      await authService.register(data);
+      await authService.register(data, INVITED);
 
       // Act
-      const registration = authService.register(data);
+      const registration = authService.register(data, INVITED);
 
       // Assert
       await expect(registration).rejects.toBeInstanceOf(
@@ -55,13 +58,13 @@ describe('AuthService integration', () => {
     it('rejects a duplicate email in a different case', async () => {
       // Arrange
       const authService = app.get(AuthService);
-      await authService.register(data);
+      await authService.register(data, INVITED);
 
       // Act
-      const registration = authService.register({
-        ...data,
-        email: data.email.toUpperCase(),
-      });
+      const registration = authService.register(
+        { ...data, email: data.email.toUpperCase() },
+        INVITED,
+      );
 
       // Assert
       await expect(registration).rejects.toBeInstanceOf(
@@ -75,8 +78,8 @@ describe('AuthService integration', () => {
 
       // Act
       const results = await Promise.allSettled([
-        authService.register(data),
-        authService.register(data),
+        authService.register(data, INVITED),
+        authService.register(data, INVITED),
       ]);
 
       // Assert
@@ -90,7 +93,7 @@ describe('AuthService integration', () => {
     it('issues tokens that authenticate the Account', async () => {
       // Arrange
       const authService = app.get(AuthService);
-      await authService.register(data);
+      await authService.register(data, INVITED);
 
       // Act
       const tokens = await authService.signIn(data);
@@ -103,7 +106,7 @@ describe('AuthService integration', () => {
     it('accepts the email in a different case', async () => {
       // Arrange
       const authService = app.get(AuthService);
-      await authService.register(data);
+      await authService.register(data, INVITED);
 
       // Act
       const signIn = authService.signIn({
@@ -118,7 +121,7 @@ describe('AuthService integration', () => {
     it('rejects a wrong password', async () => {
       // Arrange
       const authService = app.get(AuthService);
-      await authService.register(data);
+      await authService.register(data, INVITED);
 
       // Act
       const signIn = authService.signIn({
@@ -146,7 +149,7 @@ describe('AuthService integration', () => {
     it('issues a new pair for the same Account', async () => {
       // Arrange
       const authService = app.get(AuthService);
-      await authService.register(data);
+      await authService.register(data, INVITED);
       const { refreshToken } = await authService.signIn(data);
 
       // Act
@@ -160,7 +163,7 @@ describe('AuthService integration', () => {
     it('rejects an access token passed as a refresh token', async () => {
       // Arrange
       const authService = app.get(AuthService);
-      await authService.register(data);
+      await authService.register(data, INVITED);
       const { accessToken } = await authService.signIn(data);
 
       // Act
@@ -175,7 +178,7 @@ describe('AuthService integration', () => {
     it('rejects the token of an Account that no longer exists', async () => {
       // Arrange
       const authService = app.get(AuthService);
-      await authService.register(data);
+      await authService.register(data, INVITED);
       const { refreshToken } = await authService.signIn(data);
       await app.clearDatabase();
 

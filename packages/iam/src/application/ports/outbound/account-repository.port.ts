@@ -6,13 +6,15 @@ import { AccountNotFoundException } from '../../exceptions/index.js';
 export type AccountQueryProps =
   { readonly id: AccountId } | { readonly email: Email };
 
+/** Left out: every Account. */
 export type AccountListProps = {
-  readonly isPlatformAdmin: boolean;
+  readonly isPlatformAdmin?: boolean;
 };
 
 export abstract class AccountRepository {
   abstract save(account: Account): Promise<void>;
   abstract findOne(props: AccountQueryProps): Promise<Account | null>;
+  /** By email. */
   abstract findMany(props: AccountListProps): Promise<Account[]>;
 
   public async getOne(props: AccountQueryProps): Promise<Account> {
