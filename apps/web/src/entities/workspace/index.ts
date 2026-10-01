@@ -3,6 +3,7 @@ export {
   useDeleteWorkspaceMutation,
   useLazyWorkspacesQuery,
   useWorkspaceAccessQuery,
+  useWorkspaceCreationQuery,
   useWorkspacesQuery,
   workspaceApi,
 } from './api/workspace-api';

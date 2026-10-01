@@ -22,5 +22,6 @@ export { UnknownInvitationStatusException } from './unknown-invitation-status.ex
 export { UnknownMemberStatusException } from './unknown-member-status.exception.js';
 export { UnknownProjectRoleException } from './unknown-project-role.exception.js';
 export { UnknownRoleException } from './unknown-role.exception.js';
+export { WorkspaceCreationClosedException } from './workspace-creation-closed.exception.js';
 export { WorkspaceSlugMismatchException } from './workspace-slug-mismatch.exception.js';
 export { WorkspaceSuspendedException } from './workspace-suspended.exception.js';

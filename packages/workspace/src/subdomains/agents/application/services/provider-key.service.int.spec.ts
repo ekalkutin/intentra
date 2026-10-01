@@ -2,6 +2,7 @@ import {
   afterAll,
   afterEach,
   beforeAll,
+  beforeEach,
   describe,
   expect,
   it,
@@ -13,6 +14,7 @@ import { TestingApp } from '@intentra/platform-testing';
 import { WorkspaceId } from '@intentra/shared-kernel';
 
 import { givenAccount } from '../../../../testing/account.fixtures.js';
+import { givenOpenWorkspaceCreation } from '../../../../testing/workspace-creation.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import { WorkspacesService } from '../../../tenancy/index.js';
 import {
@@ -38,6 +40,8 @@ describe('ProviderKeyService integration', () => {
       ],
     });
   });
+
+  beforeEach(() => givenOpenWorkspaceCreation(app));
 
   afterEach(async () => {
     vi.restoreAllMocks();

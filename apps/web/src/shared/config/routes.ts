@@ -138,6 +138,7 @@ export const PLATFORM_PAGES = {
   skills: 'skills',
   modelProfiles: 'models',
   changes: 'changes',
+  settings: 'settings',
 } as const;
 
 export type PlatformPage = (typeof PLATFORM_PAGES)[keyof typeof PLATFORM_PAGES];

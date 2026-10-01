@@ -94,21 +94,21 @@ export const router = createBrowserRouter([
                   {
                     index: true,
                     lazy: async () => ({
-                      Component: (await import('@/pages/platform-agents'))
+                      Component: (await import('@/pages/platform/agents'))
                         .PlatformAgentsPage,
                     }),
                   },
                   {
                     path: PLATFORM_OBJECT_PAGES.new,
                     lazy: async () => ({
-                      Component: (await import('@/pages/platform-agent'))
+                      Component: (await import('@/pages/platform/agent'))
                         .PlatformAgentPage,
                     }),
                   },
                   {
                     path: PLATFORM_OBJECT_PAGES.agent,
                     lazy: async () => ({
-                      Component: (await import('@/pages/platform-agent'))
+                      Component: (await import('@/pages/platform/agent'))
                         .PlatformAgentPage,
                     }),
                   },
@@ -120,21 +120,21 @@ export const router = createBrowserRouter([
                   {
                     index: true,
                     lazy: async () => ({
-                      Component: (await import('@/pages/platform-skills'))
+                      Component: (await import('@/pages/platform/skills'))
                         .PlatformSkillsPage,
                     }),
                   },
                   {
                     path: PLATFORM_OBJECT_PAGES.new,
                     lazy: async () => ({
-                      Component: (await import('@/pages/platform-skill'))
+                      Component: (await import('@/pages/platform/skill'))
                         .PlatformSkillPage,
                     }),
                   },
                   {
                     path: PLATFORM_OBJECT_PAGES.skill,
                     lazy: async () => ({
-                      Component: (await import('@/pages/platform-skill'))
+                      Component: (await import('@/pages/platform/skill'))
                         .PlatformSkillPage,
                     }),
                   },
@@ -143,15 +143,22 @@ export const router = createBrowserRouter([
               {
                 path: PLATFORM_PAGES.modelProfiles,
                 lazy: async () => ({
-                  Component: (await import('@/pages/platform-models'))
+                  Component: (await import('@/pages/platform/models'))
                     .PlatformModelsPage,
                 }),
               },
               {
                 path: PLATFORM_PAGES.changes,
                 lazy: async () => ({
-                  Component: (await import('@/pages/platform-changes'))
+                  Component: (await import('@/pages/platform/changes'))
                     .PlatformChangesPage,
+                }),
+              },
+              {
+                path: PLATFORM_PAGES.settings,
+                lazy: async () => ({
+                  Component: (await import('@/pages/platform/settings'))
+                    .PlatformSettingsPage,
                 }),
               },
             ],

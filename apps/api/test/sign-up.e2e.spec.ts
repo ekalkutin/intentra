@@ -1,5 +1,13 @@
 import { HttpStatus } from '@nestjs/common';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 
 import { GatewayModule } from '@intentra/gateway';
 import { IamModule } from '@intentra/iam';
@@ -7,6 +15,7 @@ import { TestingApp } from '@intentra/platform-testing';
 import { WorkspaceModule } from '@intentra/workspace';
 
 import { setOpenSignUp, signUp } from './support/sign-up.js';
+import { setOpenWorkspaceCreation } from './support/workspace-creation.js';
 
 const SIGN_UP_PATH = '/api/iam/auth/sign-up';
 const SIGN_IN_PATH = '/api/iam/auth/sign-in';
@@ -49,6 +58,8 @@ describe('POST /api/iam/auth/sign-up', () => {
       .expect(HttpStatus.OK);
     admin = `Bearer ${signedIn.body.accessToken}`;
   });
+
+  beforeEach(() => setOpenWorkspaceCreation(app, true));
 
   afterEach(() => app.clearDatabase());
 

@@ -6,6 +6,7 @@ import { PERSONAL_ACCESS_TOKEN_REPOSITORY_PROVIDER } from './outbound/personal-a
 import { PERSONAL_ACCESS_TOKEN_SECRETS_PROVIDER } from './outbound/personal-access-token-secrets.adapter.js';
 import { PROJECT_REPOSITORY_PROVIDER } from './outbound/project-repository.adapter.js';
 import { PROJECT_ROLE_ASSIGNMENT_REPOSITORY_PROVIDER } from './outbound/project-role-assignment-repository.adapter.js';
+import { WORKSPACE_CREATION_SETTINGS_REPOSITORY_PROVIDER } from './outbound/workspace-creation-settings-repository.adapter.js';
 import { WORKSPACE_REPOSITORY_PROVIDER } from './outbound/workspace-repository.adapter.js';
 
 export const ADAPTERS: Provider[] = [
@@ -16,4 +17,5 @@ export const ADAPTERS: Provider[] = [
   PROJECT_ROLE_ASSIGNMENT_REPOSITORY_PROVIDER,
   PERSONAL_ACCESS_TOKEN_REPOSITORY_PROVIDER,
   PERSONAL_ACCESS_TOKEN_SECRETS_PROVIDER,
+  WORKSPACE_CREATION_SETTINGS_REPOSITORY_PROVIDER,
 ];

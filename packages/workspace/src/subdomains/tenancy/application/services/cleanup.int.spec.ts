@@ -2,6 +2,7 @@ import {
   afterAll,
   afterEach,
   beforeAll,
+  beforeEach,
   describe,
   expect,
   it,
@@ -13,6 +14,7 @@ import { TestingApp } from '@intentra/platform-testing';
 import { UnitOfWork } from '@intentra/shared-kernel';
 
 import { givenAccount } from '../../../../testing/account.fixtures.js';
+import { givenOpenWorkspaceCreation } from '../../../../testing/workspace-creation.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import { Member } from '../../domain/entities/index.js';
 import { Cleanup, MemberRepository } from '../ports/outbound/index.js';
@@ -27,6 +29,8 @@ describe('Cleanup integration', () => {
   beforeAll(async () => {
     app = await TestingApp.create({ imports: [WorkspaceModule.register({})] });
   });
+
+  beforeEach(() => givenOpenWorkspaceCreation(app));
 
   afterEach(async () => {
     vi.restoreAllMocks();

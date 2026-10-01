@@ -1,4 +1,12 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
 import {
@@ -13,6 +21,7 @@ import { TestingApp } from '@intentra/platform-testing';
 import { ProjectId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
 import { givenAccount } from '../../../../testing/account.fixtures.js';
+import { givenOpenWorkspaceCreation } from '../../../../testing/workspace-creation.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import {
   Member,
@@ -130,6 +139,8 @@ describe('KnowledgeService integration', () => {
   beforeAll(async () => {
     app = await TestingApp.create({ imports: [WorkspaceModule.register({})] });
   });
+
+  beforeEach(() => givenOpenWorkspaceCreation(app));
 
   afterEach(() => app.clearDatabase());
 

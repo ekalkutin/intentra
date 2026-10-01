@@ -1,9 +1,18 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 
 import type { Actor } from '@intentra/contracts/iam';
 import { TestingApp } from '@intentra/platform-testing';
 
 import { givenAccount } from '../../../../testing/account.fixtures.js';
+import { givenOpenWorkspaceCreation } from '../../../../testing/workspace-creation.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import {
   AlreadyWorkspaceMemberException,
@@ -26,6 +35,8 @@ describe('InvitationsService integration', () => {
     app = await TestingApp.create({ imports: [WorkspaceModule.register({})] });
     service = app.get(InvitationsService);
   });
+
+  beforeEach(() => givenOpenWorkspaceCreation(app));
 
   afterEach(() => app.clearDatabase());
 

@@ -1,5 +1,6 @@
 import type { Actor } from '../../iam/index.js';
 import type { DeleteWorkspaceDto } from '../workspaces/delete-workspace.dto.js';
+import type { OpenWorkspaceCreationDto } from '../workspaces/open-workspace-creation.dto.js';
 
 import type { PlatformWorkspaceDto } from './platform-workspace.dto.js';
 
@@ -25,4 +26,12 @@ export abstract class PlatformWorkspacesApi {
    * Workspace, for good; called once IAM has blocked the Account.
    */
   abstract revokeAccountTokens(actor: Actor, accountId: string): Promise<void>;
+
+  /** Open Workspace Creation: whether anyone may create a Workspace. Off until a Platform Admin turns it on. */
+  abstract getCreation(actor: Actor): Promise<OpenWorkspaceCreationDto>;
+
+  abstract setCreation(
+    actor: Actor,
+    data: OpenWorkspaceCreationDto,
+  ): Promise<OpenWorkspaceCreationDto>;
 }

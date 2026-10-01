@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
+import { useWorkspaceCreationQuery } from '@/entities/workspace';
 import { CreateProjectDialog } from '@/features/create-project';
 import { CreateWorkspaceDialog } from '@/features/create-workspace';
 import { projectPath, workspacePath } from '@/shared/config';
@@ -52,6 +53,7 @@ export function ProjectSwitcher({
   const navigate = useNavigate();
   const [creatingProject, setCreatingProject] = useState(false);
   const [creatingWorkspace, setCreatingWorkspace] = useState(false);
+  const { data: creation } = useWorkspaceCreationQuery();
 
   if (!workspace || loading) {
     return (
@@ -132,11 +134,15 @@ export function ProjectSwitcher({
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setCreatingWorkspace(true)}>
-                <Plus />
-                {t('shell.createWorkspace')}
-              </DropdownMenuItem>
+              {creation?.canCreate && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setCreatingWorkspace(true)}>
+                    <Plus />
+                    {t('shell.createWorkspace')}
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuSubContent>
           </DropdownMenuSub>
         </DropdownMenuContent>

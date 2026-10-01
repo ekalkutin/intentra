@@ -10,6 +10,7 @@ import {
   NotebookText,
   Settings,
   ShieldCheck,
+  SlidersHorizontal,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -57,4 +58,9 @@ export const PLATFORM_NAVIGATION = [
   { page: PLATFORM_PAGES.skills, icon: NotebookText, labelKey: 'skills' },
   { page: PLATFORM_PAGES.modelProfiles, icon: Cpu, labelKey: 'modelProfiles' },
   { page: PLATFORM_PAGES.changes, icon: GitCompareArrows, labelKey: 'changes' },
+  {
+    page: PLATFORM_PAGES.settings,
+    icon: SlidersHorizontal,
+    labelKey: 'settings',
+  },
 ] as const satisfies readonly Entry<PlatformPage>[];

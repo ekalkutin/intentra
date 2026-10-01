@@ -10,4 +10,8 @@ export {
   ProjectRoleAssignmentSchema,
 } from './project-role-assignment.schema.js';
 export { ProjectModel, ProjectSchema } from './project.schema.js';
+export {
+  WorkspaceCreationSettingsModel,
+  WorkspaceCreationSettingsSchema,
+} from './workspace-creation-settings.schema.js';
 export { WorkspaceModel, WorkspaceSchema } from './workspace.schema.js';

@@ -18,6 +18,7 @@ import {
   WorkspaceApi,
   type CreateWorkspaceDto,
   type DeleteWorkspaceDto,
+  type WorkspaceCreationAccessDto,
   type WorkspaceDto,
 } from '@intentra/contracts/workspace';
 
@@ -39,6 +40,13 @@ export class WorkspacesController {
   @Get()
   public async list(@CurrentActor() actor: Actor): Promise<WorkspaceDto[]> {
     return this.workspace.workspaces.list(actor);
+  }
+
+  @Get('creation')
+  public async getCreationAccess(
+    @CurrentActor() actor: Actor,
+  ): Promise<WorkspaceCreationAccessDto> {
+    return this.workspace.workspaces.getCreationAccess(actor);
   }
 
   @Delete(':workspaceId')

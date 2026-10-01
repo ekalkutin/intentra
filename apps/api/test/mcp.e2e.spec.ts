@@ -7,6 +7,7 @@ import { TestingApp } from '@intentra/platform-testing';
 import { WorkspaceModule } from '@intentra/workspace';
 
 import { signUp } from './support/sign-up.js';
+import { setOpenWorkspaceCreation } from './support/workspace-creation.js';
 
 const SIGN_IN_PATH = '/api/iam/auth/sign-in';
 const WORKSPACES_PATH = '/api/workspaces';
@@ -37,6 +38,7 @@ describe('POST /api/mcp', () => {
       .send(credentials)
       .expect(HttpStatus.OK);
     const authorization = `Bearer ${session.body.accessToken}`;
+    await setOpenWorkspaceCreation(app, true);
     const workspace = await app
       .request()
       .post(WORKSPACES_PATH)

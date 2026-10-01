@@ -4,6 +4,7 @@ import type { Actor } from '@intentra/contracts/iam';
 import type {
   CreateWorkspaceDto,
   DeleteWorkspaceDto,
+  WorkspaceCreationAccessDto,
   WorkspaceDto,
   WorkspacesApi,
 } from '@intentra/contracts/workspace';
@@ -19,6 +20,7 @@ import { toWorkspaceDto } from '../mappers/index.js';
 import {
   Cleanup,
   MemberRepository,
+  WorkspaceCreationSettingsRepository,
   WorkspaceRepository,
 } from '../ports/outbound/index.js';
 
@@ -33,12 +35,15 @@ export class WorkspacesService implements WorkspacesApi {
     private readonly workspaceRepository: WorkspaceRepository,
     private readonly memberRepository: MemberRepository,
     private readonly cleanup: Cleanup,
+    private readonly workspaceCreationSettingsRepository: WorkspaceCreationSettingsRepository,
   ) {}
 
   public async create(
     actor: Actor,
     data: CreateWorkspaceDto,
   ): Promise<WorkspaceDto> {
+    const settings = await this.workspaceCreationSettingsRepository.getOne();
+    settings.ensureAllows(actor.isPlatformAdmin);
     const { workspace, owner } = this.#workspaceCreationService.create({
       name: data.name,
       slug: data.slug,
@@ -65,6 +70,14 @@ export class WorkspacesService implements WorkspacesApi {
     });
 
     return workspaces.map(toWorkspaceDto);
+  }
+
+  public async getCreationAccess(
+    actor: Actor,
+  ): Promise<WorkspaceCreationAccessDto> {
+    const settings = await this.workspaceCreationSettingsRepository.getOne();
+
+    return { canCreate: settings.isOpen || actor.isPlatformAdmin };
   }
 
   public async delete(

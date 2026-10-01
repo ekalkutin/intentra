@@ -229,5 +229,10 @@ export {
   DeleteWorkspaceDtoSchema,
   type DeleteWorkspaceDto,
 } from './workspaces/delete-workspace.dto.js';
+export {
+  OpenWorkspaceCreationDtoSchema,
+  type OpenWorkspaceCreationDto,
+} from './workspaces/open-workspace-creation.dto.js';
+export { type WorkspaceCreationAccessDto } from './workspaces/workspace-creation-access.dto.js';
 export { type WorkspaceDto } from './workspaces/workspace.dto.js';
 export { WorkspacesApi } from './workspaces/workspaces.api.js';

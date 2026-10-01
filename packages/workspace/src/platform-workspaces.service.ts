@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import type { Actor } from '@intentra/contracts/iam';
 import type {
   DeleteWorkspaceDto,
+  OpenWorkspaceCreationDto,
   PlatformWorkspaceDto,
   PlatformWorkspacesApi,
 } from '@intentra/contracts/workspace';
@@ -20,6 +21,7 @@ import {
   MemberStatus,
   PersonalAccessTokenRepository,
   ProjectRepository,
+  WorkspaceCreationSettingsRepository,
   WorkspaceDeletionService,
   WorkspaceRepository,
 } from './subdomains/tenancy/index.js';
@@ -41,6 +43,7 @@ export class PlatformWorkspacesService implements PlatformWorkspacesApi {
     private readonly personalAccessTokenRepository: PersonalAccessTokenRepository,
     private readonly providerKeyRepository: ProviderKeyRepository,
     private readonly cleanup: Cleanup,
+    private readonly workspaceCreationSettingsRepository: WorkspaceCreationSettingsRepository,
   ) {}
 
   public async list(actor: Actor): Promise<PlatformWorkspaceDto[]> {
@@ -133,6 +136,32 @@ export class PlatformWorkspacesService implements PlatformWorkspacesApi {
           memberId: member.id,
         });
       }
+    });
+  }
+
+  public async getCreation(actor: Actor): Promise<OpenWorkspaceCreationDto> {
+    ensurePlatformAdmin(actor);
+    const settings = await this.workspaceCreationSettingsRepository.getOne();
+
+    return { open: settings.isOpen };
+  }
+
+  public async setCreation(
+    actor: Actor,
+    data: OpenWorkspaceCreationDto,
+  ): Promise<OpenWorkspaceCreationDto> {
+    ensurePlatformAdmin(actor);
+
+    return this.unitOfWork.run(async () => {
+      const settings = await this.workspaceCreationSettingsRepository.getOne();
+      if (data.open) {
+        settings.open();
+      } else {
+        settings.close();
+      }
+      await this.workspaceCreationSettingsRepository.save(settings);
+
+      return { open: settings.isOpen };
     });
   }
 }

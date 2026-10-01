@@ -2,7 +2,12 @@ import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router';
 
 import {
+  pendingInvitations,
+  useReceivedInvitationsQuery,
+} from '@/entities/invitation';
+import {
   readLastWorkspaceSlug,
+  useWorkspaceCreationQuery,
   useWorkspacesQuery,
 } from '@/entities/workspace';
 import { CreateWorkspaceForm } from '@/features/create-workspace';
@@ -20,14 +25,20 @@ import {
 import { CoverFrame } from '@/widgets/app-shell';
 
 /**
- * Opens the Workspace the person was in last (or their first one); with none
- * yet, offers to create one or to accept an invitation.
+ * Opens the Workspace the person was in last (or their first one). With none
+ * yet: their invitations first, if any; creating a Workspace only when they
+ * may (Open Workspace Creation, or a Platform Admin); otherwise how to get in.
  */
 export function StartPage() {
   const { t } = useTranslation();
   const describeError = useDescribeError();
   const { data: workspaces, isLoading, error, refetch } = useWorkspacesQuery();
-  const loadError = toApiError(error);
+  const creation = useWorkspaceCreationQuery();
+  const received = useReceivedInvitationsQuery();
+  const loadError = toApiError(error ?? creation.error);
+  const canCreate = creation.data?.canCreate ?? false;
+  // An invitation comes first: it is why most people are here.
+  const invited = pendingInvitations(received.data ?? []).length > 0;
 
   if (workspaces && workspaces.length > 0) {
     const last = readLastWorkspaceSlug();
@@ -40,31 +51,55 @@ export function StartPage() {
 
   return (
     <CoverFrame>
-      {isLoading ? (
+      {isLoading || creation.isLoading || received.isLoading ? (
         <PageSkeleton />
       ) : loadError ? (
         <Page>
           <div>
             <LoadError
               text={describeError(loadError).text}
-              onRetry={() => void refetch()}
+              onRetry={() => {
+                void refetch();
+                void creation.refetch();
+              }}
             />
           </div>
         </Page>
       ) : (
         <Page className='max-w-2xl'>
-          <PageHeader
-            title={t('start.title')}
-            description={t('start.description')}
-          />
-          <div>
-            <div>
+          {invited ? (
+            <>
+              <PageHeader
+                title={t('start.invitedTitle')}
+                description={t('start.invitedDescription')}
+              />
+              <ReceivedInvitations emptyText={t('start.noInvitations')} />
+              {canCreate && (
+                <PageSection title={t('start.orCreate')}>
+                  <CreateWorkspaceForm />
+                </PageSection>
+              )}
+            </>
+          ) : canCreate ? (
+            <>
+              <PageHeader
+                title={t('start.title')}
+                description={t('start.description')}
+              />
               <CreateWorkspaceForm />
-            </div>
-          </div>
-          <PageSection title={t('start.or')}>
-            <ReceivedInvitations emptyText={t('start.noInvitations')} />
-          </PageSection>
+              <PageSection title={t('start.or')}>
+                <ReceivedInvitations emptyText={t('start.noInvitations')} />
+              </PageSection>
+            </>
+          ) : (
+            <>
+              <PageHeader
+                title={t('start.waitTitle')}
+                description={t('start.waitDescription')}
+              />
+              <ReceivedInvitations emptyText={t('start.noInvitations')} />
+            </>
+          )}
         </Page>
       )}
     </CoverFrame>

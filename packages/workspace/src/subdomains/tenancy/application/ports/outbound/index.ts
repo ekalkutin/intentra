@@ -25,6 +25,7 @@ export {
   ProjectRepository,
   type ProjectQueryProps,
 } from './project-repository.port.js';
+export { WorkspaceCreationSettingsRepository } from './workspace-creation-settings-repository.port.js';
 export {
   WorkspaceRepository,
   type WorkspaceQueryProps,

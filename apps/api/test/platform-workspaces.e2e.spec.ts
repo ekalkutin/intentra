@@ -3,6 +3,7 @@ import {
   afterAll,
   afterEach,
   beforeAll,
+  beforeEach,
   describe,
   expect,
   it,
@@ -15,11 +16,14 @@ import { TestingApp } from '@intentra/platform-testing';
 import { WorkspaceModule } from '@intentra/workspace';
 
 import { signUp } from './support/sign-up.js';
+import { setOpenWorkspaceCreation } from './support/workspace-creation.js';
 
 const SIGN_IN_PATH = '/api/iam/auth/sign-in';
 const WORKSPACES_PATH = '/api/workspaces';
 const PLATFORM_WORKSPACES_PATH = '/api/platform/workspaces';
 const PLATFORM_ACCOUNTS_PATH = '/api/platform/accounts';
+const WORKSPACE_CREATION_PATH = '/api/workspaces/creation';
+const OPEN_WORKSPACE_CREATION_PATH = '/api/platform/workspace-creation';
 const MCP_PATH = '/api/mcp';
 
 const PASSWORD = 'correct-horse-battery-staple';
@@ -65,6 +69,8 @@ describe('Workspaces and Accounts for a Platform Admin', () => {
       .expect(HttpStatus.OK);
     admin = `Bearer ${signedIn.body.accessToken}`;
   });
+
+  beforeEach(() => setOpenWorkspaceCreation(app, true));
 
   afterEach(async () => {
     vi.restoreAllMocks();
@@ -355,6 +361,81 @@ describe('Workspaces and Accounts for a Platform Admin', () => {
         .expect(HttpStatus.NO_CONTENT);
       await signIn('bob@example.com').expect(HttpStatus.OK);
       await callMcp(bobToken.secret).expect(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('Open Workspace Creation', () => {
+    it('leaves creating a Workspace to a Platform Admin while it is off', async () => {
+      // Arrange
+      await setOpenWorkspaceCreation(app, false);
+      const ada = await signUpAndIn('ada@example.com');
+
+      // Act
+      const response = await app
+        .request()
+        .post(WORKSPACES_PATH)
+        .set('Authorization', ada)
+        .send({ name: 'Acme', slug: 'acme' });
+
+      // Assert
+      expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      expect(response.body.code).toBe('WORKSPACE_CREATION_CLOSED');
+      await app
+        .request()
+        .get(WORKSPACE_CREATION_PATH)
+        .set('Authorization', ada)
+        .expect(HttpStatus.OK)
+        .expect(res => expect(res.body).toEqual({ canCreate: false }));
+      await app
+        .request()
+        .get(WORKSPACE_CREATION_PATH)
+        .set('Authorization', admin)
+        .expect(HttpStatus.OK)
+        .expect(res => expect(res.body).toEqual({ canCreate: true }));
+    });
+
+    it('is off until a Platform Admin turns it on', async () => {
+      // Arrange
+      await setOpenWorkspaceCreation(app, false);
+      const ada = await signUpAndIn('ada@example.com');
+      await app
+        .request()
+        .get(OPEN_WORKSPACE_CREATION_PATH)
+        .set('Authorization', admin)
+        .expect(HttpStatus.OK)
+        .expect(res => expect(res.body).toEqual({ open: false }));
+
+      // Act
+      const turnedOn = await app
+        .request()
+        .put(OPEN_WORKSPACE_CREATION_PATH)
+        .set('Authorization', admin)
+        .send({ open: true });
+
+      // Assert
+      expect(turnedOn.body).toEqual({ open: true });
+      await app
+        .request()
+        .post(WORKSPACES_PATH)
+        .set('Authorization', ada)
+        .send({ name: 'Acme', slug: 'acme' })
+        .expect(HttpStatus.CREATED);
+    });
+
+    it('is left to a Platform Admin', async () => {
+      // Arrange
+      const ada = await signUpAndIn('ada@example.com');
+
+      // Act
+      const response = await app
+        .request()
+        .put(OPEN_WORKSPACE_CREATION_PATH)
+        .set('Authorization', ada)
+        .send({ open: true });
+
+      // Assert
+      expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      expect(response.body.code).toBe('NOT_PLATFORM_ADMIN');
     });
   });
 });

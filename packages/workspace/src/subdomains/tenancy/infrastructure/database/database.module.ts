@@ -14,6 +14,8 @@ import {
   ProjectRoleAssignmentModel,
   ProjectRoleAssignmentSchema,
   ProjectSchema,
+  WorkspaceCreationSettingsModel,
+  WorkspaceCreationSettingsSchema,
   WorkspaceModel,
   WorkspaceSchema,
 } from './schemas/index.js';
@@ -33,6 +35,10 @@ import {
       {
         name: ProjectRoleAssignmentModel.name,
         schema: ProjectRoleAssignmentSchema,
+      },
+      {
+        name: WorkspaceCreationSettingsModel.name,
+        schema: WorkspaceCreationSettingsSchema,
       },
     ]),
   ],

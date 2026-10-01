@@ -3,6 +3,7 @@ import type {
   CreateWorkspaceDto,
   DeleteWorkspaceDto,
   WorkspaceAccessDto,
+  WorkspaceCreationAccessDto,
   WorkspaceDto,
 } from '@intentra/contracts/workspace';
 
@@ -28,6 +29,11 @@ export const workspaceApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [API_TAGS.workspace],
     }),
+    /** Whether the person may create a Workspace; follows Open Workspace Creation. */
+    workspaceCreation: build.query<WorkspaceCreationAccessDto, void>({
+      query: () => '/workspaces/creation',
+      providesTags: [API_TAGS.platformSettings],
+    }),
     workspaceAccess: build.query<WorkspaceAccessDto, string>({
       query: workspaceId => `/workspaces/${workspaceId}/access`,
       providesTags: [API_TAGS.access],
@@ -41,4 +47,5 @@ export const {
   useCreateWorkspaceMutation,
   useDeleteWorkspaceMutation,
   useWorkspaceAccessQuery,
+  useWorkspaceCreationQuery,
 } = workspaceApi;

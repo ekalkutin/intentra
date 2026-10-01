@@ -1,7 +1,7 @@
 ---
 version: 1
 slug: "src-pages-platform-agents"
-primary_target: "src/pages/platform-agents"
+primary_target: "src/pages/platform/agents"
 related_targets: ["src/widgets/app-shell","src/pages"]
 ---
 
