@@ -25,16 +25,19 @@ type ThemeContextValue = {
 /** Also read by the script in `index.html`, before the app renders. */
 const STORAGE_KEY = 'intentra.theme';
 const ThemeContext = createContext<ThemeContextValue | null>(null);
-const darkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+const DARK_SCHEME_QUERY = '(prefers-color-scheme: dark)';
 
 /** Puts the `dark` class on <html> from the chosen theme or the system's. */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() =>
     ThemeSchema.catch(ThemeSchema.enum.system).parse(readStored(STORAGE_KEY)),
   );
-  const [systemDark, setSystemDark] = useState(darkScheme.matches);
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia(DARK_SCHEME_QUERY).matches,
+  );
 
   useEffect(() => {
+    const darkScheme = window.matchMedia(DARK_SCHEME_QUERY);
     const onChange = () => setSystemDark(darkScheme.matches);
     darkScheme.addEventListener('change', onChange);
     return () => darkScheme.removeEventListener('change', onChange);

@@ -1,4 +1,4 @@
-/** The interface's Russian texts; the only language for now (ADR 0003). */
+/** The interface's Russian texts, the full set; English covers only part (ADR 0003). */
 export const ru = {
   brand: 'Intentra',
   fields: {
@@ -42,8 +42,8 @@ export const ru = {
     toSignUp: 'Регистрация',
   },
   authArtwork: {
-    line1: 'Общее понимание.',
-    line2: 'Ясное направление.',
+    line1: 'Ваши агенты не умеют читать мысли.',
+    line2: 'Теперь им и не нужно.',
   },
   signUp: {
     title: 'Создайте аккаунт',
@@ -62,6 +62,16 @@ export const ru = {
     system: 'Как в системе',
     light: 'Светлая',
     dark: 'Тёмная',
+    switchTo: {
+      light: 'Включить светлую тему',
+      dark: 'Включить тёмную тему',
+    },
+  },
+  language: {
+    switchTo: {
+      ru: 'Переключить на русский',
+      en: 'Switch to English',
+    },
   },
   roles: {
     owner: 'Владелец',

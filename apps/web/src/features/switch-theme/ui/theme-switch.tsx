@@ -1,63 +1,25 @@
-import { Monitor, Moon, Sun } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { ThemeSchema, useTheme } from '@/shared/lib';
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from '@/shared/ui';
+import { Button } from '@/shared/ui';
 
-const ICONS = {
-  [ThemeSchema.enum.system]: Monitor,
-  [ThemeSchema.enum.light]: Sun,
-  [ThemeSchema.enum.dark]: Moon,
-};
-
-/** The system's theme, the light one or the dark one. */
+/** Flips between the light theme and the dark one in a single click. */
 export function ThemeSwitch({ className }: { className?: string }) {
   const { t } = useTranslation();
-  const { theme, setTheme } = useTheme();
-  const Icon = ICONS[theme];
+  const { resolvedTheme, setTheme } = useTheme();
+  const dark = resolvedTheme === ThemeSchema.enum.dark;
+  const next = dark ? ThemeSchema.enum.light : ThemeSchema.enum.dark;
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant='ghost'
-            size='icon'
-            aria-label={t('theme.label')}
-            className={className}
-          />
-        }
-      >
-        <Icon />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align='end'>
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>{t('theme.label')}</DropdownMenuLabel>
-          <DropdownMenuRadioGroup
-            value={theme}
-            onValueChange={value => setTheme(ThemeSchema.parse(value))}
-          >
-            {ThemeSchema.options.map(option => {
-              const OptionIcon = ICONS[option];
-              return (
-                <DropdownMenuRadioItem key={option} value={option}>
-                  <OptionIcon />
-                  {t(`theme.${option}`)}
-                </DropdownMenuRadioItem>
-              );
-            })}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      variant='ghost'
+      size='icon'
+      aria-label={t(`theme.switchTo.${next}`)}
+      className={className}
+      onClick={() => setTheme(next)}
+    >
+      {dark ? <Moon /> : <Sun />}
+    </Button>
   );
 }
