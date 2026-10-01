@@ -28,7 +28,11 @@ import { ProjectsService } from './projects.service.js';
 import { WorkspacesService } from './workspaces.service.js';
 
 function actor(): Actor {
-  return { accountId: new AccountId().value, email: 'ada@example.com' };
+  return {
+    accountId: new AccountId().value,
+    email: 'ada@example.com',
+    isPlatformAdmin: false,
+  };
 }
 
 describe('ProjectsService integration', () => {

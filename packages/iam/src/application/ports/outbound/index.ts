@@ -1,5 +1,6 @@
 export {
   AccountRepository,
+  type AccountListProps,
   type AccountQueryProps,
 } from './account-repository.port.js';
 export { PasswordHasher } from './password-hasher.port.js';

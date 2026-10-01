@@ -18,7 +18,11 @@ export const toolContextSchema = z.object({
     value => typeof value === 'object' && value !== null,
   ),
   caller: z.object({
-    actor: z.object({ accountId: z.string(), email: z.string() }),
+    actor: z.object({
+      accountId: z.string(),
+      email: z.string(),
+      isPlatformAdmin: z.boolean(),
+    }),
     agent: z
       .object({
         kind: AgentKindDtoSchema,

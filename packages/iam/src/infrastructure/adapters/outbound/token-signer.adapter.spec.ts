@@ -13,7 +13,11 @@ describe('TokenSignerAdapter', () => {
     refreshTokenTtlSeconds: 604800,
   };
   const signer = new TokenSignerAdapter(new JwtService(), options);
-  const claims = { accountId: new AccountId().value, email: 'ada@example.com' };
+  const claims = {
+    accountId: new AccountId().value,
+    email: 'ada@example.com',
+    isPlatformAdmin: true,
+  };
 
   it('reads back the claims of an access token', async () => {
     // Arrange
@@ -55,6 +59,20 @@ describe('TokenSignerAdapter', () => {
     // Assert
     expect(refreshAsAccess).toBeNull();
     expect(accessAsRefresh).toBeNull();
+  });
+
+  it('reads a token signed before the Platform Admin mark as not a Platform Admin', async () => {
+    // Arrange
+    const token = await new JwtService().signAsync(
+      { sub: claims.accountId, email: claims.email },
+      { secret: options.accessTokenSecret },
+    );
+
+    // Act
+    const verified = await signer.verifyAccessToken(token);
+
+    // Assert
+    expect(verified?.isPlatformAdmin).toBe(false);
   });
 
   it('rejects a token signed with another secret', async () => {

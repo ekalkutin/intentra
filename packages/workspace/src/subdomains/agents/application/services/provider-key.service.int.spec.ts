@@ -24,7 +24,7 @@ import { ProviderKeyService } from './provider-key.service.js';
 const KEY = 'sk-or-v1-0123456789abcdef';
 
 function actor(email: string): Actor {
-  return { accountId: new AccountId().value, email };
+  return { accountId: new AccountId().value, email, isPlatformAdmin: false };
 }
 
 describe('ProviderKeyService integration', () => {

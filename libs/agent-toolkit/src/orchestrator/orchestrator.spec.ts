@@ -62,7 +62,11 @@ function requestContextWith(
     knowledge: { record },
   } as unknown as ToolApis);
   requestContext.set('caller', {
-    actor: { accountId: 'account-1', email: 'ada@example.com' },
+    actor: {
+      accountId: 'account-1',
+      email: 'ada@example.com',
+      isPlatformAdmin: false,
+    },
     agent: { kind: 'intentra', level: 'contributor', projectId: 'project-1' },
   });
   requestContext.set('workspaceId', 'workspace-1');

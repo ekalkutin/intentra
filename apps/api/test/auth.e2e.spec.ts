@@ -133,6 +133,7 @@ describe('IAM authentication', () => {
         expect(res.body).toEqual({
           accountId: expect.any(String),
           email: credentials.email,
+          isPlatformAdmin: false,
         }),
       );
     });

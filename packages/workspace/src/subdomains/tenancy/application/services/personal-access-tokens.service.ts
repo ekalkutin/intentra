@@ -154,7 +154,12 @@ export class PersonalAccessTokensService implements PersonalAccessTokensApi {
       await this.personalAccessTokenRepository.save(token);
 
       return {
-        actor: { accountId: member.accountId.value, email: member.email.value },
+        // An external agent never acts as a Platform Admin.
+        actor: {
+          accountId: member.accountId.value,
+          email: member.email.value,
+          isPlatformAdmin: false,
+        },
         workspaceId: token.workspaceId.value,
         level: token.level.value as ProjectRoleDto,
       };

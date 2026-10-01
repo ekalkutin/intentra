@@ -34,7 +34,7 @@ import {
 import { KnowledgeService } from './knowledge.service.js';
 
 function actor(email: string): Actor {
-  return { accountId: new AccountId().value, email };
+  return { accountId: new AccountId().value, email, isPlatformAdmin: false };
 }
 
 function person(actor: Actor): CallerDto {

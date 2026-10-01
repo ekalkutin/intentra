@@ -11,7 +11,11 @@ import {
   type IamModuleOptions,
 } from '../../../iam.module-defs.js';
 
-type AccessTokenPayload = { readonly sub: string; readonly email: string };
+type AccessTokenPayload = {
+  readonly sub: string;
+  readonly email: string;
+  readonly platformAdmin: boolean;
+};
 type RefreshTokenPayload = { readonly sub: string };
 
 /** Access and refresh tokens are signed with different secrets, so one cannot pass for the other. */
@@ -28,6 +32,7 @@ export class TokenSignerAdapter extends TokenSigner {
     const payload: AccessTokenPayload = {
       sub: claims.accountId,
       email: claims.email,
+      platformAdmin: claims.isPlatformAdmin,
     };
 
     return this.jwtService.signAsync(payload, {
@@ -56,7 +61,12 @@ export class TokenSignerAdapter extends TokenSigner {
       return null;
     }
 
-    return { accountId: payload.sub, email: payload.email };
+    return {
+      accountId: payload.sub,
+      email: payload.email,
+      // Tokens signed before the mark existed have no such claim.
+      isPlatformAdmin: payload.platformAdmin === true,
+    };
   }
 
   public async verifyRefreshToken(

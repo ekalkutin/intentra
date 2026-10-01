@@ -20,7 +20,7 @@ import { PersonalAccessTokensService } from './personal-access-tokens.service.js
 import { WorkspacesService } from './workspaces.service.js';
 
 function actor(email: string): Actor {
-  return { accountId: new AccountId().value, email };
+  return { accountId: new AccountId().value, email, isPlatformAdmin: false };
 }
 
 describe('PersonalAccessTokensService integration', () => {

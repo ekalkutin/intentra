@@ -13,6 +13,9 @@ export class AccountModel {
 
   @Prop({ type: String, required: true })
   readonly passwordHash: string;
+
+  @Prop({ type: Boolean, required: true, default: false })
+  readonly isPlatformAdmin: boolean;
 }
 
 export const AccountSchema = SchemaFactory.createForClass(AccountModel);

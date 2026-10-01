@@ -1,6 +1,7 @@
 export type AccessTokenClaims = {
   readonly accountId: string;
   readonly email: string;
+  readonly isPlatformAdmin: boolean;
 };
 
 export type RefreshTokenClaims = {

@@ -75,7 +75,11 @@ export class AuthService implements AuthApi {
       throw new UnauthenticatedException();
     }
 
-    return { accountId: claims.accountId, email: claims.email };
+    return {
+      accountId: claims.accountId,
+      email: claims.email,
+      isPlatformAdmin: claims.isPlatformAdmin,
+    };
   }
 
   private async issueTokens(account: Account): Promise<TokenPair> {
@@ -84,6 +88,7 @@ export class AuthService implements AuthApi {
       this.tokenSigner.signAccessToken({
         accountId,
         email: account.email.value,
+        isPlatformAdmin: account.isPlatformAdmin,
       }),
       this.tokenSigner.signRefreshToken({ accountId }),
     ]);

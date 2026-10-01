@@ -31,7 +31,7 @@ import { Conversation } from '../../../domain/entities/index.js';
 import { ConversationId } from '../../../domain/value-objects/index.js';
 
 function actor(email: string): Actor {
-  return { accountId: new AccountId().value, email };
+  return { accountId: new AccountId().value, email, isPlatformAdmin: false };
 }
 
 type Owner = {

@@ -16,6 +16,9 @@ export const EnvironmentSchema = z
       .int()
       .positive()
       .default(604800),
+    /** Both or neither: the Account made the only Platform Admin on start, created with this password if missing. */
+    PLATFORM_ADMIN_EMAIL: z.email().optional(),
+    PLATFORM_ADMIN_PASSWORD: z.string().min(8).optional(),
     /** 32 random bytes in base64 that encrypt every Workspace's Provider Key. */
     PROVIDER_KEY_ENCRYPTION_KEY: z
       .base64()
@@ -30,6 +33,15 @@ export const EnvironmentSchema = z
   .refine(env => env.IAM_ACCESS_TOKEN_SECRET !== env.IAM_REFRESH_TOKEN_SECRET, {
     message: 'IAM_ACCESS_TOKEN_SECRET and IAM_REFRESH_TOKEN_SECRET must differ',
   })
+  .refine(
+    env =>
+      (env.PLATFORM_ADMIN_EMAIL === undefined) ===
+      (env.PLATFORM_ADMIN_PASSWORD === undefined),
+    {
+      message:
+        'PLATFORM_ADMIN_EMAIL and PLATFORM_ADMIN_PASSWORD go together: set both or neither',
+    },
+  )
   .transform(env => ({
     listen: { port: env.PORT },
     database: { uri: env.DB_URI },
@@ -38,6 +50,13 @@ export const EnvironmentSchema = z
       refreshTokenSecret: env.IAM_REFRESH_TOKEN_SECRET,
       accessTokenTtlSeconds: env.IAM_ACCESS_TOKEN_TTL_SECONDS,
       refreshTokenTtlSeconds: env.IAM_REFRESH_TOKEN_TTL_SECONDS,
+      platformAdmin:
+        env.PLATFORM_ADMIN_EMAIL && env.PLATFORM_ADMIN_PASSWORD
+          ? {
+              email: env.PLATFORM_ADMIN_EMAIL,
+              password: env.PLATFORM_ADMIN_PASSWORD,
+            }
+          : null,
     },
     workspace: {
       agents: {
