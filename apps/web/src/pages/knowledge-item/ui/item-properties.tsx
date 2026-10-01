@@ -3,9 +3,12 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
+  HISTORY_EVENTS,
+  historyOf,
   KindBadge,
   KnowledgeKeyLink,
   KnowledgeStatusPair,
+  type HistoryEvent,
 } from '@/entities/knowledge-item';
 import { useFormatDate } from '@/shared/i18n';
 import { cn } from '@/shared/lib';
@@ -13,8 +16,6 @@ import {
   KnowledgeSourceDtoSchema,
   type KnowledgeItemDto,
 } from '@intentra/contracts/workspace';
-
-import { HISTORY_EVENTS, historyOf, type HistoryEvent } from '../model/history';
 
 /** The item's frame at a glance, then what happened to it, who did it and why. */
 export function ItemProperties({

@@ -9,7 +9,11 @@ import {
 } from '@/entities/knowledge-item';
 import { useNearViewport } from '@/shared/lib';
 import { List, ListSkeleton } from '@/shared/ui';
-import type { KnowledgeKindDto } from '@intentra/contracts/workspace';
+import type {
+  KnowledgeKindDto,
+  KnowledgeListOrderDto,
+  MemberDto,
+} from '@intentra/contracts/workspace';
 
 import { loadedParts } from '../model/loaded-parts';
 
@@ -28,7 +32,8 @@ export function KindGroup({
   total,
   pathOf,
   state,
-  showStatus,
+  order,
+  memberOf,
 }: {
   readonly scope: InProject;
   readonly view: KnowledgeView;
@@ -36,10 +41,11 @@ export function KindGroup({
   readonly total: number;
   readonly pathOf: (key: string) => string;
   readonly state: KnowledgeListState;
-  readonly showStatus: boolean;
+  readonly order: KnowledgeListOrderDto;
+  readonly memberOf: (memberId: string) => MemberDto | undefined;
 }) {
   const { t } = useTranslation();
-  const part = `${scope.projectId}:${view}:${kind}`;
+  const part = `${scope.projectId}:${view}:${kind}:${order}`;
   const ref = useRef<HTMLElement>(null);
   const near = useNearViewport(ref, { initial: loadedParts.wasSeen(part) });
 
@@ -53,11 +59,12 @@ export function KindGroup({
     <section
       ref={ref}
       aria-labelledby={`${part}-heading`}
-      className='flex flex-col gap-3 [contain-intrinsic-size:auto_20rem] [content-visibility:auto]'
+      className='flex flex-col gap-1 [contain-intrinsic-size:auto_20rem] [content-visibility:auto]'
     >
       <h2
         id={`${part}-heading`}
-        className='flex items-center gap-2 text-sm font-semibold'
+        // Stays on top while its items scroll by, until the next Kind takes its place.
+        className='sticky top-0 z-10 -mx-1 flex items-center gap-2 bg-background px-1 py-2 text-sm font-semibold'
       >
         <KindIcon kind={kind} />
         {t(`kinds.${kind}`)}
@@ -70,6 +77,7 @@ export function KindGroup({
           scope={scope}
           view={view}
           kind={kind}
+          order={order}
           total={total}
           part={part}
           active={near}
@@ -80,7 +88,7 @@ export function KindGroup({
                 item={item}
                 to={pathOf(item.key)}
                 state={state}
-                showStatus={showStatus}
+                memberOf={memberOf}
               />
             ))
           }

@@ -14,6 +14,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -200,6 +201,18 @@ export function AppSidebar({
           </SidebarGroup>
         )}
       </SidebarContent>
+      <SidebarFooter className='pb-3'>
+        <div className='pointer-events-none ml-2 w-32 select-none invert dark:invert-0'>
+          <img
+            src='/intentra-wordmark-inverse.svg'
+            alt={t('brand')}
+            width={854}
+            height={173}
+            draggable={false}
+            className='h-auto w-full animate-[intentra-wordmark-reassemble_12s_steps(1,end)_infinite] motion-reduce:animate-none'
+          />
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

@@ -36,6 +36,7 @@ export {
   inListOrder,
   knowledgeFilter,
   parseKnowledgeKind,
+  parseKnowledgeOrder,
   parseKnowledgeView,
   readKnowledgeListState,
   viewCount,
@@ -70,3 +71,9 @@ export {
   KnowledgeMarkdown,
   KnowledgeStreamingMarkdown,
 } from './ui/knowledge-markdown';
+export {
+  HISTORY_EVENTS,
+  historyOf,
+  type HistoryEvent,
+  type HistoryEventType,
+} from './model/history';

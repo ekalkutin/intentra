@@ -44,13 +44,13 @@ describe('knowledgeFilter', () => {
 });
 
 describe('parseKnowledgeView and parseKnowledgeKind', () => {
-  it('fall back to the current knowledge of every Kind for unknown values', () => {
+  it('fall back to every item of every Kind for unknown values', () => {
     // Act
     const view = parseKnowledgeView('everything');
     const kind = parseKnowledgeKind('essay');
 
     // Assert
-    expect(view).toBe('current');
+    expect(view).toBe('all');
     expect(kind).toBeNull();
   });
 
@@ -135,11 +135,11 @@ describe('viewCount and viewTotal', () => {
   it('counts each view of a Kind from its statuses and marks', () => {
     // Act
     const counts = (
-      ['current', 'drafts', 'review', 'rejected', 'obsolete'] as const
+      ['all', 'approved', 'drafts', 'review', 'rejected', 'obsolete'] as const
     ).map(view => viewCount(requirements, view));
 
     // Assert
-    expect(counts).toEqual([7, 2, 1, 1, 3]);
+    expect(counts).toEqual([11, 5, 2, 1, 1, 3]);
   });
 
   it('adds a view up over every Kind, or keeps to one', () => {

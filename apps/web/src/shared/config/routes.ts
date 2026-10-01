@@ -99,6 +99,8 @@ export const KNOWLEDGE_SEARCH_PARAMS = {
   /** Which part of the knowledge the list shows. */
   view: 'view',
   kind: 'kind',
+  /** Newest first instead of by Knowledge Key. */
+  order: 'order',
   /** The Knowledge Key a new Draft replaces. */
   supersedes: 'supersedes',
 } as const;

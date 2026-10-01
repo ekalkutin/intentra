@@ -14,6 +14,7 @@ import { Button, LoadError, Spinner } from '@/shared/ui';
 import type {
   KnowledgeItemDto,
   KnowledgeKindDto,
+  KnowledgeListOrderDto,
 } from '@intentra/contracts/workspace';
 
 import { loadedParts, PAGE_SIZE, pageLength } from '../model/loaded-parts';
@@ -22,6 +23,7 @@ type Part = {
   readonly scope: InProject;
   readonly view: KnowledgeView;
   readonly kind: KnowledgeKindDto;
+  readonly order: KnowledgeListOrderDto;
   /** How many items the part holds, from the summary. */
   readonly total: number;
   /** Names the part in `loadedParts`. */
@@ -41,7 +43,7 @@ function argsFor(part: Part, index: number) {
   return {
     ...part.scope,
     filter: {
-      ...knowledgeFilter(part.view, part.kind),
+      ...knowledgeFilter(part.view, part.kind, part.order),
       take: PAGE_SIZE,
       offset: index * PAGE_SIZE,
     },

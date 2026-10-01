@@ -5,6 +5,7 @@ import {
   KNOWLEDGE_VIEWS,
   KnowledgeScopeProvider,
   parseKnowledgeKind,
+  parseKnowledgeOrder,
   parseKnowledgeView,
   useKnowledgeSummaryQuery,
   viewCount,
@@ -12,12 +13,14 @@ import {
   type KnowledgeListState,
   type KnowledgeView,
 } from '@/entities/knowledge-item';
+import { useMembersQuery } from '@/entities/member';
 import { useCurrentProject } from '@/entities/project';
 import { useCurrentWorkspace } from '@/entities/workspace';
 import { toApiError } from '@/shared/api';
 import { KNOWLEDGE_SEARCH_PARAMS, knowledgeItemPath } from '@/shared/config';
 import { useDescribeError } from '@/shared/i18n';
 import {
+  Button,
   List,
   ListEmpty,
   ListSkeleton,
@@ -27,34 +30,35 @@ import {
   PageSkeleton,
   TableCell,
   TableRow,
-  Tabs,
-  TabsList,
-  TabsTrigger,
 } from '@/shared/ui';
-import type { KnowledgeKindDto } from '@intentra/contracts/workspace';
+import {
+  KnowledgeListOrderDtoSchema,
+  type KnowledgeKindDto,
+  type KnowledgeListOrderDto,
+} from '@intentra/contracts/workspace';
 
 import { KindGroup } from './kind-group';
-import { KindNav, KindSelect, ViewNav } from './kind-nav';
 import {
   columnCount,
   KindTable,
   KindTableRows,
   KindTableSkeleton,
 } from './kind-table';
+import { KnowledgeFilters } from './knowledge-filters';
 import { PagedPart } from './paged-part';
-import { RecordMenu } from './record-menu';
 
 /** Views where every item has the same status, so rows need not repeat it. */
 const SINGLE_STATUS_VIEWS: readonly KnowledgeView[] = [
+  KNOWLEDGE_VIEWS.approved,
   KNOWLEDGE_VIEWS.drafts,
   KNOWLEDGE_VIEWS.rejected,
   KNOWLEDGE_VIEWS.obsolete,
 ];
 
 /**
- * A Project's knowledge: a status view (current, Drafts, Needs Review,
- * Rejected, Obsolete) and a Kind, chosen beside the list (above it where
- * narrow). Every count comes from the Project's summary; every Kind is a
+ * A Project's knowledge: a status view (every item, Approved, Drafts, Needs
+ * Review, Rejected, Obsolete; none overlaps another but the first) and a
+ * Kind, chosen above the list. Every count comes from the Project's summary; every Kind is a
  * group read a page at a time once it comes near the screen, or one Kind is
  * a table of its fields.
  */
@@ -67,6 +71,7 @@ export function ProjectKnowledgePage() {
   const { project } = useCurrentProject(workspace?.id, workspaceAccess);
   const view = parseKnowledgeView(params.get(KNOWLEDGE_SEARCH_PARAMS.view));
   const kind = parseKnowledgeKind(params.get(KNOWLEDGE_SEARCH_PARAMS.kind));
+  const order = parseKnowledgeOrder(params.get(KNOWLEDGE_SEARCH_PARAMS.order));
   const scope = {
     workspaceId: workspace?.id ?? '',
     projectId: project?.id ?? '',
@@ -79,6 +84,9 @@ export function ProjectKnowledgePage() {
     skip: !workspace || !project,
   });
   const loadError = toApiError(error);
+  const { data: members = [] } = useMembersQuery(workspace?.id ?? '', {
+    skip: !workspace,
+  });
 
   if (!workspace || !project) {
     return <PageSkeleton />;
@@ -103,7 +111,12 @@ export function ProjectKnowledgePage() {
   const chooseView = (next: KnowledgeView) =>
     setParam(
       KNOWLEDGE_SEARCH_PARAMS.view,
-      next === KNOWLEDGE_VIEWS.current ? null : next,
+      next === KNOWLEDGE_VIEWS.all ? null : next,
+    );
+  const chooseOrder = (next: KnowledgeListOrderDto) =>
+    setParam(
+      KNOWLEDGE_SEARCH_PARAMS.order,
+      next === KnowledgeListOrderDtoSchema.enum['by-key'] ? null : next,
     );
   const listState: KnowledgeListState = { listSearch: search };
   const pathOf = (key: string) =>
@@ -122,148 +135,141 @@ export function ProjectKnowledgePage() {
   const shown = summary ? viewTotal(kinds, view, kind) : null;
   const groups = kinds.filter(entry => viewCount(entry, view) > 0);
   const kindTotal = kind ? (kindCounts[kind] ?? 0) : 0;
-  const recordMenu = ({ wide = false } = {}) =>
-    summary &&
-    summary.access.canRecord.length > 0 && (
-      <RecordMenu
-        workspaceSlug={workspace.slug}
-        projectSlug={project.slug}
-        kinds={summary.access.canRecord}
-        wide={wide}
-      />
-    );
+  const memberOf = (memberId: string) =>
+    members.find(member => member.id === memberId);
+  // Where the chosen Kind (or anything at all) is, when this view holds none of it.
+  const elsewhere = Object.values(KNOWLEDGE_VIEWS).filter(
+    option => option !== view && (viewCounts[option] ?? 0) > 0,
+  );
+  const otherKinds = kind ? viewTotal(kinds, view, null) : 0;
 
   return (
     <KnowledgeScopeProvider scope={{ ...scope, itemPath: pathOf }}>
       <Page>
-        {/* Wide: the button tops the side column instead of sitting by the title. */}
         <PageHeader
           title={t('knowledge.title')}
           description={t('knowledge.description')}
-          actions={<div className='lg:hidden'>{recordMenu()}</div>}
         />
-        <div className='grid gap-x-10 gap-y-6 lg:grid-cols-[12rem_minmax(0,1fr)]'>
-          <aside className='sticky top-6 -mx-2 hidden max-h-[calc(100dvh-7rem)] flex-col gap-6 self-start overflow-y-auto px-2 pb-2 lg:flex'>
-            {recordMenu({ wide: true })}
-            <KindNav
-              kind={kind}
-              counts={kindCounts}
-              total={summary && viewTotal(kinds, view, null)}
-              onChoose={chooseKind}
-            />
-            <ViewNav view={view} counts={viewCounts} onChoose={chooseView} />
-          </aside>
-          <div className='flex min-w-0 flex-col gap-6'>
-            <div className='flex flex-col gap-3 lg:hidden'>
-              <Tabs
-                value={view}
-                onValueChange={value =>
-                  chooseView(parseKnowledgeView(String(value)))
-                }
-                className='border-b border-border'
-              >
-                <TabsList
-                  variant='line'
-                  aria-label={t('knowledge.viewsLabel')}
-                  className='-mb-px h-auto! flex-wrap justify-start gap-1'
-                >
-                  {Object.values(KNOWLEDGE_VIEWS).map(option => (
-                    <TabsTrigger
-                      key={option}
-                      value={option}
-                      className='h-8 flex-none'
-                    >
-                      {t(`knowledge.views.${option}`)}
-                      {Boolean(viewCounts[option]) && (
-                        <span className='font-mono text-xs font-normal text-muted-foreground tabular-nums'>
-                          {viewCounts[option]}
-                        </span>
-                      )}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-              <KindSelect
-                className='w-full sm:w-56'
-                kind={kind}
-                onChoose={chooseKind}
+        <div className='flex min-w-0 flex-col gap-6'>
+          <KnowledgeFilters
+            view={view}
+            viewCounts={viewCounts}
+            kind={kind}
+            kindCounts={kindCounts}
+            total={summary && viewTotal(kinds, view, null)}
+            order={order}
+            onView={chooseView}
+            onKind={chooseKind}
+            onOrder={chooseOrder}
+          />
+          <div className='flex flex-col gap-6'>
+            {!summary && !loadError && (
+              <List>
+                <ListSkeleton rows={4} />
+              </List>
+            )}
+            {loadError && (
+              <LoadError
+                text={describeError(loadError).text}
+                onRetry={() => void refetch()}
               />
-            </div>
-            <div className='flex flex-col gap-6'>
-              {!summary && !loadError && (
-                <List>
-                  <ListSkeleton rows={4} />
-                </List>
-              )}
-              {loadError && (
-                <LoadError
-                  text={describeError(loadError).text}
-                  onRetry={() => void refetch()}
-                />
-              )}
-              {shown === 0 && (
-                <List>
-                  <ListEmpty>
-                    {kind
-                      ? t('knowledge.emptyKind')
-                      : t(`knowledge.empty.${view}`)}
-                  </ListEmpty>
-                </List>
-              )}
-              {kind && kindTotal > 0 && (
-                <div className='flex flex-col gap-3'>
-                  <p className='max-w-2xl text-sm text-pretty text-muted-foreground'>
-                    {t(`kindDescriptions.${kind}`)}
-                  </p>
-                  <KindTable kind={kind}>
-                    <PagedPart
-                      key={`${view}-${kind}`}
-                      scope={scope}
-                      view={view}
-                      kind={kind}
-                      total={kindTotal}
-                      part={`${scope.projectId}:${view}:${kind}`}
-                      active
-                      rows={items => (
-                        <KindTableRows
-                          kind={kind}
-                          items={items}
-                          pathOf={pathOf}
-                          state={listState}
-                          showStatus={showStatus}
-                        />
-                      )}
-                      placeholder={count => (
-                        <KindTableSkeleton kind={kind} count={count} />
-                      )}
-                      more={line => (
-                        <TableRow className='hover:bg-transparent'>
-                          <TableCell
-                            colSpan={columnCount(kind)}
-                            className='px-2 py-1.5'
+            )}
+            {shown === 0 && (
+              <List>
+                <ListEmpty
+                  action={
+                    (elsewhere.length > 0 || otherKinds > 0) && (
+                      <span className='flex flex-wrap gap-2'>
+                        {elsewhere.map(option => (
+                          <Button
+                            key={option}
+                            variant='outline'
+                            size='sm'
+                            onClick={() => chooseView(option)}
                           >
-                            {line}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    />
-                  </KindTable>
-                </div>
-              )}
-              {!kind &&
-                groups.map(entry => (
-                  <KindGroup
-                    key={`${view}-${entry.kind}`}
+                            {t(`knowledge.views.${option}`)}
+                            <span className='font-mono text-xs text-muted-foreground tabular-nums'>
+                              {viewCounts[option]}
+                            </span>
+                          </Button>
+                        ))}
+                        {otherKinds > 0 && (
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            onClick={() => chooseKind(null)}
+                          >
+                            {t('knowledge.allKinds')}
+                            <span className='font-mono text-xs text-muted-foreground tabular-nums'>
+                              {otherKinds}
+                            </span>
+                          </Button>
+                        )}
+                      </span>
+                    )
+                  }
+                >
+                  {kind
+                    ? t('knowledge.emptyKind')
+                    : t(`knowledge.empty.${view}`)}
+                </ListEmpty>
+              </List>
+            )}
+            {kind && kindTotal > 0 && (
+              <div className='flex flex-col gap-3'>
+                <p className='max-w-2xl text-sm text-pretty text-muted-foreground'>
+                  {t(`kindDescriptions.${kind}`)}
+                </p>
+                <KindTable kind={kind}>
+                  <PagedPart
+                    key={`${view}-${kind}-${order}`}
                     scope={scope}
                     view={view}
-                    kind={entry.kind}
-                    total={viewCount(entry, view)}
-                    pathOf={pathOf}
-                    state={listState}
-                    showStatus={showStatus}
+                    kind={kind}
+                    order={order}
+                    total={kindTotal}
+                    part={`${scope.projectId}:${view}:${kind}:${order}`}
+                    active
+                    rows={items => (
+                      <KindTableRows
+                        kind={kind}
+                        items={items}
+                        pathOf={pathOf}
+                        state={listState}
+                        showStatus={showStatus}
+                      />
+                    )}
+                    placeholder={count => (
+                      <KindTableSkeleton kind={kind} count={count} />
+                    )}
+                    more={line => (
+                      <TableRow className='hover:bg-transparent'>
+                        <TableCell
+                          colSpan={columnCount(kind)}
+                          className='px-2 py-1.5'
+                        >
+                          {line}
+                        </TableCell>
+                      </TableRow>
+                    )}
                   />
-                ))}
-            </div>
+                </KindTable>
+              </div>
+            )}
+            {!kind &&
+              groups.map(entry => (
+                <KindGroup
+                  key={`${view}-${entry.kind}-${order}`}
+                  scope={scope}
+                  view={view}
+                  kind={entry.kind}
+                  order={order}
+                  total={viewCount(entry, view)}
+                  pathOf={pathOf}
+                  state={listState}
+                  memberOf={memberOf}
+                />
+              ))}
           </div>
         </div>
       </Page>

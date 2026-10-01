@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ThemeSwitch } from '@/features/switch-theme';
-import { Brand } from '@/shared/ui';
 
 import { mountAuthMosaic } from './auth-mosaic-animation';
 import { LanguageSwitch } from './language-switch';
@@ -66,29 +65,25 @@ export function AuthMosaic({
       >
         <canvas ref={wordRef} aria-hidden='true' className='size-full' />
       </div>
-      {/* Fades the field out under the slogan so the text sits on a calm ground. */}
       <div
         aria-hidden='true'
         className='pointer-events-none absolute inset-x-0 bottom-0 hidden h-[40%] lg:block bg-linear-to-t from-(--panel) from-25% to-transparent'
       />
-      <div className='relative flex w-full flex-col justify-between p-6 lg:p-8 lg:pb-10'>
-        {/* Below lg the dotted word is the brand; the mark would only repeat it. */}
-        <div className='flex items-center justify-end lg:justify-start'>
-          <Brand className='hidden lg:inline-flex' />
-          <div className='flex gap-1 lg:hidden'>
-            <LanguageSwitch />
-            <ThemeSwitch />
-          </div>
+      <div className='relative flex w-full flex-col p-6 lg:p-8 lg:pb-10'>
+        <div className='flex justify-end gap-1 lg:hidden'>
+          <LanguageSwitch />
+          <ThemeSwitch />
         </div>
-        {/* Wide screens only. The set-up light and muted, the answer heavy and bright; sized by the panel, not the viewport. */}
-        <p className='hidden lg:block lg:text-[clamp(1.5rem,5cqi,2.5rem)] lg:leading-[1.1] lg:tracking-[-0.035em]'>
-          <span className='block font-normal text-foreground/75'>
-            {t('authArtwork.line1')}
-          </span>
-          <span className='block font-semibold text-foreground'>
-            {t('authArtwork.line2')}
-          </span>
-        </p>
+        <div className='mt-auto'>
+          <p className='hidden lg:block lg:text-[clamp(1.5rem,5cqi,2.5rem)] lg:leading-[1.1] lg:tracking-[-0.035em]'>
+            <span className='block font-normal text-foreground/75'>
+              {t('authArtwork.line1')}
+            </span>
+            <span className='block font-semibold text-foreground'>
+              {t('authArtwork.line2')}
+            </span>
+          </p>
+        </div>
       </div>
     </aside>
   );

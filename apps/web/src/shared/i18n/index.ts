@@ -3,7 +3,12 @@ export {
   type DescribedError,
   type Translator,
 } from './describe-error';
-export { useFormatDate } from './format';
+export {
+  useFormatDate,
+  useFormatMoment,
+  useFormatShortDate,
+  useFormatWhen,
+} from './format';
 export { initI18n } from './i18n';
 export {
   LanguageSchema,

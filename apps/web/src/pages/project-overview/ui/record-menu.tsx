@@ -22,13 +22,10 @@ export function RecordMenu({
   workspaceSlug,
   projectSlug,
   kinds,
-  wide = false,
 }: {
   readonly workspaceSlug: string;
   readonly projectSlug: string;
   readonly kinds: readonly KnowledgeKindDto[];
-  /** Fills its column, as the first line of the side column. */
-  readonly wide?: boolean;
 }) {
   const { t } = useTranslation();
   const allowed = KnowledgeKindDtoSchema.options.filter(kind =>
@@ -39,16 +36,14 @@ export function RecordMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button className={wide ? 'w-full justify-start' : undefined}>
+          <Button variant='outline'>
             <Plus />
-            <span className={wide ? 'flex-1 text-left' : undefined}>
-              {t('knowledge.record')}
-            </span>
+            {t('knowledge.record')}
             <ChevronDown data-icon='inline-end' />
           </Button>
         }
       />
-      <DropdownMenuContent align={wide ? 'start' : 'end'} className='min-w-60'>
+      <DropdownMenuContent align='end' className='min-w-60'>
         <DropdownMenuGroup>
           <DropdownMenuLabel className='font-normal text-muted-foreground'>
             {t('knowledge.recordKind')}

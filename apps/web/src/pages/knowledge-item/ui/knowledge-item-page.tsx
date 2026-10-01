@@ -10,6 +10,7 @@ import {
   KnowledgeScopeProvider,
   KnowledgeStatusPair,
   parseKnowledgeKind,
+  parseKnowledgeOrder,
   parseKnowledgeView,
   planApproval,
   readKnowledgeListState,
@@ -223,6 +224,7 @@ function useNeighbours(
   const filter = knowledgeFilter(
     parseKnowledgeView(params.get(KNOWLEDGE_SEARCH_PARAMS.view)),
     parseKnowledgeKind(params.get(KNOWLEDGE_SEARCH_PARAMS.kind)),
+    parseKnowledgeOrder(params.get(KNOWLEDGE_SEARCH_PARAMS.order)),
   );
   const { data } = useKnowledgeItemsQuery(
     { ...scope, filter },

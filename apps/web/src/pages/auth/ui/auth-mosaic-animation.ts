@@ -198,9 +198,7 @@ function dot(
   alpha: number,
 ) {
   fill(context, alpha);
-  context.beginPath();
-  context.arc(x, y, radius, 0, Math.PI * 2);
-  context.fill();
+  context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 }
 
 function line(

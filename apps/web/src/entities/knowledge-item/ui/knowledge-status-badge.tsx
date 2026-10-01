@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { StatusBadge } from '@/shared/ui';
@@ -10,17 +11,27 @@ const BADGE_STATUS = {
   obsolete: 'inactive',
 } as const satisfies Record<KnowledgeStatusDto, string>;
 
-/** A Knowledge Item's status as an icon and a word. */
+/** A Knowledge Item's status as an icon and a word, perhaps with a detail after it, such as when it last changed. */
 export function KnowledgeStatusBadge({
   status,
+  detail,
 }: {
   readonly status: KnowledgeStatusDto;
+  readonly detail?: ReactNode;
 }) {
   const { t } = useTranslation();
 
   return (
     <StatusBadge status={BADGE_STATUS[status]}>
       {t(`statuses.${status}`)}
+      {detail && (
+        <>
+          <span aria-hidden className='text-muted-foreground/50'>
+            ·
+          </span>
+          {detail}
+        </>
+      )}
     </StatusBadge>
   );
 }

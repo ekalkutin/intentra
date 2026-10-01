@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 import {
+  ChoiceValue,
   FIELD_CONTROLS,
   kindFields,
   KnowledgeStatusPair,
@@ -168,7 +169,6 @@ function Cell({
   readonly item: KnowledgeItemDto;
   readonly field: KindField;
 }) {
-  const texts = useFieldTexts();
   const value: unknown = (item.fields as Record<string, unknown>)[field.name];
   const gap = <span className='text-muted-foreground'>—</span>;
 
@@ -183,9 +183,12 @@ function Cell({
     return gap;
   }
   return field.control === FIELD_CONTROLS.choice ? (
-    <span className='whitespace-nowrap'>
-      {texts.option(item.kind, field.name, value)}
-    </span>
+    <ChoiceValue
+      kind={item.kind}
+      field={field.name}
+      value={value}
+      className='whitespace-nowrap'
+    />
   ) : (
     <span>{value}</span>
   );

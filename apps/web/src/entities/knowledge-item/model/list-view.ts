@@ -1,16 +1,19 @@
 import {
   KnowledgeKindDtoSchema,
+  KnowledgeListOrderDtoSchema,
   KnowledgeStatusDtoSchema,
   type KnowledgeItemDto,
   type KnowledgeKindDto,
   type KnowledgeKindSummaryDto,
+  type KnowledgeListOrderDto,
   type ListKnowledgeItemsDto,
 } from '@intentra/contracts/workspace';
 
 /** The parts of a Project's knowledge the list shows, one per tab. */
 export const KNOWLEDGE_VIEWS = {
-  /** Drafts and Approved: what is known or proposed now. */
-  current: 'current',
+  /** Every item, whatever its status. */
+  all: 'all',
+  approved: 'approved',
   drafts: 'drafts',
   /** Marked Needs Review. */
   review: 'review',
@@ -27,7 +30,8 @@ export const KNOWLEDGE_LIST_SIZE = 200;
 const { draft, approved, rejected, obsolete } = KnowledgeStatusDtoSchema.enum;
 
 const FILTERS = {
-  current: { statuses: [draft, approved] },
+  all: { statuses: [draft, approved, rejected, obsolete] },
+  approved: { statuses: [approved] },
   drafts: { statuses: [draft] },
   review: { statuses: [draft, approved], needsReview: true },
   rejected: { statuses: [rejected] },
@@ -38,6 +42,7 @@ const FILTERS = {
 export function knowledgeFilter(
   view: KnowledgeView,
   kind: KnowledgeKindDto | null,
+  order: KnowledgeListOrderDto = KnowledgeListOrderDtoSchema.enum['by-key'],
 ): Partial<ListKnowledgeItemsDto> {
   const filter = FILTERS[view];
 
@@ -45,17 +50,28 @@ export function knowledgeFilter(
     ...filter,
     statuses: [...filter.statuses],
     ...(kind ? { kind } : {}),
+    ...(order === KnowledgeListOrderDtoSchema.enum['by-key'] ? {} : { order }),
     take: KNOWLEDGE_LIST_SIZE,
   };
 }
 
-/** The view named in the address, or the current knowledge. */
+/** The order named in the address, or by Knowledge Key. */
+export function parseKnowledgeOrder(
+  value: string | null,
+): KnowledgeListOrderDto {
+  const parsed = KnowledgeListOrderDtoSchema.safeParse(value);
+  return parsed.success
+    ? parsed.data
+    : KnowledgeListOrderDtoSchema.enum['by-key'];
+}
+
+/** The view named in the address, or every item. */
 export function parseKnowledgeView(value: string | null): KnowledgeView {
   const views: readonly string[] = Object.values(KNOWLEDGE_VIEWS);
 
   return value && views.includes(value)
     ? (value as KnowledgeView)
-    : KNOWLEDGE_VIEWS.current;
+    : KNOWLEDGE_VIEWS.all;
 }
 
 /** The Kind named in the address, or null for every Kind. */
@@ -111,7 +127,8 @@ export function viewCount(
 ): number {
   const { draft, approved, rejected, obsolete } = summary.statuses;
   const counts: Record<KnowledgeView, number> = {
-    current: draft + approved,
+    all: draft + approved + rejected + obsolete,
+    approved,
     drafts: draft,
     review: summary.needsReview,
     rejected,

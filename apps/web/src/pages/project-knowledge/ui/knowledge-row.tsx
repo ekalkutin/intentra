@@ -1,35 +1,36 @@
-import { Link2 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 import {
   FactChips,
-  KnowledgeStatusPair,
-  NeedsReviewBadge,
   useKnowledgePrefetch,
   useKnowledgeScope,
   type KnowledgeListState,
 } from '@/entities/knowledge-item';
 import { cn } from '@/shared/lib';
 import { InlineMarkdown, LIST_ROW_LINK_CLASS, ListRow } from '@/shared/ui';
-import type { KnowledgeItemDto } from '@intentra/contracts/workspace';
+import type {
+  KnowledgeItemDto,
+  MemberDto,
+} from '@intentra/contracts/workspace';
+
+import { RowLinks } from './row-links';
+import { RowMeta } from './row-meta';
 
 /**
- * One item in the list: key, title, its statement as text, its short facts;
- * status and Links on the right.
+ * One item in the list: key and title, its statement, its short facts and
+ * its Links; the status, author and dates in a column on the right.
  */
 export function KnowledgeRow({
   item,
   to,
   state,
-  showStatus,
+  memberOf,
 }: {
   readonly item: KnowledgeItemDto;
   readonly to: string;
   readonly state: KnowledgeListState;
-  readonly showStatus: boolean;
+  readonly memberOf: (memberId: string) => MemberDto | undefined;
 }) {
-  const { t } = useTranslation();
   const { workspaceId, projectId } = useKnowledgeScope();
   const prefetch = useKnowledgePrefetch('knowledgeItem');
   // The item is read as the pointer or focus reaches the row, so it opens at once.
@@ -37,23 +38,9 @@ export function KnowledgeRow({
 
   return (
     <ListRow
-      lead={item.key}
       interactive
-      meta={
-        <span className='flex flex-col items-end gap-1.5 max-sm:items-start'>
-          {showStatus ? (
-            <KnowledgeStatusPair item={item} className='justify-end' />
-          ) : (
-            item.needsReview && <NeedsReviewBadge />
-          )}
-          {item.links.length > 0 && (
-            <span className='flex items-center gap-1 text-xs text-muted-foreground'>
-              <Link2 aria-hidden className='size-3' />
-              {t('knowledge.links', { count: item.links.length })}
-            </span>
-          )}
-        </span>
-      }
+      className='gap-x-8 py-3.5'
+      meta={<RowMeta item={item} memberOf={memberOf} />}
     >
       <Link
         to={to}
@@ -65,12 +52,16 @@ export function KnowledgeRow({
           LIST_ROW_LINK_CLASS,
         )}
       >
+        <span className='mr-2 font-mono text-xs font-normal text-muted-foreground'>
+          {item.key}
+        </span>
         {item.title}
       </Link>
-      <InlineMarkdown className='mt-0.5 line-clamp-2 text-sm text-muted-foreground'>
+      <InlineMarkdown className='mt-1 line-clamp-2 max-w-[68ch] text-sm text-muted-foreground'>
         {item.mainField}
       </InlineMarkdown>
-      <FactChips item={item} className='mt-2' />
+      <FactChips item={item} className='mt-2.5' />
+      <RowLinks item={item} />
     </ListRow>
   );
 }

@@ -37,6 +37,7 @@ import { summarizeKnowledge } from '../model/summary';
 
 import { AWAITING_SHOWN, AwaitingApproval } from './awaiting-approval';
 import { Contents } from './contents';
+import { RecordMenu } from './record-menu';
 
 /**
  * The Project's table of contents: what is signed by Kind, what waits for a
@@ -97,21 +98,30 @@ export function ProjectOverviewPage() {
           )
         }
         actions={
-          <Button
-            render={
-              <Link
-                to={projectPath(
-                  workspace.slug,
-                  project.slug,
-                  PROJECT_PAGES.interview,
-                )}
+          <div className='flex flex-wrap gap-2'>
+            {knowledge.data && knowledge.data.access.canRecord.length > 0 && (
+              <RecordMenu
+                workspaceSlug={workspace.slug}
+                projectSlug={project.slug}
+                kinds={knowledge.data.access.canRecord}
               />
-            }
-            nativeButton={false}
-          >
-            <MessagesSquare />
-            {t('overview.startInterview')}
-          </Button>
+            )}
+            <Button
+              render={
+                <Link
+                  to={projectPath(
+                    workspace.slug,
+                    project.slug,
+                    PROJECT_PAGES.interview,
+                  )}
+                />
+              }
+              nativeButton={false}
+            >
+              <MessagesSquare />
+              {t('overview.startInterview')}
+            </Button>
+          </div>
         }
       />
       {reviewCount > 0 && (

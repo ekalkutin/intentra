@@ -544,7 +544,8 @@ export const ru = {
     description:
       'Всё, что известно о продукте: утверждённые знания и черновики, которые ждут решения человека.',
     views: {
-      current: 'Актуальные',
+      all: 'Все',
+      approved: 'Утверждённые',
       drafts: 'Черновики',
       review: 'На проверке',
       rejected: 'Отклонённые',
@@ -557,22 +558,35 @@ export const ru = {
     recordKind: 'Что записать',
     needsReview: 'на проверке',
     previewMissing: '{{key}} не найдена — возможно, черновик удалили.',
-    kindsNav: 'Вид',
     key: 'Ключ',
     status: 'Статус',
-    links_one: '{{count}} связь',
-    links_few: '{{count}} связи',
-    links_many: '{{count}} связей',
-    links_other: '{{count}} связи',
+    filters: 'Фильтры',
+    replaces: 'Заменяет',
+    replacedBy: 'Заменена на',
     empty: {
-      current:
-        'Знаний пока нет. Запишите первое вручную, проведите интервью с агентом или подключите внешнего агента через MCP.',
+      all: 'Знаний пока нет. Запишите первое вручную, проведите интервью с агентом или подключите внешнего агента через MCP.',
+      approved:
+        'Утверждённых знаний пока нет: черновики ждут решения человека.',
       drafts: 'Черновиков нет: все разобраны.',
       review: 'Перепроверять нечего.',
       rejected: 'Отклонённых записей нет.',
       obsolete: 'Устаревших записей нет.',
     },
     emptyKind: 'Записей этого вида здесь нет.',
+    orderLabel: 'Порядок',
+    agentTags: {
+      'intentra-agent': 'Intentra',
+      'external-agent': 'MCP',
+    },
+    agentHints: {
+      'intentra-agent': 'Записал агент Intentra в интервью от имени {{who}}.',
+      'external-agent':
+        'Записал внешний агент (Claude Code, Codex, Cursor…) через MCP от имени {{who}}, по его токену доступа.',
+    },
+    orders: {
+      'by-key': 'По ключу',
+      'newest-first': 'Сначала новые',
+    },
     more_one: 'Ещё {{count}}',
     more_few: 'Ещё {{count}}',
     more_many: 'Ещё {{count}}',
