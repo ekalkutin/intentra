@@ -15,6 +15,7 @@ import { WorkspaceProjectsPage } from '@/pages/workspace-projects';
 import { WorkspaceSettingsPage } from '@/pages/workspace-settings';
 import { WorkspaceTokensPage } from '@/pages/workspace-tokens';
 import {
+  INTERVIEW_PAGES,
   KNOWLEDGE_PAGES,
   PLATFORM_OBJECT_PAGES,
   PLATFORM_PAGES,
@@ -64,7 +65,8 @@ export const router = createBrowserRouter([
                 ],
               },
               {
-                path: PROJECT_PAGES.interview,
+                // One route for both, so a new Conversation keeps its page when its address appears.
+                path: `${PROJECT_PAGES.interview}/${INTERVIEW_PAGES.conversation}`,
                 Component: ProjectInterviewPage,
               },
               { path: PROJECT_PAGES.roles, Component: ProjectAccessPage },

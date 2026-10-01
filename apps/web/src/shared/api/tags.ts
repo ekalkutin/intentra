@@ -13,6 +13,7 @@ export const API_TAGS = {
   personalAccessToken: 'PersonalAccessToken',
   knowledge: 'Knowledge',
   providerKey: 'ProviderKey',
+  conversation: 'Conversation',
   /** The Unpublished Agents and what they change: one whole, edited object by object. */
   platformAgents: 'PlatformAgents',
 } as const;

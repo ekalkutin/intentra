@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useId, useMemo, useRef } from 'react';
+import { useId, useMemo, useRef, type ReactNode } from 'react';
 import {
   Controller,
   useForm,
@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 
 import {
+  ChoiceValue,
   FIELD_CONTROLS,
   kindFields,
   KNOWLEDGE_ERROR_CODES,
@@ -211,6 +212,7 @@ export function EditorForm({
               label={texts.label(kind, field.name)}
               hint={texts.hint(kind, field.name)}
               option={value => texts.option(kind, field.name, value)}
+              kind={kind}
             />
           ))}
           <Field data-invalid={Boolean(errors.rationale)}>
@@ -286,8 +288,10 @@ function KindFieldInput({
   label,
   hint,
   option,
+  kind,
 }: {
   readonly id: string;
+  readonly kind: KnowledgeKindDto;
   readonly field: KindField;
   readonly required: boolean;
   readonly control: Control<EditorValues>;
@@ -338,6 +342,9 @@ function KindFieldInput({
           {field.control === FIELD_CONTROLS.choice && (
             <ChoiceInput
               id={id}
+              render={choice => (
+                <ChoiceValue kind={kind} field={field.name} value={choice} />
+              )}
               value={input.value as string}
               onChange={input.onChange}
               options={(field.options ?? []).map(value => ({
@@ -377,8 +384,11 @@ function ChoiceInput({
   onChange,
   options,
   noneLabel,
+  render,
 }: {
   readonly id: string;
+  /** How a chosen option reads, such as a priority with its bars. */
+  readonly render: (value: string) => ReactNode;
   readonly value: string;
   readonly onChange: (value: string) => void;
   readonly options: readonly { value: string; label: string }[];
@@ -393,12 +403,14 @@ function ChoiceInput({
       onValueChange={next => onChange(next ?? '')}
     >
       <SelectTrigger id={id} className='w-full sm:w-72'>
-        <SelectValue />
+        <SelectValue>
+          {(chosen: string | null) => (chosen ? render(chosen) : noneLabel)}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {items.map(item => (
           <SelectItem key={item.label} value={item.value}>
-            {item.label}
+            {item.value ? render(item.value) : item.label}
           </SelectItem>
         ))}
       </SelectContent>

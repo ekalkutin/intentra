@@ -7,6 +7,8 @@ import type { KnowledgeItemDto } from '@intentra/contracts/workspace';
 import { FACT_TYPES, factsOf, type Fact } from '../model/facts';
 import { useFieldTexts } from '../model/field-texts';
 
+import { ChoiceValue } from './choice-value';
+
 const CHIP =
   'inline-flex h-5 max-w-56 items-center gap-1 rounded-md border border-border bg-background px-1.5 text-xs text-muted-foreground';
 
@@ -60,15 +62,28 @@ function FactChip({
     );
   }
   const label = texts.label(item.kind, fact.field);
+  if (fact.type === FACT_TYPES.choice) {
+    return (
+      <span
+        className={CHIP}
+        title={`${label}: ${texts.option(item.kind, fact.field, fact.value)}`}
+      >
+        <ChoiceValue
+          kind={item.kind}
+          field={fact.field}
+          value={fact.value}
+          className='truncate'
+        />
+      </span>
+    );
+  }
   const text =
     fact.type === FACT_TYPES.count
       ? // Every list field has its plural texts; a unit test checks them.
         t(`knowledgeCounts.${fact.field}` as 'knowledgeCounts.needs', {
           count: fact.count,
         })
-      : fact.type === FACT_TYPES.choice
-        ? texts.option(item.kind, fact.field, fact.value)
-        : fact.value;
+      : fact.value;
 
   return (
     <span className={CHIP} title={`${label}: ${text}`}>

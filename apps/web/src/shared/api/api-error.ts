@@ -43,3 +43,26 @@ export function toApiError(
     message: 'message' in error ? String(error.message) : 'Unknown error',
   };
 }
+
+/**
+ * The error a streamed request failed with, such as the AI SDK's chat
+ * transport, which carries the API's answer as its message.
+ */
+export function toStreamApiError(error: Error | undefined): ApiError | null {
+  if (!error) {
+    return null;
+  }
+  if (error instanceof TypeError) {
+    return { code: CLIENT_ERROR_CODES.network, message: error.message };
+  }
+  try {
+    const wire = WireErrorSchema.safeParse(JSON.parse(error.message));
+    if (wire.success) {
+      return { code: wire.data.code, message: wire.data.message };
+    }
+  } catch {
+    // Not the API's answer: the stream broke, or the model failed mid-way.
+  }
+
+  return { code: CLIENT_ERROR_CODES.unknown, message: error.message };
+}

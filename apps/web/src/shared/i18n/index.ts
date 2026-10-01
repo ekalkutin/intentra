@@ -12,3 +12,12 @@ export {
   type Language,
 } from './language';
 export { useDescribeError } from './use-describe-error';
+export {
+  nextPhrase,
+  useThinkingPhrases,
+} from './thinking-phrases/thinking-phrases';
+export {
+  DEFAULT_TONE,
+  SYSTEM_TONES,
+  type SystemTone,
+} from './thinking-phrases/tone';

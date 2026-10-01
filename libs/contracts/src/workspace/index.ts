@@ -62,6 +62,7 @@ export {
   PersonaFieldsDtoSchema,
   ProductOverviewFieldsDtoSchema,
   RequirementFieldsDtoSchema,
+  RequirementPriorityDtoSchema,
   ScenarioFieldsDtoSchema,
   TermFieldsDtoSchema,
   type BusinessRuleFieldsDto,
@@ -74,6 +75,7 @@ export {
   type PersonaFieldsDto,
   type ProductOverviewFieldsDto,
   type RequirementFieldsDto,
+  type RequirementPriorityDto,
   type ScenarioFieldsDto,
   type TermFieldsDto,
 } from './knowledge/knowledge-fields.dto.js';

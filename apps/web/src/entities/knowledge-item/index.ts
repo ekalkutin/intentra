@@ -49,6 +49,8 @@ export {
   NeedsReviewBadge,
 } from './ui/knowledge-status-badge';
 export { FACT_TYPES, factsOf, type Fact } from './model/facts';
+export { choiceIconOf } from './model/choice-icons';
+export { PRIORITY_LEVELS, priorityOf } from './model/priority';
 export {
   KIND_KEY_PREFIXES,
   KNOWLEDGE_KEY_PATTERN,
@@ -59,8 +61,12 @@ export {
   useKnowledgeScope,
   type KnowledgeScope,
 } from './model/scope';
+export { ChoiceValue, PriorityIcon } from './ui/choice-value';
 export { FactChips } from './ui/fact-chips';
 export { KnowledgeItemSummary, KnowledgeStatusPair } from './ui/item-summary';
 export { KIND_ICONS, KindBadge, KindIcon } from './ui/kind-badge';
 export { KnowledgeKeyLink } from './ui/knowledge-key-link';
-export { KnowledgeMarkdown } from './ui/knowledge-markdown';
+export {
+  KnowledgeMarkdown,
+  KnowledgeStreamingMarkdown,
+} from './ui/knowledge-markdown';

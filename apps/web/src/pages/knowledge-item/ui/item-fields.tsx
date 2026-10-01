@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
+  ChoiceValue,
   FIELD_CONTROLS,
   kindFields,
   KnowledgeMarkdown,
@@ -84,7 +85,6 @@ function FieldValue({
   readonly value: unknown;
 }) {
   const { t } = useTranslation();
-  const texts = useFieldTexts();
   const gap = <Gap>{t('knowledgeItem.notFilled')}</Gap>;
 
   if (field.control === FIELD_CONTROLS.alternatives) {
@@ -138,7 +138,11 @@ function FieldValue({
     return gap;
   }
   if (field.control === FIELD_CONTROLS.choice) {
-    return <p className='text-sm'>{texts.option(kind, field.name, value)}</p>;
+    return (
+      <p className='text-sm'>
+        <ChoiceValue kind={kind} field={field.name} value={value} />
+      </p>
+    );
   }
 
   return <KnowledgeMarkdown>{value}</KnowledgeMarkdown>;

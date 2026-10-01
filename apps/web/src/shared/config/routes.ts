@@ -4,6 +4,7 @@ export const ROUTE_PARAMS = {
   projectSlug: 'projectSlug',
   knowledgeKey: 'knowledgeKey',
   agentId: 'agentId',
+  conversationId: 'conversationId',
   skillId: 'skillId',
 } as const;
 
@@ -74,6 +75,24 @@ export const KNOWLEDGE_PAGES = {
   item: `:${ROUTE_PARAMS.knowledgeKey}`,
   edit: `:${ROUTE_PARAMS.knowledgeKey}/${EDIT_SEGMENT}`,
 } as const;
+
+/** The pages under a Project's interview, relative to it: a Conversation, or none for a new one. */
+export const INTERVIEW_PAGES = {
+  conversation: `:${ROUTE_PARAMS.conversationId}?`,
+} as const;
+
+/** The path of a Project's interview, or of one Conversation in it. */
+export function conversationPath(
+  workspaceSlug: string,
+  projectSlug: string,
+  conversationId?: string,
+): string {
+  const base = projectPath(workspaceSlug, projectSlug, PROJECT_PAGES.interview);
+
+  return conversationId
+    ? `${base}/${encodeURIComponent(conversationId)}`
+    : base;
+}
 
 /** The query parameters of the knowledge pages. */
 export const KNOWLEDGE_SEARCH_PARAMS = {

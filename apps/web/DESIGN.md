@@ -216,6 +216,8 @@ The Platform Admin's pages live in the same shell: a third sidebar group "Пла
 
 An object worth a page of text (a Knowledge Item, an Agent, a Skill) is edited on an **editor page**: a quiet back link above the page header, then the texts in the main column and its properties in a 17rem column on the right from 1280px, separated by a hairline rule (stacked below the texts when narrower). Saving is explicit, from a save bar pinned to the bottom of the canvas. A small object with a handful of fields (a Model Profile) is edited in a form dialog opened from its row instead.
 
+A conversation with the agents (the Project's Interview) is a **conversation canvas**: the page column gives way to three panes inside the canvas, divided by hairlines. The Conversations list sits in a 16rem column on the left (a new-conversation outline button on top, a hidden-ones toggle pinned under a hairline at the bottom); the middle pane has its own hairline header row (the Conversation's title at body size, 500) above the transcript, which is centred in a 48rem column with the composer pinned under it in the same column; from 1280px an 18rem panel on the right lists what the Conversation recorded (18rem, not 17: a Knowledge Item summary's key, Kind and status keep to one line). Below 768px the list moves into a left sheet behind an icon button in the header row. User decision, 2026-10-01.
+
 Pages outside a Workspace (first steps, received invitations) use a plain frame: a 3rem header with the brand left and the avatar menu right, and the page below it, in a 42rem column.
 
 ### Scales
@@ -245,7 +247,7 @@ Content is flat. Depth comes from the tonal step between the frame and the canva
 
 ## Shapes
 
-One base radius (0.5rem) scaled by multiplier, four steps only: controls, list blocks, menus and cards at 0.5rem; initial tiles, skeletons, sidebar items and small controls at 0.4rem; the canvas at 0.7rem; the avatar and dots round. Dialog corners (0.7rem) and badge pills are owned by their primitives. Every border is 1px. Rows inside a list are divided, never separately rounded; the list block clips them.
+One base radius (0.5rem) scaled by multiplier, four steps only: controls, list blocks, menus and cards at 0.5rem; initial tiles, skeletons, sidebar items and small controls at 0.4rem; the canvas at 0.7rem; the avatar and dots round. Dialog corners (0.7rem), chat bubbles (0.7rem) and badge pills are owned by their primitives; the composer takes 0.7rem to match the bubbles it faces. Every border is 1px. Rows inside a list are divided, never separately rounded; the list block clips them.
 
 ## Components
 
@@ -283,9 +285,11 @@ A square with the first letter of a name (hairline border, canvas fill, muted 60
 ### Knowledge Items
 - **Kind Badge:** the Kind's toned icon plus its name in muted text; never a filled chip.
 - **Fact Chips:** an item's short facts (choices, list sizes, one-line texts) as 1.25rem outline chips in muted text, under its statement in rows, tiles and previews.
+- **Priority:** a Requirement's priority (must, should, could) reads as three rising bars, filled to its level (3, 2, 1), in the text's own colour with the empty bars at 25%, before its word ("Обязательно", "Желательно", "Если успеем"), never with the MoSCoW term in brackets; the same in fact chips, on the item's page and in the editor's choice. Priority takes no hue: the bars carry it.
+- **Choice icons:** every choice except a priority (which has its bars) reads with a 12px icon before its word, in the text's own colour, wherever the choice shows (chips, the item's page, the editor). Term sort: Box entity, Hash value, UserRound role, Zap action or event, Shapes other. Requirement type: SquareFunction functional, Gauge non-functional. Decision area: Layers architecture, Package product, Briefcase business. Persona type: User person, Server system. Constraint imposed by: Scale law, Wallet budget, CalendarClock deadline, Handshake customer, Building2 company, Server infrastructure. Integration direction: ArrowUpRight outbound, ArrowDownLeft inbound, ArrowLeftRight both. One table (`choiceIconOf` in `entities/knowledge-item`) holds them, and a unit test fails when a new choice value has no icon.
 - **Related Tiles:** on an item's page, linked items are bordered tiles (0.5rem radius, 0.75rem padding) in a two-column grid from 768px, grouped under the Link's meaning with an arrow for out or in; each shows key, Kind, status, title, three lines of statement and facts, and opens the item. Rejected and Obsolete tiles fade to 70%. This is the one sanctioned tile grid: it previews content, it does not structure the page.
 - **Dependency Tree:** the `depends-on` cascade as indented rows inside one bordered block, joined by hairline elbows.
-- **Markdown:** item texts render as Markdown at body size (14px, 1.5rem leading, measure 68ch): lists, emphasis, inline code on muted, code blocks and tables in hairline blocks. Knowledge Keys in text become mono links with a hover preview of the item.
+- **Markdown:** item texts render as Markdown at body size (14px, 1.5rem leading, measure 68ch): lists, emphasis, inline code on muted, code blocks and tables in hairline blocks. Knowledge Keys in text become mono links with a hover preview of the item. A model's answer that is still arriving renders through StreamingMarkdown, which uses the same block components, so a streamed answer and a stored text look alike; unfinished syntax is completed rather than shown raw.
 - **History:** a hairline timeline with small dots; only the approval (green) and the rejection (red) dots take colour, and a reason sits under its event.
 
 ### Editor Page
@@ -304,6 +308,19 @@ An object that differs from its published version carries a StatusBadge with the
 ### Navigating Row
 A list row that leads somewhere takes `interactive`: its link stretches over the row, the row washes with muted grey at 60% on hover and on focus-within, and keyboard focus draws an inset indigo ring (2px at 50%, the same strength as the primitives) on the whole row.
 
+### Conversation
+A conversation that visibly turns into knowledge, in the app's own materials: no avatars, no gradients, no sparkle or "magic" accent.
+- **Transcript:** the person's turns are a muted Bubble on the right; the agent's answer is plain document text at body size with no bubble, no avatar and no name. Turns sit 2rem apart; MessageScroller keeps to the bottom edge and follows the answer as it streams, with no anchor on the person's turn (an anchor lifts the whole history to bring the sent message to the top, which reads as the chat jumping away); a reopened Conversation opens at its end; scrolling up stops the follow and shows the jump-to-latest button. Sending always brings the end into view, and a finished answer is brought to the end too unless the Member scrolled back meanwhile (an answer may end with a tall block, such as choice cards, that outruns the follow). A row paints only inside its box (`content-visibility`), so rows reach 4px past the column on each side to keep focus rings whole.
+- **Live status:** while the agent works, one line under its answer says what it is doing. Concrete steps name themselves with a 16px icon and a muted word with the shimmer utility (reading, writing, asking a Specialist by name). While it only thinks, the line is a turning glyph (✢ ✳ ✶ ✻ ✽, still under reduced motion) and a phrase in the system's tone with an ellipsis, a new one at random every 5 seconds: phrases are objects with a tone (`playful`, the default, or `serious`), written natively per language in `shared/i18n/thinking-phrases`, never translated word for word. No typing dots; the line goes once the answer's words show.
+- **Agent message:** three parts, 1rem apart, whatever order the parts streamed in: what it did (the folded work log and the Drafts it wrote, 6px apart), what it says (Markdown, 12px between blocks), and the question it asks, always last and 0.5rem further off, since it waits for the Member. Streamdown's own `space-y-4` is zeroed so only the gap spaces blocks. Choice options are body weight under the 500-weight question.
+- **Work log:** after the answer, its steps fold above it under a small muted chevron, "Ход работы" and a count. Open, it is a hairline-ruled list in label size: an icon, the step in words first, the tool name after it in mono (secondary), reasoning as clamped muted text, a failed step marked with a red word.
+- **Write rows:** each Draft the agent recorded or changed is one inline line in the answer, always visible: the Kind's toned icon, a muted verb, the Knowledge Key as a mono link with its preview, the title truncated. A failed write is a red line with an alert icon and the reason in muted label text under it.
+- **Choice cards:** a question with clear-cut answers, held to 36rem, without an outer frame: the question in body 500 with one muted line under it saying how it works. A single answer is a list of outline buttons, each a reply sent on click or by its number key (a Kbd on the right that turns into an arrow on hover); no radio, since nothing waits for confirmation; an optional own answer is an input with a send arrow inside. Several answers use the shadcn Questionnaire with checkboxes, an optional own-answer input and a primary "Ответить · N" that stays off until something is picked or typed. Once answered, a static summary: the question, then every option as a wrapping 6px-radius chip — the chosen ones filled secondary with a check, the rest bordered and muted — and the own words as one more filled chip with a pen icon. A send button inside an InputGroup is never `disabled` (the group would grey out the whole field); it is `aria-disabled` and faded.
+- **Composer:** the shadcn InputGroup with a growing textarea (at least 3rem, at most 15rem, 1.5rem leading) and a block-end row: a muted hint of the keys on the left (from 640px), a small primary send button on the right that turns into a secondary stop button while the agent answers. It sits in the transcript's column and keeps the transcript's scrollbar gutter, so both share edges.
+- **Conversations list:** compact rows (0.4rem radius, body text, the latest activity as a mono time on the right) that wash with muted grey at 60% on hover and take it fully when open; a row's actions (rename inline, hide, delete behind a confirm) open from a ghost icon button that replaces the time on hover.
+- **Recorded panel:** the items a Conversation recorded or changed, newest first, as bordered navigating tiles (0.5rem radius, 0.75rem padding) with the Knowledge Item summary read live, so a status follows approvals made elsewhere; its title carries a mono count.
+- **Empty conversation:** the Project's name as the one heading (Headline), one muted line under it, and a few starters as outline buttons, set low in the transcript above the composer.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -317,6 +334,7 @@ A list row that leads somewhere takes `interactive`: its link stretches over the
 - **Do** reuse the closed scales (sizes, weights, radii, row density, menu width, measure) instead of adding a step.
 - **Do** edit long texts on an editor page (texts left, 17rem properties column right, sticky save bar, ask before leaving unsaved) and small objects in a form dialog.
 - **Do** keep the page settle (220ms, ease-out-expo, 0.25rem rise) as the only page-level motion, collapsed under reduced motion.
+- **Do** show an agent at work as one live status line (icon plus a shimmering word), never a spinner, and fold its steps under the answer once it is in; writes stay visible.
 
 ### Don't:
 - **Don't** build card grids, metric tiles or boxed dashboard panels (the Related Tiles of linked knowledge are the one exception).

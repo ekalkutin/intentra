@@ -1,4 +1,4 @@
-import { Markdown, type Linkify } from '@/shared/ui';
+import { Markdown, StreamingMarkdown, type Linkify } from '@/shared/ui';
 
 import { KNOWLEDGE_KEY_PATTERN } from '../model/key-prefixes';
 
@@ -21,5 +21,26 @@ export function KnowledgeMarkdown({
     <Markdown linkify={LINKIFY} className={className}>
       {children}
     </Markdown>
+  );
+}
+
+/** A model's answer streamed as Markdown, the Knowledge Keys in it opening their items. */
+export function KnowledgeStreamingMarkdown({
+  children,
+  streaming,
+  className,
+}: {
+  readonly children: string;
+  readonly streaming: boolean;
+  readonly className?: string;
+}) {
+  return (
+    <StreamingMarkdown
+      linkify={LINKIFY}
+      streaming={streaming}
+      className={className}
+    >
+      {children}
+    </StreamingMarkdown>
   );
 }

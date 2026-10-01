@@ -1,4 +1,5 @@
 export {
+  INTERVIEW_PAGES,
   KNOWLEDGE_PAGES,
   KNOWLEDGE_SEARCH_PARAMS,
   PLATFORM_OBJECT_PAGES,
@@ -9,6 +10,7 @@ export {
   ROUTE_PARAMS,
   ROUTES,
   WORKSPACE_PAGES,
+  conversationPath,
   knowledgeItemPath,
   newKnowledgeItemPath,
   platformAgentPath,

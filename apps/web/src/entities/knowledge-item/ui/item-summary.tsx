@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/shared/lib';
 import { InlineMarkdown } from '@/shared/ui';
 import type { KnowledgeItemDto } from '@intentra/contracts/workspace';
 
 import { FactChips } from './fact-chips';
-import { KindBadge } from './kind-badge';
+import { KindBadge, KindIcon } from './kind-badge';
 import {
   KnowledgeStatusBadge,
   NeedsReviewBadge,
@@ -19,19 +20,31 @@ export function KnowledgeItemSummary({
   item,
   title,
   clamp = 3,
+  compact = false,
 }: {
   readonly item: KnowledgeItemDto;
   /** The title as a link, when the summary leads to the item. */
   readonly title?: ReactNode;
   readonly clamp?: 2 | 3 | 4;
+  /** A narrow column: the Kind as its icon only, so key, Kind and status keep to one line. */
+  readonly compact?: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className='flex min-w-0 flex-col gap-1.5'>
       <div className='flex flex-wrap items-center gap-x-2 gap-y-1'>
         <span className='font-mono text-xs text-muted-foreground'>
           {item.key}
         </span>
-        <KindBadge kind={item.kind} />
+        {compact ? (
+          <span title={t(`kindsOne.${item.kind}`)} className='inline-flex'>
+            <KindIcon kind={item.kind} />
+            <span className='sr-only'>{t(`kindsOne.${item.kind}`)}</span>
+          </span>
+        ) : (
+          <KindBadge kind={item.kind} />
+        )}
         <KnowledgeStatusPair item={item} className='ml-auto' />
       </div>
       <div className='text-sm leading-5 font-medium text-balance'>

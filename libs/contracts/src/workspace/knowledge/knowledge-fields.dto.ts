@@ -30,6 +30,13 @@ export const TermFieldsDtoSchema = z.object({
 
 export type TermFieldsDto = z.infer<typeof TermFieldsDtoSchema>;
 
+/** How much a Requirement matters, MoSCoW without "won't". */
+export const RequirementPriorityDtoSchema = z.enum(['must', 'should', 'could']);
+
+export type RequirementPriorityDto = z.infer<
+  typeof RequirementPriorityDtoSchema
+>;
+
 export const RequirementFieldsDtoSchema = z.object({
   statement: z
     .string()
@@ -39,9 +46,7 @@ export const RequirementFieldsDtoSchema = z.object({
     .nullable()
     .default(null)
     .describe('A function the system performs, or a quality it has.'),
-  priority: z
-    .enum(['must', 'should', 'could'])
-    .nullable()
+  priority: RequirementPriorityDtoSchema.nullable()
     .default(null)
     .describe('How much it matters.'),
   acceptanceCriteria: z

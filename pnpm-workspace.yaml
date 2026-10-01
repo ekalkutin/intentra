@@ -72,3 +72,5 @@ minimumReleaseAgeExclude:
   - '@mastra/schema-compat@1.3.12'
   - '@mastra/core@1.72.0'
   - lucide-react@1.49.0
+  - remend@1.4.0
+  - streamdown@2.7.0

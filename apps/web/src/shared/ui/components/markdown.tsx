@@ -22,7 +22,10 @@ export type Linkify = {
 };
 
 /** Turns each match into a Markdown link the renderer recognises; code, links and URLs are left alone. */
-function withReferences(text: string, linkify: Linkify | undefined): string {
+export function withReferences(
+  text: string,
+  linkify: Linkify | undefined,
+): string {
   return linkify
     ? linkReferences(
         text,
@@ -32,7 +35,7 @@ function withReferences(text: string, linkify: Linkify | undefined): string {
     : text;
 }
 
-function link(linkify: Linkify | undefined): Components['a'] {
+export function link(linkify: Linkify | undefined): Components['a'] {
   return ({ href, children }) => {
     if (linkify && href?.startsWith(REFERENCE_HREF)) {
       return <>{linkify.render(href.slice(REFERENCE_HREF.length))}</>;
@@ -50,7 +53,8 @@ function link(linkify: Linkify | undefined): Components['a'] {
   };
 }
 
-const BLOCK_COMPONENTS: Components = {
+/** How block Markdown is set at the app's body size, shared by the streamed renderer. */
+export const BLOCK_COMPONENTS: Components = {
   p: ({ children }) => <p className='text-pretty'>{children}</p>,
   ul: ({ children }) => (
     <ul className='flex list-disc flex-col gap-1 pl-5 marker:text-muted-foreground'>

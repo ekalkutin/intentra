@@ -5,16 +5,14 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
-import { Mutex } from 'async-mutex';
 
 import type { RefreshTokensDto, TokenPair } from '@intentra/contracts/iam';
 
+import { API_PREFIX, REFRESH_PATH } from './paths';
 import { afterResponse } from './reauth';
+import { refreshing } from './refreshing';
 import { sessionTokens } from './session-tokens';
 import { API_TAG_TYPES } from './tags';
-
-const API_PREFIX = '/api';
-const REFRESH_PATH = '/iam/auth/refresh';
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_PREFIX,
@@ -26,9 +24,6 @@ const rawBaseQuery = fetchBaseQuery({
     return headers;
   },
 });
-
-/** One refresh at a time: requests that fail together wait for the same new pair. */
-const refreshing = new Mutex();
 
 /**
  * Sends a request with the session's access token. When it expired, refreshes
