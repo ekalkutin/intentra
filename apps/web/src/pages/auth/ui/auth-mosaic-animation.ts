@@ -197,7 +197,7 @@ function dot(
   radius: number,
   alpha: number,
 ) {
-  fill(context, alpha);
+  context.fillStyle = `rgba(242, 245, 252, ${Math.min(0.98, alpha)})`;
   context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 }
 
@@ -668,7 +668,7 @@ export function mountAuthMosaic(options: {
       }
     }
 
-    const radius = Math.max(0.46, Math.min(0.85, scale * 0.73));
+    const radius = Math.max(0.72, Math.min(1.12, scale * 0.86));
     for (const point of shape.points) {
       const x = centerX + point.x * scale;
       const y = centerY + point.y * scale;
@@ -793,7 +793,7 @@ export function mountAuthMosaic(options: {
           x + dx,
           y + dy,
           radius,
-          0.65 + point.seed * 0.12 + hover * 0.14,
+          0.88 + point.seed * 0.1 + hover * 0.02,
         );
     }
   }
