@@ -74,7 +74,13 @@ export function PageSection({
 }) {
   return (
     <section className={cn('flex min-w-0 flex-col gap-3', className)}>
-      <div className='flex flex-wrap items-end justify-between gap-x-4 gap-y-2'>
+      <div
+        className={cn(
+          'flex flex-wrap justify-between gap-x-4 gap-y-2',
+          // A lone title shares its line with the actions; under a description they keep to its foot.
+          description ? 'items-end' : 'items-center',
+        )}
+      >
         <div className='min-w-0'>
           <h2 className='text-sm font-semibold'>{title}</h2>
           {description && (

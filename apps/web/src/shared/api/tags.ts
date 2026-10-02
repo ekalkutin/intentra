@@ -14,6 +14,7 @@ export const API_TAGS = {
   knowledge: 'Knowledge',
   providerKey: 'ProviderKey',
   conversation: 'Conversation',
+  analysisRun: 'AnalysisRun',
   /** The Unpublished Agents and what they change: one whole, edited object by object. */
   platformAgents: 'PlatformAgents',
   /** Open Sign-up and Open Workspace Creation, and the verdicts that follow from them. */

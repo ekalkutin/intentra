@@ -5,6 +5,7 @@ import { InvitationsPage } from '@/pages/invitations';
 import { KnowledgeEditorPage } from '@/pages/knowledge-editor';
 import { KnowledgeItemPage } from '@/pages/knowledge-item';
 import { ProjectAccessPage } from '@/pages/project-access';
+import { ProjectAnalysisPage } from '@/pages/project-analysis';
 import { ProjectInterviewPage } from '@/pages/project-interview';
 import { ProjectKnowledgePage } from '@/pages/project-knowledge';
 import { ProjectPassportPage } from '@/pages/project-passport';
@@ -69,6 +70,7 @@ export const router = createBrowserRouter([
                 path: `${PROJECT_PAGES.interview}/${INTERVIEW_PAGES.conversation}`,
                 Component: ProjectInterviewPage,
               },
+              { path: PROJECT_PAGES.analysis, Component: ProjectAnalysisPage },
               { path: PROJECT_PAGES.roles, Component: ProjectAccessPage },
               { path: PROJECT_PAGES.settings, Component: ProjectSettingsPage },
             ],

@@ -39,6 +39,7 @@ export type WorkspacePage =
 /** The pages of a Project, relative to its path; the index is its Passport. */
 export const PROJECT_PAGES = {
   knowledge: 'knowledge',
+  analysis: 'analysis',
   interview: 'interview',
   roles: 'roles',
   settings: 'settings',

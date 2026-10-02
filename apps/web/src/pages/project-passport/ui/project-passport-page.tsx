@@ -2,12 +2,14 @@ import {
   BookText,
   CircleDashed,
   MessagesSquare,
+  SearchCheck,
   TriangleAlert,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
+import { latestFindings, useAnalysisRunsQuery } from '@/entities/analysis-run';
 import {
   KNOWLEDGE_LIST_SIZE,
   KNOWLEDGE_VIEWS,
@@ -80,6 +82,8 @@ export function ProjectPassportPage() {
     },
     { skip },
   );
+  // The newest runs, for what the last one found.
+  const runs = useAnalysisRunsQuery({ ...scope, page: { take: 5 } }, { skip });
   const loadError = toApiError(approved.error ?? summary.error);
 
   if (!workspace || !project) {
@@ -114,6 +118,7 @@ export function ProjectPassportPage() {
   const drafts = kinds.reduce((sum, kind) => sum + kind.statuses.draft, 0);
   const needsReview = kinds.reduce((sum, kind) => sum + kind.needsReview, 0);
   const canRecord = summary.data?.access.canRecord ?? [];
+  const findings = latestFindings(runs.data?.items ?? []);
 
   return (
     <KnowledgeScopeProvider
@@ -145,7 +150,7 @@ export function ProjectPassportPage() {
               </>
             }
           />
-          {(drafts > 0 || needsReview > 0) && (
+          {(drafts > 0 || needsReview > 0 || findings) && (
             <p className='flex flex-wrap gap-x-5 gap-y-1 text-sm'>
               {drafts > 0 && (
                 <SignalLink to={viewPath(KNOWLEDGE_VIEWS.drafts)}>
@@ -157,6 +162,20 @@ export function ProjectPassportPage() {
                 <SignalLink to={viewPath(KNOWLEDGE_VIEWS.review)}>
                   <TriangleAlert className='text-warning' />
                   {t('passport.needsReview', { count: needsReview })}
+                </SignalLink>
+              )}
+              {findings && (
+                <SignalLink
+                  to={projectPath(
+                    workspace.slug,
+                    project.slug,
+                    PROJECT_PAGES.analysis,
+                  )}
+                >
+                  <SearchCheck className='text-muted-foreground' />
+                  {t('passport.findings', {
+                    count: findings.questionKeys.length,
+                  })}
                 </SignalLink>
               )}
             </p>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
+import { WorkspaceId } from '@intentra/shared-kernel';
 
 import { MemberId, Project, ProjectRole } from '../../../tenancy/index.js';
 import { IntentraRecordingForbiddenException } from '../exceptions/index.js';

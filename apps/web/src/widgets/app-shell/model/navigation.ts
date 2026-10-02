@@ -7,6 +7,7 @@ import {
   Library,
   MessagesSquare,
   NotebookText,
+  SearchCheck,
   Settings,
   SlidersHorizontal,
   Users,
@@ -51,6 +52,7 @@ export const PROJECT_NAVIGATION = [
   },
   { page: undefined, icon: BookText, labelKey: 'passport' },
   { page: PROJECT_PAGES.knowledge, icon: LayoutList, labelKey: 'knowledge' },
+  { page: PROJECT_PAGES.analysis, icon: SearchCheck, labelKey: 'analysis' },
   { page: PROJECT_PAGES.roles, icon: UsersRound, labelKey: 'roles' },
   { page: PROJECT_PAGES.settings, icon: Settings, labelKey: 'settings' },
 ] as const satisfies readonly Entry<ProjectPage>[];

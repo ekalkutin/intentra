@@ -144,6 +144,7 @@ export const ru = {
     projectPages: {
       passport: 'Паспорт',
       knowledge: 'Знания',
+      analysis: 'Анализ',
       interview: 'Интервью',
       roles: 'Участники',
       settings: 'Настройки',
@@ -337,8 +338,51 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     readOnly:
       'Менять доступ может владелец пространства или тот, кто утверждает в этом проекте.',
   },
+  analysis: {
+    title: 'Анализ',
+    description:
+      'Intentra проверяет утверждённые знания проекта и записывает найденное открытыми вопросами. Решать, что верно, остаётся людям.',
+    start: 'Проверить проект',
+    running: 'Идёт проверка',
+    history: 'История проверок',
+    emptyTitle: 'Проект ещё не проверяли',
+    emptyDescription:
+      'Intentra найдёт противоречия и неясности в утверждённых знаниях.',
+    bySchedule: 'по расписанию',
+    statuses: {
+      running: 'Идёт',
+      completed: 'Готово',
+      failed: 'Не удалось',
+    },
+    runningHint:
+      'Intentra читает знания проекта. Можно уйти со страницы: проверка продолжится.',
+    foundNothing: 'Противоречий и неясностей не нашлось.',
+    found_one: 'Найден {{count}} вопрос:',
+    found_few: 'Найдено {{count}} вопроса:',
+    found_many: 'Найдено {{count}} вопросов:',
+    found_other: 'Найдено {{count}} вопроса:',
+    foundBeforeFailing_one: 'До сбоя записан {{count}} вопрос:',
+    foundBeforeFailing_few: 'До сбоя записано {{count}} вопроса:',
+    foundBeforeFailing_many: 'До сбоя записано {{count}} вопросов:',
+    foundBeforeFailing_other: 'До сбоя записано {{count}} вопроса:',
+    stepLimitReached:
+      'Проверка упёрлась в предел шагов и могла посмотреть не всё.',
+    failures: {
+      interrupted: 'Прервалась: сервер перезапустился во время проверки.',
+      'provider-key-missing':
+        'Нет ключа провайдера: его может добавить владелец пространства в настройках.',
+      'agents-not-published':
+        'Агенты Intentra ещё не опубликованы. Обратитесь к администратору платформы.',
+      'auditor-failed':
+        'Intentra не смогла довести проверку до конца. Попробуйте ещё раз позже.',
+    },
+  },
   passport: {
     contents: 'Содержание',
+    findings_one: 'Intentra нашла {{count}} вопрос при проверке',
+    findings_few: 'Intentra нашла {{count}} вопроса при проверке',
+    findings_many: 'Intentra нашла {{count}} вопросов при проверке',
+    findings_other: 'Intentra нашла {{count}} вопроса при проверке',
     written: '{{written}} из {{total}} описано',
     chapters: {
       overview: 'Обзор',
@@ -1418,6 +1462,10 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     SKILL_NAME_TAKEN: 'Skill с таким именем уже есть',
     INTENTRA_EXISTS: 'Intentra уже есть',
     AUDITOR_EXISTS: 'Auditor уже есть',
+    ANALYSIS_RUN_BUSY: 'Проверка уже идёт',
+    ANALYSIS_RUN_FORBIDDEN:
+      'Запускать проверку могут те, кто пишет или утверждает в проекте',
+    ANALYSIS_RUN_NOT_FOUND: 'Такой проверки нет',
     AUDITOR_NOT_REMOVABLE: 'Auditor удалить нельзя',
     INTENTRA_NOT_REMOVABLE: 'Intentra удалить нельзя',
     MODEL_PROFILE_IN_USE:
