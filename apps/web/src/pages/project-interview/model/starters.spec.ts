@@ -27,7 +27,6 @@ function summary(
       obsolete: 0,
     },
     needsReview: counts[kind]?.needsReview ?? 0,
-    unlinked: 0,
   }));
 }
 

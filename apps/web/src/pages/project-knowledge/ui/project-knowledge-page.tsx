@@ -2,11 +2,14 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useSearchParams } from 'react-router';
 
 import {
+  groupGapsByRule,
+  isListView,
   KNOWLEDGE_VIEWS,
   KnowledgeScopeProvider,
   parseKnowledgeKind,
   parseKnowledgeOrder,
   parseKnowledgeView,
+  useKnowledgeGapsQuery,
   useKnowledgeSummaryQuery,
   viewCount,
   viewTotal,
@@ -17,7 +20,11 @@ import { useMembersQuery } from '@/entities/member';
 import { useCurrentProject } from '@/entities/project';
 import { useCurrentWorkspace } from '@/entities/workspace';
 import { toApiError } from '@/shared/api';
-import { KNOWLEDGE_SEARCH_PARAMS, knowledgeItemPath } from '@/shared/config';
+import {
+  KNOWLEDGE_SEARCH_PARAMS,
+  knowledgeItemPath,
+  newKnowledgeItemPath,
+} from '@/shared/config';
 import { useDescribeError } from '@/shared/i18n';
 import {
   Button,
@@ -38,6 +45,7 @@ import {
 } from '@intentra/contracts/workspace';
 
 import { ApproveAll } from './approve-all';
+import { GapsView } from './gaps-view';
 import { KindGroup } from './kind-group';
 import {
   columnCount,
@@ -54,16 +62,15 @@ const SINGLE_STATUS_VIEWS: readonly KnowledgeView[] = [
   KNOWLEDGE_VIEWS.drafts,
   KNOWLEDGE_VIEWS.rejected,
   KNOWLEDGE_VIEWS.obsolete,
-  KNOWLEDGE_VIEWS.unlinked,
 ];
 
 /**
  * A Project's knowledge: a status view (every item, Approved, Drafts, Needs
- * Review, Rejected, Obsolete, and the Approved items linked to nothing; none
- * overlaps another but the first and the last) and a
- * Kind, chosen above the list. Every count comes from the Project's summary; every Kind is a
- * group read a page at a time once it comes near the screen, or one Kind is
- * a table of its fields.
+ * Review, Rejected, Obsolete; none overlaps another but the first) or the
+ * Gaps, and a Kind, chosen above the list. Every count comes from the
+ * Project's summary and its Gaps; every Kind is a group read a page at a time
+ * once it comes near the screen, or one Kind is a table of its fields. The
+ * Gaps are grouped by what they miss.
  */
 export function ProjectKnowledgePage() {
   const { t } = useTranslation();
@@ -86,6 +93,10 @@ export function ProjectKnowledgePage() {
   } = useKnowledgeSummaryQuery(scope, {
     skip: !workspace || !project,
   });
+  const { data: gapsData } = useKnowledgeGapsQuery(scope, {
+    skip: !workspace || !project,
+  });
+  const gaps = gapsData?.gaps ?? [];
   const loadError = toApiError(error);
   const { data: members = [] } = useMembersQuery(workspace?.id ?? '', {
     skip: !workspace,
@@ -127,16 +138,17 @@ export function ProjectKnowledgePage() {
   const showStatus = !SINGLE_STATUS_VIEWS.includes(view);
   const kinds = summary?.kinds ?? [];
   const kindCounts = Object.fromEntries(
-    kinds.map(entry => [entry.kind, viewCount(entry, view)]),
+    kinds.map(entry => [entry.kind, viewCount(entry, view, gaps)]),
   ) as Partial<Record<KnowledgeKindDto, number>>;
   const viewCounts = Object.fromEntries(
     Object.values(KNOWLEDGE_VIEWS).map(option => [
       option,
-      viewTotal(kinds, option, kind),
+      viewTotal(kinds, option, kind, gaps),
     ]),
   ) as Partial<Record<KnowledgeView, number>>;
-  const shown = summary ? viewTotal(kinds, view, kind) : null;
-  const groups = kinds.filter(entry => viewCount(entry, view) > 0);
+  const loaded = summary && (isListView(view) || gapsData);
+  const shown = loaded ? viewTotal(kinds, view, kind, gaps) : null;
+  const groups = kinds.filter(entry => viewCount(entry, view, gaps) > 0);
   const kindTotal = kind ? (kindCounts[kind] ?? 0) : 0;
   const memberOf = (memberId: string) =>
     members.find(member => member.id === memberId);
@@ -144,7 +156,7 @@ export function ProjectKnowledgePage() {
   const elsewhere = Object.values(KNOWLEDGE_VIEWS).filter(
     option => option !== view && (viewCounts[option] ?? 0) > 0,
   );
-  const otherKinds = kind ? viewTotal(kinds, view, null) : 0;
+  const otherKinds = kind ? viewTotal(kinds, view, null, gaps) : 0;
 
   return (
     <KnowledgeScopeProvider scope={{ ...scope, itemPath: pathOf }}>
@@ -159,7 +171,7 @@ export function ProjectKnowledgePage() {
             viewCounts={viewCounts}
             kind={kind}
             kindCounts={kindCounts}
-            total={summary && viewTotal(kinds, view, null)}
+            total={summary && viewTotal(kinds, view, null, gaps)}
             order={order}
             onView={chooseView}
             onKind={chooseKind}
@@ -173,12 +185,7 @@ export function ProjectKnowledgePage() {
             }
           />
           <div className='flex flex-col gap-6'>
-            {view === KNOWLEDGE_VIEWS.unlinked && (shown ?? 0) > 0 && (
-              <p className='max-w-2xl text-sm text-pretty text-muted-foreground'>
-                {t('knowledge.unlinkedHint')}
-              </p>
-            )}
-            {!summary && !loadError && (
+            {!loaded && !loadError && (
               <List>
                 <ListSkeleton rows={4} />
               </List>
@@ -230,7 +237,18 @@ export function ProjectKnowledgePage() {
                 </ListEmpty>
               </List>
             )}
-            {kind && kindTotal > 0 && (
+            {view === KNOWLEDGE_VIEWS.gaps && (
+              <GapsView
+                groups={groupGapsByRule(gaps, kind)}
+                pathOf={pathOf}
+                newPathOf={next =>
+                  newKnowledgeItemPath(workspace.slug, project.slug, next)
+                }
+                canRecord={summary?.access.canRecord ?? []}
+                state={listState}
+              />
+            )}
+            {isListView(view) && kind && kindTotal > 0 && (
               <div className='flex flex-col gap-3'>
                 <p className='max-w-2xl text-sm text-pretty text-muted-foreground'>
                   {t(`kindDescriptions.${kind}`)}
@@ -271,7 +289,8 @@ export function ProjectKnowledgePage() {
                 </KindTable>
               </div>
             )}
-            {!kind &&
+            {isListView(view) &&
+              !kind &&
               groups.map(entry => (
                 <KindGroup
                   key={`${view}-${entry.kind}-${order}`}
@@ -279,7 +298,7 @@ export function ProjectKnowledgePage() {
                   view={view}
                   kind={entry.kind}
                   order={order}
-                  total={viewCount(entry, view)}
+                  total={viewCount(entry, view, gaps)}
                   pathOf={pathOf}
                   state={listState}
                   memberOf={memberOf}

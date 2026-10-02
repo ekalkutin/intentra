@@ -19,6 +19,10 @@ export class GoalContent {
     return this.#outcome;
   }
 
+  get successMetric(): KnowledgeText | null {
+    return this.#successMetric;
+  }
+
   public toFields(): GoalFields {
     return {
       outcome: this.#outcome.value,

@@ -26,12 +26,6 @@ export const listKnowledgeTool = createTool({
       .boolean()
       .optional()
       .describe('Only items marked Needs Review (true) or only unmarked ones.'),
-    unlinked: z
-      .literal(true)
-      .optional()
-      .describe(
-        'Only the Approved items linked to nothing, outside the Project Frame; statuses and needsReview are then left aside.',
-      ),
     take: z.number().int().min(1).max(200).default(50),
     offset: z.number().int().min(0).default(0),
   }),

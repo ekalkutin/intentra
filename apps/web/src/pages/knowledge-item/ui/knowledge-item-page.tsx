@@ -3,9 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
 import {
+  gapKeys,
+  gapRulesOf,
   inListOrder,
+  isListView,
   KindBadge,
   KNOWLEDGE_ERROR_CODES,
+  KNOWLEDGE_VIEWS,
   knowledgeFilter,
   KnowledgeScopeProvider,
   KnowledgeStatusPair,
@@ -16,6 +20,7 @@ import {
   readKnowledgeListState,
   useConfirmKnowledgeItemMutation,
   useKnowledgeDependenciesQuery,
+  useKnowledgeGapsQuery,
   useKnowledgeIndex,
   useKnowledgeItemQuery,
   useKnowledgeItemsQuery,
@@ -52,6 +57,7 @@ import { AgentContext } from './agent-context';
 import { ItemActions } from './item-actions';
 import { ItemContext } from './item-context';
 import { ItemFields } from './item-fields';
+import { ItemGaps } from './item-gaps';
 import { ItemNotices } from './item-notices';
 import { ItemProperties } from './item-properties';
 import { ItemStepper } from './item-stepper';
@@ -87,6 +93,7 @@ export function KnowledgeItemPage() {
     { skip: skip || !(isDraft || dependsOnSomething) },
   );
   const index = useKnowledgeIndex(scope, { skip });
+  const { data: gaps } = useKnowledgeGapsQuery(scope, { skip });
   const neighbours = useNeighbours(scope, listState, key, skip);
   const { data: members = [] } = useMembersQuery(workspace?.id ?? '', {
     skip: !workspace,
@@ -200,6 +207,7 @@ export function KnowledgeItemPage() {
           confirming={confirming}
           onConfirm={() => void runConfirm()}
         />
+        <ItemGaps rules={gapRulesOf(gaps?.gaps ?? [], item.key)} />
         <div className='grid gap-10 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-12'>
           <div className='flex min-w-0 flex-col gap-10'>
             <ItemFields item={item} />
@@ -227,20 +235,28 @@ function useNeighbours(
   skip: boolean,
 ) {
   const params = new URLSearchParams(listState?.listSearch ?? '');
-  const filter = knowledgeFilter(
-    parseKnowledgeView(params.get(KNOWLEDGE_SEARCH_PARAMS.view)),
-    parseKnowledgeKind(params.get(KNOWLEDGE_SEARCH_PARAMS.kind)),
-    parseKnowledgeOrder(params.get(KNOWLEDGE_SEARCH_PARAMS.order)),
-  );
+  const view = parseKnowledgeView(params.get(KNOWLEDGE_SEARCH_PARAMS.view));
+  const kind = parseKnowledgeKind(params.get(KNOWLEDGE_SEARCH_PARAMS.kind));
+  const listView = isListView(view) ? view : null;
   const { data } = useKnowledgeItemsQuery(
-    { ...scope, filter },
-    { skip: skip || listState === null },
+    {
+      ...scope,
+      filter: knowledgeFilter(
+        listView ?? KNOWLEDGE_VIEWS.all,
+        kind,
+        parseKnowledgeOrder(params.get(KNOWLEDGE_SEARCH_PARAMS.order)),
+      ),
+    },
+    { skip: skip || listState === null || listView === null },
   );
+  // Opened from the Gaps, it steps through the items they name.
+  const { data: gaps } = useKnowledgeGapsQuery(scope, {
+    skip: skip || listState === null || listView !== null,
+  });
+  const keys =
+    listView === null
+      ? gaps && gapKeys(gaps.gaps, kind)
+      : data && inListOrder(data.items).map(item => item.key);
 
-  return data
-    ? neighboursOf(
-        inListOrder(data.items).map(item => item.key),
-        key,
-      )
-    : null;
+  return keys ? neighboursOf(keys, key) : null;
 }

@@ -7,6 +7,7 @@ export {
   useKnowledgeContextQuery,
   useKnowledgeDependenciesQuery,
   useKnowledgeFrameQuery,
+  useKnowledgeGapsQuery,
   useKnowledgeItemQuery,
   useKnowledgePrefetch,
   useKnowledgeItemsQuery,
@@ -17,6 +18,12 @@ export {
   type InProject,
 } from './api/knowledge-api';
 export { planApproval, type Approval } from './model/approval';
+export {
+  gapKeys,
+  gapRulesOf,
+  groupGapsByRule,
+  type GapGroup,
+} from './model/gaps';
 export {
   BULK_APPROVAL_BLOCKS,
   planBulkApproval,
@@ -42,6 +49,7 @@ export {
   KNOWLEDGE_VIEWS,
   groupByKind,
   inListOrder,
+  isListView,
   knowledgeFilter,
   parseKnowledgeKind,
   parseKnowledgeOrder,
@@ -51,6 +59,7 @@ export {
   viewTotal,
   type KindGroup,
   type KnowledgeListState,
+  type KnowledgeListView,
   type KnowledgeView,
 } from './model/list-view';
 export {

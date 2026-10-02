@@ -22,6 +22,11 @@ export class PersonaContent {
     return this.#profile;
   }
 
+  /** A person or a system; `null` when not said. */
+  get type(): PersonaType | null {
+    return this.#type;
+  }
+
   public toFields(): PersonaFields {
     return {
       profile: this.#profile.value,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type {
+  KnowledgeGapDto,
   KnowledgeItemDto,
   KnowledgeKindDto,
 } from '@intentra/contracts/workspace';
@@ -125,14 +126,24 @@ describe('viewCount and viewTotal', () => {
     kind: 'requirement' as const,
     statuses: { draft: 2, approved: 5, rejected: 1, obsolete: 3 },
     needsReview: 1,
-    unlinked: 4,
   };
   const terms = {
     kind: 'term' as const,
     statuses: { draft: 1, approved: 0, rejected: 0, obsolete: 0 },
     needsReview: 0,
-    unlinked: 0,
   };
+  const gaps: KnowledgeGapDto[] = [
+    { rule: 'no-goal', item: null },
+    {
+      rule: 'unlinked',
+      item: {
+        key: 'REQ-1',
+        kind: 'requirement',
+        title: 'Export',
+        status: 'approved',
+      },
+    },
+  ];
 
   it('counts each view of a Kind from its statuses and marks', () => {
     // Act
@@ -144,21 +155,31 @@ describe('viewCount and viewTotal', () => {
         'review',
         'rejected',
         'obsolete',
-        'unlinked',
+        'gaps',
       ] as const
-    ).map(view => viewCount(requirements, view));
+    ).map(view => viewCount(requirements, view, gaps));
 
     // Assert
-    expect(counts).toEqual([11, 5, 2, 1, 1, 3, 4]);
+    expect(counts).toEqual([11, 5, 2, 1, 1, 3, 1]);
   });
 
   it('adds a view up over every Kind, or keeps to one', () => {
     // Act
-    const all = viewTotal([requirements, terms], 'drafts', null);
-    const one = viewTotal([requirements, terms], 'drafts', 'term');
+    const all = viewTotal([requirements, terms], 'drafts', null, gaps);
+    const one = viewTotal([requirements, terms], 'drafts', 'term', gaps);
 
     // Assert
     expect(all).toBe(3);
+    expect(one).toBe(1);
+  });
+
+  it('counts the Gaps of the Project as a whole only across every Kind', () => {
+    // Act
+    const all = viewTotal([requirements, terms], 'gaps', null, gaps);
+    const one = viewTotal([requirements, terms], 'gaps', 'requirement', gaps);
+
+    // Assert
+    expect(all).toBe(2);
     expect(one).toBe(1);
   });
 });

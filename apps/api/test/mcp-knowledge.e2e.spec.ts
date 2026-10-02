@@ -195,10 +195,37 @@ describe('Knowledge tools over MCP', () => {
       approved: 0,
       rejected: 0,
       obsolete: 0,
-      unlinked: 0,
       needsReview: 0,
     });
+    expect(result.structuredContent?.gaps).toBe(3);
     expect(result.structuredContent?.canRecord).toHaveLength(11);
+  });
+
+  it('lists the Gaps with what each one misses', async () => {
+    // Arrange
+    await callTool('record_requirement', {
+      projectId,
+      ...requirement,
+      fields: { statement: 'Export a report to PDF', priority: 'must' },
+    });
+
+    // Act
+    const result = await callTool('list_gaps', { projectId });
+
+    // Assert
+    expect(result.isError).toBeFalsy();
+    expect(result.structuredContent?.total).toBe(4);
+    expect(result.structuredContent?.gaps).toContainEqual({
+      rule: 'requirement-without-acceptance-criteria',
+      missing:
+        'A Must Requirement has no acceptance criteria: how to check it is met.',
+      item: {
+        key: 'REQ-1',
+        kind: 'requirement',
+        title: 'PDF export',
+        status: 'draft',
+      },
+    });
   });
 
   it('refuses a recording without a rationale', async () => {

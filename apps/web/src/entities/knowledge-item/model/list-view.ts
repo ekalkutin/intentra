@@ -2,6 +2,7 @@ import {
   KnowledgeKindDtoSchema,
   KnowledgeListOrderDtoSchema,
   KnowledgeStatusDtoSchema,
+  type KnowledgeGapDto,
   type KnowledgeItemDto,
   type KnowledgeKindDto,
   type KnowledgeKindSummaryDto,
@@ -19,12 +20,22 @@ export const KNOWLEDGE_VIEWS = {
   review: 'review',
   rejected: 'rejected',
   obsolete: 'obsolete',
-  /** Approved, linked to nothing and outside the Project Frame: agents reach it only as an Anchor. */
-  unlinked: 'unlinked',
+  /** What is missing from the knowledge, by rule: not a list of items. */
+  gaps: 'gaps',
 } as const;
 
 export type KnowledgeView =
   (typeof KNOWLEDGE_VIEWS)[keyof typeof KNOWLEDGE_VIEWS];
+
+/** The views that list items, read a page at a time. */
+export type KnowledgeListView = Exclude<
+  KnowledgeView,
+  typeof KNOWLEDGE_VIEWS.gaps
+>;
+
+export function isListView(view: KnowledgeView): view is KnowledgeListView {
+  return view !== KNOWLEDGE_VIEWS.gaps;
+}
 
 /** The most items one list reads; the server's own limit. */
 export const KNOWLEDGE_LIST_SIZE = 200;
@@ -38,12 +49,11 @@ const FILTERS = {
   review: { statuses: [draft, approved], needsReview: true },
   rejected: { statuses: [rejected] },
   obsolete: { statuses: [obsolete] },
-  unlinked: { statuses: [approved], unlinked: true },
-} as const satisfies Record<KnowledgeView, Partial<ListKnowledgeItemsDto>>;
+} as const satisfies Record<KnowledgeListView, Partial<ListKnowledgeItemsDto>>;
 
 /** What the list reads for a view and a Kind (every Kind when null). */
 export function knowledgeFilter(
-  view: KnowledgeView,
+  view: KnowledgeListView,
   kind: KnowledgeKindDto | null,
   order: KnowledgeListOrderDto = KnowledgeListOrderDtoSchema.enum['by-key'],
 ): Partial<ListKnowledgeItemsDto> {
@@ -123,10 +133,11 @@ export function readKnowledgeListState(
     : null;
 }
 
-/** How many items a view holds within one Kind, from the Project's summary. */
+/** How many items a view holds within one Kind, from the Project's summary, or its Gaps. */
 export function viewCount(
   summary: KnowledgeKindSummaryDto,
   view: KnowledgeView,
+  gaps: readonly KnowledgeGapDto[],
 ): number {
   const { draft, approved, rejected, obsolete } = summary.statuses;
   const counts: Record<KnowledgeView, number> = {
@@ -136,19 +147,27 @@ export function viewCount(
     review: summary.needsReview,
     rejected,
     obsolete,
-    unlinked: summary.unlinked,
+    gaps: gaps.filter(gap => gap.item?.kind === summary.kind).length,
   };
 
   return counts[view];
 }
 
-/** How many items a view holds, in one Kind or (null) in every Kind. */
+/**
+ * How many items a view holds, in one Kind or (null) in every Kind; for Gaps,
+ * those of the Project as a whole count in every Kind.
+ */
 export function viewTotal(
   kinds: readonly KnowledgeKindSummaryDto[],
   view: KnowledgeView,
   kind: KnowledgeKindDto | null,
+  gaps: readonly KnowledgeGapDto[],
 ): number {
+  if (view === KNOWLEDGE_VIEWS.gaps && kind === null) {
+    return gaps.length;
+  }
+
   return kinds
     .filter(summary => kind === null || summary.kind === kind)
-    .reduce((total, summary) => total + viewCount(summary, view), 0);
+    .reduce((total, summary) => total + viewCount(summary, view, gaps), 0);
 }

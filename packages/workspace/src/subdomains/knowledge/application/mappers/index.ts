@@ -16,5 +16,6 @@ export {
   toKnowledgeDependencyDto,
   toKnowledgeItemDto,
 } from './knowledge-item.mapper.js';
+export { toKnowledgeGapDto } from './knowledge-gap.mapper.js';
 export { toKnowledgeSource } from './knowledge-source.mapper.js';
 export { toKnowledgeSummaryDto } from './knowledge-summary.mapper.js';

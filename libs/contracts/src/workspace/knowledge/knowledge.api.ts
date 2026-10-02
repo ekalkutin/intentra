@@ -6,6 +6,7 @@ import type {
   KnowledgeContextDto,
   KnowledgeFrameDto,
 } from './knowledge-context.dto.js';
+import type { KnowledgeGapsDto } from './knowledge-gap.dto.js';
 import type {
   ApproveKnowledgeItemDto,
   ApproveKnowledgeItemsDto,
@@ -60,6 +61,16 @@ export abstract class KnowledgeApi {
     workspaceId: string,
     projectId: string,
   ): Promise<KnowledgeSummaryDto>;
+
+  /**
+   * The Project's Gaps: what is missing from its knowledge that needs no
+   * judgement to see, found anew on every call. Every Member reads them.
+   */
+  abstract gaps(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+  ): Promise<KnowledgeGapsDto>;
 
   /** Reads a Knowledge Item in any status, Rejected included. */
   abstract get(

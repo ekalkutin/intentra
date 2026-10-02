@@ -7,6 +7,7 @@ export { getKnowledgeItemTool } from './get-knowledge-item.tool.js';
 export { getKnowledgeSummaryTool } from './get-knowledge-summary.tool.js';
 export { getProjectFrameTool } from './get-project-frame.tool.js';
 export { KIND_TOOLS } from './kind-tools.js';
+export { listGapsTool } from './list-gaps.tool.js';
 export { listKnowledgeTool } from './list-knowledge.tool.js';
 export { rejectKnowledgeItemTool } from './reject-knowledge-item.tool.js';
 export { retireKnowledgeItemTool } from './retire-knowledge-item.tool.js';

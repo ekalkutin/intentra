@@ -19,10 +19,10 @@ const MARKABLE: readonly KnowledgeStatus[] = [
   KnowledgeStatus.Approved,
 ];
 
-/** Every Kind in the model's order, each with its counts by status and its unlinked items (their Kinds, one per item); empty ones as zeros. */
+/** Every Kind in the model's order, each with its counts by status, empty ones as zeros; and how many Gaps the Project has. */
 export function toKnowledgeSummaryDto(
   counts: readonly KnowledgeItemCount[],
-  unlinked: readonly KnowledgeKind[],
+  gaps: number,
   projectRole: ProjectRole,
 ): KnowledgeSummaryDto {
   return {
@@ -45,9 +45,9 @@ export function toKnowledgeSummaryDto(
               MARKABLE.some(status => status.equals(count.status)),
           ),
         ),
-        unlinked: unlinked.filter(of => of.equals(kind)).length,
       };
     }),
+    gaps,
     access: toKnowledgeAccessDto(projectRole),
   };
 }

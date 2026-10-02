@@ -7,6 +7,7 @@ import type {
   KnowledgeContextDto,
   KnowledgeDependenciesDto,
   KnowledgeFrameDto,
+  KnowledgeGapsDto,
   KnowledgeItemDto,
   KnowledgeItemPageDto,
   KnowledgeSummaryDto,
@@ -37,9 +38,6 @@ function toSearch(filter: Partial<ListKnowledgeItemsDto>): string {
   }
   if (filter.needsReview !== undefined) {
     params.set('needsReview', String(filter.needsReview));
-  }
-  if (filter.unlinked) {
-    params.set('unlinked', 'true');
   }
   if (filter.order) {
     params.set('order', filter.order);
@@ -73,6 +71,10 @@ export const knowledgeApi = baseApi.injectEndpoints({
     knowledgeItems: build.query<KnowledgeItemPageDto, KnowledgeQuery>({
       query: ({ filter, ...scope }) =>
         `${knowledgePath(scope)}${toSearch(filter)}`,
+      providesTags: [API_TAGS.knowledge],
+    }),
+    knowledgeGaps: build.query<KnowledgeGapsDto, InProject>({
+      query: scope => `${knowledgePath(scope)}/gaps`,
       providesTags: [API_TAGS.knowledge],
     }),
     knowledgeSummary: build.query<KnowledgeSummaryDto, InProject>({
@@ -182,6 +184,7 @@ export const knowledgeApi = baseApi.injectEndpoints({
 export const {
   useKnowledgeItemsQuery,
   useKnowledgeSummaryQuery,
+  useKnowledgeGapsQuery,
   useKnowledgeItemQuery,
   useKnowledgeDependenciesQuery,
   useKnowledgeContextQuery,

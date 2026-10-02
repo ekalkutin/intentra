@@ -45,11 +45,11 @@ A directed connection from one Knowledge Item to another, of one of these types:
 _Avoid_: Relation, Reference, Dependency
 
 **Source**:
-Where a Knowledge Item came from: a Conversation, in which an Agent recorded it; an external agent working for a Member over MCP; or a person entering it by hand. It says which of the three, never which Conversation. Unless it was entered by hand, a Source always carries a Rationale: a short quote or summary of what the Knowledge Item rests on, supplied by the Agent that recorded it. The Rationale is part of the knowledge and the team sees it, while the Conversation (or the external agent's own chat) stays private. The Source never changes; while the Knowledge Item is a Draft, its Rationale can be edited like the rest of it.
+Where a Knowledge Item came from: a Conversation, in which an Agent recorded it; an Analysis Run; an external agent working for a Member over MCP; or a person entering it by hand. It says which of the four, never which Conversation. Unless it was entered by hand, a Source always carries a Rationale: a short quote or summary of what the Knowledge Item rests on, supplied by the Agent that recorded it. The Rationale is part of the knowledge and the team sees it, while the Conversation (or the external agent's own chat) stays private. The Source never changes; while the Knowledge Item is a Draft, its Rationale can be edited like the rest of it.
 _Avoid_: Origin, Provenance, Reference
 
 **Draft**:
-A Knowledge Item that has been recorded but not yet approved. Agents, Intentra's own and external ones, only ever record Drafts. A Draft can be edited freely, by an Agent or any person who may record knowledge, not only its author. It keeps no history of its edits, only who edited it last and when; its author stays the one who recorded it. Searches show Drafts marked as such; context assembled for implementing a task holds only Approved knowledge.
+A Knowledge Item that has been recorded but not yet approved. Agents, Intentra's own and external ones, only ever record Drafts. A Draft can be edited freely, by an Agent or any person who may record knowledge, not only its author. It keeps no history of its edits, only who edited it last and when; its author stays the one who recorded it: a Member, or Intentra itself for a Draft recorded in an Analysis Run. Searches show Drafts marked as such; context assembled for implementing a task holds only Approved knowledge.
 _Avoid_: Proposal, Suggestion, Pending
 
 **Approved**:
@@ -93,3 +93,9 @@ _Avoid_: Root, Seed, Entry point
 **Project Frame**:
 The knowledge that holds for every task in a Project, whatever it links to: the Product Overview, every Approved Constraint and every Approved non-functional Requirement. An agent reads it once per session, alongside the Context Packs of its tasks.
 _Avoid_: Project Context (that is a document), Global context
+
+### Analysis
+
+**Gap**:
+Something missing from a Project's knowledge that Intentra sees without judgement, such as an Approved Knowledge Item with no Link, a Requirement without acceptance criteria or an empty field of its Kind. A Gap is never stored: it is found anew from the knowledge each time, and disappears once the knowledge is completed; a Draft already closes it, since someone has thought of it. What takes judgement (a contradiction, an ambiguity, a doubtful rule) is not a Gap: it is recorded as a Draft Open Question that `concerns` the items, or as a `conflicts-with` Link.
+_Avoid_: Finding, Issue, Warning, Problem

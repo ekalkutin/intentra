@@ -5,7 +5,7 @@ import {
   KindIcon,
   type InProject,
   type KnowledgeListState,
-  type KnowledgeView,
+  type KnowledgeListView,
 } from '@/entities/knowledge-item';
 import { useNearViewport } from '@/shared/lib';
 import { List, ListSkeleton } from '@/shared/ui';
@@ -36,7 +36,7 @@ export function KindGroup({
   memberOf,
 }: {
   readonly scope: InProject;
-  readonly view: KnowledgeView;
+  readonly view: KnowledgeListView;
   readonly kind: KnowledgeKindDto;
   readonly total: number;
   readonly pathOf: (key: string) => string;

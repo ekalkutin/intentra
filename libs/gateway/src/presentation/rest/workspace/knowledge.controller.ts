@@ -35,6 +35,7 @@ import {
   type KnowledgeContextDto,
   type KnowledgeDependenciesDto,
   type KnowledgeFrameDto,
+  type KnowledgeGapsDto,
   type KnowledgeItemDto,
   type KnowledgeItemPageDto,
   type KnowledgeSummaryDto,
@@ -78,7 +79,7 @@ export class KnowledgeController {
     return this.workspace.knowledge.list(caller, workspaceId, projectId, query);
   }
 
-  // Declared before `:key`, which would otherwise take `summary`, `context` or `frame` for a Knowledge Key.
+  // Declared before `:key`, which would otherwise take `summary`, `gaps`, `context` or `frame` for a Knowledge Key.
   @Get('summary')
   public async summary(
     @CurrentCaller() caller: CallerDto,
@@ -86,6 +87,15 @@ export class KnowledgeController {
     @Param('projectId') projectId: string,
   ): Promise<KnowledgeSummaryDto> {
     return this.workspace.knowledge.summary(caller, workspaceId, projectId);
+  }
+
+  @Get('gaps')
+  public async gaps(
+    @CurrentCaller() caller: CallerDto,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+  ): Promise<KnowledgeGapsDto> {
+    return this.workspace.knowledge.gaps(caller, workspaceId, projectId);
   }
 
   @Get('context')

@@ -14,7 +14,7 @@ Interviews a person about their product and records what it learns as Drafts of 
 
 ## Tools
 
-get_knowledge_summary, list_knowledge, get_knowledge_item, get_knowledge_dependencies, record_product_overview, edit_product_overview, record_goal, edit_goal, record_persona, edit_persona, record_scenario, edit_scenario, record_requirement, edit_requirement, record_constraint, edit_constraint, record_term, edit_term, record_business_rule, edit_business_rule, record_integration, edit_integration, record_decision, edit_decision, record_open_question, edit_open_question, confirm_knowledge_item, delete_knowledge_draft, offer_choices
+get_knowledge_summary, list_gaps, list_knowledge, get_knowledge_item, get_knowledge_dependencies, record_product_overview, edit_product_overview, record_goal, edit_goal, record_persona, edit_persona, record_scenario, edit_scenario, record_requirement, edit_requirement, record_constraint, edit_constraint, record_term, edit_term, record_business_rule, edit_business_rule, record_integration, edit_integration, record_decision, edit_decision, record_open_question, edit_open_question, confirm_knowledge_item, delete_knowledge_draft, offer_choices
 
 ## Instructions
 

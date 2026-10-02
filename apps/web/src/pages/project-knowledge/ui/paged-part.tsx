@@ -5,7 +5,7 @@ import {
   knowledgeFilter,
   useKnowledgeItemsQuery,
   type InProject,
-  type KnowledgeView,
+  type KnowledgeListView,
 } from '@/entities/knowledge-item';
 import { toApiError } from '@/shared/api';
 import { useDescribeError } from '@/shared/i18n';
@@ -21,7 +21,7 @@ import { loadedParts, PAGE_SIZE, pageLength } from '../model/loaded-parts';
 
 type Part = {
   readonly scope: InProject;
-  readonly view: KnowledgeView;
+  readonly view: KnowledgeListView;
   readonly kind: KnowledgeKindDto;
   readonly order: KnowledgeListOrderDto;
   /** How many items the part holds, from the summary. */

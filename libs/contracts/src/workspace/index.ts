@@ -113,6 +113,13 @@ export {
 } from './knowledge/knowledge-kind.dto.js';
 export { KnowledgeApi } from './knowledge/knowledge.api.js';
 export {
+  KnowledgeGapRuleDtoSchema,
+  type KnowledgeGapDto,
+  type KnowledgeGapItemDto,
+  type KnowledgeGapRuleDto,
+  type KnowledgeGapsDto,
+} from './knowledge/knowledge-gap.dto.js';
+export {
   GetKnowledgeContextDtoSchema,
   KNOWLEDGE_CONTEXT_MAX_ANCHORS,
   KnowledgeContextDetailDtoSchema,

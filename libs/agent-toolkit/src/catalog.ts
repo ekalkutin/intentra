@@ -11,6 +11,7 @@ import {
   getKnowledgeSummaryTool,
   getProjectFrameTool,
   KIND_TOOLS,
+  listGapsTool,
   listKnowledgeTool,
   listProjectsTool,
   offerChoicesTool,
@@ -29,6 +30,7 @@ export const MCP_TOOLS = Object.fromEntries(
     getProjectFrameTool,
     getContextTool,
     getKnowledgeSummaryTool,
+    listGapsTool,
     listKnowledgeTool,
     getKnowledgeItemTool,
     getKnowledgeDependenciesTool,
@@ -57,6 +59,7 @@ export const MCP_INSTRUCTIONS = [
 export const AGENT_TOOLS = Object.fromEntries(
   [
     getKnowledgeSummaryTool,
+    listGapsTool,
     listKnowledgeTool,
     getKnowledgeItemTool,
     getKnowledgeDependenciesTool,

@@ -300,7 +300,6 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
       kind: 'requirement',
       statuses: { draft: 1, approved: 0, rejected: 1, obsolete: 1 },
       needsReview: 1,
-      unlinked: 0,
     });
     expect(
       response.body.kinds.find(
@@ -310,12 +309,11 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
       kind: 'term',
       statuses: { draft: 1, approved: 0, rejected: 0, obsolete: 0 },
       needsReview: 0,
-      unlinked: 0,
     });
     expect(response.body.access).toEqual({ canRecord: [] });
   });
 
-  it('counts and lists the Approved items linked to nothing, outside the Project Frame', async () => {
+  it('counts and lists the Gaps: the skeleton, empty fields and the Approved items linked to nothing', async () => {
     // Arrange
     const { ada, path } = await setUp();
     for (const body of [
@@ -334,6 +332,11 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
         ...requirement,
         title: 'Fast export',
         fields: { statement: 'Export within a second', type: 'non-functional' },
+      },
+      {
+        ...requirement,
+        title: 'Signed export',
+        fields: { statement: 'Sign every export', priority: 'must' },
       },
     ]) {
       await app
@@ -360,28 +363,36 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
       .request()
       .get(`${path}/summary`)
       .set('Authorization', ada);
-    const list = await app
+    const gaps = await app
       .request()
-      .get(path)
-      .query({ unlinked: 'true' })
+      .get(`${path}/gaps`)
       .set('Authorization', ada);
 
     // Assert
-    expect(
-      summary.body.kinds.map(({ kind, unlinked }: Record<string, unknown>) => [
-        kind,
-        unlinked,
-      ]),
-    ).toContainEqual(['requirement', 1]);
-    expect(
-      summary.body.kinds.find(
-        (entry: { kind: string }) => entry.kind === 'term',
-      ).unlinked,
-    ).toBe(0);
-    expect(list.status).toBe(HttpStatus.OK);
-    expect(list.body.total).toBe(1);
-    expect(list.body.items.map(({ key }: { key: string }) => key)).toEqual([
-      'REQ-1',
+    expect(summary.body.gaps).toBe(5);
+    expect(gaps.status).toBe(HttpStatus.OK);
+    expect(gaps.body.gaps).toEqual([
+      { rule: 'no-product-overview', item: null },
+      { rule: 'no-persona', item: null },
+      { rule: 'no-goal', item: null },
+      {
+        rule: 'requirement-without-acceptance-criteria',
+        item: {
+          key: 'REQ-4',
+          kind: 'requirement',
+          title: 'Signed export',
+          status: 'draft',
+        },
+      },
+      {
+        rule: 'unlinked',
+        item: {
+          key: 'REQ-1',
+          kind: 'requirement',
+          title: 'PDF export',
+          status: 'approved',
+        },
+      },
     ]);
   });
 

@@ -13,6 +13,7 @@ import {
   type KnowledgeContextDto,
   type KnowledgeDependenciesDto,
   type KnowledgeFrameDto,
+  type KnowledgeGapsDto,
   type KnowledgeItemDto,
   type KnowledgeItemPageDto,
   type KnowledgeKindDto,
@@ -41,15 +42,16 @@ import {
   DraftEditingService,
   DraftRejectionService,
   KnowledgeConfirmationService,
+  KnowledgeGapService,
   KnowledgeRecordingService,
   KnowledgeRetirementService,
   ReviewMarkingService,
-  UnlinkedKnowledgeService,
   type ContextPackCandidate,
   type SeenDraft,
 } from '../../domain/services/index.js';
 import {
   ContextPackRole,
+  KnowledgeGap,
   KnowledgeItemVersion,
   KnowledgeKey,
   KnowledgeKind,
@@ -67,6 +69,7 @@ import {
   toKnowledgeContextEntryDto,
   toKnowledgeContextItemDto,
   toKnowledgeDependencyDto,
+  toKnowledgeGapDto,
   toKnowledgeItemDto,
   toKnowledgeSource,
   toKnowledgeSummaryDto,
@@ -118,7 +121,7 @@ export class KnowledgeService implements KnowledgeApi {
   readonly #knowledgeConfirmationService = new KnowledgeConfirmationService();
   readonly #reviewMarkingService = new ReviewMarkingService();
   readonly #contextPackAssemblyService = new ContextPackAssemblyService();
-  readonly #unlinkedKnowledgeService = new UnlinkedKnowledgeService();
+  readonly #knowledgeGapService = new KnowledgeGapService();
 
   constructor(
     private readonly unitOfWork: UnitOfWork,
@@ -197,18 +200,14 @@ export class KnowledgeService implements KnowledgeApi {
 
     const newestFirst =
       query.order === KnowledgeListOrderDtoSchema.enum['newest-first'];
-    const { items, total } = query.unlinked
-      ? await this.listUnlinked(project.id, query, newestFirst)
-      : {
-          items: await this.knowledgeItemRepository.findMany(props, {
-            take: query.take,
-            offset: query.offset,
-            order: newestFirst
-              ? KNOWLEDGE_ITEM_ORDERS.newestFirst
-              : KNOWLEDGE_ITEM_ORDERS.byKey,
-          }),
-          total: await this.knowledgeItemRepository.count(props),
-        };
+    const items = await this.knowledgeItemRepository.findMany(props, {
+      take: query.take,
+      offset: query.offset,
+      order: newestFirst
+        ? KNOWLEDGE_ITEM_ORDERS.newestFirst
+        : KNOWLEDGE_ITEM_ORDERS.byKey,
+    });
+    const total = await this.knowledgeItemRepository.count(props);
     const answers = await this.findAnswers(project.id, items);
 
     return {
@@ -235,13 +234,20 @@ export class KnowledgeService implements KnowledgeApi {
     const counts = await this.knowledgeItemRepository.countGroups({
       projectId: project.id,
     });
-    const unlinked = await this.findUnlinked(project.id);
+    const { gaps } = await this.findGaps(project.id);
 
-    return toKnowledgeSummaryDto(
-      counts,
-      unlinked.map(item => item.kind),
-      projectRole,
-    );
+    return toKnowledgeSummaryDto(counts, gaps.length, projectRole);
+  }
+
+  public async gaps(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+  ): Promise<KnowledgeGapsDto> {
+    const { project } = await this.resolve(caller, workspaceId, projectId);
+    const { gaps, current } = await this.findGaps(project.id);
+
+    return { gaps: gaps.map(gap => toKnowledgeGapDto(gap, current)) };
   }
 
   public async get(
@@ -653,37 +659,18 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   /**
-   * The Project's unlinked items, read whole: whether an item is linked
-   * depends on every Approved item, so there is no query for a page of them.
+   * The Project's Gaps, with every Draft and Approved item they were found
+   * in, read whole: a Gap of one item depends on the others.
    */
-  private async findUnlinked(projectId: ProjectId): Promise<KnowledgeItem[]> {
-    const approved = await this.knowledgeItemRepository.findMany({
+  private async findGaps(
+    projectId: ProjectId,
+  ): Promise<{ gaps: KnowledgeGap[]; current: KnowledgeItem[] }> {
+    const current = await this.knowledgeItemRepository.findMany({
       projectId,
-      statuses: [KnowledgeStatus.Approved],
+      statuses: CURRENT,
     });
 
-    return this.#unlinkedKnowledgeService.findUnlinked(approved);
-  }
-
-  /** A page of the unlinked items, of a Kind if asked, by key or the newest first. */
-  private async listUnlinked(
-    projectId: ProjectId,
-    query: ListKnowledgeItemsDto,
-    newestFirst: boolean,
-  ): Promise<{ items: KnowledgeItem[]; total: number }> {
-    const unlinked = (await this.findUnlinked(projectId)).filter(
-      item => !query.kind || item.kind.value === query.kind,
-    );
-    if (newestFirst) {
-      unlinked.sort((a, b) =>
-        Temporal.Instant.compare(b.recordedAt, a.recordedAt),
-      );
-    }
-
-    return {
-      items: unlinked.slice(query.offset, query.offset + query.take),
-      total: unlinked.length,
-    };
+    return { gaps: this.#knowledgeGapService.findGaps(current), current };
   }
 
   /** The Anchors in the order asked, each once; each must exist and be Approved. */
