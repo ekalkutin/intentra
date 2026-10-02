@@ -1,9 +1,12 @@
 export { AccessApi } from './access/access.api.js';
 export {
   AgentKindDtoSchema,
+  intentraCaller,
   type AgentDto,
   type AgentKindDto,
   type CallerDto,
+  type IntentraCallerDto,
+  type MemberCallerDto,
 } from './access/caller.dto.js';
 export {
   type ProjectAccessDto,

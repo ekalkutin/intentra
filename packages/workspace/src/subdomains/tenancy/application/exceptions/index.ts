@@ -1,3 +1,4 @@
+export { IntentraCallerForbiddenException } from './intentra-caller-forbidden.exception.js';
 export { InvalidPersonalAccessTokenException } from './invalid-personal-access-token.exception.js';
 export { InvitationAlreadyPendingException } from './invitation-already-pending.exception.js';
 export { InvitationNotFoundException } from './invitation-not-found.exception.js';

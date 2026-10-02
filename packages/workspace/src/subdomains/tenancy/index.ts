@@ -6,9 +6,13 @@ import { ADAPTERS } from './infrastructure/adapters/index.js';
 
 export {
   AccessResolver,
+  type ProjectAccess,
   type ProjectMembership,
 } from './application/access/index.js';
-export { ProjectNotFoundException } from './application/exceptions/index.js';
+export {
+  IntentraCallerForbiddenException,
+  ProjectNotFoundException,
+} from './application/exceptions/index.js';
 export {
   AccessService,
   InvitationsService,

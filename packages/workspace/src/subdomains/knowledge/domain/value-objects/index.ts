@@ -12,6 +12,7 @@ export {
   type KnowledgeContent,
   type KnowledgeFields,
 } from './knowledge-content.js';
+export { KnowledgeAuthor } from './knowledge-author.vo.js';
 export { KnowledgeGapRule } from './knowledge-gap-rule.vo.js';
 export { KnowledgeGap } from './knowledge-gap.vo.js';
 export { KnowledgeItemId } from './knowledge-item-id.vo.js';

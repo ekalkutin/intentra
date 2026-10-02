@@ -49,7 +49,12 @@ export const knowledgeItemSchema = z.object({
   ),
   source: KnowledgeSourceDtoSchema,
   rationale: z.string().nullable(),
-  authorId: z.string(),
+  authorId: z
+    .string()
+    .nullable()
+    .describe(
+      'The Member who recorded it; null when Intentra did, in an Analysis Run.',
+    ),
   recordedAt: z.string(),
   lastEditedBy: z.string().nullable(),
   lastEditedAt: z.string().nullable(),

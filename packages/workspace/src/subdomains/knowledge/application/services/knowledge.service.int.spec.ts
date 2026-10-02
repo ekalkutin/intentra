@@ -11,6 +11,7 @@ import {
 import type { Actor } from '@intentra/contracts/iam';
 import {
   AgentKindDtoSchema,
+  intentraCaller,
   KnowledgeKindDtoSchema,
   ProjectRoleDtoSchema,
   type CallerDto,
@@ -24,6 +25,7 @@ import { givenAccount } from '../../../../testing/account.fixtures.js';
 import { givenOpenWorkspaceCreation } from '../../../../testing/workspace-creation.fixtures.js';
 import { WorkspaceModule } from '../../../../workspace.module.js';
 import {
+  IntentraCallerForbiddenException,
   Member,
   MemberRepository,
   MembersService,
@@ -37,6 +39,7 @@ import {
   DraftApprovalForbiddenException,
   DraftDeletionForbiddenException,
   DraftEditingForbiddenException,
+  IntentraRecordingForbiddenException,
   KnowledgeItemChangedException,
   KnowledgeItemNotApprovedException,
   KnowledgeItemNotDraftException,
@@ -1381,6 +1384,187 @@ describe('KnowledgeService integration', () => {
       await expect(approving).rejects.toBeInstanceOf(
         DraftApprovalForbiddenException,
       );
+    });
+  });
+
+  describe('through Intentra itself, in an Analysis Run', () => {
+    const question: RecordKnowledgeItemDto = {
+      kind: 'open-question',
+      title: 'Export format',
+      rationale: 'REQ-1 says PDF, BR-1 says CSV',
+      supersedes: null,
+      links: [],
+      fields: { question: 'Which format does an export use?' },
+    };
+
+    it('reads the knowledge of its Project and records an Open Question as Intentra', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada } = await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        requirement,
+      );
+      const intentra = intentraCaller(projectId);
+
+      // Act
+      const page = await knowledgeService.list(
+        intentra,
+        workspaceId,
+        projectId,
+        { ...firstPage, statuses: ['draft'] },
+      );
+      const recorded = await knowledgeService.record(
+        intentra,
+        workspaceId,
+        projectId,
+        question,
+      );
+
+      // Assert
+      expect(page.items.map(item => item.key)).toEqual(['REQ-1']);
+      expect(recorded).toMatchObject({
+        key: 'TBD-1',
+        source: 'analysis-run',
+        authorId: null,
+        rationale: 'REQ-1 says PDF, BR-1 says CSV',
+      });
+    });
+
+    it('records no other Kind and no replacement', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada } = await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        question,
+      );
+      await knowledgeService.approve(
+        person(ada),
+        workspaceId,
+        projectId,
+        'TBD-1',
+        {
+          version: 1,
+        },
+      );
+      const intentra = intentraCaller(projectId);
+
+      // Act
+      const outcomes = await Promise.allSettled([
+        knowledgeService.record(intentra, workspaceId, projectId, requirement),
+        knowledgeService.record(intentra, workspaceId, projectId, {
+          ...question,
+          supersedes: 'TBD-1',
+        }),
+      ]);
+
+      // Assert
+      for (const outcome of outcomes) {
+        expect(outcome).toMatchObject({
+          status: 'rejected',
+          reason: expect.any(IntentraRecordingForbiddenException),
+        });
+      }
+    });
+
+    it('changes nothing else', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada } = await setUp();
+      const knowledgeService = app.get(KnowledgeService);
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        requirement,
+      );
+      await knowledgeService.record(
+        person(ada),
+        workspaceId,
+        projectId,
+        decision,
+      );
+      await knowledgeService.approve(
+        person(ada),
+        workspaceId,
+        projectId,
+        'DEC-1',
+        {
+          version: 1,
+        },
+      );
+      const intentra = intentraCaller(projectId);
+      const seen = { version: 1 };
+
+      // Act
+      const outcomes = await Promise.allSettled([
+        knowledgeService.edit(intentra, workspaceId, projectId, 'REQ-1', {
+          kind: 'requirement',
+          version: 1,
+          title: 'Changed',
+        }),
+        knowledgeService.delete(
+          intentra,
+          workspaceId,
+          projectId,
+          'REQ-1',
+          seen,
+        ),
+        knowledgeService.approve(
+          intentra,
+          workspaceId,
+          projectId,
+          'REQ-1',
+          seen,
+        ),
+        knowledgeService.approveTogether(intentra, workspaceId, projectId, {
+          items: [{ key: 'REQ-1', version: 1 }],
+        }),
+        knowledgeService.reject(intentra, workspaceId, projectId, 'REQ-1', {
+          ...seen,
+          reason: 'Wrong',
+        }),
+        knowledgeService.retire(intentra, workspaceId, projectId, 'DEC-1', {
+          version: 2,
+          reason: 'Dropped',
+        }),
+        knowledgeService.confirm(
+          intentra,
+          workspaceId,
+          projectId,
+          'REQ-1',
+          seen,
+        ),
+      ]);
+
+      // Assert
+      for (const outcome of outcomes) {
+        expect(outcome).toMatchObject({
+          status: 'rejected',
+          reason: expect.any(IntentraCallerForbiddenException),
+        });
+      }
+    });
+
+    it('reaches no Project but its own', async () => {
+      // Arrange
+      const { workspaceId, projectId, ada } = await setUp();
+      const payroll = await app
+        .get(ProjectsService)
+        .create(ada, workspaceId, { name: 'Payroll', slug: 'payroll' });
+      const intentra = intentraCaller(projectId);
+
+      // Act
+      const listing = app
+        .get(KnowledgeService)
+        .list(intentra, workspaceId, payroll.id, firstPage);
+
+      // Assert
+      await expect(listing).rejects.toBeInstanceOf(ProjectNotFoundException);
     });
   });
 

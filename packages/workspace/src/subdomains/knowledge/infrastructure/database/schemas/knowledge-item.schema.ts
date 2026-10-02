@@ -42,8 +42,9 @@ export class KnowledgeItemModel {
   @Prop({ type: Object, required: true })
   readonly fields: KnowledgeFields;
 
-  @Prop({ type: SchemaTypes.UUID, required: true })
-  readonly authorId: Types.UUID;
+  /** Null when Intentra itself recorded it, in an Analysis Run. */
+  @Prop({ type: SchemaTypes.UUID, default: null })
+  readonly authorId: Types.UUID | null;
 
   @Prop({ type: Date, required: true })
   readonly recordedAt: Date;

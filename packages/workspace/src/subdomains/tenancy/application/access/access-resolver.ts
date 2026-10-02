@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import type { Actor } from '@intentra/contracts/iam';
-import type { CallerDto } from '@intentra/contracts/workspace';
+import type { CallerDto, MemberCallerDto } from '@intentra/contracts/workspace';
 import {
   AccountId,
   ProjectId,
@@ -12,6 +12,7 @@ import { Member, Project } from '../../domain/entities/index.js';
 import { ProjectRoleResolutionService } from '../../domain/services/index.js';
 import { MemberStatus, ProjectRole } from '../../domain/value-objects/index.js';
 import {
+  IntentraCallerForbiddenException,
   ProjectNotFoundException,
   WorkspaceNotFoundException,
 } from '../exceptions/index.js';
@@ -28,6 +29,17 @@ import {
  */
 export type ProjectMembership = {
   readonly member: Member;
+  readonly project: Project;
+  readonly projectRole: ProjectRole;
+};
+
+/**
+ * A Project and what the caller may do in it: an active Member through
+ * their Project Role, or Intentra itself, a Contributor with no Member.
+ */
+export type ProjectAccess = {
+  /** Null for Intentra itself, in an Analysis Run. */
+  readonly member: Member | null;
   readonly project: Project;
   readonly projectRole: ProjectRole;
 };
@@ -95,16 +107,62 @@ export class AccessResolver {
   }
 
   /**
+   * Like `resolveInProject`, for the use cases Intentra itself may call as
+   * well (reading knowledge, recording an Open Question): it gets the
+   * Project it runs in as a Contributor, with no Member.
+   */
+  public async resolveProjectAccess(
+    caller: CallerDto,
+    workspaceId: WorkspaceId,
+    projectId: ProjectId,
+  ): Promise<ProjectAccess> {
+    if (caller.actor !== null) {
+      return this.resolveInProject(caller, workspaceId, projectId);
+    }
+    if (!projectId.equals(new ProjectId(caller.agent.projectId))) {
+      throw new ProjectNotFoundException();
+    }
+    const project = await this.projectRepository.getOne({
+      workspaceId,
+      id: projectId,
+    });
+
+    return {
+      member: null,
+      project,
+      projectRole: ProjectRole.from(caller.agent.level),
+    };
+  }
+
+  /** Like `resolveProjectAccess`, for a use case that changes something: refused while the Workspace is suspended. */
+  public async resolveProjectAccessForChange(
+    caller: CallerDto,
+    workspaceId: WorkspaceId,
+    projectId: ProjectId,
+  ): Promise<ProjectAccess> {
+    const access = await this.resolveProjectAccess(
+      caller,
+      workspaceId,
+      projectId,
+    );
+    await this.ensureChangeable(workspaceId);
+
+    return access;
+  }
+
+  /**
    * For use cases scoped to one Project; an unknown Project is not found, and
-   * so is any Project but the one an agent is limited to.
+   * so is any Project but the one an agent is limited to. Intentra itself is
+   * refused: it has no Member.
    */
   public async resolveInProject(
     caller: CallerDto,
     workspaceId: WorkspaceId,
     projectId: ProjectId,
   ): Promise<ProjectMembership> {
-    const member = await this.resolve(caller.actor, workspaceId);
-    const agentProjectId = caller.agent?.projectId;
+    const memberCaller = asMemberCaller(caller);
+    const member = await this.resolve(memberCaller.actor, workspaceId);
+    const agentProjectId = memberCaller.agent?.projectId;
     if (agentProjectId && !projectId.equals(new ProjectId(agentProjectId))) {
       throw new ProjectNotFoundException();
     }
@@ -125,8 +183,8 @@ export class AccessResolver {
     return {
       member,
       project,
-      projectRole: caller.agent
-        ? projectRole.atMost(ProjectRole.from(caller.agent.level))
+      projectRole: memberCaller.agent
+        ? projectRole.atMost(ProjectRole.from(memberCaller.agent.level))
         : projectRole,
     };
   }
@@ -137,4 +195,12 @@ export class AccessResolver {
     });
     workspace.ensureChangeable();
   }
+}
+
+function asMemberCaller(caller: CallerDto): MemberCallerDto {
+  if (caller.actor === null) {
+    throw new IntentraCallerForbiddenException();
+  }
+
+  return caller;
 }

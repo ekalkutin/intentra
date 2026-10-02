@@ -1,4 +1,4 @@
-import { Bot, Heart, type LucideIcon } from 'lucide-react';
+import { Bot, Heart, SearchCheck, type LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -22,7 +22,6 @@ import {
   type MemberDto,
 } from '@intentra/contracts/workspace';
 
-/** The mark between the author and the agent that wrote for them: our own agent, or a robot from outside over MCP. */
 /** A hint's trigger sits above the row's cover link, so pointing at it shows the hint. */
 const HINTED = 'relative z-10 cursor-default';
 
@@ -32,6 +31,7 @@ const SOURCE_ICONS: Record<
 > = {
   [KnowledgeSourceDtoSchema.enum['intentra-agent']]: Heart,
   [KnowledgeSourceDtoSchema.enum['external-agent']]: Bot,
+  [KnowledgeSourceDtoSchema.enum['analysis-run']]: SearchCheck,
 };
 
 /**
@@ -51,14 +51,18 @@ export function RowMeta({
   const { t } = useTranslation();
   const history = historyOf(item);
   const latest = history.at(-1);
-  const author = memberOf(item.authorId);
+  const author = item.authorId === null ? undefined : memberOf(item.authorId);
+  // Intentra itself, in an Analysis Run, has no Member.
+  const authorName =
+    item.authorId === null ? t('brand') : author ? displayName(author) : '—';
   // Every event in full, oldest first, for whoever wants the whole story.
   const story = history.map(event => {
-    const member = memberOf(event.memberId);
+    const member =
+      event.memberId === null ? undefined : memberOf(event.memberId);
     return [
       t(`knowledgeItem.events.${event.type}`),
       formatMoment(event.at),
-      member && displayName(member),
+      event.memberId === null ? t('brand') : member && displayName(member),
     ]
       .filter(Boolean)
       .join(' · ');
@@ -69,14 +73,11 @@ export function RowMeta({
       <span className='flex max-w-full min-w-0 items-center gap-1.5 text-foreground/80'>
         <Avatar className='size-4'>
           <AvatarFallback className='text-[0.5625rem] font-medium uppercase'>
-            {initialsOf(author)}
+            {item.authorId === null ? t('brand').charAt(0) : initialsOf(author)}
           </AvatarFallback>
         </Avatar>
-        <span className='truncate'>{author ? displayName(author) : '—'}</span>
-        <AgentTag
-          source={item.source}
-          who={author ? displayName(author) : '—'}
-        />
+        <span className='truncate'>{authorName}</span>
+        <AgentTag source={item.source} who={authorName} />
       </span>
       <span className='flex flex-wrap items-center gap-1.5 sm:justify-end'>
         {item.needsReview && <NeedsReviewBadge />}

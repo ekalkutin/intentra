@@ -15,8 +15,8 @@ export type HistoryEventType =
 
 export type HistoryEvent = {
   readonly type: HistoryEventType;
-  /** The Member who did it. */
-  readonly memberId: string;
+  /** The Member who did it; null when Intentra itself recorded it, in an Analysis Run. */
+  readonly memberId: string | null;
   /** ISO 8601 */
   readonly at: string;
 };

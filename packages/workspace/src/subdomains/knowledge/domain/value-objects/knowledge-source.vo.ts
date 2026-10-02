@@ -5,11 +5,14 @@ export class KnowledgeSource {
   public static readonly Manual = new KnowledgeSource('manual');
   public static readonly ExternalAgent = new KnowledgeSource('external-agent');
   public static readonly IntentraAgent = new KnowledgeSource('intentra-agent');
+  /** Recorded by Intentra itself, in an Analysis Run. */
+  public static readonly AnalysisRun = new KnowledgeSource('analysis-run');
 
   static readonly #all: readonly KnowledgeSource[] = [
     KnowledgeSource.Manual,
     KnowledgeSource.ExternalAgent,
     KnowledgeSource.IntentraAgent,
+    KnowledgeSource.AnalysisRun,
   ];
 
   readonly #value: string;

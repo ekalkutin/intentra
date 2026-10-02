@@ -38,7 +38,7 @@ export function toKnowledgeItemDto(
     status: item.status.value as KnowledgeStatusDto,
     source: item.source.value as KnowledgeSourceDto,
     rationale: item.rationale?.value ?? null,
-    authorId: item.authorId.value,
+    authorId: item.author.memberId?.value ?? null,
     recordedAt: toIsoString(item.recordedAt),
     lastEditedBy: item.lastEditedBy?.value ?? null,
     lastEditedAt: item.lastEditedAt && toIsoString(item.lastEditedAt),

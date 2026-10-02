@@ -25,11 +25,12 @@ export const KnowledgeStatusDtoSchema = z.enum([
 
 export type KnowledgeStatusDto = z.infer<typeof KnowledgeStatusDtoSchema>;
 
-/** Where a Knowledge Item came from: entered by hand, recorded by an external agent over MCP, or by one of Intentra's own Agents in a Conversation. */
+/** Where a Knowledge Item came from: entered by hand, recorded by an external agent over MCP, by one of Intentra's own Agents in a Conversation, or by Intentra itself in an Analysis Run. */
 export const KnowledgeSourceDtoSchema = z.enum([
   'manual',
   'external-agent',
   'intentra-agent',
+  'analysis-run',
 ]);
 
 export type KnowledgeSourceDto = z.infer<typeof KnowledgeSourceDtoSchema>;

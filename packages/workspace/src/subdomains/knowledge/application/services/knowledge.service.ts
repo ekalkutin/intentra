@@ -28,6 +28,7 @@ import { ProjectId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
 import {
   AccessResolver,
+  type ProjectAccess,
   type ProjectMembership,
 } from '../../../tenancy/index.js';
 import { KnowledgeItem } from '../../domain/entities/index.js';
@@ -51,6 +52,7 @@ import {
 } from '../../domain/services/index.js';
 import {
   ContextPackRole,
+  KnowledgeAuthor,
   KnowledgeGap,
   KnowledgeItemVersion,
   KnowledgeKey,
@@ -137,11 +139,12 @@ export class KnowledgeService implements KnowledgeApi {
     data: RecordKnowledgeItemDto,
   ): Promise<KnowledgeItemDto> {
     return this.unitOfWork.run(async () => {
-      const { member, project, projectRole } = await this.resolveForChange(
-        caller,
-        workspaceId,
-        projectId,
-      );
+      const { member, project, projectRole } =
+        await this.accessResolver.resolveProjectAccessForChange(
+          caller,
+          new WorkspaceId(workspaceId),
+          new ProjectId(projectId),
+        );
       const content = toKnowledgeContent(data);
       const links = data.links.map(link => KnowledgeLink.from(link));
       const replaced =
@@ -157,7 +160,7 @@ export class KnowledgeService implements KnowledgeApi {
 
       const item = this.#knowledgeRecordingService.record(
         project,
-        member,
+        member ? KnowledgeAuthor.member(member.id) : KnowledgeAuthor.Intentra,
         projectRole,
         {
           source: toKnowledgeSource(caller),
@@ -600,19 +603,20 @@ export class KnowledgeService implements KnowledgeApi {
     });
   }
 
+  /** For reading: Intentra itself reads too. */
   private resolve(
     caller: CallerDto,
     workspaceId: string,
     projectId: string,
-  ): Promise<ProjectMembership> {
-    return this.accessResolver.resolveInProject(
+  ): Promise<ProjectAccess> {
+    return this.accessResolver.resolveProjectAccess(
       caller,
       new WorkspaceId(workspaceId),
       new ProjectId(projectId),
     );
   }
 
-  /** Refused while the Workspace is suspended. */
+  /** Refused while the Workspace is suspended, and to Intentra itself. */
   private resolveForChange(
     caller: CallerDto,
     workspaceId: string,

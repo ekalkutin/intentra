@@ -13,6 +13,7 @@ import {
   SupersededItemNotApprovedException,
 } from '../exceptions/index.js';
 import {
+  KnowledgeAuthor,
   KnowledgeItemId,
   KnowledgeItemVersion,
   KnowledgeKey,
@@ -46,7 +47,7 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   readonly #source: KnowledgeSource;
   #rationale: Rationale | null;
   #content: KnowledgeContent;
-  readonly #authorId: MemberId;
+  readonly #author: KnowledgeAuthor;
   readonly #recordedAt: Temporal.Instant;
   #lastEditedBy: MemberId | null;
   #lastEditedAt: Temporal.Instant | null;
@@ -76,7 +77,7 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     this.#source = state.source;
     this.#rationale = state.rationale;
     this.#content = state.content;
-    this.#authorId = state.authorId;
+    this.#author = state.author;
     this.#recordedAt = state.recordedAt;
     this.#lastEditedBy = state.lastEditedBy;
     this.#lastEditedAt = state.lastEditedAt;
@@ -134,8 +135,8 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   }
 
   /** The Member who recorded it; stays when others edit it. */
-  get authorId(): MemberId {
-    return this.#authorId;
+  get author(): KnowledgeAuthor {
+    return this.#author;
   }
 
   get recordedAt(): Temporal.Instant {
@@ -285,7 +286,7 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
       rationale:
         props.rationale === null ? null : new Rationale(props.rationale),
       content: props.content,
-      authorId: new MemberId(props.authorId),
+      author: KnowledgeAuthor.from(props.authorId),
       recordedAt: Temporal.Now.instant(),
       lastEditedBy: null,
       lastEditedAt: null,
@@ -323,7 +324,7 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
       rationale:
         props.rationale === null ? null : new Rationale(props.rationale),
       content: props.content,
-      authorId: new MemberId(props.authorId),
+      author: KnowledgeAuthor.from(props.authorId),
       recordedAt: props.recordedAt,
       lastEditedBy: toMemberId(props.lastEditedBy),
       lastEditedAt: props.lastEditedAt,
@@ -543,7 +544,7 @@ type KnowledgeItemState = {
   readonly source: KnowledgeSource;
   readonly rationale: Rationale | null;
   readonly content: KnowledgeContent;
-  readonly authorId: MemberId;
+  readonly author: KnowledgeAuthor;
   readonly recordedAt: Temporal.Instant;
   readonly lastEditedBy: MemberId | null;
   readonly lastEditedAt: Temporal.Instant | null;
@@ -572,7 +573,8 @@ type KnowledgeItemRecordProps = {
   readonly title: string;
   readonly rationale: string | null;
   readonly content: KnowledgeContent;
-  readonly authorId: string;
+  /** The Member who records it; null for Intentra itself, in an Analysis Run. */
+  readonly authorId: string | null;
   /** The Approved item of the same Kind it replaces once approved, if any. */
   readonly supersedes: KnowledgeKey | null;
   readonly links: readonly KnowledgeLink[];
@@ -588,7 +590,7 @@ type KnowledgeItemRestoreProps = {
   readonly source: string;
   readonly rationale: string | null;
   readonly content: KnowledgeContent;
-  readonly authorId: string;
+  readonly authorId: string | null;
   readonly recordedAt: Temporal.Instant;
   readonly lastEditedBy: string | null;
   readonly lastEditedAt: Temporal.Instant | null;

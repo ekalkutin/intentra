@@ -35,8 +35,8 @@ type KnowledgeItemFrameDto = {
   readonly status: KnowledgeStatusDto;
   readonly source: KnowledgeSourceDto;
   readonly rationale: string | null;
-  /** The Member who recorded it. */
-  readonly authorId: string;
+  /** The Member who recorded it; null when Intentra itself did, in an Analysis Run (`source` `analysis-run`). */
+  readonly authorId: string | null;
   /** ISO 8601 */
   readonly recordedAt: string;
   /** Null until someone edits it. */

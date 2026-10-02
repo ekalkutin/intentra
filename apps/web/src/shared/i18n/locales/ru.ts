@@ -121,6 +121,7 @@ export const ru = {
     manual: 'вручную',
     'external-agent': 'внешний агент',
     'intentra-agent': 'Intentra',
+    'analysis-run': 'проверка проекта',
   },
   shell: {
     navigation: 'Навигация',
@@ -727,11 +728,13 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     agentTags: {
       'intentra-agent': 'Intentra',
       'external-agent': 'MCP',
+      'analysis-run': 'Проверка',
     },
     agentHints: {
       'intentra-agent': 'Записала Intentra в интервью от имени {{who}}.',
       'external-agent':
         'Записал внешний агент (Claude Code, Codex, Cursor…) через MCP от имени {{who}}, по его токену доступа.',
+      'analysis-run': 'Нашла {{who}}, проверяя знания проекта.',
     },
     orders: {
       'by-key': 'По ключу',

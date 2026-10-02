@@ -78,7 +78,9 @@ export function ItemProperties({
             <HistoryEntry
               key={event.type}
               event={event}
-              who={emailOf(event.memberId)}
+              who={
+                event.memberId === null ? t('brand') : emailOf(event.memberId)
+              }
               reason={reasonOf(item, event)}
             />
           ))}

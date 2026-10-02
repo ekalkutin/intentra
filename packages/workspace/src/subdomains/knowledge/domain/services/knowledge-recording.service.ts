@@ -1,13 +1,16 @@
-import type { Member, Project, ProjectRole } from '../../../tenancy/index.js';
+import type { Project, ProjectRole } from '../../../tenancy/index.js';
 import { KnowledgeItem } from '../entities/index.js';
 import {
+  IntentraRecordingForbiddenException,
   KnowledgeRecordingForbiddenException,
   SupersededItemNotApprovedException,
 } from '../exceptions/index.js';
-import type {
-  KnowledgeContent,
-  KnowledgeLink,
-  KnowledgeSource,
+import {
+  KnowledgeKind,
+  type KnowledgeAuthor,
+  type KnowledgeContent,
+  type KnowledgeLink,
+  type KnowledgeSource,
 } from '../value-objects/index.js';
 
 import { KnowledgeLinkingService } from './knowledge-linking.service.js';
@@ -20,13 +23,21 @@ export class KnowledgeRecordingService {
   /**
    * A Contributor or Maintainer of the Project records a Draft, by hand or
    * through an agent, possibly as the replacement of an Approved item.
+   * Intentra itself, in an Analysis Run, records only new Open Questions.
    */
   public record(
     project: Project,
-    author: Member,
+    author: KnowledgeAuthor,
     projectRole: ProjectRole,
     props: KnowledgeRecordingProps,
   ): KnowledgeItem {
+    if (
+      author.isIntentra() &&
+      (!props.content.kind.equals(KnowledgeKind.OpenQuestion) ||
+        props.replaced !== null)
+    ) {
+      throw new IntentraRecordingForbiddenException();
+    }
     if (
       !this.#knowledgePolicyService.canRecordDraft(
         projectRole,
@@ -51,7 +62,7 @@ export class KnowledgeRecordingService {
       title: props.title,
       rationale: props.rationale,
       content: props.content,
-      authorId: author.id.value,
+      authorId: author.memberId?.value ?? null,
       supersedes: props.replaced?.key ?? null,
       links: props.links,
     });

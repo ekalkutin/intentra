@@ -30,3 +30,4 @@ export { SupersededItemNotApprovedException } from './superseded-item-not-approv
 export { UnknownKnowledgeKindException } from './unknown-knowledge-kind.exception.js';
 export { UnknownKnowledgeSourceException } from './unknown-knowledge-source.exception.js';
 export { UnknownKnowledgeStatusException } from './unknown-knowledge-status.exception.js';
+export { IntentraRecordingForbiddenException } from './intentra-recording-forbidden.exception.js';

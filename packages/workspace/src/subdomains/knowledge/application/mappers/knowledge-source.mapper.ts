@@ -5,7 +5,7 @@ import {
 
 import { KnowledgeSource } from '../../domain/value-objects/index.js';
 
-/** Where what the caller records comes from: their own hand, or the agent working for them. */
+/** Where what the caller records comes from: their own hand, the agent working for them, or Intentra itself in an Analysis Run. */
 export function toKnowledgeSource(caller: CallerDto): KnowledgeSource {
   switch (caller.agent?.kind) {
     case undefined:
@@ -14,5 +14,7 @@ export function toKnowledgeSource(caller: CallerDto): KnowledgeSource {
       return KnowledgeSource.ExternalAgent;
     case AgentKindDtoSchema.enum.intentra:
       return KnowledgeSource.IntentraAgent;
+    case AgentKindDtoSchema.enum['analysis-run']:
+      return KnowledgeSource.AnalysisRun;
   }
 }

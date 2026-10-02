@@ -57,7 +57,7 @@ describe('KnowledgeItem', () => {
       expect(item.kind).toBe(KnowledgeKind.Term);
       expect(item.status).toBe(KnowledgeStatus.Draft);
       expect(item.source).toBe(KnowledgeSource.Manual);
-      expect(item.authorId.equals(authorId)).toBe(true);
+      expect(item.author.memberId?.equals(authorId)).toBe(true);
       expect(item.lastEditedBy).toBeNull();
       expect(item.lastEditedAt).toBeNull();
       expect(item.version).toBe(KnowledgeItemVersion.First);
@@ -125,7 +125,7 @@ describe('KnowledgeItem', () => {
       expect(item.content.mainField.value).toBe(
         'An offer, sent by email, to join a Workspace',
       );
-      expect(item.authorId.equals(authorId)).toBe(true);
+      expect(item.author.memberId?.equals(authorId)).toBe(true);
       expect(item.lastEditedBy?.equals(editorId)).toBe(true);
       expect(item.lastEditedAt).not.toBeNull();
       expect(item.version.value).toBe(2);
