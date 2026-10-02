@@ -8,8 +8,10 @@ import {
   type ConfirmKnowledgeItemDto,
   type DeleteKnowledgeItemDto,
   type EditKnowledgeItemDto,
+  type GetKnowledgeChangesDto,
   type GetKnowledgeContextDto,
   type KnowledgeApi,
+  type KnowledgeChangesDto,
   type KnowledgeContextDto,
   type KnowledgeDependenciesDto,
   type KnowledgeFrameDto,
@@ -251,6 +253,30 @@ export class KnowledgeService implements KnowledgeApi {
     const { gaps, current } = await this.findGaps(project.id);
 
     return { gaps: gaps.map(gap => toKnowledgeGapDto(gap, current)) };
+  }
+
+  public async changes(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    query: GetKnowledgeChangesDto,
+  ): Promise<KnowledgeChangesDto> {
+    const { project } = await this.resolve(caller, workspaceId, projectId);
+    const since = Temporal.Instant.from(query.since);
+    const approved = await this.knowledgeItemRepository.findMany({
+      projectId: project.id,
+      statuses: [KnowledgeStatus.Approved],
+      approvedAfter: since,
+    });
+    const retired = await this.knowledgeItemRepository.findMany({
+      projectId: project.id,
+      retiredAfter: since,
+    });
+
+    return {
+      approved: approved.map(item => item.key.value),
+      retired: retired.map(item => item.key.value),
+    };
   }
 
   public async get(

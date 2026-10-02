@@ -4,7 +4,7 @@ The Auditor carries out Analysis Runs: with no person to talk to, it looks over 
 
 1. **Agent**: role `auditor`, name `Auditor`, Model Profile `Default` (or a smarter one: it reads the whole Project), the tools below, no Skills, with the description and instructions below.
 
-The code puts the Project around the instructions and gives the task (for now "look over the whole Project"). Whatever tools it is given, it acts as Intentra itself: it may read the knowledge and record Open Questions, nothing else (Agents ADR 0004).
+The code puts the Project around the instructions and gives the task: "look over the whole Project" for a run started by hand, or, for a nightly run, the Knowledge Keys approved or retired since the last completed run, to look at each with the knowledge around it. Whatever tools it is given, it acts as Intentra itself: it may read the knowledge and record Open Questions, nothing else (Agents ADR 0004).
 
 ## Description
 

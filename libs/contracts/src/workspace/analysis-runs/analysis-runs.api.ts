@@ -3,6 +3,8 @@ import type { Actor } from '../../iam/index.js';
 import type {
   AnalysisRunDto,
   AnalysisRunPageDto,
+  AnalysisScheduleDto,
+  ChangeAnalysisScheduleDto,
   ListAnalysisRunsDto,
 } from './analysis-run.dto.js';
 
@@ -40,4 +42,19 @@ export abstract class AnalysisRunsApi {
     projectId: string,
     runId: string,
   ): Promise<AnalysisRunDto>;
+
+  /** The Project's nightly run. Every Member reads it. */
+  abstract schedule(
+    actor: Actor,
+    workspaceId: string,
+    projectId: string,
+  ): Promise<AnalysisScheduleDto>;
+
+  /** Turns the nightly run on or off; a Maintainer only (403 `ANALYSIS_SCHEDULE_FORBIDDEN`). */
+  abstract changeSchedule(
+    actor: Actor,
+    workspaceId: string,
+    projectId: string,
+    data: ChangeAnalysisScheduleDto,
+  ): Promise<AnalysisScheduleDto>;
 }

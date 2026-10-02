@@ -7,6 +7,7 @@ export { AnalysisRunFailure } from './analysis-run-failure.vo.js';
 export { AnalysisRunId } from './analysis-run-id.vo.js';
 export { AnalysisRunScope } from './analysis-run-scope.vo.js';
 export { AnalysisRunStatus } from './analysis-run-status.vo.js';
+export { AnalysisScheduleId } from './analysis-schedule-id.vo.js';
 export { AgentsChangeKind } from './agents-change-kind.vo.js';
 export { AgentsVersionId } from './agents-version-id.vo.js';
 export { AgentsVersionNumber } from './agents-version-number.vo.js';

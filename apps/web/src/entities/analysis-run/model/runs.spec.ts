@@ -12,6 +12,7 @@ function run(
   return {
     id,
     scope: 'whole-project',
+    changedKeys: [],
     status,
     startedBy: null,
     startedAt: '2026-10-03T00:00:00.000Z',

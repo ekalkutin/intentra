@@ -5,6 +5,10 @@ export {
 } from './agents-content.document.js';
 export { AnalysisRunModel, AnalysisRunSchema } from './analysis-run.schema.js';
 export {
+  AnalysisScheduleModel,
+  AnalysisScheduleSchema,
+} from './analysis-schedule.schema.js';
+export {
   AgentsVersionModel,
   AgentsVersionSchema,
 } from './agents-version.schema.js';

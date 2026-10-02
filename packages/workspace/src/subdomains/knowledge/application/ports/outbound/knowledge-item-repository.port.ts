@@ -25,6 +25,10 @@ export type KnowledgeItemQueryProps = {
   };
   /** Only items marked Needs Review (true) or only unmarked ones (false). */
   readonly needsReview?: boolean;
+  /** Only items approved after this moment. */
+  readonly approvedAfter?: Temporal.Instant;
+  /** Only items retired after this moment. */
+  readonly retiredAfter?: Temporal.Instant;
 };
 
 /** How many items share a Kind, a status and whether they are marked Needs Review. */

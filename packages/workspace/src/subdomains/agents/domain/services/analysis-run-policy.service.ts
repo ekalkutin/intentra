@@ -5,4 +5,9 @@ export class AnalysisRunPolicyService {
   public canStart(projectRole: ProjectRole): boolean {
     return !projectRole.equals(ProjectRole.Viewer);
   }
+
+  /** Only a Maintainer turns the nightly run on or off: it spends the Workspace's Provider Key unattended. */
+  public canChangeSchedule(projectRole: ProjectRole): boolean {
+    return projectRole.equals(ProjectRole.Maintainer);
+  }
 }

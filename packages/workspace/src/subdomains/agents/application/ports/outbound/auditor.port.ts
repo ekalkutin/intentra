@@ -8,6 +8,11 @@ import type {
 export type AuditTask = {
   readonly project: Project;
   readonly scope: AnalysisRunScope;
+  /** For a run over the changes, what changed, by Knowledge Key. */
+  readonly changes: {
+    readonly approved: readonly string[];
+    readonly retired: readonly string[];
+  } | null;
   /** The Agents that hold the Auditor to run. */
   readonly agents: AgentsContent;
   /** The Workspace's key; every model call of the run runs on it. */

@@ -2,6 +2,7 @@ import type { Type } from '@nestjs/common';
 
 import { AccessController } from './access.controller.js';
 import { AnalysisRunsController } from './analysis-runs.controller.js';
+import { AnalysisScheduleController } from './analysis-schedule.controller.js';
 import { ConversationsController } from './conversations.controller.js';
 import { InvitationsController } from './invitations.controller.js';
 import { KnowledgeController } from './knowledge.controller.js';
@@ -25,5 +26,6 @@ export const WORKSPACE_CONTROLLERS: Type[] = [
   KnowledgeController,
   ConversationsController,
   AnalysisRunsController,
+  AnalysisScheduleController,
   ProviderKeyController,
 ];

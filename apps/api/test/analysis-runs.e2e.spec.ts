@@ -479,6 +479,68 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
     });
   });
 
+  it('lets a Maintainer turn the nightly run on and every Member read it', async () => {
+    // Arrange
+    const { ada, bob, base } = await setUp();
+
+    // Act
+    const before = await app
+      .request()
+      .get(`${base}/analysis-schedule`)
+      .set('Authorization', ada);
+    const turned = await app
+      .request()
+      .put(`${base}/analysis-schedule`)
+      .set('Authorization', ada)
+      .send({ enabled: true });
+    const byViewer = await app
+      .request()
+      .put(`${base}/analysis-schedule`)
+      .set('Authorization', bob)
+      .send({ enabled: false });
+    const readByViewer = await app
+      .request()
+      .get(`${base}/analysis-schedule`)
+      .set('Authorization', bob);
+
+    // Assert
+    expect(before.body).toEqual({
+      enabled: false,
+      changedBy: null,
+      changedAt: null,
+      blockedBy: null,
+      access: { canChange: true },
+    });
+    expect(turned.status).toBe(HttpStatus.OK);
+    expect(turned.body).toMatchObject({
+      enabled: true,
+      changedBy: expect.any(String),
+      changedAt: expect.any(String),
+      blockedBy: null,
+    });
+    expect(byViewer.status).toBe(HttpStatus.FORBIDDEN);
+    expect(byViewer.body.code).toBe('ANALYSIS_SCHEDULE_FORBIDDEN');
+    expect(readByViewer.body).toMatchObject({
+      enabled: true,
+      access: { canChange: false },
+    });
+  });
+
+  it('tells why a nightly run that is on cannot go ahead', async () => {
+    // Arrange
+    const { ada, base } = await setUp({ publish: false });
+
+    // Act
+    const turned = await app
+      .request()
+      .put(`${base}/analysis-schedule`)
+      .set('Authorization', ada)
+      .send({ enabled: true });
+
+    // Assert
+    expect(turned.body.blockedBy).toBe('agents-not-published');
+  });
+
   it('hides the runs from someone outside the Workspace', async () => {
     // Arrange
     const { base } = await setUp({ providerKey: false, publish: false });

@@ -4,6 +4,7 @@ import type { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 
 import {
   AnalysisRunRepository,
+  AnalysisScheduleRepository,
   ConversationStore,
   ProviderKeyRepository,
 } from './subdomains/agents/index.js';
@@ -40,12 +41,14 @@ export class CleanupAdapter implements Cleanup {
     private readonly conversationStore: ConversationStore,
     private readonly providerKeyRepository: ProviderKeyRepository,
     private readonly analysisRunRepository: AnalysisRunRepository,
+    private readonly analysisScheduleRepository: AnalysisScheduleRepository,
   ) {}
 
   public async afterWorkspaceDeleted(workspaceId: WorkspaceId): Promise<void> {
     await this.conversationStore.deleteMany({ workspaceId });
     await this.providerKeyRepository.deleteMany({ workspaceId });
     await this.analysisRunRepository.deleteMany({ workspaceId });
+    await this.analysisScheduleRepository.deleteMany({ workspaceId });
     await this.knowledgeItemRepository.deleteMany({ workspaceId });
     await this.knowledgeKeyCounter.deleteMany({ workspaceId });
     await this.personalAccessTokenRepository.deleteMany({ workspaceId });
@@ -58,6 +61,7 @@ export class CleanupAdapter implements Cleanup {
   public async afterProjectDeleted(projectId: ProjectId): Promise<void> {
     await this.conversationStore.deleteMany({ projectId });
     await this.analysisRunRepository.deleteMany({ projectId });
+    await this.analysisScheduleRepository.deleteMany({ projectId });
     await this.knowledgeItemRepository.deleteMany({ projectId });
     await this.knowledgeKeyCounter.deleteMany({ projectId });
     await this.projectRoleAssignmentRepository.deleteMany({ projectId });

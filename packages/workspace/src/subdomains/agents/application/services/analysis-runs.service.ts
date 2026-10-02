@@ -5,21 +5,30 @@ import {
 } from '@nestjs/common';
 
 import type { Actor } from '@intentra/contracts/iam';
-import type {
-  AnalysisRunDto,
-  AnalysisRunPageDto,
-  AnalysisRunsApi,
-  ListAnalysisRunsDto,
+import {
+  AnalysisScheduleBlockDtoSchema,
+  type AnalysisRunDto,
+  type AnalysisRunPageDto,
+  type AnalysisRunsApi,
+  type AnalysisScheduleBlockDto,
+  type AnalysisScheduleDto,
+  type ChangeAnalysisScheduleDto,
+  type ListAnalysisRunsDto,
 } from '@intentra/contracts/workspace';
 import { ProjectId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
 import {
   AccessResolver,
+  ProjectRepository,
+  WorkspaceRepository,
   type Project,
   type ProjectMembership,
 } from '../../../tenancy/index.js';
-import { AnalysisRun } from '../../domain/entities/index.js';
-import { AnalysisRunForbiddenException } from '../../domain/exceptions/index.js';
+import { AnalysisRun, AnalysisSchedule } from '../../domain/entities/index.js';
+import {
+  AnalysisRunForbiddenException,
+  AnalysisScheduleForbiddenException,
+} from '../../domain/exceptions/index.js';
 import { AnalysisRunPolicyService } from '../../domain/services/index.js';
 import {
   AnalysisRunFailure,
@@ -27,19 +36,25 @@ import {
   AnalysisRunScope,
   AnalysisRunStatus,
 } from '../../domain/value-objects/index.js';
+import { AnalysisRunBusyException } from '../exceptions/index.js';
 import { toAnalysisRunDto } from '../mappers/index.js';
+import { toIsoString } from '../mappers/instant.mapper.js';
 import {
   AgentsVersionRepository,
   AnalysisRunRepository,
+  AnalysisScheduleRepository,
   Auditor,
+  KnowledgeChangesReader,
   ProviderKeyCipher,
   ProviderKeyRepository,
+  type KnowledgeChanges,
 } from '../ports/outbound/index.js';
 
 /**
- * A Project's Analysis Runs. A run started here goes on in the background in
- * this process, on the Published Agents' Auditor; one left running when the
- * process stopped is marked interrupted when it starts again.
+ * A Project's Analysis Runs and its nightly schedule. A run started here goes
+ * on in the background in this process, on the Published Agents' Auditor; one
+ * left running when the process stopped is marked interrupted when it starts
+ * again. The nightly runs go one Project after another.
  */
 @Injectable()
 export class AnalysisRunsService
@@ -52,9 +67,13 @@ export class AnalysisRunsService
     private readonly unitOfWork: UnitOfWork,
     private readonly accessResolver: AccessResolver,
     private readonly analysisRunRepository: AnalysisRunRepository,
+    private readonly analysisScheduleRepository: AnalysisScheduleRepository,
     private readonly agentsVersionRepository: AgentsVersionRepository,
     private readonly providerKeyRepository: ProviderKeyRepository,
     private readonly providerKeyCipher: ProviderKeyCipher,
+    private readonly projectRepository: ProjectRepository,
+    private readonly workspaceRepository: WorkspaceRepository,
+    private readonly knowledgeChangesReader: KnowledgeChangesReader,
     private readonly auditor: Auditor,
   ) {}
 
@@ -95,9 +114,172 @@ export class AnalysisRunsService
 
       return { run: started, project };
     });
-    void this.carryOut(run.run, run.project);
+    void this.carryOut(run.run, run.project, null);
 
     return toAnalysisRunDto(run.run);
+  }
+
+  public async schedule(
+    actor: Actor,
+    workspaceId: string,
+    projectId: string,
+  ): Promise<AnalysisScheduleDto> {
+    const { project, projectRole } = await this.resolve(
+      actor,
+      workspaceId,
+      projectId,
+    );
+    const schedule = await this.analysisScheduleRepository.findOne({
+      projectId: project.id,
+    });
+
+    return this.toScheduleDto(
+      schedule,
+      project,
+      this.#analysisRunPolicyService.canChangeSchedule(projectRole),
+    );
+  }
+
+  public async changeSchedule(
+    actor: Actor,
+    workspaceId: string,
+    projectId: string,
+    data: ChangeAnalysisScheduleDto,
+  ): Promise<AnalysisScheduleDto> {
+    const { schedule, project } = await this.unitOfWork.run(async () => {
+      const { member, project, projectRole } =
+        await this.accessResolver.resolveInProjectForChange(
+          { actor, agent: null },
+          new WorkspaceId(workspaceId),
+          new ProjectId(projectId),
+        );
+      if (!this.#analysisRunPolicyService.canChangeSchedule(projectRole)) {
+        throw new AnalysisScheduleForbiddenException();
+      }
+      const found = await this.analysisScheduleRepository.findOne({
+        projectId: project.id,
+      });
+      const schedule =
+        found ??
+        AnalysisSchedule.create({
+          workspaceId: project.workspaceId.value,
+          projectId: project.id.value,
+          enabled: data.enabled,
+          changedBy: member.id.value,
+        });
+      schedule.turn(data.enabled, member.id);
+      await this.analysisScheduleRepository.save(schedule);
+
+      return { schedule, project };
+    });
+
+    return this.toScheduleDto(schedule, project, true);
+  }
+
+  /**
+   * The nightly runs: each Project whose schedule is on, one after another,
+   * over what was approved or retired since its last completed run (the whole
+   * Project if it has none). A Project is left alone, with nothing kept, when
+   * its Workspace is suspended, a run cannot go ahead (no Provider Key, no
+   * Published Agents), one is already running, or nothing changed.
+   */
+  public async runScheduled(): Promise<void> {
+    const schedules = await this.analysisScheduleRepository.findMany({
+      enabled: true,
+    });
+    for (const schedule of schedules) {
+      try {
+        await this.runScheduledFor(schedule);
+      } catch (error) {
+        this.#logger.error(error);
+      }
+    }
+  }
+
+  private async runScheduledFor(schedule: AnalysisSchedule): Promise<void> {
+    const workspace = await this.workspaceRepository.findOne({
+      id: schedule.workspaceId,
+    });
+    const project = await this.projectRepository.findOne({
+      workspaceId: schedule.workspaceId,
+      id: schedule.projectId,
+    });
+    if (
+      !workspace ||
+      workspace.isSuspended ||
+      !project ||
+      (await this.blockerOf(project)) !== null
+    ) {
+      return;
+    }
+    const [lastCompleted] = await this.analysisRunRepository.findMany(
+      { projectId: project.id, status: AnalysisRunStatus.Completed },
+      { take: 1, offset: 0 },
+    );
+    const changes = lastCompleted
+      ? await this.knowledgeChangesReader.since(
+          project,
+          lastCompleted.startedAt,
+        )
+      : null;
+    if (
+      changes &&
+      changes.approved.length === 0 &&
+      changes.retired.length === 0
+    ) {
+      return;
+    }
+    const run = AnalysisRun.start({
+      workspaceId: project.workspaceId.value,
+      projectId: project.id.value,
+      scope: changes ? AnalysisRunScope.Changes : AnalysisRunScope.WholeProject,
+      changedKeys: changes ? [...changes.approved, ...changes.retired] : [],
+      startedBy: null,
+    });
+    try {
+      await this.keep(run);
+    } catch (error) {
+      if (error instanceof AnalysisRunBusyException) {
+        return;
+      }
+      throw error;
+    }
+    await this.carryOut(run, project, changes);
+  }
+
+  /** What keeps a run from going ahead in the Project now; null when nothing does. */
+  private async blockerOf(
+    project: Project,
+  ): Promise<AnalysisScheduleBlockDto | null> {
+    const providerKey = await this.providerKeyRepository.findOne({
+      workspaceId: project.workspaceId,
+    });
+    if (!providerKey) {
+      return AnalysisScheduleBlockDtoSchema.enum['provider-key-missing'];
+    }
+    const published = await this.agentsVersionRepository.findOne({
+      latest: true,
+    });
+
+    return published
+      ? null
+      : AnalysisScheduleBlockDtoSchema.enum['agents-not-published'];
+  }
+
+  private async toScheduleDto(
+    schedule: AnalysisSchedule | null,
+    project: Project,
+    canChange: boolean,
+  ): Promise<AnalysisScheduleDto> {
+    const enabled = schedule?.enabled ?? false;
+
+    return {
+      enabled,
+      changedBy: schedule?.changedBy.value ?? null,
+      changedAt: schedule ? toIsoString(schedule.changedAt) : null,
+      blockedBy: enabled ? await this.blockerOf(project) : null,
+      access: { canChange },
+    };
   }
 
   public async list(
@@ -142,7 +324,11 @@ export class AnalysisRunsService
   }
 
   /** Runs the Auditor and keeps what came of it; never rejects. */
-  private async carryOut(run: AnalysisRun, project: Project): Promise<void> {
+  private async carryOut(
+    run: AnalysisRun,
+    project: Project,
+    changes: KnowledgeChanges | null,
+  ): Promise<void> {
     try {
       const providerKey = await this.providerKeyRepository.findOne({
         workspaceId: project.workspaceId,
@@ -164,6 +350,7 @@ export class AnalysisRunsService
       const result = await this.auditor.audit({
         project,
         scope: run.scope,
+        changes,
         agents: published.content,
         providerKey: this.providerKeyCipher.decrypt(providerKey.encryptedKey),
       });

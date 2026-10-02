@@ -13,6 +13,7 @@ export function toAnalysisRunDto(run: AnalysisRun): AnalysisRunDto {
   return {
     id: run.id.value,
     scope: run.scope.value as AnalysisRunScopeDto,
+    changedKeys: [...run.changedKeys],
     status: run.status.value as AnalysisRunStatusDto,
     startedBy: run.startedBy?.value ?? null,
     startedAt: toIsoString(run.startedAt),

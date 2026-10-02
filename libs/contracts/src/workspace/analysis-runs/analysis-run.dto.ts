@@ -9,8 +9,12 @@ export const AnalysisRunStatusDtoSchema = z.enum([
 
 export type AnalysisRunStatusDto = z.infer<typeof AnalysisRunStatusDtoSchema>;
 
-/** What it looks at: for now always the whole Project, the run started by hand. */
-export const AnalysisRunScopeDtoSchema = z.enum(['whole-project']);
+/**
+ * What it looks at: `whole-project`, a run started by hand; `changes`, a run
+ * the schedule started, over what was approved or retired since the last
+ * completed run.
+ */
+export const AnalysisRunScopeDtoSchema = z.enum(['whole-project', 'changes']);
 
 export type AnalysisRunScopeDto = z.infer<typeof AnalysisRunScopeDtoSchema>;
 
@@ -33,6 +37,8 @@ export type AnalysisRunFailureDto = z.infer<typeof AnalysisRunFailureDtoSchema>;
 export type AnalysisRunDto = {
   readonly id: string;
   readonly scope: AnalysisRunScopeDto;
+  /** For `changes`, the Knowledge Keys of what was approved or retired; empty for the whole Project. */
+  readonly changedKeys: string[];
   readonly status: AnalysisRunStatusDto;
   /** The Member who started it; null for one the schedule started. */
   readonly startedBy: string | null;
@@ -67,3 +73,40 @@ export const ListAnalysisRunsDtoSchema = z.object({
 });
 
 export type ListAnalysisRunsDto = z.infer<typeof ListAnalysisRunsDtoSchema>;
+
+/**
+ * Why a nightly run cannot go ahead tonight, though turned on:
+ * `provider-key-missing`, the Workspace has no Provider Key;
+ * `agents-not-published`, no Agents are published yet.
+ */
+export const AnalysisScheduleBlockDtoSchema = z.enum([
+  'provider-key-missing',
+  'agents-not-published',
+]);
+
+export type AnalysisScheduleBlockDto = z.infer<
+  typeof AnalysisScheduleBlockDtoSchema
+>;
+
+/** Whether the Project is checked every night, over what changed since the last completed run. */
+export type AnalysisScheduleDto = {
+  readonly enabled: boolean;
+  /** The Member who last turned it on or off; null if no one ever did. */
+  readonly changedBy: string | null;
+  /** ISO 8601, or null if no one ever did. */
+  readonly changedAt: string | null;
+  /** What keeps a nightly run from going ahead now; null when nothing does. */
+  readonly blockedBy: AnalysisScheduleBlockDto | null;
+  readonly access: {
+    /** Whether the caller may turn it on or off: a Maintainer. */
+    readonly canChange: boolean;
+  };
+};
+
+export const ChangeAnalysisScheduleDtoSchema = z.object({
+  enabled: z.boolean(),
+});
+
+export type ChangeAnalysisScheduleDto = z.infer<
+  typeof ChangeAnalysisScheduleDtoSchema
+>;

@@ -46,6 +46,7 @@ export class AuditorAdapter implements Auditor {
     project,
     agents,
     providerKey,
+    changes,
   }: AuditTask): Promise<AuditResult> {
     const questionKeys: string[] = [];
     try {
@@ -76,7 +77,10 @@ export class AuditorAdapter implements Auditor {
         name: project.name.value,
       });
 
-      const output = await auditor.generate(AUDIT_TASKS.wholeProject, {
+      const task = changes
+        ? AUDIT_TASKS.changes(changes.approved, changes.retired)
+        : AUDIT_TASKS.wholeProject;
+      const output = await auditor.generate(task, {
         requestContext,
         maxSteps: this.options.auditMaxSteps,
         abortSignal: AbortSignal.timeout(this.options.auditTimeoutMs),

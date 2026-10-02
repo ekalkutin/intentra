@@ -2,6 +2,10 @@ import type { CallerDto } from '../access/caller.dto.js';
 
 import type { EditKnowledgeItemDto } from './edit-knowledge-item.dto.js';
 import type {
+  GetKnowledgeChangesDto,
+  KnowledgeChangesDto,
+} from './knowledge-changes.dto.js';
+import type {
   GetKnowledgeContextDto,
   KnowledgeContextDto,
   KnowledgeFrameDto,
@@ -71,6 +75,14 @@ export abstract class KnowledgeApi {
     workspaceId: string,
     projectId: string,
   ): Promise<KnowledgeGapsDto>;
+
+  /** What was approved or retired after a moment, such as since the last Analysis Run. Every Member reads it, and Intentra itself. */
+  abstract changes(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    query: GetKnowledgeChangesDto,
+  ): Promise<KnowledgeChangesDto>;
 
   /** Reads a Knowledge Item in any status, Rejected included. */
   abstract get(

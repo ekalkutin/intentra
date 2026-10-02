@@ -12,6 +12,7 @@ export {
 } from './application/services/index.js';
 export {
   AnalysisRunRepository,
+  AnalysisScheduleRepository,
   ConversationStore,
   ProviderKeyRepository,
 } from './application/ports/outbound/index.js';

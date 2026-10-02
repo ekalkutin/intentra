@@ -26,6 +26,13 @@ export const EnvironmentSchema = z
       .refine(value => Buffer.from(value, 'base64').length === 32, {
         message: 'PROVIDER_KEY_ENCRYPTION_KEY must be 32 bytes in base64',
       }),
+    /** The hour, in UTC (0–23), when the nightly Analysis Runs start; midnight UTC when unset. */
+    ANALYSIS_SCHEDULE_HOUR_UTC: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(23)
+      .default(0),
     /** Comma-separated hostnames the MCP endpoint answers to; localhost only when unset. */
     MCP_ALLOWED_HOSTS: z
       .string()
@@ -78,6 +85,7 @@ export const EnvironmentSchema = z
     workspace: {
       agents: {
         providerKeyEncryptionKey: env.PROVIDER_KEY_ENCRYPTION_KEY,
+        analysisScheduleHourUtc: env.ANALYSIS_SCHEDULE_HOUR_UTC,
       },
     },
   }));

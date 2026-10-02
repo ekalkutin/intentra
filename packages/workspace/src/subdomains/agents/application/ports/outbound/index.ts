@@ -7,6 +7,10 @@ export {
   AgentsVersionRepository,
   type AgentsVersionQueryProps,
 } from './agents-version-repository.port.js';
+export {
+  AnalysisScheduleRepository,
+  type AnalysisScheduleQueryProps,
+} from './analysis-schedule-repository.port.js';
 export { Auditor, type AuditResult, type AuditTask } from './auditor.port.js';
 export {
   ConversationStore,
@@ -16,6 +20,10 @@ export {
   type ConversationPage,
   type ConversationQueryProps,
 } from './conversation-store.port.js';
+export {
+  KnowledgeChangesReader,
+  type KnowledgeChanges,
+} from './knowledge-changes.port.js';
 export {
   Intentra,
   type AnswerStream,

@@ -19,6 +19,8 @@ export type AgentsOptions = {
   readonly auditMaxSteps: number;
   /** The longest one Analysis Run may run, in milliseconds. */
   readonly auditTimeoutMs: number;
+  /** The hour, in UTC, when the nightly Analysis Runs start; null for none (tests). */
+  readonly analysisScheduleHourUtc: number | null;
 };
 
 export const DEFAULT_AGENTS_OPTIONS: AgentsOptions = {
@@ -33,6 +35,7 @@ export const DEFAULT_AGENTS_OPTIONS: AgentsOptions = {
   historyTokens: 64_000,
   auditMaxSteps: 40,
   auditTimeoutMs: 10 * 60 * 1000,
+  analysisScheduleHourUtc: null,
 };
 
 export const AGENTS_OPTIONS = Symbol('AGENTS_OPTIONS');

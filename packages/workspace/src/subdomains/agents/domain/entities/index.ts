@@ -6,6 +6,7 @@ export {
 } from './agents-content.js';
 export { AgentsVersion } from './agents-version.aggregate.js';
 export { AnalysisRun } from './analysis-run.aggregate.js';
+export { AnalysisSchedule } from './analysis-schedule.aggregate.js';
 export { Conversation } from './conversation.aggregate.js';
 export { ModelProfile, type ModelProfileSpec } from './model-profile.entity.js';
 export { ProviderKey } from './provider-key.aggregate.js';

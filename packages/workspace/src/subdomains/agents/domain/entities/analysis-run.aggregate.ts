@@ -19,6 +19,7 @@ export class AnalysisRun extends Aggregate<AnalysisRunId> {
   readonly #workspaceId: WorkspaceId;
   readonly #projectId: ProjectId;
   readonly #scope: AnalysisRunScope;
+  readonly #changedKeys: readonly string[];
   readonly #startedBy: MemberId | null;
   readonly #startedAt: Temporal.Instant;
   #agentsVersion: AgentsVersionNumber | null;
@@ -33,6 +34,7 @@ export class AnalysisRun extends Aggregate<AnalysisRunId> {
     this.#workspaceId = state.workspaceId;
     this.#projectId = state.projectId;
     this.#scope = state.scope;
+    this.#changedKeys = state.changedKeys;
     this.#startedBy = state.startedBy;
     this.#startedAt = state.startedAt;
     this.#agentsVersion = state.agentsVersion;
@@ -53,6 +55,11 @@ export class AnalysisRun extends Aggregate<AnalysisRunId> {
 
   get scope(): AnalysisRunScope {
     return this.#scope;
+  }
+
+  /** For a run over the changes, the Knowledge Keys of what was approved or retired; empty for the whole Project. */
+  get changedKeys(): readonly string[] {
+    return this.#changedKeys;
   }
 
   /** The Member who started it by hand; null for one the schedule started. */
@@ -100,6 +107,7 @@ export class AnalysisRun extends Aggregate<AnalysisRunId> {
       workspaceId: new WorkspaceId(props.workspaceId),
       projectId: new ProjectId(props.projectId),
       scope: props.scope,
+      changedKeys: props.changedKeys ?? [],
       startedBy:
         props.startedBy === null ? null : new MemberId(props.startedBy),
       startedAt: Temporal.Now.instant(),
@@ -117,6 +125,7 @@ export class AnalysisRun extends Aggregate<AnalysisRunId> {
       workspaceId: new WorkspaceId(props.workspaceId),
       projectId: new ProjectId(props.projectId),
       scope: AnalysisRunScope.from(props.scope),
+      changedKeys: props.changedKeys,
       startedBy:
         props.startedBy === null ? null : new MemberId(props.startedBy),
       startedAt: props.startedAt,
@@ -173,6 +182,7 @@ type AnalysisRunState = {
   readonly workspaceId: WorkspaceId;
   readonly projectId: ProjectId;
   readonly scope: AnalysisRunScope;
+  readonly changedKeys: readonly string[];
   readonly startedBy: MemberId | null;
   readonly startedAt: Temporal.Instant;
   readonly agentsVersion: AgentsVersionNumber | null;
@@ -187,6 +197,8 @@ type AnalysisRunStartProps = {
   readonly workspaceId: string;
   readonly projectId: string;
   readonly scope: AnalysisRunScope;
+  /** For a run over the changes, what changed. */
+  readonly changedKeys?: readonly string[];
   /** The Member who starts it by hand; null for the schedule. */
   readonly startedBy: string | null;
 };
@@ -196,6 +208,7 @@ type AnalysisRunRestoreProps = {
   readonly workspaceId: string;
   readonly projectId: string;
   readonly scope: string;
+  readonly changedKeys: readonly string[];
   readonly startedBy: string | null;
   readonly startedAt: Temporal.Instant;
   readonly agentsVersion: number | null;

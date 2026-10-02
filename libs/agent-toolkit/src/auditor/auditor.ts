@@ -19,7 +19,18 @@ export type AuditorOptions = {
 export const AUDIT_TASKS = {
   wholeProject:
     "Look over the whole Project's Approved knowledge for contradictions, ambiguities and doubtful rules, and record each finding as an Open Question.",
-} as const;
+  /** Only what changed since the last run, each with the knowledge around it. */
+  changes: (approved: readonly string[], retired: readonly string[]) =>
+    [
+      'Since the last check of this Project, some of its knowledge changed. Look at each changed item with the knowledge around it (get_context with it as an Anchor) for contradictions, ambiguities and doubtful rules it brings in, and record each finding as an Open Question. Leave the rest of the Project alone.',
+      approved.length > 0 ? `Approved since then: ${approved.join(', ')}.` : '',
+      retired.length > 0
+        ? `Retired since then (read them with get_knowledge_item; check what still relies on them): ${retired.join(', ')}.`
+        : '',
+    ]
+      .filter(Boolean)
+      .join('\n\n'),
+};
 
 /**
  * The Agent that carries out Analysis Runs: no memory and no Conversation, a

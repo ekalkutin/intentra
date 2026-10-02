@@ -4,9 +4,12 @@ import { InvalidAnalysisRunException } from '../exceptions/index.js';
 export class AnalysisRunScope {
   /** Every Approved Knowledge Item of the Project: a run started by hand. */
   public static readonly WholeProject = new AnalysisRunScope('whole-project');
+  /** What was approved or retired since the last completed run: a run the schedule started. */
+  public static readonly Changes = new AnalysisRunScope('changes');
 
   static readonly #all: readonly AnalysisRunScope[] = [
     AnalysisRunScope.WholeProject,
+    AnalysisRunScope.Changes,
   ];
 
   readonly #value: string;
@@ -21,7 +24,7 @@ export class AnalysisRunScope {
     );
     if (!scope) {
       throw new InvalidAnalysisRunException(
-        'Analysis Run scope must be whole-project',
+        'Analysis Run scope must be whole-project or changes',
       );
     }
 

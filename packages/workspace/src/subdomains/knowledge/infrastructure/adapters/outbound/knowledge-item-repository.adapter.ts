@@ -205,6 +205,12 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
         'reviewCauses.0': { $exists: true },
       }),
       ...(props.needsReview === false && { reviewCauses: { $size: 0 } }),
+      ...(props.approvedAfter && {
+        approvedAt: { $gt: toDate(props.approvedAfter) },
+      }),
+      ...(props.retiredAfter && {
+        retiredAt: { $gt: toDate(props.retiredAfter) },
+      }),
     };
   }
 

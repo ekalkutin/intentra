@@ -3,7 +3,12 @@ export {
   AnalysisRunFailureDtoSchema,
   AnalysisRunScopeDtoSchema,
   AnalysisRunStatusDtoSchema,
+  AnalysisScheduleBlockDtoSchema,
+  ChangeAnalysisScheduleDtoSchema,
   ListAnalysisRunsDtoSchema,
+  type AnalysisScheduleBlockDto,
+  type AnalysisScheduleDto,
+  type ChangeAnalysisScheduleDto,
   type AnalysisRunDto,
   type AnalysisRunFailureDto,
   type AnalysisRunPageDto,
@@ -128,6 +133,11 @@ export {
   type KnowledgeStatusDto,
 } from './knowledge/knowledge-kind.dto.js';
 export { KnowledgeApi } from './knowledge/knowledge.api.js';
+export {
+  GetKnowledgeChangesDtoSchema,
+  type GetKnowledgeChangesDto,
+  type KnowledgeChangesDto,
+} from './knowledge/knowledge-changes.dto.js';
 export {
   KnowledgeGapRuleDtoSchema,
   type KnowledgeGapDto,

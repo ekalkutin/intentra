@@ -1,4 +1,5 @@
 export { AnalysisRunForbiddenException } from './analysis-run-forbidden.exception.js';
+export { AnalysisScheduleForbiddenException } from './analysis-schedule-forbidden.exception.js';
 export { AnalysisRunFinishedException } from './analysis-run-finished.exception.js';
 export { AuditorExistsException } from './auditor-exists.exception.js';
 export { AuditorNotRemovableException } from './auditor-not-removable.exception.js';
