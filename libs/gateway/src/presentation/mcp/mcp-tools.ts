@@ -43,12 +43,29 @@ export function registerMcpTools(
           return errorResult(result.message);
         }
         return {
-          content: [{ type: 'text', text: JSON.stringify(result) }],
+          content: [{ type: 'text', text: toText(result) }],
           structuredContent: result,
         };
       },
     );
   }
+}
+
+/**
+ * A result drawn for reading (a `markdown` field, such as a Context Pack's)
+ * is given as that text, the rest as JSON; `structuredContent` holds it whole.
+ */
+function toText(result: unknown): string {
+  if (
+    result !== null &&
+    typeof result === 'object' &&
+    'markdown' in result &&
+    typeof result.markdown === 'string'
+  ) {
+    return result.markdown;
+  }
+
+  return JSON.stringify(result);
 }
 
 /**

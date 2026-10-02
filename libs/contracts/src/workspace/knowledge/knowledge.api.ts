@@ -2,6 +2,11 @@ import type { CallerDto } from '../access/caller.dto.js';
 
 import type { EditKnowledgeItemDto } from './edit-knowledge-item.dto.js';
 import type {
+  GetKnowledgeContextDto,
+  KnowledgeContextDto,
+  KnowledgeFrameDto,
+} from './knowledge-context.dto.js';
+import type {
   ApproveKnowledgeItemDto,
   ApproveKnowledgeItemsDto,
   ConfirmKnowledgeItemDto,
@@ -88,6 +93,26 @@ export abstract class KnowledgeApi {
     projectId: string,
     key: string,
   ): Promise<KnowledgeDependenciesDto>;
+
+  /**
+   * The Context Pack for a task: the Approved knowledge gathered from its
+   * Anchors along the Links. Every Anchor must be Approved (409
+   * `ANCHOR_NOT_APPROVED` naming it otherwise); one that does not exist is
+   * 404. Every Member reads it.
+   */
+  abstract context(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    query: GetKnowledgeContextDto,
+  ): Promise<KnowledgeContextDto>;
+
+  /** The Project Frame: what holds for every task, whatever it links to. Every Member reads it. */
+  abstract frame(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+  ): Promise<KnowledgeFrameDto>;
 
   /**
    * Approving a Draft that `supersedes` an item also makes that item Obsolete.

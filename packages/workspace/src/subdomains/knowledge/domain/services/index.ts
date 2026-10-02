@@ -1,4 +1,9 @@
 export {
+  ContextPackAssemblyService,
+  type ContextPackCandidate,
+  type ContextPackEntry,
+} from './context-pack-assembly.service.js';
+export {
   DraftApprovalService,
   type SeenDraft,
 } from './draft-approval.service.js';

@@ -1271,6 +1271,8 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       'Отклонять может только тот, кто утверждает в проекте',
     DRAFT_EDITING_FORBIDDEN: 'Править черновики вам нельзя',
     DRAFT_DELETION_FORBIDDEN: 'Удалять черновики вам нельзя',
+    ANCHOR_NOT_APPROVED:
+      'Контекст для агента собирается только от утверждённых записей',
     DEPENDENCIES_NOT_APPROVED:
       'Не всё, от чего зависит запись, утверждено. Утвердите их вместе',
     SUPERSEDED_ITEM_NOT_APPROVED:

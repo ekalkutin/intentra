@@ -8,7 +8,11 @@ import {
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { Inject, Injectable } from '@nestjs/common';
 
-import { MCP_TOOLS, type ToolApis } from '@intentra/agent-toolkit';
+import {
+  MCP_INSTRUCTIONS,
+  MCP_TOOLS,
+  type ToolApis,
+} from '@intentra/agent-toolkit';
 import {
   AgentKindDtoSchema,
   WorkspaceApi,
@@ -50,7 +54,10 @@ export class McpHandler {
           } satisfies CallerDto);
           requestContext.set('workspaceId', caller.workspaceId);
         }
-        const server = new McpServer({ name: 'intentra', version: '1.0.0' });
+        const server = new McpServer(
+          { name: 'intentra', version: '1.0.0' },
+          { instructions: MCP_INSTRUCTIONS },
+        );
         registerMcpTools(server, MCP_TOOLS, requestContext);
         return server;
       }),

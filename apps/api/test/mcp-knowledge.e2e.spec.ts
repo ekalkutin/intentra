@@ -29,6 +29,9 @@ describe('Knowledge tools over MCP', () => {
   let app: TestingApp;
   let secret: string;
   let projectId: string;
+  /** Ada's own session, for what only a person does: approving. */
+  let knowledgePath: string;
+  let ada: string;
 
   /** Calls a tool with the Contributor-level token and reads its result from the stream. */
   async function callTool(name: string, args: object): Promise<ToolResult> {
@@ -84,6 +87,8 @@ describe('Knowledge tools over MCP', () => {
       .expect(HttpStatus.CREATED);
     secret = token.body.secret;
     projectId = project.body.id;
+    knowledgePath = `${WORKSPACES_PATH}/${workspace.body.id}/projects/${projectId}/knowledge`;
+    ada = authorization;
   }
 
   beforeAll(async () => {
@@ -331,5 +336,101 @@ describe('Knowledge tools over MCP', () => {
       key: 'REQ-1',
     });
     expect(read.content[0]?.text).toMatch(/^KNOWLEDGE_ITEM_NOT_FOUND: /);
+  });
+
+  it('tells a connecting agent to read the frame, then a Context Pack per task', async () => {
+    // Act
+    const response = await app
+      .request()
+      .post(MCP_PATH)
+      .set('Accept', 'application/json, text/event-stream')
+      .set('Authorization', `Bearer ${secret}`)
+      .send({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2025-06-18',
+          capabilities: {},
+          clientInfo: { name: 'test', version: '1.0.0' },
+        },
+      })
+      .expect(HttpStatus.OK);
+
+    // Assert
+    const data = response.text
+      .split('\n')
+      .find(line => line.startsWith('data: '));
+    const result = JSON.parse(data?.slice('data: '.length) ?? response.text)
+      .result as { instructions?: string };
+    expect(result.instructions).toContain('get_project_frame');
+    expect(result.instructions).toContain('get_context');
+  });
+
+  it('gives the Context Pack as text to read, and whole as structured content', async () => {
+    // Arrange
+    await callTool('record_persona', {
+      projectId,
+      title: 'Bookkeeper',
+      rationale: 'Ada: "our bookkeepers pay the invoices"',
+      fields: { profile: 'Pays the invoices' },
+    });
+    await callTool('record_scenario', {
+      projectId,
+      title: 'Pay an invoice',
+      rationale: 'Ada: "they pay from the list"',
+      fields: { expectedResult: 'The invoice is paid' },
+      links: [{ type: 'depends-on', key: 'PER-1' }],
+    });
+    await app
+      .request()
+      .post(`${knowledgePath}/approve`)
+      .set('Authorization', ada)
+      .send({
+        items: [
+          { key: 'PER-1', version: 1 },
+          { key: 'SC-1', version: 1 },
+        ],
+      })
+      .expect(HttpStatus.OK);
+
+    // Act
+    const result = await callTool('get_context', {
+      projectId,
+      anchors: ['SC-1'],
+    });
+    const frame = await callTool('get_project_frame', { projectId });
+
+    // Assert
+    expect(result.content[0]?.text).toMatch(/^# Context for SC-1\n/);
+    expect(result.content[0]?.text).toContain(
+      '### PER-1 · Persona · Bookkeeper',
+    );
+    expect(result.content[0]?.text).toContain('Project frame: 0 items');
+    expect(result.structuredContent).toMatchObject({
+      anchors: ['SC-1'],
+      items: [
+        expect.objectContaining({ key: 'SC-1', role: 'anchor' }),
+        expect.objectContaining({ key: 'PER-1', role: 'foundation' }),
+      ],
+    });
+    expect(frame.content[0]?.text).toMatch(/^# Project frame\n/);
+  });
+
+  it('refuses a Draft as an Anchor, so that the agent asks for approval', async () => {
+    // Arrange
+    await callTool('record_requirement', { projectId, ...requirement });
+
+    // Act
+    const result = await callTool('get_context', {
+      projectId,
+      anchors: ['REQ-1'],
+    });
+
+    // Assert
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toMatch(
+      /^ANCHOR_NOT_APPROVED: REQ-1 is a Draft/,
+    );
   });
 });

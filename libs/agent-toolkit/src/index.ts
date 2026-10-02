@@ -1,6 +1,7 @@
 export {
   AGENT_TOOLS,
   isReadOnlyTool,
+  MCP_INSTRUCTIONS,
   MCP_TOOLS,
   type AgentTool,
 } from './catalog.js';

@@ -8,10 +8,15 @@ import {
   type ConfirmKnowledgeItemDto,
   type DeleteKnowledgeItemDto,
   type EditKnowledgeItemDto,
+  type GetKnowledgeContextDto,
   type KnowledgeApi,
+  type KnowledgeContextDto,
   type KnowledgeDependenciesDto,
+  type KnowledgeFrameDto,
   type KnowledgeItemDto,
   type KnowledgeItemPageDto,
+  type KnowledgeKindDto,
+  type KnowledgeLinkTypeDto,
   type KnowledgeSummaryDto,
   type ListKnowledgeItemsDto,
   type RecordKnowledgeItemDto,
@@ -25,8 +30,12 @@ import {
   type ProjectMembership,
 } from '../../../tenancy/index.js';
 import { KnowledgeItem } from '../../domain/entities/index.js';
-import { KnowledgeKindMismatchException } from '../../domain/exceptions/index.js';
 import {
+  AnchorNotApprovedException,
+  KnowledgeKindMismatchException,
+} from '../../domain/exceptions/index.js';
+import {
+  ContextPackAssemblyService,
   DraftApprovalService,
   DraftDeletionService,
   DraftEditingService,
@@ -35,20 +44,29 @@ import {
   KnowledgeRecordingService,
   KnowledgeRetirementService,
   ReviewMarkingService,
+  type ContextPackCandidate,
   type SeenDraft,
 } from '../../domain/services/index.js';
 import {
+  ContextPackRole,
   KnowledgeItemVersion,
   KnowledgeKey,
   KnowledgeKind,
   KnowledgeLink,
   KnowledgeLinkType,
   KnowledgeStatus,
+  RequirementContent,
+  RequirementType,
 } from '../../domain/value-objects/index.js';
+import { KnowledgeItemNotFoundException } from '../exceptions/index.js';
 import {
+  drawContextPack,
+  drawProjectFrame,
   toChangedKnowledgeContent,
   toKnowledgeAccessDto,
   toKnowledgeContent,
+  toKnowledgeContextEntryDto,
+  toKnowledgeContextItemDto,
   toKnowledgeDependencyDto,
   toKnowledgeItemDto,
   toKnowledgeSource,
@@ -72,6 +90,15 @@ const CURRENT: readonly KnowledgeStatus[] = [
   KnowledgeStatus.Approved,
 ];
 
+/** How many items a Context Pack shows in full before the rest go brief. */
+const CONTEXT_PACK_BUDGET = 40;
+
+/** What a Context Pack's foundation walks along: what an item rests on. */
+const FOUNDATION_LINKS: readonly KnowledgeLinkType[] = [
+  KnowledgeLinkType.DependsOn,
+  KnowledgeLinkType.JustifiedBy,
+];
+
 @Injectable()
 export class KnowledgeService implements KnowledgeApi {
   readonly #knowledgeRecordingService = new KnowledgeRecordingService();
@@ -82,6 +109,7 @@ export class KnowledgeService implements KnowledgeApi {
   readonly #knowledgeRetirementService = new KnowledgeRetirementService();
   readonly #knowledgeConfirmationService = new KnowledgeConfirmationService();
   readonly #reviewMarkingService = new ReviewMarkingService();
+  readonly #contextPackAssemblyService = new ContextPackAssemblyService();
 
   constructor(
     private readonly unitOfWork: UnitOfWork,
@@ -246,6 +274,58 @@ export class KnowledgeService implements KnowledgeApi {
         to: to.value,
       })),
     };
+  }
+
+  public async context(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    query: GetKnowledgeContextDto,
+  ): Promise<KnowledgeContextDto> {
+    const { project } = await this.resolve(caller, workspaceId, projectId);
+    const anchors = await this.findAnchors(project.id, query.anchors);
+    const candidates = await this.gatherContext(project.id, anchors);
+    const entries = this.#contextPackAssemblyService.assemble(
+      candidates,
+      CONTEXT_PACK_BUDGET,
+    );
+    const inPack = entries.map(entry => entry.item);
+    const drafts = await this.findDraftsNear(project.id, inPack);
+    const frame = await this.findFrame(project.id);
+    const pack = {
+      anchors: anchors.map(anchor => anchor.key.value),
+      items: entries.map(toKnowledgeContextItemDto),
+      links: inPack.flatMap(item =>
+        item.links
+          .filter(link => inPack.some(other => other.key.equals(link.target)))
+          .map(link => ({
+            from: item.key.value,
+            to: link.target.value,
+            type: link.type.value as KnowledgeLinkTypeDto,
+          })),
+      ),
+      draftsNearby: drafts.map(draft => ({
+        key: draft.key.value,
+        kind: draft.kind.value as KnowledgeKindDto,
+        title: draft.title.value,
+      })),
+      frameSize: frame.length,
+    };
+
+    return { ...pack, markdown: drawContextPack(pack) };
+  }
+
+  public async frame(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+  ): Promise<KnowledgeFrameDto> {
+    const { project } = await this.resolve(caller, workspaceId, projectId);
+    const items = (await this.findFrame(project.id)).map(
+      toKnowledgeContextEntryDto,
+    );
+
+    return { items, markdown: drawProjectFrame(items) };
   }
 
   public async edit(
@@ -544,6 +624,224 @@ export class KnowledgeService implements KnowledgeApi {
     });
   }
 
+  /** The Anchors in the order asked, each once; each must exist and be Approved. */
+  private async findAnchors(
+    projectId: ProjectId,
+    keys: readonly string[],
+  ): Promise<KnowledgeItem[]> {
+    const asked = [...new Set(keys)].map(key => KnowledgeKey.parse(key));
+    const found = await this.knowledgeItemRepository.findMany({
+      projectId,
+      keys: asked,
+    });
+
+    return asked.map(key => {
+      const anchor = found.find(item => item.key.equals(key));
+      if (!anchor) {
+        throw new KnowledgeItemNotFoundException(key.value);
+      }
+      if (!anchor.isApproved()) {
+        throw new AnchorNotApprovedException(
+          key.value,
+          anchor.status.value,
+          anchor.supersededByKey?.value ?? null,
+        );
+      }
+
+      return anchor;
+    });
+  }
+
+  /**
+   * Every Approved item a Context Pack takes, for each reason it is found:
+   * the Anchors; what they rest on, level by level, each once, so that cycles
+   * end; what links to an Anchor; the Terms used; what conflicts with any of
+   * them; and the Open Questions about any of them not answered yet.
+   */
+  private async gatherContext(
+    projectId: ProjectId,
+    anchors: readonly KnowledgeItem[],
+  ): Promise<ContextPackCandidate[]> {
+    const candidates: ContextPackCandidate[] = anchors.map(item => ({
+      item,
+      role: ContextPackRole.Anchor,
+      distance: 0,
+    }));
+    const distances = new Map(anchors.map(item => [item.key.value, 0]));
+    const take = (
+      items: readonly KnowledgeItem[],
+      role: ContextPackRole,
+      distanceOf: (item: KnowledgeItem) => number,
+    ): KnowledgeItem[] => {
+      const added = items.filter(
+        (item, index) =>
+          item.isApproved() &&
+          items.findIndex(other => other.key.equals(item.key)) === index,
+      );
+      for (const item of added) {
+        const distance = distanceOf(item);
+        candidates.push({ item, role, distance });
+        const held = distances.get(item.key.value);
+        distances.set(
+          item.key.value,
+          held === undefined ? distance : Math.min(held, distance),
+        );
+      }
+
+      return added;
+    };
+    const inPack = () => candidates.map(candidate => candidate.item);
+    const nearest = (keys: readonly KnowledgeKey[]) =>
+      Math.min(...keys.map(key => distances.get(key.value) ?? Infinity));
+
+    let level: readonly KnowledgeItem[] = anchors;
+    for (let distance = 1; level.length > 0; distance++) {
+      const targets = await this.findLinked(projectId, level, FOUNDATION_LINKS);
+      level = take(
+        targets.filter(item => !distances.has(item.key.value)),
+        ContextPackRole.Foundation,
+        () => distance,
+      );
+    }
+
+    const anchorKeys = anchors.map(anchor => anchor.key);
+    const linkingToAnchors = await this.knowledgeItemRepository.findMany({
+      projectId,
+      linkingTo: { keys: anchorKeys },
+      statuses: [KnowledgeStatus.Approved],
+    });
+    take(
+      linkingToAnchors.filter(item =>
+        item.links.some(
+          link =>
+            anchorKeys.some(key => key.equals(link.target)) &&
+            !link.type.equals(KnowledgeLinkType.Concerns) &&
+            !link.type.equals(KnowledgeLinkType.ConflictsWith),
+        ),
+      ),
+      ContextPackRole.MayBeAffected,
+      () => 1,
+    );
+
+    const users = inPack();
+    take(
+      await this.findLinked(projectId, users, [KnowledgeLinkType.UsesTerm]),
+      ContextPackRole.Term,
+      term =>
+        1 +
+        nearest(
+          users
+            .filter(user =>
+              user.links.some(link => link.target.equals(term.key)),
+            )
+            .map(user => user.key),
+        ),
+    );
+
+    const related = inPack();
+    const relatedKeys = related.map(item => item.key);
+    const conflicting = [
+      ...(await this.findLinked(projectId, related, [
+        KnowledgeLinkType.ConflictsWith,
+      ])),
+      ...(await this.knowledgeItemRepository.findMany({
+        projectId,
+        linkingTo: {
+          keys: relatedKeys,
+          types: [KnowledgeLinkType.ConflictsWith],
+        },
+        statuses: [KnowledgeStatus.Approved],
+      })),
+    ];
+    take(conflicting, ContextPackRole.Conflict, item =>
+      distanceBetween(item, related, nearest),
+    );
+
+    const concerned = inPack();
+    const questions = await this.knowledgeItemRepository.findMany({
+      projectId,
+      kind: KnowledgeKind.OpenQuestion,
+      linkingTo: {
+        keys: concerned.map(item => item.key),
+        types: [KnowledgeLinkType.Concerns],
+      },
+      statuses: [KnowledgeStatus.Approved],
+    });
+    const answers = await this.findAnswers(projectId, questions);
+    take(
+      questions.filter(question => answeredBy(question, answers).length === 0),
+      ContextPackRole.Unsettled,
+      question => 1 + nearest(question.links.map(link => link.target)),
+    );
+
+    return candidates;
+  }
+
+  /** The targets of the items' Links of these types, in any status. */
+  private findLinked(
+    projectId: ProjectId,
+    items: readonly KnowledgeItem[],
+    types: readonly KnowledgeLinkType[],
+  ): Promise<KnowledgeItem[]> {
+    return this.findTargets(
+      projectId,
+      items.flatMap(item =>
+        item.links.filter(link => types.some(type => type.equals(link.type))),
+      ),
+    );
+  }
+
+  /** The Drafts the pack's items link to or that link to them, by key. */
+  private async findDraftsNear(
+    projectId: ProjectId,
+    inPack: readonly KnowledgeItem[],
+  ): Promise<KnowledgeItem[]> {
+    const linked = await this.findTargets(
+      projectId,
+      inPack.flatMap(item => item.links),
+    );
+    const linking = await this.knowledgeItemRepository.findMany({
+      projectId,
+      linkingTo: { keys: inPack.map(item => item.key) },
+      statuses: [KnowledgeStatus.Draft],
+    });
+
+    return [...linked.filter(item => item.isDraft()), ...linking]
+      .filter(
+        (item, index, drafts) =>
+          drafts.findIndex(other => other.key.equals(item.key)) === index,
+      )
+      .sort(
+        (a, b) =>
+          KnowledgeKind.all.indexOf(a.kind) -
+            KnowledgeKind.all.indexOf(b.kind) || a.key.number - b.key.number,
+      );
+  }
+
+  /**
+   * The Project Frame: the Approved Product Overview, Constraints and
+   * non-functional Requirements, in that order.
+   */
+  private async findFrame(projectId: ProjectId): Promise<KnowledgeItem[]> {
+    const approved = (kind: KnowledgeKind) =>
+      this.knowledgeItemRepository.findMany({
+        projectId,
+        kind,
+        statuses: [KnowledgeStatus.Approved],
+      });
+    const requirements = await approved(KnowledgeKind.Requirement);
+
+    return [
+      ...(await approved(KnowledgeKind.ProductOverview)),
+      ...(await approved(KnowledgeKind.Constraint)),
+      ...requirements.filter(
+        ({ content }) =>
+          content instanceof RequirementContent &&
+          content.type === RequirementType.NonFunctional,
+      ),
+    ];
+  }
+
   /**
    * Walks `depends on` from the item, level by level, each item once, so that
    * cycles end: the item itself first, then everything it reaches.
@@ -634,4 +932,19 @@ function answeredBy(
       ),
     )
     .map(answer => answer.key.value);
+}
+
+/** One step further than the nearest item it links to or that links to it. */
+function distanceBetween(
+  item: KnowledgeItem,
+  related: readonly KnowledgeItem[],
+  nearest: (keys: readonly KnowledgeKey[]) => number,
+): number {
+  const touching = related.filter(
+    other =>
+      item.links.some(link => link.target.equals(other.key)) ||
+      other.links.some(link => link.target.equals(item.key)),
+  );
+
+  return 1 + nearest(touching.map(other => other.key));
 }

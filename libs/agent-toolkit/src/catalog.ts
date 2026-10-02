@@ -5,9 +5,11 @@ import {
   confirmKnowledgeItemTool,
   deleteKnowledgeDraftTool,
   echoTool,
+  getContextTool,
   getKnowledgeDependenciesTool,
   getKnowledgeItemTool,
   getKnowledgeSummaryTool,
+  getProjectFrameTool,
   KIND_TOOLS,
   listKnowledgeTool,
   listProjectsTool,
@@ -24,6 +26,8 @@ export const MCP_TOOLS = Object.fromEntries(
   [
     echoTool,
     listProjectsTool,
+    getProjectFrameTool,
+    getContextTool,
     getKnowledgeSummaryTool,
     listKnowledgeTool,
     getKnowledgeItemTool,
@@ -36,6 +40,13 @@ export const MCP_TOOLS = Object.fromEntries(
     deleteKnowledgeDraftTool,
   ].map(tool => [tool.id, tool]),
 ) satisfies ToolsInput;
+
+/** What an external agent is told about Intentra when it connects over MCP. */
+export const MCP_INSTRUCTIONS = [
+  "Intentra keeps a Project's knowledge: what the product is, for whom, its requirements, rules, terms and decisions, each recorded as a Draft and confirmed by a person (Approved).",
+  'Before working on code of a Project: find its id with list_projects, read get_project_frame once per session (what holds for every task), then for each task pick the Approved items it is about from list_knowledge and read their Context Pack with get_context. Build on Approved knowledge only; where the pack shows something unsettled, in conflict or under review, ask the person.',
+  'When the person tells you something new about the product, record it as a Draft with the record_ tool of its Kind, after checking with list_knowledge that it is not known already; only a person approves.',
+].join('\n\n');
 
 /**
  * The tools Intentra's own Agents may be given, each working in one Project:

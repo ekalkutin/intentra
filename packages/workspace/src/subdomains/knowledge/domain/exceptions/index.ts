@@ -1,3 +1,4 @@
+export { AnchorNotApprovedException } from './anchor-not-approved.exception.js';
 export { DependenciesNotApprovedException } from './dependencies-not-approved.exception.js';
 export { DraftApprovalForbiddenException } from './draft-approval-forbidden.exception.js';
 export { DraftDeletionForbiddenException } from './draft-deletion-forbidden.exception.js';

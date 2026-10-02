@@ -19,6 +19,7 @@ import {
   ConfirmKnowledgeItemDtoSchema,
   DeleteKnowledgeItemDtoSchema,
   EditKnowledgeItemDtoSchema,
+  GetKnowledgeContextDtoSchema,
   ListKnowledgeItemsDtoSchema,
   RecordKnowledgeItemDtoSchema,
   RejectKnowledgeItemDtoSchema,
@@ -30,7 +31,10 @@ import {
   type ConfirmKnowledgeItemDto,
   type DeleteKnowledgeItemDto,
   type EditKnowledgeItemDto,
+  type GetKnowledgeContextDto,
+  type KnowledgeContextDto,
   type KnowledgeDependenciesDto,
+  type KnowledgeFrameDto,
   type KnowledgeItemDto,
   type KnowledgeItemPageDto,
   type KnowledgeSummaryDto,
@@ -74,7 +78,7 @@ export class KnowledgeController {
     return this.workspace.knowledge.list(caller, workspaceId, projectId, query);
   }
 
-  // Declared before `:key`, which would otherwise take `summary` for a Knowledge Key.
+  // Declared before `:key`, which would otherwise take `summary`, `context` or `frame` for a Knowledge Key.
   @Get('summary')
   public async summary(
     @CurrentCaller() caller: CallerDto,
@@ -82,6 +86,31 @@ export class KnowledgeController {
     @Param('projectId') projectId: string,
   ): Promise<KnowledgeSummaryDto> {
     return this.workspace.knowledge.summary(caller, workspaceId, projectId);
+  }
+
+  @Get('context')
+  public async context(
+    @CurrentCaller() caller: CallerDto,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Query({ schema: GetKnowledgeContextDtoSchema })
+    query: GetKnowledgeContextDto,
+  ): Promise<KnowledgeContextDto> {
+    return this.workspace.knowledge.context(
+      caller,
+      workspaceId,
+      projectId,
+      query,
+    );
+  }
+
+  @Get('frame')
+  public async frame(
+    @CurrentCaller() caller: CallerDto,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+  ): Promise<KnowledgeFrameDto> {
+    return this.workspace.knowledge.frame(caller, workspaceId, projectId);
   }
 
   @Post('approve')

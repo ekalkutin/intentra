@@ -1,6 +1,7 @@
 export { BusinessRuleContent } from './business-rule-content.vo.js';
 export { ConstraintContent } from './constraint-content.vo.js';
 export { ConstraintOrigin } from './constraint-origin.vo.js';
+export { ContextPackRole } from './context-pack-role.vo.js';
 export { DecisionArea } from './decision-area.vo.js';
 export { DecisionContent } from './decision-content.vo.js';
 export { GoalContent } from './goal-content.vo.js';

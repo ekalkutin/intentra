@@ -113,6 +113,20 @@ export {
 } from './knowledge/knowledge-kind.dto.js';
 export { KnowledgeApi } from './knowledge/knowledge.api.js';
 export {
+  GetKnowledgeContextDtoSchema,
+  KNOWLEDGE_CONTEXT_MAX_ANCHORS,
+  KnowledgeContextDetailDtoSchema,
+  KnowledgeContextRoleDtoSchema,
+  type GetKnowledgeContextDto,
+  type KnowledgeContextDetailDto,
+  type KnowledgeContextDraftDto,
+  type KnowledgeContextDto,
+  type KnowledgeContextEntryDto,
+  type KnowledgeContextItemDto,
+  type KnowledgeContextRoleDto,
+  type KnowledgeFrameDto,
+} from './knowledge/knowledge-context.dto.js';
+export {
   KnowledgeLinkDtoSchema,
   KnowledgeLinkTypeDtoSchema,
   type KnowledgeLinkDto,
