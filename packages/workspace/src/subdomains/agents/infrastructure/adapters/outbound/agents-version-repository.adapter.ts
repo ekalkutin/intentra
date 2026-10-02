@@ -68,6 +68,13 @@ export class AgentsVersionRepositoryAdapter extends AgentsVersionRepository {
     return documents.map(document => this.toDomain(document));
   }
 
+  public async count(): Promise<number> {
+    return this.agentsVersionModel
+      .countDocuments()
+      .session(this.unitOfWork.session)
+      .exec();
+  }
+
   private toDomain(document: AgentsVersionModel): AgentsVersion {
     return AgentsVersion.restore({
       id: document._id.toHexString(),

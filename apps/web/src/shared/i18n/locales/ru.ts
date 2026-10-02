@@ -349,6 +349,24 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     emptyDescription:
       'Intentra найдёт противоречия и неясности в утверждённых знаниях.',
     bySchedule: 'по расписанию',
+    changesScope_one: 'изменилась {{count}} запись',
+    changesScope_few: 'изменились {{count}} записи',
+    changesScope_many: 'изменились {{count}} записей',
+    changesScope_other: 'изменились {{count}} записи',
+    schedule: {
+      title: 'Проверять каждую ночь',
+      on: 'Каждую ночь Intentra проверяет то, что изменилось с прошлой проверки.',
+      off: 'Проверка идёт только когда её запускают вручную.',
+      onlyMaintainer: 'Переключает тот, кто утверждает в проекте.',
+      changeFailed:
+        'Не удалось переключить ночную проверку. Обновите страницу и попробуйте ещё раз.',
+      blocked: {
+        'provider-key-missing':
+          'Сейчас ночная проверка не запустится: нет ключа провайдера. Его может добавить владелец пространства в настройках.',
+        'agents-not-published':
+          'Сейчас ночная проверка не запустится: агенты Intentra ещё не опубликованы.',
+      },
+    },
     statuses: {
       running: 'Идёт',
       completed: 'Готово',
@@ -1466,6 +1484,8 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     ANALYSIS_RUN_FORBIDDEN:
       'Запускать проверку могут те, кто пишет или утверждает в проекте',
     ANALYSIS_RUN_NOT_FOUND: 'Такой проверки нет',
+    ANALYSIS_SCHEDULE_FORBIDDEN:
+      'Ночную проверку переключает тот, кто утверждает в проекте',
     AUDITOR_NOT_REMOVABLE: 'Auditor удалить нельзя',
     INTENTRA_NOT_REMOVABLE: 'Intentra удалить нельзя',
     MODEL_PROFILE_IN_USE:

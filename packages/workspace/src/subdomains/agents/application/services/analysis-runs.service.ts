@@ -257,11 +257,10 @@ export class AnalysisRunsService
     if (!providerKey) {
       return AnalysisScheduleBlockDtoSchema.enum['provider-key-missing'];
     }
-    const published = await this.agentsVersionRepository.findOne({
-      latest: true,
-    });
+    // Counted, not read: telling the schedule's state never depends on what the Agents hold.
+    const published = await this.agentsVersionRepository.count();
 
-    return published
+    return published > 0
       ? null
       : AnalysisScheduleBlockDtoSchema.enum['agents-not-published'];
   }

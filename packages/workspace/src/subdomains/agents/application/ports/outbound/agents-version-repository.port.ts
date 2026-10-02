@@ -14,6 +14,8 @@ export abstract class AgentsVersionRepository {
   ): Promise<AgentsVersion | null>;
   /** Newest first. */
   abstract findMany(): Promise<AgentsVersion[]>;
+  /** How many were published, without reading any. */
+  abstract count(): Promise<number>;
 
   public async getOne(props: AgentsVersionQueryProps): Promise<AgentsVersion> {
     const version = await this.findOne(props);

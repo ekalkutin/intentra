@@ -5,6 +5,7 @@ import { KnowledgeKeyLink } from '@/entities/knowledge-item';
 import { useFormatMoment } from '@/shared/i18n';
 import { ListRow, StatusBadge } from '@/shared/ui';
 import {
+  AnalysisRunScopeDtoSchema,
   AnalysisRunStatusDtoSchema,
   type AnalysisRunDto,
   type AnalysisRunStatusDto,
@@ -48,6 +49,12 @@ export function RunRow({
       <p className='text-sm font-medium'>
         {formatMoment(run.startedAt)}
         <span className='font-normal text-muted-foreground'> · {who}</span>
+        {run.scope === AnalysisRunScopeDtoSchema.enum.changes && (
+          <span className='font-normal text-muted-foreground'>
+            {' · '}
+            {t('analysis.changesScope', { count: run.changedKeys.length })}
+          </span>
+        )}
       </p>
       <p className='mt-1 text-sm text-pretty text-muted-foreground'>
         <Outcome run={run} />

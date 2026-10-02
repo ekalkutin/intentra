@@ -31,6 +31,7 @@ import {
 } from '@/shared/ui';
 
 import { AnalysisEmpty } from './analysis-empty';
+import { NightlySchedule } from './nightly-schedule';
 import { RunRow } from './run-row';
 
 /** The runs the page shows, the newest first. */
@@ -114,6 +115,7 @@ export function ProjectAnalysisPage() {
             <AlertDescription>{describeError(failure).text}</AlertDescription>
           </Alert>
         )}
+        {runs.data && <NightlySchedule scope={scope} />}
         {loadError ? (
           <LoadError
             text={describeError(loadError).text}
