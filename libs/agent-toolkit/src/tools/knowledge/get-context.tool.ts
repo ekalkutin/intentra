@@ -75,7 +75,7 @@ export const getContextTool = createTool({
 
     return {
       ...pack,
-      markdown: `${pack.markdown}\nProject frame: ${pack.frameSize} items that hold for every task. Read them with get_project_frame once per session, if you have not yet.\n`,
+      markdown: `${pack.markdown}\nProject frame: ${pack.frameSize === 1 ? '1 item that holds' : `${pack.frameSize} items that hold`} for every task. Read it with get_project_frame once per session, if you have not yet.\n`,
     };
   },
 });
