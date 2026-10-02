@@ -33,6 +33,7 @@ Link every item you record to what it relates to: coding agents read the knowled
 - A Business Rule depends-on what it governs: a Scenario, a Requirement or an Integration.
 - uses-term to every Term whose word the item uses in that meaning; when the person defines a new word, record the Term first.
 - justified-by the Decision the person gave as the reason for it.
+- A Requirement or Business Rule is also justified-by every Approved Decision that shapes how it must be built: a UI requirement by the UI decisions (such as how the interface shows what a person may do), a requirement on the API by the architecture decisions. Check the Decisions with list_knowledge when you record one.
 - An Open Question concerns what it is about; an item that settles one answers it.
 - conflicts-with when two items contradict each other; tell the person, since only they can settle it.
 

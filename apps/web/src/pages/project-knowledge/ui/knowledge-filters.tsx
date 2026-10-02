@@ -1,4 +1,5 @@
 import { ArrowDownUp, Library } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -35,7 +36,8 @@ const QUIET_TRIGGER =
 /**
  * One line above the list: the status views as tabs on a hairline, their
  * labels on the page's left edge, and at its end the Kind and the order as
- * two quiet selects sized to their words (above the tabs where narrow).
+ * two quiet selects sized to their words (above the tabs where narrow), then
+ * the view's own action, when it has one, on the column's right edge.
  * Neither filter locks the other: each shows its counts for the other's
  * current value, and an empty pair says where to look.
  */
@@ -49,6 +51,7 @@ export function KnowledgeFilters({
   onView,
   onKind,
   onOrder,
+  action,
 }: {
   readonly view: KnowledgeView;
   /** For the chosen Kind, so every tab says what it would show. */
@@ -61,6 +64,8 @@ export function KnowledgeFilters({
   readonly onView: (view: KnowledgeView) => void;
   readonly onKind: (kind: KnowledgeKindDto | null) => void;
   readonly onOrder: (order: KnowledgeListOrderDto) => void;
+  /** What the current view offers to do with its items, after the filters. */
+  readonly action?: ReactNode;
 }) {
   const { t } = useTranslation();
 
@@ -92,18 +97,33 @@ export function KnowledgeFilters({
           ))}
         </TabsList>
       </Tabs>
-      <div
-        role='group'
-        aria-label={t('knowledge.filters')}
-        className='-ml-2.5 flex shrink-0 items-center gap-1 sm:-mr-2 sm:ml-0'
-      >
-        <KindSelect
-          kind={kind}
-          counts={kindCounts}
-          total={total}
-          onChoose={onKind}
-        />
-        <OrderSelect order={order} onChoose={onOrder} />
+      <div className='flex shrink-0 items-center gap-1'>
+        <div
+          role='group'
+          aria-label={t('knowledge.filters')}
+          className={cn(
+            '-ml-2.5 flex items-center gap-1 sm:ml-0',
+            // Quiet selects reach past the edge so their words end on it; a framed action ends there itself.
+            !action && 'sm:-mr-2',
+          )}
+        >
+          <KindSelect
+            kind={kind}
+            counts={kindCounts}
+            total={total}
+            onChoose={onKind}
+          />
+          <OrderSelect order={order} onChoose={onOrder} />
+        </div>
+        {action && (
+          <>
+            <span
+              aria-hidden
+              className='mx-1.5 hidden h-4 w-px bg-border sm:block'
+            />
+            <span className='ml-auto sm:ml-0'>{action}</span>
+          </>
+        )}
       </div>
     </div>
   );

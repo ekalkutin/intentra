@@ -9,6 +9,8 @@ export class ContextPackRole {
   public static readonly Conflict = new ContextPackRole('conflict', true);
   /** An Open Question about an item of the pack, not answered yet. */
   public static readonly Unsettled = new ContextPackRole('unsettled', true);
+  /** A Business Rule on an Anchor or on what they rest on: the code must keep it. */
+  public static readonly Rule = new ContextPackRole('rule', true);
   /** What the Anchors rest on, at any depth. */
   public static readonly Foundation = new ContextPackRole('foundation', false);
   /** It links to an Anchor, so changing the Anchor may break it. */
@@ -23,6 +25,7 @@ export class ContextPackRole {
     ContextPackRole.Anchor,
     ContextPackRole.Conflict,
     ContextPackRole.Unsettled,
+    ContextPackRole.Rule,
     ContextPackRole.Foundation,
     ContextPackRole.MayBeAffected,
     ContextPackRole.Term,

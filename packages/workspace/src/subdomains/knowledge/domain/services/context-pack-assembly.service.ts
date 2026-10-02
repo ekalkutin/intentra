@@ -18,8 +18,8 @@ export type ContextPackEntry = ContextPackCandidate & {
 export class ContextPackAssemblyService {
   /**
    * Keeps each item once, under its first role and nearest distance; drops
-   * nothing. Anchors, conflicts, Open Questions and items under review are
-   * always in full; the rest in full nearest first while fewer than `budget`
+   * nothing. Anchors, conflicts, Open Questions, rules and items under review
+   * are always in full; the rest in full nearest first while fewer than `budget`
    * items are, then brief. Anchors first, then by role, distance and key.
    */
   public assemble(

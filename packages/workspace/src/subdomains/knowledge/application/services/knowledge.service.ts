@@ -93,6 +93,15 @@ const CURRENT: readonly KnowledgeStatus[] = [
 /** How many items a Context Pack shows in full before the rest go brief. */
 const CONTEXT_PACK_BUDGET = 40;
 
+/** A Draft that links to the pack this way may change it; one merely using a Term does not. */
+const DRAFT_NEARBY_LINKS: readonly KnowledgeLinkType[] = [
+  KnowledgeLinkType.DependsOn,
+  KnowledgeLinkType.JustifiedBy,
+  KnowledgeLinkType.Answers,
+  KnowledgeLinkType.Concerns,
+  KnowledgeLinkType.ConflictsWith,
+];
+
 /** What a Context Pack's foundation walks along: what an item rests on. */
 const FOUNDATION_LINKS: readonly KnowledgeLinkType[] = [
   KnowledgeLinkType.DependsOn,
@@ -290,7 +299,16 @@ export class KnowledgeService implements KnowledgeApi {
       CONTEXT_PACK_BUDGET,
     );
     const inPack = entries.map(entry => entry.item);
-    const drafts = await this.findDraftsNear(project.id, inPack);
+    const grounds = entries
+      .filter(({ role }) =>
+        [
+          ContextPackRole.Anchor,
+          ContextPackRole.Foundation,
+          ContextPackRole.Rule,
+        ].includes(role),
+      )
+      .map(entry => entry.item);
+    const drafts = await this.findDraftsNear(project.id, inPack, grounds);
     const frame = await this.findFrame(project.id);
     const pack = {
       anchors: anchors.map(anchor => anchor.key.value),
@@ -655,7 +673,8 @@ export class KnowledgeService implements KnowledgeApi {
   /**
    * Every Approved item a Context Pack takes, for each reason it is found:
    * the Anchors; what they rest on, level by level, each once, so that cycles
-   * end; what links to an Anchor; the Terms used; what conflicts with any of
+   * end; the Business Rules that depend on any of those; what links to an
+   * Anchor; the Terms used; what conflicts with any of
    * them; and the Open Questions about any of them not answered yet.
    */
   private async gatherContext(
@@ -703,6 +722,18 @@ export class KnowledgeService implements KnowledgeApi {
         () => distance,
       );
     }
+
+    const grounds = inPack();
+    const rules = await this.knowledgeItemRepository.findMany({
+      projectId,
+      kind: KnowledgeKind.BusinessRule,
+      linkingTo: {
+        keys: grounds.map(item => item.key),
+        types: [KnowledgeLinkType.DependsOn],
+      },
+      statuses: [KnowledgeStatus.Approved],
+    });
+    take(rules, ContextPackRole.Rule, rule => 1 + nearest(rule.dependencies()));
 
     const anchorKeys = anchors.map(anchor => anchor.key);
     const linkingToAnchors = await this.knowledgeItemRepository.findMany({
@@ -791,10 +822,15 @@ export class KnowledgeService implements KnowledgeApi {
     );
   }
 
-  /** The Drafts the pack's items link to or that link to them, by key. */
+  /**
+   * The Drafts the pack's items link to, and those that link to what the task
+   * rests on (its Anchors, foundation and rules) other than by using a Term,
+   * by key.
+   */
   private async findDraftsNear(
     projectId: ProjectId,
     inPack: readonly KnowledgeItem[],
+    grounds: readonly KnowledgeItem[],
   ): Promise<KnowledgeItem[]> {
     const linked = await this.findTargets(
       projectId,
@@ -802,7 +838,10 @@ export class KnowledgeService implements KnowledgeApi {
     );
     const linking = await this.knowledgeItemRepository.findMany({
       projectId,
-      linkingTo: { keys: inPack.map(item => item.key) },
+      linkingTo: {
+        keys: grounds.map(item => item.key),
+        types: DRAFT_NEARBY_LINKS,
+      },
       statuses: [KnowledgeStatus.Draft],
     });
 

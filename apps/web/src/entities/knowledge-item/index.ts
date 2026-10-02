@@ -15,6 +15,12 @@ export {
   type InProject,
 } from './api/knowledge-api';
 export { planApproval, type Approval } from './model/approval';
+export {
+  BULK_APPROVAL_BLOCKS,
+  planBulkApproval,
+  type BulkApproval,
+  type BulkApprovalBlock,
+} from './model/bulk-approval';
 export { KNOWLEDGE_ERROR_CODES } from './model/error-codes';
 export { useFieldTexts, type FieldTexts } from './model/field-texts';
 export {

@@ -37,6 +37,7 @@ import {
   type KnowledgeListOrderDto,
 } from '@intentra/contracts/workspace';
 
+import { ApproveAll } from './approve-all';
 import { KindGroup } from './kind-group';
 import {
   columnCount,
@@ -161,6 +162,13 @@ export function ProjectKnowledgePage() {
             onView={chooseView}
             onKind={chooseKind}
             onOrder={chooseOrder}
+            action={
+              view === KNOWLEDGE_VIEWS.drafts &&
+              shown !== null &&
+              shown > 0 && (
+                <ApproveAll scope={scope} kind={kind} count={shown} />
+              )
+            }
           />
           <div className='flex flex-col gap-6'>
             {!summary && !loadError && (

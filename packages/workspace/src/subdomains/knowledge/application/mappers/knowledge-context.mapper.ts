@@ -67,6 +67,10 @@ const ROLE_SECTIONS: readonly {
     role: 'unsettled',
     heading: 'Unsettled: open questions, ask the person before deciding',
   },
+  {
+    role: 'rule',
+    heading: 'Rules: business rules on the task, the code must keep them',
+  },
   { role: 'foundation', heading: 'Foundation: what the Anchors rest on' },
   {
     role: 'may-be-affected',

@@ -130,7 +130,7 @@ describe('ContextPackAssemblyService', () => {
     );
   });
 
-  it('shows Anchors, conflicts, open questions and items under review in full past the budget', () => {
+  it('shows Anchors, conflicts, open questions, rules and items under review in full past the budget', () => {
     // Arrange
     const marked = requirement(5);
     marked.markForReview(KnowledgeKey.parse('REQ-9'));
@@ -141,6 +141,7 @@ describe('ContextPackAssemblyService', () => {
         candidate(requirement(1), ContextPackRole.Anchor, 0),
         candidate(requirement(2), ContextPackRole.Conflict, 1),
         candidate(requirement(3), ContextPackRole.Unsettled, 1),
+        candidate(requirement(6), ContextPackRole.Rule, 3),
         candidate(requirement(4), ContextPackRole.Foundation, 1),
         candidate(marked, ContextPackRole.Foundation, 4),
       ],
@@ -153,6 +154,7 @@ describe('ContextPackAssemblyService', () => {
         ['REQ-1', true],
         ['REQ-2', true],
         ['REQ-3', true],
+        ['REQ-6', true],
         ['REQ-4', false],
         ['REQ-5', true],
       ],

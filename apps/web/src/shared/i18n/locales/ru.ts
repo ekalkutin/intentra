@@ -644,6 +644,31 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       obsolete: 'Устаревших записей нет.',
     },
     emptyKind: 'Записей этого вида здесь нет.',
+    approveAll: {
+      open: 'Утвердить все',
+      title: 'Утвердить черновики',
+      titleCount_one: 'Утвердить {{count}} черновик',
+      titleCount_few: 'Утвердить {{count}} черновика',
+      titleCount_many: 'Утвердить {{count}} черновиков',
+      titleCount_other: 'Утвердить {{count}} черновика',
+      description: 'Одним шагом и вместе с зависимостями — все или ни один.',
+      firstOnly:
+        'Здесь первые {{count}} черновиков, остальные — следующим заходом.',
+      dependency: 'зависимость',
+      dependencyHint:
+        'Не входит в выбранное, но выбранные черновики от него зависят',
+      blocked: 'Не будут утверждены',
+      reasons: {
+        forbidden: 'Утверждать его вам нельзя',
+        'needs-review': 'На проверке',
+        'depends-on-blocked': 'Зависит от',
+      },
+      nothing: 'Утверждать нечего.',
+      confirm_one: 'Утвердить {{count}}',
+      confirm_few: 'Утвердить {{count}}',
+      confirm_many: 'Утвердить {{count}}',
+      confirm_other: 'Утвердить {{count}}',
+    },
     orderLabel: 'Порядок',
     agentTags: {
       'intentra-agent': 'Intentra',

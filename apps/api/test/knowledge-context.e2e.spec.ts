@@ -118,6 +118,20 @@ const PROJECT = [
     title: 'Fast answers',
     fields: { statement: 'Every answer within 300 ms', type: 'non-functional' },
   },
+  // BR-2, a rule on the foundation
+  {
+    kind: 'business-rule',
+    title: 'One email, one Invitation',
+    fields: { rule: 'An email has at most one pending Invitation' },
+    links: [{ type: 'depends-on', key: 'SC-1' }],
+  },
+  // REQ-4, resting on the Anchor
+  {
+    kind: 'requirement',
+    title: 'Audit revocations',
+    fields: { statement: 'Every revocation is logged' },
+    links: [{ type: 'depends-on', key: 'REQ-1' }],
+  },
 ];
 
 describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge/context', () => {
@@ -198,7 +212,10 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge/context', (
     };
   }
 
-  /** Records and approves PROJECT, then records REQ-4, a Draft resting on REQ-1. */
+  /**
+   * Records and approves PROJECT, then records REQ-5, a Draft resting on
+   * REQ-1, and BR-3, a Draft merely using TERM-1.
+   */
   async function givenProject(ada: string, path: string): Promise<void> {
     for (const body of PROJECT) {
       await app
@@ -238,6 +255,17 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge/context', (
         links: [{ type: 'depends-on', key: 'REQ-1' }],
       })
       .expect(HttpStatus.CREATED);
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send({
+        kind: 'business-rule',
+        title: 'Invitation wording',
+        fields: { rule: 'An Invitation names who sent it' },
+        links: [{ type: 'uses-term', key: 'TERM-1' }],
+      })
+      .expect(HttpStatus.CREATED);
   }
 
   it('gathers the Approved knowledge around the Anchors, each under its role', async () => {
@@ -266,10 +294,12 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge/context', (
       ['REQ-1', 'anchor', 0],
       ['REQ-2', 'conflict', 1],
       ['TBD-1', 'unsettled', 1],
+      ['BR-1', 'rule', 1],
+      ['BR-2', 'rule', 2],
       ['SC-1', 'foundation', 1],
       ['DEC-1', 'foundation', 1],
       ['PER-1', 'foundation', 2],
-      ['BR-1', 'may-be-affected', 1],
+      ['REQ-4', 'may-be-affected', 1],
       ['TERM-1', 'term', 1],
     ]);
     expect(response.body.items[0]).toMatchObject({
@@ -277,7 +307,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge/context', (
       fields: { acceptanceCriteria: ['The invitee can no longer accept it'] },
     });
     expect(response.body.draftsNearby).toEqual([
-      { key: 'REQ-4', kind: 'requirement', title: 'Revoke in bulk' },
+      { key: 'REQ-5', kind: 'requirement', title: 'Revoke in bulk' },
     ]);
     expect(response.body.frameSize).toBe(3);
     expect(response.body.links).toContainEqual({
@@ -289,7 +319,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge/context', (
       '### REQ-1 · Requirement · Revoke an Invitation',
     );
     expect(response.body.markdown).toContain(
-      'REQ-4 (Requirement: Revoke in bulk)',
+      'REQ-5 (Requirement: Revoke in bulk)',
     );
     expect(response.body.markdown).not.toContain('TBD-2');
   });
@@ -303,13 +333,13 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge/context', (
     const response = await app
       .request()
       .get(`${path}/context`)
-      .query({ anchors: 'REQ-1,REQ-4' })
+      .query({ anchors: 'REQ-1,REQ-5' })
       .set('Authorization', ada);
 
     // Assert
     expect(response.status).toBe(HttpStatus.CONFLICT);
     expect(response.body.code).toBe('ANCHOR_NOT_APPROVED');
-    expect(response.body.message).toContain('REQ-4');
+    expect(response.body.message).toContain('REQ-5');
   });
 
   it('names an Anchor that does not exist', async () => {

@@ -28,13 +28,16 @@ export type GetKnowledgeContextDto = z.infer<
 /**
  * Why an item is in a Context Pack: `anchor`, the subject of the task;
  * `foundation`, what the Anchors rest on (`depends-on`, `justified-by`, at any
- * depth); `may-be-affected`, what links to an Anchor; `term`, a Term used;
+ * depth); `rule`, a Business Rule that depends on an Anchor or on the
+ * foundation, which the code must keep; `may-be-affected`, what links to an
+ * Anchor; `term`, a Term used;
  * `conflict`, what contradicts an item of the pack; `unsettled`, an Open
  * Question about one, not answered yet.
  */
 export const KnowledgeContextRoleDtoSchema = z.enum([
   'anchor',
   'foundation',
+  'rule',
   'may-be-affected',
   'term',
   'conflict',

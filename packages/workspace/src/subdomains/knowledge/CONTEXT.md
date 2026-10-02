@@ -83,7 +83,7 @@ _Avoid_: Stale, Suspect, Outdated
 ### Context for agents
 
 **Context Pack**:
-The Approved knowledge an agent needs for one task, gathered from its Anchors along the Links: what they rest on, at any depth; what rests on them, one step back; the Terms they use; what conflicts with them; and the Open Questions about them. Each Knowledge Item in it has a role (Anchor, foundation, may be affected, term, conflict, unsettled), and one under Needs Review is marked as such. Drafts are never part of it, only named as being linked nearby.
+The Approved knowledge an agent needs for one task, gathered from its Anchors along the Links: what they rest on, at any depth; the Business Rules that depend on any of those, which the code must keep; what rests on the Anchors, one step back; the Terms they use; what conflicts with them; and the Open Questions about them. Each Knowledge Item in it has a role (Anchor, foundation, rule, may be affected, term, conflict, unsettled), and one under Needs Review is marked as such. Drafts are never part of it, only named when linked nearby (a Draft merely using one of its Terms is not).
 _Avoid_: Task Context, Brief, Bundle
 
 **Anchor**:
