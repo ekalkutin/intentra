@@ -48,6 +48,7 @@ import {
 
 import { neighboursOf } from '../model/neighbours';
 
+import { AgentContext } from './agent-context';
 import { ItemActions } from './item-actions';
 import { ItemContext } from './item-context';
 import { ItemFields } from './item-fields';
@@ -174,14 +175,19 @@ export function KnowledgeItemPage() {
             </span>
           }
           actions={
-            <ItemActions
-              item={item}
-              scope={scope}
-              slugs={slugs}
-              approval={approval}
-              onFailure={report}
-              refresh={refresh}
-            />
+            <>
+              {item.status === KnowledgeStatusDtoSchema.enum.approved && (
+                <AgentContext scope={scope} itemKey={item.key} />
+              )}
+              <ItemActions
+                item={item}
+                scope={scope}
+                slugs={slugs}
+                approval={approval}
+                onFailure={report}
+                refresh={refresh}
+              />
+            </>
           }
         />
         {failure && (

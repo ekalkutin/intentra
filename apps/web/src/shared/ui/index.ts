@@ -171,6 +171,7 @@ export {
   EmptyMedia,
   EmptyTitle,
 } from './primitives/empty';
+export { Checkbox } from './primitives/checkbox';
 export { Switch } from './primitives/switch';
 export { ToggleGroup, ToggleGroupItem } from './primitives/toggle-group';
 export { Textarea } from './primitives/textarea';
@@ -226,6 +227,7 @@ export {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,

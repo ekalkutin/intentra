@@ -4,7 +4,9 @@ import type {
   ConfirmKnowledgeItemDto,
   DeleteKnowledgeItemDto,
   EditKnowledgeItemDto,
+  KnowledgeContextDto,
   KnowledgeDependenciesDto,
+  KnowledgeFrameDto,
   KnowledgeItemDto,
   KnowledgeItemPageDto,
   KnowledgeSummaryDto,
@@ -83,6 +85,18 @@ export const knowledgeApi = baseApi.injectEndpoints({
     }),
     knowledgeDependencies: build.query<KnowledgeDependenciesDto, OneItem>({
       query: item => `${itemPath(item)}/dependencies`,
+      providesTags: [API_TAGS.knowledge],
+    }),
+    knowledgeContext: build.query<
+      KnowledgeContextDto,
+      InProject & { readonly anchors: readonly string[] }
+    >({
+      query: ({ anchors, ...scope }) =>
+        `${knowledgePath(scope)}/context?anchors=${anchors.map(encodeURIComponent).join(',')}`,
+      providesTags: [API_TAGS.knowledge],
+    }),
+    knowledgeFrame: build.query<KnowledgeFrameDto, InProject>({
+      query: scope => `${knowledgePath(scope)}/frame`,
       providesTags: [API_TAGS.knowledge],
     }),
     recordKnowledgeItem: build.mutation<
@@ -170,6 +184,8 @@ export const {
   useKnowledgeSummaryQuery,
   useKnowledgeItemQuery,
   useKnowledgeDependenciesQuery,
+  useKnowledgeContextQuery,
+  useKnowledgeFrameQuery,
   useRecordKnowledgeItemMutation,
   useEditKnowledgeItemMutation,
   useDeleteKnowledgeItemMutation,
