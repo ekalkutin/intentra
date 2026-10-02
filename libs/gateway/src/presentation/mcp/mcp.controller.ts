@@ -1,8 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 import {
+  hostHeaderValidation,
   localhostHostValidation,
-  localhostOriginValidation,
 } from '@modelcontextprotocol/node';
 import type { AuthInfo } from '@modelcontextprotocol/server';
 import { All, Controller, Inject, Req, Res } from '@nestjs/common';
@@ -13,27 +13,35 @@ import { readBearerToken } from '../rest/auth/index.js';
 import { UnauthenticatedException } from '../rest/errors/index.js';
 
 import { toAuthInfo } from './mcp-caller.js';
+import { MCP_OPTIONS, type McpOptions } from './mcp-options.js';
 import { McpHandler } from './mcp.handler.js';
-
-// DNS rebinding protection: localhost only. Configure allowed hosts before
-// exposing the gateway publicly (hostHeaderValidation / originValidation).
-const validateHost = localhostHostValidation();
-const validateOrigin = localhostOriginValidation();
 
 /** External agents authenticate with a Personal Access Token. */
 @Controller('mcp')
 export class McpController {
+  // DNS rebinding protection by the Host header. Origin is not checked:
+  // external agents are not browsers and send no Origin.
+  readonly #validateHost: (
+    req: IncomingMessage,
+    res: ServerResponse,
+  ) => boolean;
+
   constructor(
     private readonly mcpHandler: McpHandler,
     @Inject(WorkspaceApi) private readonly workspace: WorkspaceApi,
-  ) {}
+    @Inject(MCP_OPTIONS) options: McpOptions,
+  ) {
+    this.#validateHost = options.allowedHosts
+      ? hostHeaderValidation([...options.allowedHosts])
+      : localhostHostValidation();
+  }
 
   @All()
   public async handle(
     @Req() req: IncomingMessage & { body?: unknown; auth?: AuthInfo },
     @Res() res: ServerResponse,
   ): Promise<void> {
-    if (!validateHost(req, res) || !validateOrigin(req, res)) return;
+    if (!this.#validateHost(req, res)) return;
 
     const secret = readBearerToken(req.headers);
     if (!secret) {

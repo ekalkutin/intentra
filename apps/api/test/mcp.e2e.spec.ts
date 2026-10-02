@@ -12,6 +12,7 @@ import { setOpenWorkspaceCreation } from './support/workspace-creation.js';
 const SIGN_IN_PATH = '/api/iam/auth/sign-in';
 const WORKSPACES_PATH = '/api/workspaces';
 const MCP_PATH = '/api/mcp';
+const PUBLIC_HOST = 'intentra.example.com';
 
 describe('POST /api/mcp', () => {
   let app: TestingApp;
@@ -59,6 +60,7 @@ describe('POST /api/mcp', () => {
     app = await TestingApp.create({
       imports: [
         GatewayModule.register({
+          mcp: { allowedHosts: ['127.0.0.1', PUBLIC_HOST] },
           contexts: [
             IamModule.register({
               accessTokenSecret: 'test-access-secret',
@@ -102,6 +104,36 @@ describe('POST /api/mcp', () => {
     // Assert
     expect(response.status).toBe(HttpStatus.OK);
     expect(response.text).toContain('"structuredContent":{"message":"hello"}');
+  });
+
+  it('accepts a request to an allowed public host', async () => {
+    // Act
+    const response = await call('tools/list', {}).set('Host', PUBLIC_HOST);
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.OK);
+  });
+
+  it('rejects a request to a host outside the allowed list', async () => {
+    // Act
+    const response = await call('tools/list', {}).set(
+      'Host',
+      'attacker.example.com',
+    );
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.FORBIDDEN);
+  });
+
+  it('accepts a request with a foreign Origin', async () => {
+    // Act
+    const response = await call('tools/list', {}).set(
+      'Origin',
+      'https://attacker.example.com',
+    );
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.OK);
   });
 
   it('rejects a request without a Personal Access Token', async () => {

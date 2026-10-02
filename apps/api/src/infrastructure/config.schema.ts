@@ -26,6 +26,17 @@ export const EnvironmentSchema = z
       .refine(value => Buffer.from(value, 'base64').length === 32, {
         message: 'PROVIDER_KEY_ENCRYPTION_KEY must be 32 bytes in base64',
       }),
+    /** Comma-separated hostnames the MCP endpoint answers to; localhost only when unset. */
+    MCP_ALLOWED_HOSTS: z
+      .string()
+      .transform(value =>
+        value
+          .split(',')
+          .map(host => host.trim())
+          .filter(host => host.length > 0),
+      )
+      .pipe(z.array(z.string()).min(1))
+      .optional(),
   })
   .refine(env => env.IAM_ACCESS_TOKEN_SECRET !== env.IAM_REFRESH_TOKEN_SECRET, {
     message: 'IAM_ACCESS_TOKEN_SECRET and IAM_REFRESH_TOKEN_SECRET must differ',
@@ -60,6 +71,9 @@ export const EnvironmentSchema = z
               password: env.PLATFORM_ADMIN_PASSWORD,
             }
           : null,
+    },
+    gateway: {
+      mcp: { allowedHosts: env.MCP_ALLOWED_HOSTS },
     },
     workspace: {
       agents: {
