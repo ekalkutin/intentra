@@ -14,29 +14,37 @@ The core job: turn product knowledge that lives in chats, in people's heads and 
 
 ## Product Purpose
 
-Intentra is an AI platform that forms, structures and maintains the context of a software project. People talk with Intentra's own AI agents about the product. The agents act as product, business and system analysts: they ask questions, find gaps and contradictions, and record what they learn as Drafts. People review the Drafts and approve or reject them. The approved knowledge is the single source of truth. Documents (Product Passport, Specs, ADRs, plans) are views of it, and external coding agents read it over MCP.
+Intentra is an AI analyst for a software product. People talk with Intentra about what they are building; it interviews them, checks what they say against what is already known, points out gaps and contradictions, and records what it learns as Drafts. People review the Drafts and approve or reject them. The approved knowledge is the single source of truth: the Product Passport is a view of it, and external coding agents read it over MCP, task by task, as a Context Pack.
 
-Success: a team and its coding agents answer "what are we building, why, how should it work, and what has already been decided?" from Intentra instead of reconstructing it every time.
+Success: a team and its coding agents answer "what are we building, why, how should it work, and what has already been decided?" from Intentra instead of reconstructing it every time, and the answer holds together because Intentra keeps checking it.
 
 Sources: `docs/product-brief.md`, `docs/product-documentation-model.md`.
 
 ## Positioning
 
-Intentra is the knowledge and intent layer between people and AI developers. It does not keep a pile of documents. It keeps one canonical, linked model of Knowledge Items, each with a status, a source, an author and its relations. Documents and agent context are generated from that model. The AI may propose knowledge but never approves it. Only a person approves.
+First of all an AI analyst (decided 2026-10-02): a companion in describing requirements and functionality that finds what is missing, unclear or contradictory, while every decision stays with a person. Equally, the knowledge layer between people and AI developers: one canonical, linked model of Knowledge Items, each with a status, a source, an author and its Links, from which the Passport and the agents' context are drawn. The AI may propose knowledge but never approves it. Only a person approves.
 
 ## Operating Context
 
 - Structure: Workspace (top level; never "Organization") → Project → Knowledge. Members hold a Workspace Role (Owner, Manager or none) and a Project Role (Viewer, Contributor or Maintainer).
-- Knowledge Items have a Kind (Term, Requirement, Decision so far; more planned), a Knowledge Key such as `REQ-12`, a Source with a Rationale, and a lifecycle: Draft → Approved or Rejected. Contributors record and edit Drafts, Maintainers approve and reject them, and an Approved item is never edited. Writes use optimistic locking: an approval confirms exactly the text the Maintainer read.
+- Knowledge Items have one of 11 Kinds (Product Overview, Goal, Persona, Scenario, Requirement, Constraint, Term, Business Rule, Integration, Decision, Open Question), a Knowledge Key such as `REQ-12`, a Source with a Rationale (by hand, an external agent over MCP, Intentra in a Conversation, or Intentra in an Analysis Run), Links (depends on, uses term, justified by, answers, concerns, conflicts with) and a lifecycle: Draft → Approved or Rejected; an Approved item is never edited, only replaced (Supersession) or retired, both leaving it Obsolete; what rests on a changed item is marked Needs Review. Contributors record and edit Drafts, Maintainers approve, reject, replace and retire. Writes use optimistic locking: an approval confirms exactly the text the Maintainer read.
+- Intentra's own Agents: Intentra, the one people talk to in a Conversation; the Auditor, which carries out Analysis Runs on its own and records what it finds as Open Questions authored by Intentra; Specialists Intentra may call. A Platform Admin designs them and publishes them as Agents Versions; every model call runs on the Workspace's own Provider Key (OpenRouter).
+- Analysis: Gaps (what is missing without judgement, computed on the fly) and Analysis Runs (judgement: contradictions, ambiguities, doubtful rules), by hand or every night over what changed.
 - There are two equal ways in: the web UI, and external agents (Claude Code, Codex, Cursor) over MCP, authenticated by a Member's Personal Access Token.
-- The main loop: a Conversation with an Intentra agent (the AI interview) → Drafts → human review → approved knowledge → documents and agent context.
+- The main loop: a Conversation with Intentra (the interview) → Drafts → human review → Approved knowledge → Analysis Runs keep it consistent → the Passport and the agents' Context Packs.
 - The UI shows the server's access-policy verdicts. It does not re-derive permissions (`docs/adr/0002-client-shows-the-policy-verdict.md`).
 - Glossaries: `CONTEXT-MAP.md` and the subdomain `CONTEXT.md` files. UI copy uses these terms.
 
 ## Capabilities and Constraints
 
-- Built: sign-up and sign-in, Workspaces, Members, Roles, Invitations, Projects, Project Roles, Personal Access Tokens, Knowledge Items (Draft / Approve / Reject), and the MCP endpoint. The web UI is at an early stage: auth pages and an empty home page.
-- Planned: the AI interview (Conversations with agents), more Knowledge Kinds, Supersession and Retirement, the Product Passport and other document views, planning (Objective → Epic → Feature → Spec → Task).
+- Built:
+  - Sign-up and sign-in, Account names, Open Sign-up, Open Workspace Creation, a Platform Admin from env.
+  - Workspaces, Members, Roles, Invitations, Projects, Project Roles, Personal Access Tokens, suspending Workspaces and blocking Accounts.
+  - Knowledge in the web UI: views by Kind and status with bulk approval, the item page (fields, Links, history, what it misses, the agent's context), the editor.
+  - The Product Passport (8 chapters), the Interview (Conversations with Intentra), Analysis (Gaps, Analysis Runs, the nightly check).
+  - MCP: reading (summary, Gaps, list, item, Context Pack, Project Frame) and recording every Kind, approving per token level.
+  - The admin area: Agents, Skills, Model Profiles, changes and publishing, Open Sign-up and Open Workspace Creation.
+- Planned: Usage, the admin area's history of Agents Versions and its Workspaces and Accounts, importing documents, planning (Feature → Task), document views beyond the Passport (Feature Spec, ADR, user guide). See `todo.md`.
 - Stack (existing): `apps/web` is a Vite + React 19 SPA with a Feature-Sliced Design structure (enforced by steiger), RTK Query, react-router, react-hook-form + zod, Tailwind v4, and i18next (`docs/adr/0003-web-ui-is-an-fsd-spa-on-rtk-query.md`).
 - Components (binding): use shadcn primitives (style `base-nova`, on Base UI) wherever they fit. Primitives are added through the shadcn CLI into `src/shared/ui/primitives` and are never hand-edited. Anything shadcn does not provide is our own component in `src/shared/ui/components`, built by composing those primitives.
 - Language: the UI is Russian now, and English will come later. Every string goes through i18n with no hardcoded copy, and layouts must fit longer English and Russian strings alike.
@@ -57,7 +65,7 @@ Intentra is the knowledge and intent layer between people and AI developers. It 
 ## Product Principles
 
 1. **People decide, AI proposes.** Every AI contribution is visibly a Draft with a source until a person approves it. The UI never blurs proposed and approved knowledge.
-2. **One model, many views.** Documents, passports and agent context are views of the same Knowledge Items. Show where each statement comes from and what it links to.
+2. **One model, many views.** The Passport, documents and agent context are views of the same Knowledge Items. Show where each statement comes from and what it links to.
 3. **Traceable over clever.** Status, author, source, Knowledge Key and version are always reachable. A reader can always tell whether something is current, approved, and why.
 4. **Equal for every role.** A product person, an architect and a developer each finish their job without needing another role's vocabulary. Engineering depth is available but not in the way.
 5. **Web and MCP are peers.** Anything a person can see or do in the UI has the same meaning for an agent over MCP. The UI never invents concepts the model lacks.

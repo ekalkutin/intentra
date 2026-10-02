@@ -8,6 +8,10 @@ A subdomain of the Workspace context (see `CONTEXT-MAP.md`): the top-level space
 The top-level space that groups people and projects. It is created explicitly by an Account, never automatically at sign-up. Its name is chosen at creation and cannot be changed later. It is deleted by one of its Owners or by a Platform Admin.
 _Avoid_: Organization, Portfolio, Team, Tenant
 
+**Open Workspace Creation**:
+Whether any Account may create a Workspace. A Platform Admin turns it on and off; it is off until one turns it on. While it is off, only a Platform Admin creates Workspaces, and everyone else gets one by being invited.
+_Avoid_: Self-service workspaces, Public creation
+
 **Workspace Slug**:
 A short, globally unique, human-readable handle of a Workspace used in its address. Unlike the name, no two Workspaces share it, and it never changes after the Workspace is created. It becomes free again once the Workspace is deleted.
 _Avoid_: Handle, Alias, Subdomain
