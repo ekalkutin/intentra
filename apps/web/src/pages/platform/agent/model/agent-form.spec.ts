@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { emptyAgent, toSaveAgentDto, type AgentFormValues } from './agent-form';
 
 const VALUES: AgentFormValues = {
-  name: '  Analyst ',
+  name: '  Researcher ',
   description: 'Digs into requirements\n',
   instructions: '\nFind the gaps.',
   modelProfileId: 'm1',
@@ -31,13 +31,13 @@ describe('emptyAgent', () => {
 });
 
 describe('toSaveAgentDto', () => {
-  it('trims the texts and keeps an Orchestrator’s Specialists', () => {
+  it('trims the texts and keeps Intentra’s Specialists', () => {
     // Act
     const dto = toSaveAgentDto(VALUES, true);
 
     // Assert
     expect(dto).toEqual({
-      name: 'Analyst',
+      name: 'Researcher',
       description: 'Digs into requirements',
       instructions: 'Find the gaps.',
       modelProfileId: 'm1',

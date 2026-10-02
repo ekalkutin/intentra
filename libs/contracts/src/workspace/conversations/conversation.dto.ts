@@ -1,6 +1,6 @@
 import type { UIMessage } from 'ai';
 
-/** A Conversation of a Member with the Orchestrator in one Project. */
+/** A Conversation of a Member with Intentra in one Project. */
 export type ConversationDto = {
   readonly id: string;
   /** Suggested by Intentra once the Conversation has begun; null until then. */

@@ -1,6 +1,6 @@
 # Контекст вызова tools: Mastra `requestContextSchema`
 
-Статус: решено (2026-09-30), `requestContextSchema` подошёл. Общая схема: `libs/agent-toolkit/src/tool-context.ts` (`toolContextSchema`: `apis`, `caller: CallerDto`, `workspaceId`); MCP-хендлер кладёт их в `RequestContext`. С 2026-09-30 `apis` — только нужные tools sub-API (`ToolApis`: `knowledge`, `projects`, `access`), а не весь `WorkspaceApi`: Orchestrator из подобласти Agents сам входит в `WorkspaceApi` (Agents ADR 0002). `caller.agent` — `{ kind, level, projectId }`.
+Статус: решено (2026-09-30), `requestContextSchema` подошёл. Общая схема: `libs/agent-toolkit/src/tool-context.ts` (`toolContextSchema`: `apis`, `caller: CallerDto`, `workspaceId`); MCP-хендлер кладёт их в `RequestContext`. С 2026-09-30 `apis` — только нужные tools sub-API (`ToolApis`: `knowledge`, `projects`, `access`), а не весь `WorkspaceApi`: Intentra из подобласти Agents сам входит в `WorkspaceApi` (Agents ADR 0002). `caller.agent` — `{ kind, level, projectId }`.
 
 Что выяснилось на практике (`@mastra/core@1.71.0`):
 

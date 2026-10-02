@@ -11,11 +11,11 @@ export {
   type ConversationQueryProps,
 } from './conversation-store.port.js';
 export {
-  Orchestrator,
+  Intentra,
   type AnswerStream,
-  type OrchestratorAnswer,
-  type OrchestratorQuestion,
-} from './orchestrator.port.js';
+  type IntentraAnswer,
+  type IntentraQuestion,
+} from './intentra.port.js';
 export { ProviderKeyCipher } from './provider-key-cipher.port.js';
 export {
   ProviderKeyRepository,

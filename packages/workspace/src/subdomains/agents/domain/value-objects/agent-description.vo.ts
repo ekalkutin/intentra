@@ -4,7 +4,7 @@ import { trimmedWithin } from './text.js';
 
 const MAX_LENGTH = 1024;
 
-/** What an Agent is for; the Orchestrator reads a Specialist's to decide when to call it. */
+/** What an Agent is for; Intentra reads a Specialist's to decide when to call it. */
 export class AgentDescription {
   readonly #value: string;
 

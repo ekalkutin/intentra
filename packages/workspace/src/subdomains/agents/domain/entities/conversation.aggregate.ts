@@ -4,7 +4,7 @@ import { MemberId } from '../../../tenancy/index.js';
 import { ConversationId, ConversationTitle } from '../value-objects/index.js';
 
 /**
- * A private exchange between one Member and the Orchestrator in a Project.
+ * A private exchange between one Member and Intentra in a Project.
  * Its messages are kept by the Agents' runtime, not here.
  */
 export class Conversation extends Aggregate<ConversationId> {

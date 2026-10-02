@@ -10,8 +10,8 @@ export { InvalidPublishingNoteException } from './invalid-publishing-note.except
 export { InvalidSkillException } from './invalid-skill.exception.js';
 export { ModelProfileInUseException } from './model-profile-in-use.exception.js';
 export { ModelProfileNotFoundException } from './model-profile-not-found.exception.js';
-export { OrchestratorExistsException } from './orchestrator-exists.exception.js';
-export { OrchestratorNotRemovableException } from './orchestrator-not-removable.exception.js';
+export { IntentraExistsException } from './intentra-exists.exception.js';
+export { IntentraNotRemovableException } from './intentra-not-removable.exception.js';
 export { ProviderKeyManagementForbiddenException } from './provider-key-management-forbidden.exception.js';
 export { SkillNameTakenException } from './skill-name-taken.exception.js';
 export { SkillNotFoundException } from './skill-not-found.exception.js';

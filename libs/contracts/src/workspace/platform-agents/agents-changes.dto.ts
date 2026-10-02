@@ -18,7 +18,7 @@ export type AgentsChangeDto = {
 };
 
 export const PublishingProblemCodeDtoSchema = z.enum([
-  'orchestrator-count',
+  'intentra-count',
   'duplicate-skill-name',
   'tool-unavailable',
   'skill-missing',
@@ -34,7 +34,7 @@ export type PublishingProblemCodeDto = z.infer<
 /** One thing that keeps the Unpublished Agents from being published. */
 export type PublishingProblemDto = {
   readonly code: PublishingProblemCodeDto;
-  /** The Agent or Skill it is about; null for the whole, such as the Orchestrator's count. */
+  /** The Agent or Skill it is about; null for the whole, such as Intentra's count. */
   readonly subject: {
     /** Null when it names several objects, such as two Skills with one name. */
     readonly id: string | null;

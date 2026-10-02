@@ -1,7 +1,7 @@
 /** What kind of thing keeps the Unpublished Agents from being published. */
 export class PublishingProblemKind {
-  public static readonly OrchestratorCount = new PublishingProblemKind(
-    'orchestrator-count',
+  public static readonly IntentraCount = new PublishingProblemKind(
+    'intentra-count',
   );
   public static readonly DuplicateSkillName = new PublishingProblemKind(
     'duplicate-skill-name',
@@ -60,8 +60,8 @@ export class PublishingProblem {
     this.#tool = tool;
   }
 
-  public static orchestratorCount(): PublishingProblem {
-    return new PublishingProblem(PublishingProblemKind.OrchestratorCount, null);
+  public static intentraCount(): PublishingProblem {
+    return new PublishingProblem(PublishingProblemKind.IntentraCount, null);
   }
 
   public static duplicateSkillName(name: string): PublishingProblem {
@@ -132,8 +132,8 @@ export class PublishingProblem {
   public describe(): string {
     const name = this.#subject?.name ?? '';
     switch (this.#kind) {
-      case PublishingProblemKind.OrchestratorCount:
-        return 'there must be exactly one Orchestrator';
+      case PublishingProblemKind.IntentraCount:
+        return 'there must be exactly one Intentra';
       case PublishingProblemKind.DuplicateSkillName:
         return `more than one Skill is called "${name}"`;
       case PublishingProblemKind.ToolUnavailable:

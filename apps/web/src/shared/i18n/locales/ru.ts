@@ -120,7 +120,7 @@ export const ru = {
   sources: {
     manual: 'вручную',
     'external-agent': 'внешний агент',
-    'intentra-agent': 'агент Intentra',
+    'intentra-agent': 'Intentra',
   },
   shell: {
     navigation: 'Навигация',
@@ -366,7 +366,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     notDescribed: 'Пока не описано.',
     nothing: '—',
     discuss: 'Обсудить',
-    discussLabel: 'Обсудить раздел «{{chapter}}» с агентом',
+    discussLabel: 'Обсудить раздел «{{chapter}}» с Intentra',
     discussPrompt:
       'Давай заполним раздел паспорта «{{chapter}}»: {{about}} Сейчас он пуст. Задавай мне вопросы по одному, предлагай варианты ответа и записывай то, что выясним, черновиками.',
     discussMorePrompt:
@@ -376,7 +376,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     discussMore_many: 'и ещё {{count}}',
     discussMore_other: 'и ещё {{count}}',
     empty:
-      'Паспорт пока пуст. Он соберётся из знаний, которые люди утвердят: начните интервью с агентом или запишите знание вручную.',
+      'Паспорт пока пуст. Он соберётся из знаний, которые люди утвердят: начните интервью с Intentra или запишите знание вручную.',
     more_one: 'Ещё {{count}} запись — в Знаниях',
     more_few: 'Ещё {{count}} записи — в Знаниях',
     more_many: 'Ещё {{count}} записей — в Знаниях',
@@ -650,7 +650,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     replaces: 'Заменяет',
     replacedBy: 'Заменена на',
     empty: {
-      all: 'Знаний пока нет. Запишите первое вручную, проведите интервью с агентом или подключите внешнего агента через MCP.',
+      all: 'Знаний пока нет. Запишите первое вручную, проведите интервью с Intentra или подключите внешнего агента через MCP.',
       approved:
         'Утверждённых знаний пока нет: черновики ждут решения человека.',
       drafts: 'Черновиков нет: все разобраны.',
@@ -729,7 +729,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       'external-agent': 'MCP',
     },
     agentHints: {
-      'intentra-agent': 'Записал агент Intentra в интервью от имени {{who}}.',
+      'intentra-agent': 'Записала Intentra в интервью от имени {{who}}.',
       'external-agent':
         'Записал внешний агент (Claude Code, Codex, Cursor…) через MCP от имени {{who}}, по его токену доступа.',
     },
@@ -810,6 +810,9 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     confirm: 'Всё ещё верно',
     needsReviewTitle: 'Требует проверки',
     gapsTitle: 'Чего не хватает',
+    discussGaps: 'Обсудить с Intentra',
+    discussGapsPrompt:
+      'Давай обсудим {{key}} «{{title}}». Чего не хватает: {{gaps}} Задавай мне вопросы по одному и поправь запись, когда выясним.',
     needsReview:
       'Изменилось то, на чём держится запись: <keys/>. Проверьте, верна ли она ещё. Если нет — поправьте черновик или запишите замену.',
     dependencyNeedsReview:
@@ -917,7 +920,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     forbiddenHint:
       'Здесь настраивают агентов Intentra. Это может только администратор платформы.',
     roles: {
-      orchestrator: 'Orchestrator',
+      intentra: 'Intentra',
       specialist: 'Specialist',
     },
     changeKinds: {
@@ -943,26 +946,26 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       'Правки здесь не меняют того, с чем работают пространства, пока вы их не опубликуете. Сейчас опубликована версия {{number}}.',
     descriptionNothing:
       'Пространства не могут разговаривать с агентами, пока вы не опубликуете первую версию.',
-    createOrchestrator: 'Создать Orchestrator',
+    createIntentra: 'Создать Intentra',
     createSpecialist: 'Новый Specialist',
     emptyNoModels:
       'Агентов пока нет. Сначала добавьте модель: каждый агент работает на одной из них.',
     toModels: 'К моделям',
     empty:
-      'Агентов пока нет. Начните с Orchestrator: с ним разговаривают люди в пространствах.',
+      'Агентов пока нет. Начните с Intentra: с ней разговаривают люди в пространствах.',
   },
   platformAgent: {
     back: 'Агенты',
     titleNew: 'Новый {{role}}',
-    aboutOrchestrator:
+    aboutIntentra:
       'С ним разговаривают люди в пространствах. Он зовёт Specialists, когда нужна их работа.',
     aboutSpecialist:
-      'Orchestrator зовёт его, когда по описанию видит, что задача для него.',
+      'Intentra зовёт его, когда по описанию видит, что задача для него.',
     name: 'Имя',
     description: 'Описание',
-    descriptionHintOrchestrator: 'Коротко, что делает агент.',
+    descriptionHintIntentra: 'Коротко, что делает агент.',
     descriptionHintSpecialist:
-      'Orchestrator читает это, решая, звать ли агента. Напишите, за что он берётся и что возвращает.',
+      'Intentra читает это, решая, звать ли агента. Напишите, за что он берётся и что возвращает.',
     instructions: 'Инструкции',
     instructionsHint:
       'Как агент работает. Проект и правила роли участника в проекте код добавит сам.',
@@ -983,7 +986,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     skillsEmpty: 'Такого Skill нет',
     skillsNone: 'Без Skills',
     specialists: 'Specialists',
-    specialistsHint: 'Кого Orchestrator может позвать.',
+    specialistsHint: 'Кого Intentra может позвать.',
     specialistsSearch: 'Найти агента',
     specialistsEmpty: 'Specialists пока нет',
     specialistsNone: 'Никого',
@@ -992,11 +995,11 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     delete: 'Удалить агента',
     deleteTitle: 'Удалить {{name}}?',
     deleteDescription:
-      'Агент уйдёт из неопубликованных, и Orchestrator перестанет его звать. Пространства потеряют его со следующей публикацией.',
+      'Агент уйдёт из неопубликованных, и Intentra перестанет его звать. Пространства потеряют его со следующей публикацией.',
     missing: 'Такого агента нет',
     missingHint: 'Возможно, его удалили. Откройте агента из списка.',
-    orchestratorExists:
-      'Orchestrator уже есть, второй не нужен. Откройте его из списка.',
+    intentraExists:
+      'Intentra уже есть, второй не нужно. Откройте её из списка.',
     unknownRole: 'Выберите, кого создать, на странице агентов.',
   },
   platformSkills: {
@@ -1129,7 +1132,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     changedFields: 'Изменено: {{fields}}',
     none: 'Неопубликованных изменений нет: пространства работают на том же, что вы видите.',
     noneNothing:
-      'Публиковать пока нечего. Добавьте модель и Orchestrator: с ними можно выпустить версию 1.',
+      'Публиковать пока нечего. Добавьте модель и Intentra: с ними можно выпустить версию 1.',
     publish: 'Публикация',
     publishHint:
       'Пространства перейдут на версию {{number}} со следующего сообщения в разговоре.',
@@ -1139,7 +1142,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     blocked: 'Сначала исправьте то, что мешает публикации.',
     published: 'Версия {{number}} опубликована.',
     problemTexts: {
-      'orchestrator-count': 'Нужен ровно один Orchestrator.',
+      'intentra-count': 'Intentra должна быть ровно одна.',
       'duplicate-skill-name': 'Несколько Skills называются {{name}}.',
       'tool-unavailable':
         '{{name}} использует инструмент {{tool}}, которого больше нет в коде.',
@@ -1179,7 +1182,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     delete: 'Удалить',
     deleteTitle: 'Удалить разговор?',
     deleteDescription:
-      'Сообщения пропадут. Черновики, которые агент записал, останутся.',
+      'Сообщения пропадут. Черновики, которые записала Intentra, останутся.',
     renameLabel: 'Название разговора',
     emptyDescription:
       'Агент видит, что уже известно о проекте, расспросит о том, чего не хватает, и запишет черновики знаний.',
@@ -1202,6 +1205,10 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       openQuestions_other: '{{count}} открытого вопроса без ответа',
       empty: '{{kind}} — пока пусто',
       gaps: 'Чего не хватает в знаниях проекта?',
+      gapsFound_one: '{{count}} пробел в знаниях',
+      gapsFound_few: '{{count}} пробела в знаниях',
+      gapsFound_many: '{{count}} пробелов в знаниях',
+      gapsFound_other: '{{count}} пробела в знаниях',
     },
     starterActions: {
       fresh: 'Начать',
@@ -1221,14 +1228,17 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       openQuestions:
         'Давай обсудим открытые вопросы проекта и попробуем на них ответить. Иди по одному и записывай то, что решим, черновиками.',
       gaps: 'Чего не хватает в знаниях проекта? Посмотри, что уже записано, найди пробелы и противоречия и задавай мне вопросы по одному.',
+      gapsFound:
+        'Давай закроем пробелы в знаниях проекта. Начни с самого важного, задавай мне вопросы по одному и записывай то, что выясним, черновиками.',
       fill: 'Давай заполним «{{kind}}»: {{about}} Сейчас здесь пусто. Задавай мне вопросы по одному, предлагай варианты ответа и записывай то, что выясним, черновиками.',
       add: 'Давай дополним «{{kind}}»: {{about}} Уже записано: {{count}}. Посмотри, чего не хватает и что противоречит друг другу, задавай мне вопросы по одному и записывай новое черновиками.',
     },
-    placeholder: 'Сообщение агенту',
+    placeholder: 'Сообщение Intentra',
     send: 'Отправить',
     stop: 'Остановить',
     composerHint: 'Enter — отправить, Shift+Enter — новая строка',
-    viewer: 'У вас доступ на чтение: агент ответит, но черновиков не запишет.',
+    viewer:
+      'У вас доступ на чтение: Intentra ответит, но черновиков не запишет.',
     unpublished: 'Неопубликованные агенты',
     unpublishedHint:
       'Ваши разговоры идут на неопубликованных агентах из админки.',
@@ -1391,8 +1401,8 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     INVALID_SKILL: 'Проверьте поля Skill',
     INVALID_MODEL_PROFILE: 'Проверьте поля модели',
     SKILL_NAME_TAKEN: 'Skill с таким именем уже есть',
-    ORCHESTRATOR_EXISTS: 'Orchestrator уже есть',
-    ORCHESTRATOR_NOT_REMOVABLE: 'Orchestrator удалить нельзя',
+    INTENTRA_EXISTS: 'Intentra уже есть',
+    INTENTRA_NOT_REMOVABLE: 'Intentra удалить нельзя',
     MODEL_PROFILE_IN_USE:
       'На этой модели работают агенты. Сначала переведите их на другую',
     AGENTS_UNCHANGED: 'Публиковать нечего: изменений нет',

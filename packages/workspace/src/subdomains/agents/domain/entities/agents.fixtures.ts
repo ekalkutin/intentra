@@ -48,7 +48,7 @@ export function agentSpec(
   overrides: Partial<AgentSpec> = {},
 ): AgentSpec {
   return {
-    name: new AgentName('Analyst'),
+    name: new AgentName('Researcher'),
     description: new AgentDescription('Digs into requirements'),
     instructions: new AgentInstructions('Find the gaps.'),
     tools: [TOOLS[0]!],
@@ -59,13 +59,13 @@ export function agentSpec(
   };
 }
 
-/** Unpublished Agents holding an Orchestrator on one Model Profile, the least that can be published. */
-export function unpublishedWithOrchestrator(): UnpublishedAgents {
+/** Unpublished Agents holding Intentra on one Model Profile, the least that can be published. */
+export function unpublishedWithIntentra(): UnpublishedAgents {
   const unpublished = UnpublishedAgents.empty();
   const profile = unpublished.addModelProfile(profileSpec());
   unpublished.addAgent(
-    AgentRole.Orchestrator,
-    agentSpec(profile.id, { name: new AgentName('Orchestrator') }),
+    AgentRole.Intentra,
+    agentSpec(profile.id, { name: new AgentName('Intentra') }),
     TOOLS,
   );
 
@@ -80,6 +80,6 @@ export function unpublishedFrom(content: AgentsContent): UnpublishedAgents {
   });
 }
 
-export function orchestratorOf(content: AgentsContent): Agent {
-  return content.agents.find(agent => agent.isOrchestrator())!;
+export function intentraOf(content: AgentsContent): Agent {
+  return content.agents.find(agent => agent.isIntentra())!;
 }

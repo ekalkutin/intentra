@@ -19,7 +19,7 @@ OWN-WORLD: inherited from DESIGN.md unchanged: grey frame, inset ringed canvas, 
 
 STORY: the Platform Admin opens Агенты from the sidebar's Платформа group, sees the Agents with marks for what is new or changed since the published version, opens one, edits its instructions beside its model, tools, Skills and Specialists, saves, then goes to Changes, reads what differs and what blocks, writes a note and publishes the next version.
 
-FIRST VIEWPORT: the common sidebar with a third group "Платформа" (Агенты, Skills, Модели, Изменения with a mono count) under Работа and Пространство, which stay on the last Workspace. Canvas: page title "Агенты", one line "Опубликована версия N" or "Ничего не опубликовано", primary "Новый агент" right; one bordered list, Orchestrator first, each row the name (500), description muted on one line, meta the Model Profile and tool count, a change mark (Новый / Изменён) as icon plus word.
+FIRST VIEWPORT: the common sidebar with a third group "Платформа" (Агенты, Skills, Модели, Изменения with a mono count) under Работа and Пространство, which stay on the last Workspace. Canvas: page title "Агенты", one line "Опубликована версия N" or "Ничего не опубликовано", primary "Новый агент" right; one bordered list, Intentra first, each row the name (500), description muted on one line, meta the Model Profile and tool count, a change mark (Новый / Изменён) as icon plus word.
 
 FORM: canon (standing exit, inherited from the app shell brief, seed key a150ca9d); no surface roll, structure pinned by the user.
 

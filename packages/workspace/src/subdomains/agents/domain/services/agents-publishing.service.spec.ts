@@ -7,7 +7,7 @@ import {
   profileSpec,
   TOOLS,
   unpublishedFrom,
-  unpublishedWithOrchestrator,
+  unpublishedWithIntentra,
 } from '../entities/agents.fixtures.js';
 import { UnpublishedAgents } from '../entities/index.js';
 import {
@@ -33,7 +33,7 @@ describe('AgentsPublishingService', () => {
 
   /** Agents Version 1 and the Unpublished Agents right after it. */
   function publishVersionOne() {
-    const unpublished = unpublishedWithOrchestrator();
+    const unpublished = unpublishedWithIntentra();
     const versionOne = service.publish(
       unpublished,
       null,
@@ -47,7 +47,7 @@ describe('AgentsPublishingService', () => {
 
   it('publishes Agents Version 1 when nothing was published yet', () => {
     // Arrange
-    const unpublished = unpublishedWithOrchestrator();
+    const unpublished = unpublishedWithIntentra();
 
     // Act
     const version = service.publish(
@@ -55,16 +55,16 @@ describe('AgentsPublishingService', () => {
       null,
       TOOLS,
       publisher,
-      new PublishingNote('The Orchestrator'),
+      new PublishingNote('Intentra'),
     );
 
     // Assert
     expect(version.number.value).toBe(1);
-    expect(version.note?.value).toBe('The Orchestrator');
+    expect(version.note?.value).toBe('Intentra');
     expect(version.publisher.email.value).toBe('admin@example.com');
   });
 
-  it('refuses to publish Agents without an Orchestrator', () => {
+  it('refuses to publish Agents without Intentra', () => {
     // Arrange
     const unpublished = UnpublishedAgents.empty();
     unpublished.addModelProfile(profileSpec());
@@ -75,7 +75,7 @@ describe('AgentsPublishingService', () => {
 
     // Assert
     expect(publishing).toThrow(AgentsNotPublishableException);
-    expect(publishing).toThrow(/exactly one Orchestrator/);
+    expect(publishing).toThrow(/exactly one Intentra/);
   });
 
   it('publishes the changes as the next Agents Version', () => {

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/** One answer the Orchestrator offers the Member to pick. */
+/** One answer Intentra offers the Member to pick. */
 export const ChoiceOptionDtoSchema = z.object({
   label: z
     .string()

@@ -7,9 +7,9 @@ import { Memory } from '@mastra/memory';
 import { Inject, Injectable, Logger, type Provider } from '@nestjs/common';
 
 import {
-  createOrchestrator,
+  createIntentra,
   type AgentDefinition,
-  type OrchestratorContext,
+  type IntentraContext,
   type ToolApis,
 } from '@intentra/agent-toolkit';
 import {
@@ -24,28 +24,28 @@ import {
 import { KnowledgeService } from '../../../../knowledge/index.js';
 import { AccessService, ProjectsService } from '../../../../tenancy/index.js';
 import {
-  Orchestrator,
+  Intentra,
   type AnswerStream,
-  type OrchestratorAnswer,
-  type OrchestratorQuestion,
+  type IntentraAnswer,
+  type IntentraQuestion,
 } from '../../../application/ports/outbound/index.js';
 import type { Agent, AgentsContent } from '../../../domain/entities/index.js';
 import type { ProviderKeySecret } from '../../../domain/value-objects/index.js';
 import { AGENTS_OPTIONS, type AgentsOptions } from '../../runtime/index.js';
 
-/** What the client is told when the Orchestrator itself fails; the cause stays in the logs. */
-const AGENT_FAILED = 'The Orchestrator could not answer. Try again later';
+/** What the client is told when Intentra itself fails; the cause stays in the logs. */
+const AGENT_FAILED = 'Intentra could not answer. Try again later';
 
 /**
- * Runs the Orchestrator and its Specialists from `@intentra/agent-toolkit`,
+ * Runs Intentra and its Specialists from `@intentra/agent-toolkit`,
  * built for each answer from the Agents given, each on its Model Profile and
  * the Workspace's Provider Key. Their tools call back into Knowledge, Projects and Access through
  * their published sub-APIs, as an external agent does over MCP (Agents ADR
  * 0002).
  */
 @Injectable()
-export class OrchestratorAdapter implements Orchestrator {
-  readonly #logger = new Logger(OrchestratorAdapter.name);
+export class IntentraAdapter implements Intentra {
+  readonly #logger = new Logger(IntentraAdapter.name);
   readonly #apis: ToolApis;
 
   constructor(
@@ -71,20 +71,20 @@ export class OrchestratorAdapter implements Orchestrator {
     providerKey,
     agents,
     agentsVersion,
-  }: OrchestratorQuestion): Promise<OrchestratorAnswer> {
-    const orchestratorAgent = agents.orchestrator();
-    if (!orchestratorAgent) {
-      throw new Error('The Agents to run hold no Orchestrator');
+  }: IntentraQuestion): Promise<IntentraAnswer> {
+    const intentraAgent = agents.intentra();
+    if (!intentraAgent) {
+      throw new Error('The Agents to run hold no Intentra');
     }
-    const orchestrator = createOrchestrator({
-      orchestrator: this.toDefinition(agents, orchestratorAgent, providerKey),
+    const intentra = createIntentra({
+      intentra: this.toDefinition(agents, intentraAgent, providerKey),
       specialists: agents
-        .specialistsOf(orchestratorAgent)
+        .specialistsOf(intentraAgent)
         .map(specialist => this.toDefinition(agents, specialist, providerKey)),
       memory: this.memory,
       onUnexpectedError: error => this.#logger.error(error),
     });
-    const requestContext = new RequestContext<OrchestratorContext>();
+    const requestContext = new RequestContext<IntentraContext>();
     requestContext.set('apis', this.#apis);
     // At most a Contributor, and only in the Conversation's Project.
     requestContext.set('caller', {
@@ -102,7 +102,7 @@ export class OrchestratorAdapter implements Orchestrator {
       role: projectRole.value as ProjectRoleDto,
     });
 
-    const output = await orchestrator.stream(
+    const output = await intentra.stream(
       [{ id: message.id ?? randomUUID(), role: 'user', parts: message.parts }],
       {
         requestContext,
@@ -199,7 +199,7 @@ function prepend(
   );
 }
 
-export const ORCHESTRATOR_PROVIDER: Provider = {
-  provide: Orchestrator,
-  useClass: OrchestratorAdapter,
+export const INTENTRA_PROVIDER: Provider = {
+  provide: Intentra,
+  useClass: IntentraAdapter,
 };

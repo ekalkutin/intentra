@@ -62,7 +62,9 @@ export function EmptyChat({
     projectId,
   });
   const kinds = data?.kinds ?? null;
-  const starters = kinds ? startersOf(kinds) : FALLBACK_STARTERS;
+  const starters = kinds
+    ? startersOf(kinds, data?.gaps ?? 0)
+    : FALLBACK_STARTERS;
 
   // About a Kind, in the words of its description, lowered to run on.
   const aboutOf = (kind: KnowledgeKindDto) => {
@@ -89,6 +91,10 @@ export function EmptyChat({
           about: aboutOf(starter.kind),
         }),
       );
+      return;
+    }
+    if (starter.reason === STARTER_REASONS.gaps && starter.count > 0) {
+      onStart(t('interview.openings.gapsFound'));
       return;
     }
     if (starter.reason !== STARTER_REASONS.empty) {
@@ -222,6 +228,10 @@ function useStarterLabel(): (starter: Starter) => string {
         return t(`interview.starters.${starter.reason}`, {
           count: starter.count,
         });
+      case STARTER_REASONS.gaps:
+        return starter.count > 0
+          ? t('interview.starters.gapsFound', { count: starter.count })
+          : t('interview.starters.gaps');
       case STARTER_REASONS.empty:
         return t('interview.starters.empty', {
           kind: starter.kind ? t(`kinds.${starter.kind}`) : '',

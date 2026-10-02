@@ -9,18 +9,18 @@ import { AGENT_TOOLS, isReadOnlyTool, type AgentTool } from '../catalog.js';
 
 import type { AgentDefinition } from './agent-definition.js';
 import {
-  orchestratorContextSchema,
-  type OrchestratorContext,
-} from './orchestrator-context.js';
-import { frameInstructions } from './orchestrator-instructions.js';
+  intentraContextSchema,
+  type IntentraContext,
+} from './intentra-context.js';
+import { frameInstructions } from './intentra-instructions.js';
 import {
   reportingFailures,
   type UnexpectedErrorListener,
 } from './reporting-failures.js';
 
-export type OrchestratorOptions = {
-  readonly orchestrator: AgentDefinition;
-  /** The Specialists the Orchestrator may call. */
+export type IntentraOptions = {
+  readonly intentra: AgentDefinition;
+  /** The Specialists Intentra may call. */
   readonly specialists: readonly AgentDefinition[];
   /** Where its Conversations are kept; the caller picks the thread and its Member per call. */
   readonly memory: MastraMemory;
@@ -28,20 +28,20 @@ export type OrchestratorOptions = {
 };
 
 /**
- * The Orchestrator, the one Agent people talk to, with the Specialists it may
+ * Intentra, the one Agent people talk to, with the Specialists it may
  * call as Mastra sub-agents, each shown to it as a tool with the Specialist's
  * name and description. They work with one Member in one Project, both
  * taken from the request context, and do what the lower of their level there
  * and the Member's Project Role allows. Past tool calls are kept in memory
- * but not sent to the model again: the Orchestrator reads the knowledge
+ * but not sent to the model again: Intentra reads the knowledge
  * afresh instead.
  */
-export function createOrchestrator({
-  orchestrator,
+export function createIntentra({
+  intentra,
   specialists,
   memory,
   onUnexpectedError,
-}: OrchestratorOptions) {
+}: IntentraOptions) {
   const keys = toolKeys(specialists.map(specialist => specialist.name));
   const agents = Object.fromEntries(
     specialists.map((specialist, index) => [
@@ -50,22 +50,22 @@ export function createOrchestrator({
     ]),
   );
 
-  return createAgent(orchestrator, onUnexpectedError, {
+  return createAgent(intentra, onUnexpectedError, {
     memory,
     agents,
     inputProcessors: [new ToolCallFilter()],
   });
 }
 
-export type Orchestrator = ReturnType<typeof createOrchestrator>;
+export type Intentra = ReturnType<typeof createIntentra>;
 
 type AgentConfig = ConstructorParameters<
-  typeof Agent<string, ToolsInput, undefined, OrchestratorContext>
+  typeof Agent<string, ToolsInput, undefined, IntentraContext>
 >[0];
 
 /**
- * A Specialist keeps nothing: it works on the Orchestrator's prompt alone.
- * Mastra would otherwise give it the Orchestrator's memory and keep its turns
+ * A Specialist keeps nothing: it works on Intentra's prompt alone.
+ * Mastra would otherwise give it Intentra's memory and keep its turns
  * in threads of their own, which belong to no Conversation and would outlive
  * it. Its call and answer stay in the Conversation as a tool call.
  */
@@ -73,7 +73,7 @@ class StatelessAgent extends Agent<
   string,
   ToolsInput,
   undefined,
-  OrchestratorContext
+  IntentraContext
 > {
   public override hasOwnMemory(): boolean {
     return true;
@@ -94,7 +94,7 @@ function createAgent(
     string,
     ToolsInput,
     undefined,
-    OrchestratorContext
+    IntentraContext
   > = Agent,
 ) {
   const tools = reportingFailures(
@@ -139,12 +139,12 @@ function createAgent(
         },
       }),
     },
-    requestContextSchema: orchestratorContextSchema,
+    requestContextSchema: intentraContextSchema,
     ...extra,
   });
 }
 
-/** Names the model can call them by, such as `requirements_analyst`; a repeated one gets a number. */
+/** Names the model can call them by, such as `ux_researcher`; a repeated one gets a number. */
 function toolKeys(names: readonly string[]): string[] {
   const taken = new Set<string>();
 

@@ -15,7 +15,7 @@ export const SaveAgentDtoSchema = z.object({
 
 export type SaveAgentDto = z.infer<typeof SaveAgentDtoSchema>;
 
-/** A new Agent: any number of Specialists, but only one Orchestrator. */
+/** A new Agent: any number of Specialists, but only one Intentra. */
 export const CreateAgentDtoSchema = SaveAgentDtoSchema.extend({
   role: AgentRoleDtoSchema,
 });

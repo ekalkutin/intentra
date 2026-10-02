@@ -67,8 +67,8 @@ export class AgentsContent {
   }
 
   /** Null until a Platform Admin creates it. */
-  public orchestrator(): Agent | null {
-    return this.#agents.find(agent => agent.isOrchestrator()) ?? null;
+  public intentra(): Agent | null {
+    return this.#agents.find(agent => agent.isIntentra()) ?? null;
   }
 
   /** The Specialists the Agent may call. */
@@ -115,9 +115,9 @@ export class AgentsContent {
   /** What keeps this from being published; empty when nothing does. */
   public problems(availableTools: readonly ToolName[]): PublishingProblem[] {
     const problems: PublishingProblem[] = [];
-    const orchestrators = this.#agents.filter(agent => agent.isOrchestrator());
-    if (orchestrators.length !== 1) {
-      problems.push(PublishingProblem.orchestratorCount());
+    const intentras = this.#agents.filter(agent => agent.isIntentra());
+    if (intentras.length !== 1) {
+      problems.push(PublishingProblem.intentraCount());
     }
     const skillNames = this.#skills.map(skill => skill.name.value);
     for (const name of new Set(skillNames)) {
@@ -146,13 +146,11 @@ export class AgentsContent {
       ) {
         problems.push(PublishingProblem.modelProfileMissing(subject));
       }
-      if (!agent.isOrchestrator() && agent.specialistIds.length > 0) {
+      if (!agent.isIntentra() && agent.specialistIds.length > 0) {
         problems.push(PublishingProblem.specialistCallsAgents(subject));
       }
       const callable = agent.specialistIds.every(id =>
-        this.#agents.some(
-          other => other.id.equals(id) && !other.isOrchestrator(),
-        ),
+        this.#agents.some(other => other.id.equals(id) && !other.isIntentra()),
       );
       if (!callable) {
         problems.push(PublishingProblem.callsNonSpecialist(subject));

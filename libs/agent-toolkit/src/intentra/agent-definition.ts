@@ -3,7 +3,7 @@ import type { MastraModelConfig } from '@mastra/core/llm';
 /** One of Intentra's Agents as published, ready to run. */
 export type AgentDefinition = {
   readonly name: string;
-  /** For a Specialist, what the Orchestrator reads to decide when to call it. */
+  /** For a Specialist, what Intentra reads to decide when to call it. */
   readonly description: string;
   /** How it works; the code frames them with the Project and the Member's Project Role. */
   readonly instructions: string;

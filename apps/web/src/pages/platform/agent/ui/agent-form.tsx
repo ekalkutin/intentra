@@ -101,12 +101,12 @@ export function AgentForm({
     defaultValues: initial,
   });
   const { errors, isSubmitting, isDirty } = form.formState;
-  const isOrchestrator = role === AgentRoleDtoSchema.enum.orchestrator;
+  const isIntentra = role === AgentRoleDtoSchema.enum.intentra;
   const roleName = t(`platform.roles.${role}`);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const submit = form.handleSubmit(async values => {
-    const body = toSaveAgentDto(values, isOrchestrator);
+    const body = toSaveAgentDto(values, isIntentra);
     const result = agent
       ? await edit({ agentId: agent.id, body })
       : await create({ ...body, role });
@@ -159,8 +159,8 @@ export function AgentForm({
           agent ? agent.name : t('platformAgent.titleNew', { role: roleName })
         }
         description={
-          isOrchestrator
-            ? t('platformAgent.aboutOrchestrator')
+          isIntentra
+            ? t('platformAgent.aboutIntentra')
             : t('platformAgent.aboutSpecialist')
         }
       />
@@ -197,8 +197,8 @@ export function AgentForm({
               {...form.register('description')}
             />
             <FieldDescription>
-              {isOrchestrator
-                ? t('platformAgent.descriptionHintOrchestrator')
+              {isIntentra
+                ? t('platformAgent.descriptionHintIntentra')
                 : t('platformAgent.descriptionHintSpecialist')}
             </FieldDescription>
             <FieldError errors={[errors.description]} />
@@ -325,7 +325,7 @@ export function AgentForm({
               </PageSection>
             )}
           />
-          {isOrchestrator && (
+          {isIntentra && (
             <Controller
               control={form.control}
               name='specialistIds'
@@ -420,7 +420,7 @@ export function AgentForm({
               </PageSection>
             )}
           />
-          {agent && !isOrchestrator && (
+          {agent && !isIntentra && (
             <div>
               <ConfirmDialog
                 trigger={

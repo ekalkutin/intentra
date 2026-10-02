@@ -67,7 +67,7 @@ type AgentsState = {
 
 /**
  * A Platform Admin's work on Intentra's Agents. They start from nothing:
- * the Platform Admin creates the Orchestrator and the rest, then publishes
+ * the Platform Admin creates Intentra and the rest, then publishes
  * Agents Version 1.
  */
 @Injectable()

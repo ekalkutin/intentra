@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const AgentRoleDtoSchema = z.enum(['orchestrator', 'specialist']);
+export const AgentRoleDtoSchema = z.enum(['intentra', 'specialist']);
 
 export type AgentRoleDto = z.infer<typeof AgentRoleDtoSchema>;
 
@@ -14,7 +14,7 @@ export type PlatformAgentDto = {
   readonly id: string;
   readonly role: AgentRoleDto;
   readonly name: string;
-  /** For a Specialist, what the Orchestrator reads to decide when to call it. */
+  /** For a Specialist, what Intentra reads to decide when to call it. */
   readonly description: string;
   /** How the Agent works; the code adds the Project and the rules of the Member's Project Role. */
   readonly instructions: string;
@@ -23,7 +23,7 @@ export type PlatformAgentDto = {
   /** Ids of Intentra's own Skills. */
   readonly skillIds: readonly string[];
   readonly modelProfileId: string;
-  /** The Specialists the Orchestrator may call; always empty for a Specialist. */
+  /** The Specialists Intentra may call; always empty for a Specialist. */
   readonly specialistIds: readonly string[];
 };
 

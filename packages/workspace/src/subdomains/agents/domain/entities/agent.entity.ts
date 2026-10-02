@@ -19,7 +19,7 @@ export type AgentSpec = {
   readonly tools: readonly ToolName[];
   readonly skillIds: readonly SkillId[];
   readonly modelProfileId: ModelProfileId;
-  /** The Specialists the Orchestrator may call; empty for a Specialist. */
+  /** The Specialists Intentra may call; empty for a Specialist. */
   readonly specialistIds: readonly AgentId[];
 };
 
@@ -92,8 +92,8 @@ export class Agent {
     });
   }
 
-  public isOrchestrator(): boolean {
-    return this.#role.equals(AgentRole.Orchestrator);
+  public isIntentra(): boolean {
+    return this.#role.equals(AgentRole.Intentra);
   }
 
   public with(spec: AgentSpec): Agent {

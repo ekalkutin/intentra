@@ -36,7 +36,7 @@ describe('startersOf', () => {
     const kinds = summary();
 
     // Act
-    const starters = startersOf(kinds);
+    const starters = startersOf(kinds, 0);
 
     // Assert
     expect(starters).toEqual([
@@ -56,7 +56,7 @@ describe('startersOf', () => {
     });
 
     // Act
-    const starters = startersOf(kinds);
+    const starters = startersOf(kinds, 0);
 
     // Assert
     expect(starters).toEqual([
@@ -79,7 +79,7 @@ describe('startersOf', () => {
     });
 
     // Act
-    const starters = startersOf(kinds);
+    const starters = startersOf(kinds, 0);
 
     // Assert
     expect(starters.map(starter => starter.kind)).toEqual([
@@ -99,11 +99,47 @@ describe('startersOf', () => {
     const kinds = summary(everything);
 
     // Act
-    const starters = startersOf(kinds);
+    const starters = startersOf(kinds, 0);
 
     // Assert
     expect(starters).toEqual([
       { reason: STARTER_REASONS.gaps, kind: null, count: 0 },
     ]);
+  });
+
+  it('offers the Gaps after open questions, before empty Kinds', () => {
+    // Arrange
+    const kinds = summary({
+      'product-overview': { approved: 1 },
+      persona: { approved: 1 },
+    });
+
+    // Act
+    const starters = startersOf(kinds, 4);
+
+    // Assert
+    expect(starters).toEqual([
+      { reason: STARTER_REASONS.gaps, kind: null, count: 4 },
+      { reason: STARTER_REASONS.empty, kind: 'goal', count: 0 },
+      { reason: STARTER_REASONS.empty, kind: 'scenario', count: 0 },
+    ]);
+  });
+
+  it('leaves the Gaps out of a Project that knows nothing, which begins with its product', () => {
+    // Arrange
+    const kinds = summary();
+
+    // Act
+    const starters = startersOf(kinds, 3);
+
+    // Assert
+    expect(starters[0]).toEqual({
+      reason: STARTER_REASONS.fresh,
+      kind: null,
+      count: 0,
+    });
+    expect(starters.map(starter => starter.reason)).not.toContain(
+      STARTER_REASONS.gaps,
+    );
   });
 });

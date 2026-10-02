@@ -4,7 +4,7 @@ import { trimmedWithin } from './text.js';
 
 const MAX_LENGTH = 64;
 
-/** What people and the Orchestrator call an Agent. */
+/** What people and Intentra call an Agent. */
 export class AgentName {
   readonly #value: string;
 

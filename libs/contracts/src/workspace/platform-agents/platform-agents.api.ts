@@ -25,7 +25,7 @@ import type { SaveSkillDto } from './save-skill.dto.js';
 export abstract class PlatformAgentsApi {
   abstract getUnpublished(actor: Actor): Promise<UnpublishedAgentsDto>;
 
-  /** 409 `ORCHESTRATOR_EXISTS` for a second Orchestrator. */
+  /** 409 `INTENTRA_EXISTS` for a second Intentra. */
   abstract createAgent(
     actor: Actor,
     data: CreateAgentDto,
@@ -35,7 +35,7 @@ export abstract class PlatformAgentsApi {
     agentId: string,
     data: SaveAgentDto,
   ): Promise<PlatformAgentDto>;
-  /** Removes a Specialist, and takes it away from the Orchestrator. */
+  /** Removes a Specialist, and takes it away from Intentra. */
   abstract deleteAgent(actor: Actor, agentId: string): Promise<void>;
 
   abstract createSkill(actor: Actor, data: SaveSkillDto): Promise<SkillDto>;

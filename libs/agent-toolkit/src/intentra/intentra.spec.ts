@@ -8,8 +8,8 @@ import type { ProjectRoleDto } from '@intentra/contracts/workspace';
 import type { ToolApis } from '../tool-apis.js';
 
 import type { AgentDefinition } from './agent-definition.js';
-import type { OrchestratorContext } from './orchestrator-context.js';
-import { createOrchestrator } from './orchestrator.js';
+import type { IntentraContext } from './intentra-context.js';
+import { createIntentra } from './intentra.js';
 
 const usage = { inputTokens: 1, outputTokens: 1, totalTokens: 2 };
 
@@ -60,8 +60,8 @@ function recordingModel(): MastraLanguageModelV2Mock {
 function requestContextWith(
   record: () => Promise<never>,
   role: ProjectRoleDto = 'maintainer',
-): RequestContext<OrchestratorContext> {
-  const requestContext = new RequestContext<OrchestratorContext>();
+): RequestContext<IntentraContext> {
+  const requestContext = new RequestContext<IntentraContext>();
   requestContext.set('apis', {
     knowledge: { record },
   } as unknown as ToolApis);
@@ -90,7 +90,7 @@ function definition(
   overrides: Partial<AgentDefinition> = {},
 ): AgentDefinition {
   return {
-    name: 'Orchestrator',
+    name: 'Intentra',
     description: 'Interviews a person',
     instructions: 'Interview the person.',
     toolIds: ['list_knowledge', 'record_goal'],
@@ -122,13 +122,13 @@ async function converse(
   onUnexpectedError = vi.fn(),
 ) {
   const model = recordingModel();
-  const orchestrator = createOrchestrator({
-    orchestrator: definition(model),
+  const intentra = createIntentra({
+    intentra: definition(model),
     specialists: [],
     memory: new MockMemory(),
     onUnexpectedError,
   });
-  const output = await orchestrator.stream(
+  const output = await intentra.stream(
     [{ role: 'user', content: 'We want fewer late invoices' }],
     { requestContext: requestContextWith(record), maxSteps: 5 },
   );
@@ -137,7 +137,7 @@ async function converse(
   return { calls: model.doStreamCalls, onUnexpectedError };
 }
 
-describe('Orchestrator', () => {
+describe('Intentra', () => {
   it("is told its Project and the Member's Project Role", async () => {
     // Act
     const { calls } = await converse(() => Promise.reject(new Error('x')));
@@ -186,8 +186,8 @@ describe('Orchestrator', () => {
   it('sends past tool calls to the model no more, only what was said', async () => {
     // Arrange
     const model = recordingModel();
-    const orchestrator = createOrchestrator({
-      orchestrator: definition(model),
+    const intentra = createIntentra({
+      intentra: definition(model),
       specialists: [],
       memory: new MockMemory(),
       onUnexpectedError: vi.fn(),
@@ -196,14 +196,14 @@ describe('Orchestrator', () => {
       Promise.resolve({ key: 'GOAL-1' } as never),
     );
     const memory = { thread: 'thread-1', resource: 'member-1' };
-    const first = await orchestrator.stream(
+    const first = await intentra.stream(
       [{ role: 'user', content: 'We want fewer late invoices' }],
       { requestContext, memory, maxSteps: 5 },
     );
     await first.consumeStream();
 
     // Act
-    const second = await orchestrator.stream(
+    const second = await intentra.stream(
       [{ role: 'user', content: 'What did you record?' }],
       { requestContext, memory, maxSteps: 5 },
     );
@@ -219,15 +219,15 @@ describe('Orchestrator', () => {
   it('gives a Viewer only the tools that read, whatever the definition says', async () => {
     // Arrange
     const model = answeringModel('Hello.');
-    const orchestrator = createOrchestrator({
-      orchestrator: definition(model),
+    const intentra = createIntentra({
+      intentra: definition(model),
       specialists: [],
       memory: new MockMemory(),
       onUnexpectedError: vi.fn(),
     });
 
     // Act
-    const output = await orchestrator.stream(
+    const output = await intentra.stream(
       [{ role: 'user', content: 'Record a goal' }],
       {
         requestContext: requestContextWith(
@@ -248,8 +248,8 @@ describe('Orchestrator', () => {
   it("runs on its Model Profile's tuning", async () => {
     // Arrange
     const model = answeringModel('Hello.');
-    const orchestrator = createOrchestrator({
-      orchestrator: definition(model, {
+    const intentra = createIntentra({
+      intentra: definition(model, {
         temperature: 0.3,
         maxOutputTokens: 500,
         reasoningEffort: 'high',
@@ -260,15 +260,10 @@ describe('Orchestrator', () => {
     });
 
     // Act
-    const output = await orchestrator.stream(
-      [{ role: 'user', content: 'Hi' }],
-      {
-        requestContext: requestContextWith(() =>
-          Promise.reject(new Error('x')),
-        ),
-        maxSteps: 5,
-      },
-    );
+    const output = await intentra.stream([{ role: 'user', content: 'Hi' }], {
+      requestContext: requestContextWith(() => Promise.reject(new Error('x'))),
+      maxSteps: 5,
+    });
     await output.consumeStream();
 
     // Assert
@@ -286,29 +281,33 @@ describe('Orchestrator', () => {
         {
           type: 'tool-call',
           toolCallId: 'call-1',
-          toolName: 'agent-requirements_analyst',
+          toolName: 'agent-ux_researcher',
           input: JSON.stringify({ prompt: 'Find the gaps in billing' }),
         },
         { type: 'finish', finishReason: 'tool-calls', usage },
       ]),
       streamOf([
         { type: 'text-start', id: 'text-1' },
-        { type: 'text-delta', id: 'text-1', delta: 'The analyst found none.' },
+        {
+          type: 'text-delta',
+          id: 'text-1',
+          delta: 'The researcher found none.',
+        },
         { type: 'text-end', id: 'text-1' },
         { type: 'finish', finishReason: 'stop', usage },
       ]),
     ];
     let turn = 0;
-    const orchestratorModel = new MastraLanguageModelV2Mock({
+    const intentraModel = new MastraLanguageModelV2Mock({
       doStream: async () => turns[turn++] ?? streamOf([]),
     });
     const specialistModel = answeringModel('No gaps.');
     const memory = new MockMemory();
-    const orchestrator = createOrchestrator({
-      orchestrator: definition(orchestratorModel),
+    const intentra = createIntentra({
+      intentra: definition(intentraModel),
       specialists: [
         definition(specialistModel, {
-          name: 'Requirements analyst',
+          name: 'UX researcher',
           description: 'Finds gaps in requirements',
           instructions: 'Find the gaps.',
         }),
@@ -318,7 +317,7 @@ describe('Orchestrator', () => {
     });
 
     // Act
-    const output = await orchestrator.stream(
+    const output = await intentra.stream(
       [{ role: 'user', content: 'Check billing' }],
       {
         requestContext: requestContextWith(() =>
@@ -334,9 +333,9 @@ describe('Orchestrator', () => {
     expect(JSON.stringify(specialistModel.doStreamCalls[0]?.prompt)).toContain(
       'Billing',
     );
-    expect(
-      JSON.stringify(orchestratorModel.doStreamCalls[1]?.prompt),
-    ).toContain('No gaps.');
+    expect(JSON.stringify(intentraModel.doStreamCalls[1]?.prompt)).toContain(
+      'No gaps.',
+    );
     const threads = await memory.listThreads({ perPage: false });
     expect(threads.threads.map(thread => thread.id)).toEqual(['thread-1']);
   });
@@ -344,8 +343,8 @@ describe('Orchestrator', () => {
   it('sees the names and descriptions of its Skills', async () => {
     // Arrange
     const model = answeringModel('Hello.');
-    const orchestrator = createOrchestrator({
-      orchestrator: definition(model, {
+    const intentra = createIntentra({
+      intentra: definition(model, {
         skills: [
           {
             name: 'intentra-interviewing',
@@ -360,15 +359,10 @@ describe('Orchestrator', () => {
     });
 
     // Act
-    const output = await orchestrator.stream(
-      [{ role: 'user', content: 'Hi' }],
-      {
-        requestContext: requestContextWith(() =>
-          Promise.reject(new Error('x')),
-        ),
-        maxSteps: 5,
-      },
-    );
+    const output = await intentra.stream([{ role: 'user', content: 'Hi' }], {
+      requestContext: requestContextWith(() => Promise.reject(new Error('x'))),
+      maxSteps: 5,
+    });
     await output.consumeStream();
 
     // Assert

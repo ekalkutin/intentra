@@ -47,7 +47,8 @@ export const MCP_TOOLS = Object.fromEntries(
 export const MCP_INSTRUCTIONS = [
   "Intentra keeps a Project's knowledge: what the product is, for whom, its requirements, rules, terms and decisions, each recorded as a Draft and confirmed by a person (Approved).",
   'Before working on code of a Project: find its id with list_projects, read get_project_frame once per session (what holds for every task), then for each task pick the Approved items it is about from list_knowledge and read their Context Pack with get_context. Build on Approved knowledge only; where the pack shows something unsettled, in conflict or under review, ask the person.',
-  'When the person tells you something new about the product, record it as a Draft with the record_ tool of its Kind, after checking with list_knowledge that it is not known already; only a person approves.',
+  'When the person tells you something new about the product, record it as a Draft with the record_ tool of its Kind, after checking with list_knowledge that it is not known already and with get_context on the Approved items it relates to that it contradicts nothing; where it does, tell the person before recording. Only a person approves.',
+  'When you interview the person about the product, list_gaps shows what is missing: ask about the most basic first, never fill a gap by guessing.',
 ].join('\n\n');
 
 /**
@@ -63,6 +64,7 @@ export const AGENT_TOOLS = Object.fromEntries(
     listKnowledgeTool,
     getKnowledgeItemTool,
     getKnowledgeDependenciesTool,
+    getContextTool,
     ...KIND_TOOLS,
     confirmKnowledgeItemTool,
     deleteKnowledgeDraftTool,

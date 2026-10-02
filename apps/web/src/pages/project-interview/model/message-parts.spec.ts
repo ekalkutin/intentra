@@ -123,7 +123,7 @@ describe('currentActivity', () => {
     const current = currentActivity(
       assistant([
         {
-          type: 'tool-agent-analyst',
+          type: 'tool-agent-researcher',
           toolCallId: 'a',
           state: 'input-available',
           input: {},
@@ -134,7 +134,7 @@ describe('currentActivity', () => {
     // Assert
     expect(current).toEqual({
       activity: ACTIVITIES.specialist,
-      name: 'agent-analyst',
+      name: 'agent-researcher',
     });
   });
 

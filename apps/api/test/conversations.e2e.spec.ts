@@ -168,7 +168,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
   /** The Platform Admin's; an access token keeps working after its Account is cleared away. */
   let admin: string;
 
-  /** An Orchestrator with every tool, on one Model Profile, published as Agents Version 1. */
+  /** Intentra with every tool, on one Model Profile, published as Agents Version 1. */
   async function publishAgents(): Promise<void> {
     const tools = await app
       .request()
@@ -186,8 +186,8 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
       .post(`${AGENTS_PATH}/unpublished/agents`)
       .set('Authorization', admin)
       .send({
-        role: 'orchestrator',
-        name: 'Orchestrator',
+        role: 'intentra',
+        name: 'Intentra',
         description: 'Interviews a person',
         instructions: 'Interview the person.',
         tools: tools.body.map((tool: { id: string }) => tool.id),
@@ -959,7 +959,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
       expect(response.status).toBe(HttpStatus.CONFLICT);
       expect(response.body).toMatchObject({
         code: 'AGENTS_NOT_PUBLISHABLE',
-        message: expect.stringContaining('exactly one Orchestrator'),
+        message: expect.stringContaining('exactly one Intentra'),
       });
     });
   });

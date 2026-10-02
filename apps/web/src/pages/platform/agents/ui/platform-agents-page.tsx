@@ -31,14 +31,14 @@ import {
   type PlatformAgentDto,
 } from '@intentra/contracts/workspace';
 
-const { orchestrator, specialist } = AgentRoleDtoSchema.enum;
+const { intentra, specialist } = AgentRoleDtoSchema.enum;
 
-/** The Orchestrator first, then the Specialists by name. */
+/** Intentra first, then the Specialists by name. */
 function inOrder(agents: readonly PlatformAgentDto[]): PlatformAgentDto[] {
   return [...agents].sort((one, other) =>
     one.role === other.role
       ? one.name.localeCompare(other.name)
-      : one.role === orchestrator
+      : one.role === intentra
         ? -1
         : 1,
   );
@@ -54,15 +54,15 @@ export function PlatformAgentsPage() {
   const content = unpublished.data?.content;
   const publishedNumber = unpublished.data?.publishedNumber ?? null;
   const kinds = changeKinds(changes?.agents);
-  const hasOrchestrator =
-    content?.agents.some(agent => agent.role === orchestrator) ?? false;
+  const hasIntentra =
+    content?.agents.some(agent => agent.role === intentra) ?? false;
   const profileName = (id: string) =>
     content?.modelProfiles.find(profile => profile.id === id)?.name;
 
   const createAction =
     content &&
     content.modelProfiles.length > 0 &&
-    (hasOrchestrator ? (
+    (hasIntentra ? (
       <Button
         render={<Link to={platformAgentPath({ newRole: specialist })} />}
         nativeButton={false}
@@ -72,11 +72,11 @@ export function PlatformAgentsPage() {
       </Button>
     ) : (
       <Button
-        render={<Link to={platformAgentPath({ newRole: orchestrator })} />}
+        render={<Link to={platformAgentPath({ newRole: intentra })} />}
         nativeButton={false}
       >
         <Plus />
-        {t('platformAgents.createOrchestrator')}
+        {t('platformAgents.createIntentra')}
       </Button>
     ));
 

@@ -36,7 +36,7 @@ import {
 import {
   AgentsVersionRepository,
   ConversationStore,
-  Orchestrator,
+  Intentra,
   ProviderKeyCipher,
   ProviderKeyRepository,
   ToolCatalog,
@@ -45,7 +45,7 @@ import {
 } from '../ports/outbound/index.js';
 
 /**
- * A Member's Conversations with the Orchestrator. While an answer runs (its
+ * A Member's Conversations with Intentra. While an answer runs (its
  * title included), nothing else changes the Conversation, tracked in this
  * process: it holds while the API runs as one instance
  * (`docs/notes/agents-open-questions.md`).
@@ -57,7 +57,7 @@ export class ConversationsService implements ConversationsApi {
   constructor(
     private readonly accessResolver: AccessResolver,
     private readonly conversationStore: ConversationStore,
-    private readonly orchestrator: Orchestrator,
+    private readonly intentra: Intentra,
     private readonly providerKeyRepository: ProviderKeyRepository,
     private readonly providerKeyCipher: ProviderKeyCipher,
     private readonly unpublishedAgentsRepository: UnpublishedAgentsRepository,
@@ -198,7 +198,7 @@ export class ConversationsService implements ConversationsApi {
         conversation.show();
         await this.conversationStore.update(conversation);
       }
-      const answer = await this.orchestrator.answer({
+      const answer = await this.intentra.answer({
         conversation,
         actor,
         project,

@@ -20,7 +20,7 @@ export {
   type AgentsOptions,
 } from './infrastructure/runtime/index.js';
 
-/** Intentra's own Agents: Conversations with the Orchestrator, on the Workspace's Provider Key. */
+/** Intentra's own Agents: Conversations with Intentra, on the Workspace's Provider Key. */
 export const AGENTS_PROVIDERS: Provider[] = [
   ...APPLICATION_SERVICES,
   ...ADAPTERS,

@@ -13,7 +13,7 @@ export const STARTER_REASONS = {
   openQuestions: 'openQuestions',
   /** A Kind nothing is known of. */
   empty: 'empty',
-  /** Every Kind holds something: ask the agent what is missing. */
+  /** The Project has Gaps (with their count), or every Kind holds something: ask the agent what is missing. */
   gaps: 'gaps',
 } as const;
 
@@ -39,11 +39,12 @@ export function knownOf(entry: KnowledgeKindSummaryDto): number {
 
 /**
  * The ways to begin, most pressing first: what needs review, Drafts waiting
- * for approval, open questions, then the Kinds nothing is known of in the
- * model's order. A Project that knows nothing begins with its product.
+ * for approval, open questions, the Gaps, then the Kinds nothing is known of
+ * in the model's order. A Project that knows nothing begins with its product.
  */
 export function startersOf(
   kinds: readonly KnowledgeKindSummaryDto[],
+  gaps: number,
 ): Starter[] {
   const sum = (count: (entry: KnowledgeKindSummaryDto) => number) =>
     kinds.reduce((total, entry) => total + count(entry), 0);
@@ -77,6 +78,10 @@ export function startersOf(
       count: knownOf(questions),
     });
   }
+  // A Project that knows nothing is all gaps; its product comes first.
+  if (!fresh && gaps > 0) {
+    starters.push({ reason: STARTER_REASONS.gaps, kind: null, count: gaps });
+  }
   for (const entry of kinds) {
     if (
       knownOf(entry) === 0 &&
@@ -91,7 +96,10 @@ export function startersOf(
       });
     }
   }
-  if (starters.length < STARTERS_SHOWN) {
+  if (
+    starters.length < STARTERS_SHOWN &&
+    !starters.some(starter => starter.reason === STARTER_REASONS.gaps)
+  ) {
     starters.push({ reason: STARTER_REASONS.gaps, kind: null, count: 0 });
   }
 

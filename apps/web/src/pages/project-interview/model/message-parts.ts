@@ -18,7 +18,7 @@ export type ToolPart = Extract<Part, { toolCallId: string }>;
 
 /** The tool that offers the Member answers as cards. */
 const CHOICES_TOOL = 'offer_choices';
-/** A Specialist is shown to the Orchestrator as a tool named so. */
+/** A Specialist is shown to Intentra as a tool named so. */
 const SPECIALIST_PREFIX = 'agent-';
 /** Tools that change the Project's knowledge. */
 const WRITE_TOOL = /^(record|edit|confirm|delete)_/;
@@ -101,7 +101,7 @@ function activityOf(name: string): Activity {
   return ACTIVITIES.thinking;
 }
 
-/** A Specialist's key as the tool names it, such as `analyst`. */
+/** A Specialist's key as the tool names it, such as `researcher`. */
 export function specialistOf(name: string): string | null {
   return name.startsWith(SPECIALIST_PREFIX)
     ? name.slice(SPECIALIST_PREFIX.length)

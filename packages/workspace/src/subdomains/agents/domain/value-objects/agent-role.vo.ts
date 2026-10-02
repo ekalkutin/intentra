@@ -2,11 +2,11 @@ import { InvalidAgentException } from '../exceptions/index.js';
 
 /** Whether an Agent is the one people talk to or one it hands work to. */
 export class AgentRole {
-  public static readonly Orchestrator = new AgentRole('orchestrator');
+  public static readonly Intentra = new AgentRole('intentra');
   public static readonly Specialist = new AgentRole('specialist');
 
   static readonly #all: readonly AgentRole[] = [
-    AgentRole.Orchestrator,
+    AgentRole.Intentra,
     AgentRole.Specialist,
   ];
 
@@ -20,7 +20,7 @@ export class AgentRole {
     const role = AgentRole.#all.find(candidate => candidate.value === value);
     if (!role) {
       throw new InvalidAgentException(
-        'Agent role must be orchestrator or specialist',
+        'Agent role must be intentra or specialist',
       );
     }
 

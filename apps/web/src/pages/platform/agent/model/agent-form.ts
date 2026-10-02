@@ -54,7 +54,7 @@ export function agentValues(agent: PlatformAgentDto): AgentFormValues {
 /** The form as the API takes it, trimmed; a Specialist never calls other Agents. */
 export function toSaveAgentDto(
   values: AgentFormValues,
-  isOrchestrator: boolean,
+  isIntentra: boolean,
 ): SaveAgentDto {
   return {
     name: values.name.trim(),
@@ -63,6 +63,6 @@ export function toSaveAgentDto(
     modelProfileId: values.modelProfileId,
     tools: values.tools,
     skillIds: values.skillIds,
-    specialistIds: isOrchestrator ? values.specialistIds : [],
+    specialistIds: isIntentra ? values.specialistIds : [],
   };
 }

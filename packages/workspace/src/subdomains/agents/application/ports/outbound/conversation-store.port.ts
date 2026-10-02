@@ -37,7 +37,7 @@ export type ConversationDeleteProps =
 export abstract class ConversationStore {
   abstract findOne(props: ConversationQueryProps): Promise<Conversation | null>;
   abstract findMany(props: ConversationListProps): Promise<ConversationPage>;
-  /** Keeps a Conversation that has just started; its messages come from the Orchestrator. */
+  /** Keeps a Conversation that has just started; its messages come from Intentra. */
   abstract save(conversation: Conversation): Promise<void>;
   /** Keeps its title and whether it is hidden. */
   abstract update(conversation: Conversation): Promise<void>;

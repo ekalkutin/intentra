@@ -12,9 +12,9 @@ import type { ListConversationsDto } from './list-conversations.dto.js';
 import type { SendMessageDto } from './send-message.dto.js';
 
 /**
- * A Member's Conversations with the Orchestrator in a Project. Only the
+ * A Member's Conversations with Intentra in a Project. Only the
  * Member whose Conversation it is reaches it; to anyone else it does not exist
- * (404 `CONVERSATION_NOT_FOUND`). While the Orchestrator answers in a
+ * (404 `CONVERSATION_NOT_FOUND`). While Intentra answers in a
  * Conversation (its title included), nothing else may change it: another
  * message, an edit or a deletion is refused (409 `CONVERSATION_BUSY`).
  */
@@ -43,7 +43,7 @@ export abstract class ConversationsApi {
     data: EditConversationDto,
   ): Promise<ConversationDto>;
 
-  /** Deletes it with its messages; what the Orchestrator recorded stays. */
+  /** Deletes it with its messages; what Intentra recorded stays. */
   abstract delete(
     actor: Actor,
     workspaceId: string,
@@ -52,7 +52,7 @@ export abstract class ConversationsApi {
   ): Promise<void>;
 
   /**
-   * Sends the Member's message and streams the Orchestrator's answer as AI
+   * Sends the Member's message and streams Intentra's answer as AI
    * SDK UI message chunks, the first one (`AGENTS_IN_USE_CHUNK_TYPE`,
    * transient) telling which Agents make it: the Published Agents, or in a
    * Platform Admin's own Conversation the Unpublished Agents. The client chooses the id of a new Conversation

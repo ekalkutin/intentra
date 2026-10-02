@@ -34,7 +34,7 @@ import {
 import { ActorGuard, CurrentActor } from '../auth/index.js';
 
 /**
- * A Member's Conversations with the Orchestrator. The answer to a message is
+ * A Member's Conversations with Intentra. The answer to a message is
  * streamed in the AI SDK UI message stream format (server-sent events); what
  * goes wrong before the stream starts is an ordinary JSON error.
  */

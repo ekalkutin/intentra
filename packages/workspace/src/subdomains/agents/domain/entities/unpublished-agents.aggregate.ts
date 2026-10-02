@@ -2,11 +2,11 @@ import { Aggregate } from '@intentra/shared-kernel';
 
 import {
   AgentNotFoundException,
+  IntentraExistsException,
+  IntentraNotRemovableException,
   InvalidAgentException,
   ModelProfileInUseException,
   ModelProfileNotFoundException,
-  OrchestratorExistsException,
-  OrchestratorNotRemovableException,
   SkillNameTakenException,
   SkillNotFoundException,
 } from '../exceptions/index.js';
@@ -40,7 +40,7 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
     return this.#content;
   }
 
-  /** Nothing yet: a Platform Admin creates the Orchestrator and the rest. */
+  /** Nothing yet: a Platform Admin creates Intentra and the rest. */
   public static empty(): UnpublishedAgents {
     return new UnpublishedAgents(new UnpublishedAgentsId(), {
       content: AgentsContent.empty(),
@@ -55,7 +55,7 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
     });
   }
 
-  /** Any number of Specialists, but only one Orchestrator. */
+  /** Any number of Specialists, but only one Intentra. */
   public addAgent(
     role: AgentRole,
     spec: AgentSpec,
@@ -63,10 +63,10 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
   ): Agent {
     const agent = Agent.create(new AgentId(), role, spec);
     if (
-      agent.isOrchestrator() &&
-      this.#content.agents.some(other => other.isOrchestrator())
+      agent.isIntentra() &&
+      this.#content.agents.some(other => other.isIntentra())
     ) {
-      throw new OrchestratorExistsException();
+      throw new IntentraExistsException();
     }
     this.ensureSound(agent, availableTools);
     this.replace({ agents: [...this.#content.agents, agent] });
@@ -90,10 +90,10 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
     return agent;
   }
 
-  /** The Orchestrator stops calling the removed Specialist. */
+  /** Intentra stops calling the removed Specialist. */
   public removeAgent(id: AgentId): void {
-    if (this.getAgent(id).isOrchestrator()) {
-      throw new OrchestratorNotRemovableException();
+    if (this.getAgent(id).isIntentra()) {
+      throw new IntentraNotRemovableException();
     }
     this.replace({
       agents: this.#content.agents
@@ -220,17 +220,15 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
       this.getSkill(skillId);
     }
     this.getModelProfile(agent.modelProfileId);
-    if (!agent.isOrchestrator() && agent.specialistIds.length > 0) {
+    if (!agent.isIntentra() && agent.specialistIds.length > 0) {
       throw new InvalidAgentException('A Specialist cannot call other Agents');
     }
     for (const specialistId of agent.specialistIds) {
       const specialist = this.#content.agents.find(candidate =>
         candidate.id.equals(specialistId),
       );
-      if (!specialist || specialist.isOrchestrator()) {
-        throw new InvalidAgentException(
-          'The Orchestrator may call only Specialists',
-        );
+      if (!specialist || specialist.isIntentra()) {
+        throw new InvalidAgentException('Intentra may call only Specialists');
       }
     }
   }

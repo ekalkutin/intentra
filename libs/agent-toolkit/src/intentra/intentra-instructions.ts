@@ -3,7 +3,7 @@ import {
   type ProjectRoleDto,
 } from '@intentra/contracts/workspace';
 
-import type { OrchestratorContext } from './orchestrator-context.js';
+import type { IntentraContext } from './intentra-context.js';
 
 const ROLE_RULES: Record<ProjectRoleDto, string> = {
   viewer:
@@ -20,7 +20,7 @@ const ROLE_RULES: Record<ProjectRoleDto, string> = {
  * the instructions can change them.
  */
 export function frameInstructions(
-  project: OrchestratorContext['project'],
+  project: IntentraContext['project'],
   instructions: string,
 ): string {
   const recordsNothing = project.role === ProjectRoleDtoSchema.enum.viewer;

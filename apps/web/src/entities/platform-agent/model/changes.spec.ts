@@ -6,8 +6,8 @@ import { changeKinds, countChanges } from './changes';
 
 const CHANGES: AgentsChangesDto = {
   agents: [
-    { id: 'a1', name: 'Orchestrator', kind: 'changed', fields: ['tools'] },
-    { id: 'a2', name: 'Analyst', kind: 'added', fields: [] },
+    { id: 'a1', name: 'Intentra', kind: 'changed', fields: ['tools'] },
+    { id: 'a2', name: 'Researcher', kind: 'added', fields: [] },
   ],
   skills: [],
   modelProfiles: [{ id: 'm1', name: 'Fast', kind: 'removed', fields: [] }],

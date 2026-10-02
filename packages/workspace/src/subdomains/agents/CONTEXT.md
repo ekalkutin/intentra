@@ -5,11 +5,11 @@ A subdomain of the Workspace context (see `CONTEXT-MAP.md`). Intentra's own AI a
 ## Language
 
 **Agent**:
-An AI assistant that Intentra provides to every Workspace. It has a name, a description, a model configuration, instructions, Skills and the tools it may use. Intentra alone designs its Agents, through a Platform Admin; a Workspace cannot create, copy or remove them, and can only give them its own Skills and Model Profiles. An Agent stays the same Agent across Agents Versions however its name, instructions or tools change; only removing it ends it, and an Agent created later is a new one even under the same name. An Agent is the Analyst, the Auditor or a Specialist. In a Conversation an Agent acts on behalf of its Member and can do only what that Member may do; in an Analysis Run it acts as Intentra itself.
+An AI assistant that Intentra provides to every Workspace. It has a name, a description, a model configuration, instructions, Skills and the tools it may use. Intentra alone designs its Agents, through a Platform Admin; a Workspace cannot create, copy or remove them, and can only give them its own Skills and Model Profiles. An Agent stays the same Agent across Agents Versions however its name, instructions or tools change; only removing it ends it, and an Agent created later is a new one even under the same name. An Agent is Intentra, the Auditor or a Specialist. In a Conversation an Agent acts on behalf of its Member and can do only what that Member may do; in an Analysis Run it acts as Intentra itself.
 _Avoid_: Bot, Assistant, AI, Custom agent
 
 **Agents Version**:
-One numbered, unchangeable version of all of Intentra's Agents together: their instructions, Intentra's own Skills, the built-in Model Profiles and which one each Agent runs on, which Specialists exist and which of them the Analyst may call. A Platform Admin never edits an Agents Version; publishing creates a new one, and going back means publishing an earlier one again.
+One numbered, unchangeable version of all of Intentra's Agents together: their instructions, Intentra's own Skills, the built-in Model Profiles and which one each Agent runs on, which Specialists exist and which of them Intentra may call. A Platform Admin never edits an Agents Version; publishing creates a new one, and going back means publishing an earlier one again.
 _Avoid_: Agent Release, Lineup, Blueprint, Snapshot, Deployment
 
 **Published Agents**:
@@ -17,19 +17,19 @@ The latest published Agents Version: the Agents every Workspace works with.
 _Avoid_: Live agents, Production agents, Current release
 
 **Unpublished Agents**:
-The one set of Agents a Platform Admin is still editing, with Intentra's own Skills and the built-in Model Profiles; publishing it makes it the next Agents Version and the Published Agents. It always exists: it starts empty, a Platform Admin creates the Analyst and everything else in it, and until the first publishing there are no Published Agents and no Workspace's Agents work. Right after publishing it is the same as the Published Agents, and every change to it, even a Skill no Agent uses yet, is unpublished until the next publishing. Only Platform Admins work with it: in their own Conversations the Agents run as the Unpublished Agents, in everyone else's as the Published Agents. Each message in a Conversation is answered by the Agents as published at that moment, so publishing in the middle of a Conversation changes how the next answer is made.
+The one set of Agents a Platform Admin is still editing, with Intentra's own Skills and the built-in Model Profiles; publishing it makes it the next Agents Version and the Published Agents. It always exists: it starts empty, a Platform Admin creates Intentra and everything else in it, and until the first publishing there are no Published Agents and no Workspace's Agents work. Right after publishing it is the same as the Published Agents, and every change to it, even a Skill no Agent uses yet, is unpublished until the next publishing. Only Platform Admins work with it: in their own Conversations the Agents run as the Unpublished Agents, in everyone else's as the Published Agents. Each message in a Conversation is answered by the Agents as published at that moment, so publishing in the middle of a Conversation changes how the next answer is made.
 _Avoid_: Agent Draft Release, Pending Release, Release Candidate, Staging, Draft (that is a Knowledge Item)
 
-**Analyst**:
-The main Agent, and the only one people talk to: it interviews them about their product, checks what they say against the Approved knowledge, and points out gaps and contradictions. It hands parts of the work to Specialists. Every Agents Version has exactly one Analyst; a Platform Admin creates it once, can then change everything about it, but cannot remove it, add a second one or turn it into another sort of Agent. In a Conversation it works only in that Conversation's Project and at most as a Contributor, whatever its Member's Project Role: it records, edits and deletes Drafts and confirms a Draft marked Needs Review, and never approves, rejects, retires or confirms an Approved Knowledge Item, not even when a Maintainer asks it to.
-_Avoid_: Analyst, Interviewer, Main agent, Router, Supervisor
+**Intentra**:
+The main Agent, and the only one people talk to: it interviews them about their product, checks what they say against the Approved knowledge, and points out gaps and contradictions. It bears the product's name, since to people it is the product: where this glossary says that Intentra designs, provides or authors something, it means the product as a whole. It hands parts of the work to Specialists. Every Agents Version has exactly one Intentra; a Platform Admin creates it once, can then change everything about it, but cannot remove it, add a second one or turn it into another sort of Agent. In a Conversation it works only in that Conversation's Project and at most as a Contributor, whatever its Member's Project Role: it records, edits and deletes Drafts and confirms a Draft marked Needs Review, and never approves, rejects, retires or confirms an Approved Knowledge Item, not even when a Maintainer asks it to.
+_Avoid_: Analyst, Orchestrator, Interviewer, Main agent, Router, Supervisor
 
 **Auditor**:
 The Agent that carries out Analysis Runs. People do not talk to it, and it works without a Conversation, as Intentra itself. Every Agents Version has exactly one Auditor; a Platform Admin creates it once, can then change everything about it, but cannot remove it, add a second one or turn it into another sort of Agent.
-_Avoid_: Analyst (that is the Agent people talk to), Inspector, Reviewer
+_Avoid_: Analyst, Inspector, Reviewer
 
 **Specialist**:
-An Agent that helps the Analyst with one area of expertise. People do not talk to it directly. A Platform Admin can add and remove Specialists and choose which of them the Analyst may call.
+An Agent that helps Intentra with one area of expertise. People do not talk to it directly. A Platform Admin can add and remove Specialists and choose which of them Intentra may call.
 _Avoid_: Sub-agent, Helper, Worker
 
 **Skill**:
@@ -45,7 +45,7 @@ How many tokens the Agents used in their model calls, recorded for every call wi
 _Avoid_: Cost, Spend, Consumption, Billing
 
 **Conversation**:
-A private exchange between one Active Member and the Analyst within a Project. Only that Member sees it, and a Member may have any number of them in a Project. The Member always speaks first; the Analyst records what it learns as Drafts right away and says in its answer which ones it recorded. The Analyst in it may do only what the Member's current Project Role allows, read anew for every message: with a Viewer it answers questions but records nothing. It remembers nothing from the Member's other Conversations; what the team shares is the knowledge the Agents record from it, not the Conversation itself. It has a title, suggested by Intentra from its start and changeable by its Member. Its Member can hide it from the list, and it comes back on its own once the Member writes in it again, or delete it. It is deleted with its Project, and when its Member leaves or is removed.
+A private exchange between one Active Member and Intentra within a Project. Only that Member sees it, and a Member may have any number of them in a Project. The Member always speaks first; Intentra records what it learns as Drafts right away and says in its answer which ones it recorded. Intentra in it may do only what the Member's current Project Role allows, read anew for every message: with a Viewer it answers questions but records nothing. It remembers nothing from the Member's other Conversations; what the team shares is the knowledge the Agents record from it, not the Conversation itself. It has a title, suggested by Intentra from its start and changeable by its Member. Its Member can hide it from the list, and it comes back on its own once the Member writes in it again, or delete it. It is deleted with its Project, and when its Member leaves or is removed.
 _Avoid_: Chat, Session, Thread, Interview
 
 **Analysis Run**:

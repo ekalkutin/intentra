@@ -101,12 +101,12 @@ export function PlatformAgentPage() {
     );
   }
   const exists = content.agents.some(
-    agent => agent.role === AgentRoleDtoSchema.enum.orchestrator,
+    agent => agent.role === AgentRoleDtoSchema.enum.intentra,
   );
-  if (role.data === AgentRoleDtoSchema.enum.orchestrator && exists) {
+  if (role.data === AgentRoleDtoSchema.enum.intentra && exists) {
     return refusal(
-      t('platformAgent.titleNew', { role: t('platform.roles.orchestrator') }),
-      t('platformAgent.orchestratorExists'),
+      t('platformAgent.titleNew', { role: t('platform.roles.intentra') }),
+      t('platformAgent.intentraExists'),
     );
   }
 

@@ -31,6 +31,7 @@ import { useCurrentProject } from '@/entities/project';
 import { useCurrentWorkspace } from '@/entities/workspace';
 import { toApiError, type ApiError } from '@/shared/api';
 import {
+  conversationPath,
   KNOWLEDGE_SEARCH_PARAMS,
   knowledgeItemPath,
   PROJECT_PAGES,
@@ -207,7 +208,11 @@ export function KnowledgeItemPage() {
           confirming={confirming}
           onConfirm={() => void runConfirm()}
         />
-        <ItemGaps rules={gapRulesOf(gaps?.gaps ?? [], item.key)} />
+        <ItemGaps
+          item={item}
+          rules={gapRulesOf(gaps?.gaps ?? [], item.key)}
+          interviewPath={conversationPath(workspace.slug, project.slug)}
+        />
         <div className='grid gap-10 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-12'>
           <div className='flex min-w-0 flex-col gap-10'>
             <ItemFields item={item} />

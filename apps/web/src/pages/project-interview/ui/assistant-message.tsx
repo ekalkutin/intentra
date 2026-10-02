@@ -386,7 +386,7 @@ function StepRow({ step }: { readonly step: Step }) {
   );
 }
 
-/** A Specialist's tool key as a name: `analyst` → `Analyst`, `ux-researcher` → `Ux researcher`. */
+/** A Specialist's tool key as a name: `researcher` → `Researcher`, `ux-researcher` → `Ux researcher`. */
 function displayName(key: string): string {
   const words = key.replaceAll(/[-_]+/g, ' ').trim();
   return words.charAt(0).toUpperCase() + words.slice(1);
