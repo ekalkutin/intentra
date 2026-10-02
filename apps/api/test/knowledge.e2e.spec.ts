@@ -300,6 +300,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
       kind: 'requirement',
       statuses: { draft: 1, approved: 0, rejected: 1, obsolete: 1 },
       needsReview: 1,
+      unlinked: 0,
     });
     expect(
       response.body.kinds.find(
@@ -309,8 +310,79 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
       kind: 'term',
       statuses: { draft: 1, approved: 0, rejected: 0, obsolete: 0 },
       needsReview: 0,
+      unlinked: 0,
     });
     expect(response.body.access).toEqual({ canRecord: [] });
+  });
+
+  it('counts and lists the Approved items linked to nothing, outside the Project Frame', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    for (const body of [
+      requirement,
+      {
+        kind: 'term',
+        title: 'Report',
+        fields: { definition: 'What a customer prints' },
+      },
+      {
+        ...requirement,
+        title: 'Report header',
+        links: [{ type: 'uses-term', key: 'TERM-1' }],
+      },
+      {
+        ...requirement,
+        title: 'Fast export',
+        fields: { statement: 'Export within a second', type: 'non-functional' },
+      },
+    ]) {
+      await app
+        .request()
+        .post(path)
+        .set('Authorization', ada)
+        .send(body)
+        .expect(HttpStatus.CREATED);
+    }
+    await app
+      .request()
+      .post(`${path}/approve`)
+      .set('Authorization', ada)
+      .send({
+        items: ['REQ-1', 'TERM-1', 'REQ-2', 'REQ-3'].map(key => ({
+          key,
+          version: 1,
+        })),
+      })
+      .expect(HttpStatus.OK);
+
+    // Act
+    const summary = await app
+      .request()
+      .get(`${path}/summary`)
+      .set('Authorization', ada);
+    const list = await app
+      .request()
+      .get(path)
+      .query({ unlinked: 'true' })
+      .set('Authorization', ada);
+
+    // Assert
+    expect(
+      summary.body.kinds.map(({ kind, unlinked }: Record<string, unknown>) => [
+        kind,
+        unlinked,
+      ]),
+    ).toContainEqual(['requirement', 1]);
+    expect(
+      summary.body.kinds.find(
+        (entry: { kind: string }) => entry.kind === 'term',
+      ).unlinked,
+    ).toBe(0);
+    expect(list.status).toBe(HttpStatus.OK);
+    expect(list.body.total).toBe(1);
+    expect(list.body.items.map(({ key }: { key: string }) => key)).toEqual([
+      'REQ-1',
+    ]);
   });
 
   it('hides the summary from someone outside the Workspace', async () => {

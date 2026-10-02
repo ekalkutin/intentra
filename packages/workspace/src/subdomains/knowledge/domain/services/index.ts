@@ -16,3 +16,4 @@ export { KnowledgePolicyService } from './knowledge-policy.service.js';
 export { KnowledgeRecordingService } from './knowledge-recording.service.js';
 export { KnowledgeRetirementService } from './knowledge-retirement.service.js';
 export { ReviewMarkingService } from './review-marking.service.js';
+export { UnlinkedKnowledgeService } from './unlinked-knowledge.service.js';

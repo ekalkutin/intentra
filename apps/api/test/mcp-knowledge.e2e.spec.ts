@@ -195,6 +195,7 @@ describe('Knowledge tools over MCP', () => {
       approved: 0,
       rejected: 0,
       obsolete: 0,
+      unlinked: 0,
       needsReview: 0,
     });
     expect(result.structuredContent?.canRecord).toHaveLength(11);

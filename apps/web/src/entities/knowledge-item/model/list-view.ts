@@ -19,6 +19,8 @@ export const KNOWLEDGE_VIEWS = {
   review: 'review',
   rejected: 'rejected',
   obsolete: 'obsolete',
+  /** Approved, linked to nothing and outside the Project Frame: agents reach it only as an Anchor. */
+  unlinked: 'unlinked',
 } as const;
 
 export type KnowledgeView =
@@ -36,6 +38,7 @@ const FILTERS = {
   review: { statuses: [draft, approved], needsReview: true },
   rejected: { statuses: [rejected] },
   obsolete: { statuses: [obsolete] },
+  unlinked: { statuses: [approved], unlinked: true },
 } as const satisfies Record<KnowledgeView, Partial<ListKnowledgeItemsDto>>;
 
 /** What the list reads for a view and a Kind (every Kind when null). */
@@ -133,6 +136,7 @@ export function viewCount(
     review: summary.needsReview,
     rejected,
     obsolete,
+    unlinked: summary.unlinked,
   };
 
   return counts[view];

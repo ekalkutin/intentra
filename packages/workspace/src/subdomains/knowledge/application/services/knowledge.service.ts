@@ -44,6 +44,7 @@ import {
   KnowledgeRecordingService,
   KnowledgeRetirementService,
   ReviewMarkingService,
+  UnlinkedKnowledgeService,
   type ContextPackCandidate,
   type SeenDraft,
 } from '../../domain/services/index.js';
@@ -55,8 +56,6 @@ import {
   KnowledgeLink,
   KnowledgeLinkType,
   KnowledgeStatus,
-  RequirementContent,
-  RequirementType,
 } from '../../domain/value-objects/index.js';
 import { KnowledgeItemNotFoundException } from '../exceptions/index.js';
 import {
@@ -119,6 +118,7 @@ export class KnowledgeService implements KnowledgeApi {
   readonly #knowledgeConfirmationService = new KnowledgeConfirmationService();
   readonly #reviewMarkingService = new ReviewMarkingService();
   readonly #contextPackAssemblyService = new ContextPackAssemblyService();
+  readonly #unlinkedKnowledgeService = new UnlinkedKnowledgeService();
 
   constructor(
     private readonly unitOfWork: UnitOfWork,
@@ -195,15 +195,20 @@ export class KnowledgeService implements KnowledgeApi {
       }),
     };
 
-    const items = await this.knowledgeItemRepository.findMany(props, {
-      take: query.take,
-      offset: query.offset,
-      order:
-        query.order === KnowledgeListOrderDtoSchema.enum['newest-first']
-          ? KNOWLEDGE_ITEM_ORDERS.newestFirst
-          : KNOWLEDGE_ITEM_ORDERS.byKey,
-    });
-    const total = await this.knowledgeItemRepository.count(props);
+    const newestFirst =
+      query.order === KnowledgeListOrderDtoSchema.enum['newest-first'];
+    const { items, total } = query.unlinked
+      ? await this.listUnlinked(project.id, query, newestFirst)
+      : {
+          items: await this.knowledgeItemRepository.findMany(props, {
+            take: query.take,
+            offset: query.offset,
+            order: newestFirst
+              ? KNOWLEDGE_ITEM_ORDERS.newestFirst
+              : KNOWLEDGE_ITEM_ORDERS.byKey,
+          }),
+          total: await this.knowledgeItemRepository.count(props),
+        };
     const answers = await this.findAnswers(project.id, items);
 
     return {
@@ -230,8 +235,13 @@ export class KnowledgeService implements KnowledgeApi {
     const counts = await this.knowledgeItemRepository.countGroups({
       projectId: project.id,
     });
+    const unlinked = await this.findUnlinked(project.id);
 
-    return toKnowledgeSummaryDto(counts, projectRole);
+    return toKnowledgeSummaryDto(
+      counts,
+      unlinked.map(item => item.kind),
+      projectRole,
+    );
   }
 
   public async get(
@@ -642,6 +652,40 @@ export class KnowledgeService implements KnowledgeApi {
     });
   }
 
+  /**
+   * The Project's unlinked items, read whole: whether an item is linked
+   * depends on every Approved item, so there is no query for a page of them.
+   */
+  private async findUnlinked(projectId: ProjectId): Promise<KnowledgeItem[]> {
+    const approved = await this.knowledgeItemRepository.findMany({
+      projectId,
+      statuses: [KnowledgeStatus.Approved],
+    });
+
+    return this.#unlinkedKnowledgeService.findUnlinked(approved);
+  }
+
+  /** A page of the unlinked items, of a Kind if asked, by key or the newest first. */
+  private async listUnlinked(
+    projectId: ProjectId,
+    query: ListKnowledgeItemsDto,
+    newestFirst: boolean,
+  ): Promise<{ items: KnowledgeItem[]; total: number }> {
+    const unlinked = (await this.findUnlinked(projectId)).filter(
+      item => !query.kind || item.kind.value === query.kind,
+    );
+    if (newestFirst) {
+      unlinked.sort((a, b) =>
+        Temporal.Instant.compare(b.recordedAt, a.recordedAt),
+      );
+    }
+
+    return {
+      items: unlinked.slice(query.offset, query.offset + query.take),
+      total: unlinked.length,
+    };
+  }
+
   /** The Anchors in the order asked, each once; each must exist and be Approved. */
   private async findAnchors(
     projectId: ProjectId,
@@ -873,11 +917,7 @@ export class KnowledgeService implements KnowledgeApi {
     return [
       ...(await approved(KnowledgeKind.ProductOverview)),
       ...(await approved(KnowledgeKind.Constraint)),
-      ...requirements.filter(
-        ({ content }) =>
-          content instanceof RequirementContent &&
-          content.type === RequirementType.NonFunctional,
-      ),
+      ...requirements.filter(item => item.isOfProjectFrame()),
     ];
   }
 

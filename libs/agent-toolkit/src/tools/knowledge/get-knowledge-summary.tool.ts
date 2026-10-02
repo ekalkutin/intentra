@@ -12,7 +12,7 @@ const count = z.number().int().min(0);
 export const getKnowledgeSummaryTool = createTool({
   id: 'get_knowledge_summary',
   description:
-    "Counts a Project's whole knowledge in one call: for each Kind, how many items are Draft, Approved, Rejected and Obsolete, and how many are marked Needs Review. Use it to see what the Project knows and where the gaps are (a Kind with nothing Approved, a pile of Drafts waiting, items to review) before listing items with list_knowledge.",
+    "Counts a Project's whole knowledge in one call: for each Kind, how many items are Draft, Approved, Rejected and Obsolete, and how many are marked Needs Review. Use it to see what the Project knows and where the gaps are (a Kind with nothing Approved, a pile of Drafts waiting, items to review, items linked to nothing) before listing items with list_knowledge.",
   inputSchema: z.object({ projectId: projectIdSchema }),
   outputSchema: z.object({
     kinds: z
@@ -25,6 +25,9 @@ export const getKnowledgeSummaryTool = createTool({
           obsolete: count,
           needsReview: count.describe(
             'Drafts and Approved items marked Needs Review.',
+          ),
+          unlinked: count.describe(
+            'Approved items with no Link either way, outside the Project Frame: no Context Pack reaches them but as an Anchor. Link them to what they relate to.',
           ),
         }),
       )
@@ -45,10 +48,11 @@ export const getKnowledgeSummaryTool = createTool({
       );
 
     return {
-      kinds: summary.kinds.map(({ kind, statuses, needsReview }) => ({
+      kinds: summary.kinds.map(({ kind, statuses, needsReview, unlinked }) => ({
         kind,
         ...statuses,
         needsReview,
+        unlinked,
       })),
       canRecord: summary.access.canRecord,
     };

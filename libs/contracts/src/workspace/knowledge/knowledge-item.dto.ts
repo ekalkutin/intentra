@@ -127,6 +127,8 @@ export type KnowledgeKindSummaryDto = {
   readonly statuses: { readonly [S in KnowledgeStatusDto]: number };
   /** Drafts and Approved items marked Needs Review. */
   readonly needsReview: number;
+  /** Approved items with no Link either way, outside the Project Frame: agents reach them only as an Anchor. */
+  readonly unlinked: number;
 };
 
 /** How much a Project knows, counted whole: every Kind, in the model's order, empty ones included. */

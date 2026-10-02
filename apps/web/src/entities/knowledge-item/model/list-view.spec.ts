@@ -125,21 +125,31 @@ describe('viewCount and viewTotal', () => {
     kind: 'requirement' as const,
     statuses: { draft: 2, approved: 5, rejected: 1, obsolete: 3 },
     needsReview: 1,
+    unlinked: 4,
   };
   const terms = {
     kind: 'term' as const,
     statuses: { draft: 1, approved: 0, rejected: 0, obsolete: 0 },
     needsReview: 0,
+    unlinked: 0,
   };
 
   it('counts each view of a Kind from its statuses and marks', () => {
     // Act
     const counts = (
-      ['all', 'approved', 'drafts', 'review', 'rejected', 'obsolete'] as const
+      [
+        'all',
+        'approved',
+        'drafts',
+        'review',
+        'rejected',
+        'obsolete',
+        'unlinked',
+      ] as const
     ).map(view => viewCount(requirements, view));
 
     // Assert
-    expect(counts).toEqual([11, 5, 2, 1, 1, 3]);
+    expect(counts).toEqual([11, 5, 2, 1, 1, 3, 4]);
   });
 
   it('adds a view up over every Kind, or keeps to one', () => {

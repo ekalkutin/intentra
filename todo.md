@@ -136,7 +136,9 @@ Order (decided 2026-10-02): dogfooding as early as possible.
   - Checked by the user (2026-10-02): "Утвердить все…" approved the remaining 31 Drafts in one step; the Project "Intentra" holds 72 Approved items, no Drafts, nothing under review; its Project Frame has 5 items.
   - Left for later: the next feature built from a fresh session that has the `intentra` MCP tools natively (this session called the same endpoint through a script).
   - Done (2026-10-02): the Link rule "a Requirement or Business Rule is justified by every Decision that shapes how it is built (a UI requirement by the UI decisions)" in `docs/agents/orchestrator.md` and in the `links` description of the `record_` / `edit_` tools; REQ-10 recorded over MCP as the replacement of REQ-6 with `justified by DEC-2`, waiting for approval. A Platform Admin still publishes the new Links part of the instructions.
-- [ ] **5. Unlinked.** A count in `get_knowledge_summary` and `/knowledge/summary`, a view on the Knowledge page.
+- [x] **5. Unlinked.** A count in `get_knowledge_summary` and `/knowledge/summary`, a view on the Knowledge page.
+  - Decided (2026-10-02): the Project Frame's items (Product Overview, Constraints, non-functional Requirements) are never unlinked, since agents read the frame whatever it links to; only Links with Approved items count, since a Context Pack walks only those.
+  - Built: `KnowledgeItem.isOfProjectFrame()` (now also used by `findFrame`); `UnlinkedKnowledgeService.findUnlinked` (domain): Approved, outside the frame, no Link of its own, and no Approved item linking to it. Computed in memory over the Project's Approved items (MVP; no query can page it). `unlinked` per Kind in the summary (REST and `get_knowledge_summary`); `unlinked=true` on the list (REST and `list_knowledge`), which leaves `statuses` and `needsReview` aside. Web: a view "Без связей" with a hint on what to do. On the Project "Intentra" it found DEC-3 (the web UI's stack), which nothing is justified by.
 - [ ] **6. "Контекст для агента" in the UI.**
 
 ## Paused for Context for agents: Platform Admin and Agents as data

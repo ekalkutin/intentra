@@ -32,6 +32,14 @@ export const ListKnowledgeItemsDtoSchema = z.object({
       z.boolean(),
     )
     .optional(),
+  /**
+   * Only the Approved items no Context Pack could reach but as its own Anchor:
+   * no Link either way with another Approved item, and not of the Project
+   * Frame (`true`); with it, `statuses` and `needsReview` are left aside.
+   */
+  unlinked: z
+    .preprocess(value => (value === 'true' ? true : value), z.literal(true))
+    .optional(),
   /** By Kind and Knowledge Key when left out. */
   order: KnowledgeListOrderDtoSchema.optional(),
   take: z.coerce.number().int().min(1).max(200).default(50),

@@ -24,6 +24,8 @@ import {
   KnowledgeTitle,
   Rationale,
   RejectionReason,
+  RequirementContent,
+  RequirementType,
   RetirementReason,
   type KnowledgeContent,
   type KnowledgeLinkProps,
@@ -247,6 +249,19 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
 
   public isApproved(): boolean {
     return this.#status.equals(KnowledgeStatus.Approved);
+  }
+
+  /**
+   * Whether it is of a Kind the Project Frame holds when Approved, whatever it
+   * links to: the Product Overview, a Constraint, a non-functional Requirement.
+   */
+  public isOfProjectFrame(): boolean {
+    return (
+      this.kind.equals(KnowledgeKind.ProductOverview) ||
+      this.kind.equals(KnowledgeKind.Constraint) ||
+      (this.#content instanceof RequirementContent &&
+        this.#content.type === RequirementType.NonFunctional)
+    );
   }
 
   /** Records a Draft; its Kind is the Kind of its content. */

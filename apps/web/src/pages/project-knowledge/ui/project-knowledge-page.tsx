@@ -54,11 +54,13 @@ const SINGLE_STATUS_VIEWS: readonly KnowledgeView[] = [
   KNOWLEDGE_VIEWS.drafts,
   KNOWLEDGE_VIEWS.rejected,
   KNOWLEDGE_VIEWS.obsolete,
+  KNOWLEDGE_VIEWS.unlinked,
 ];
 
 /**
  * A Project's knowledge: a status view (every item, Approved, Drafts, Needs
- * Review, Rejected, Obsolete; none overlaps another but the first) and a
+ * Review, Rejected, Obsolete, and the Approved items linked to nothing; none
+ * overlaps another but the first and the last) and a
  * Kind, chosen above the list. Every count comes from the Project's summary; every Kind is a
  * group read a page at a time once it comes near the screen, or one Kind is
  * a table of its fields.
@@ -171,6 +173,11 @@ export function ProjectKnowledgePage() {
             }
           />
           <div className='flex flex-col gap-6'>
+            {view === KNOWLEDGE_VIEWS.unlinked && (shown ?? 0) > 0 && (
+              <p className='max-w-2xl text-sm text-pretty text-muted-foreground'>
+                {t('knowledge.unlinkedHint')}
+              </p>
+            )}
             {!summary && !loadError && (
               <List>
                 <ListSkeleton rows={4} />

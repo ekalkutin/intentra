@@ -36,6 +36,9 @@ function toSearch(filter: Partial<ListKnowledgeItemsDto>): string {
   if (filter.needsReview !== undefined) {
     params.set('needsReview', String(filter.needsReview));
   }
+  if (filter.unlinked) {
+    params.set('unlinked', 'true');
+  }
   if (filter.order) {
     params.set('order', filter.order);
   }
