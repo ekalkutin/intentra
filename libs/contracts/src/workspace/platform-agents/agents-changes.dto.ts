@@ -19,6 +19,7 @@ export type AgentsChangeDto = {
 
 export const PublishingProblemCodeDtoSchema = z.enum([
   'intentra-count',
+  'auditor-count',
   'duplicate-skill-name',
   'tool-unavailable',
   'skill-missing',

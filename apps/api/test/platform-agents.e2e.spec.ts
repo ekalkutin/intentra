@@ -107,7 +107,7 @@ describe('/api/platform/agents', () => {
     return response.body.id;
   }
 
-  /** A Model Profile and Intentra on it, published as Agents Version 1. */
+  /** A Model Profile with Intentra and the Auditor on it, published as Agents Version 1. */
   async function publishIntentra(): Promise<string> {
     const profileId = await createModelProfile('Default');
     const intentra = await post(`${UNPUBLISHED_PATH}/agents`, {
@@ -118,6 +118,15 @@ describe('/api/platform/agents', () => {
       skillIds: [],
       modelProfileId: profileId,
       role: 'intentra',
+    }).expect(HttpStatus.CREATED);
+    await post(`${UNPUBLISHED_PATH}/agents`, {
+      name: 'Auditor',
+      description: 'Looks over the knowledge',
+      instructions: 'Find contradictions.',
+      tools: ['list_knowledge', 'record_open_question'],
+      skillIds: [],
+      modelProfileId: profileId,
+      role: 'auditor',
     }).expect(HttpStatus.CREATED);
     await post(VERSIONS_PATH, { note: 'Intentra' }).expect(HttpStatus.CREATED);
 
@@ -178,7 +187,10 @@ describe('/api/platform/agents', () => {
         modelProfiles: [
           { id: profileId, name: 'Default', kind: 'added', fields: [] },
         ],
-        problems: [{ code: 'intentra-count', subject: null, tool: null }],
+        problems: [
+          { code: 'intentra-count', subject: null, tool: null },
+          { code: 'auditor-count', subject: null, tool: null },
+        ],
       });
     });
 
@@ -229,6 +241,31 @@ describe('/api/platform/agents', () => {
       // Assert
       expect(response.status).toBe(HttpStatus.CONFLICT);
       expect(response.body.code).toBe('INTENTRA_EXISTS');
+    });
+
+    it('refuses a second Auditor and keeps the one there is', async () => {
+      // Arrange
+      await publishIntentra();
+      const { content } = await getUnpublished();
+      const auditor = content.agents.find(
+        (agent: { role: string }) => agent.role === 'auditor',
+      );
+
+      // Act
+      const adding = await post(`${UNPUBLISHED_PATH}/agents`, {
+        ...auditor,
+        role: 'auditor',
+      });
+      const removing = await app
+        .request()
+        .delete(`${UNPUBLISHED_PATH}/agents/${auditor.id}`)
+        .set('Authorization', admin);
+
+      // Assert
+      expect(adding.status).toBe(HttpStatus.CONFLICT);
+      expect(adding.body.code).toBe('AUDITOR_EXISTS');
+      expect(removing.status).toBe(HttpStatus.CONFLICT);
+      expect(removing.body.code).toBe('AUDITOR_NOT_REMOVABLE');
     });
   });
 

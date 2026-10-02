@@ -2,6 +2,8 @@ import { Aggregate } from '@intentra/shared-kernel';
 
 import {
   AgentNotFoundException,
+  AuditorExistsException,
+  AuditorNotRemovableException,
   IntentraExistsException,
   IntentraNotRemovableException,
   InvalidAgentException,
@@ -55,7 +57,7 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
     });
   }
 
-  /** Any number of Specialists, but only one Intentra. */
+  /** Any number of Specialists, but only one Intentra and one Auditor. */
   public addAgent(
     role: AgentRole,
     spec: AgentSpec,
@@ -67,6 +69,12 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
       this.#content.agents.some(other => other.isIntentra())
     ) {
       throw new IntentraExistsException();
+    }
+    if (
+      agent.isAuditor() &&
+      this.#content.agents.some(other => other.isAuditor())
+    ) {
+      throw new AuditorExistsException();
     }
     this.ensureSound(agent, availableTools);
     this.replace({ agents: [...this.#content.agents, agent] });
@@ -92,8 +100,12 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
 
   /** Intentra stops calling the removed Specialist. */
   public removeAgent(id: AgentId): void {
-    if (this.getAgent(id).isIntentra()) {
+    const agent = this.getAgent(id);
+    if (agent.isIntentra()) {
       throw new IntentraNotRemovableException();
+    }
+    if (agent.isAuditor()) {
+      throw new AuditorNotRemovableException();
     }
     this.replace({
       agents: this.#content.agents
@@ -227,7 +239,7 @@ export class UnpublishedAgents extends Aggregate<UnpublishedAgentsId> {
       const specialist = this.#content.agents.find(candidate =>
         candidate.id.equals(specialistId),
       );
-      if (!specialist || specialist.isIntentra()) {
+      if (!specialist?.isSpecialist()) {
         throw new InvalidAgentException('Intentra may call only Specialists');
       }
     }

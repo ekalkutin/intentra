@@ -1,5 +1,18 @@
 export { AccessApi } from './access/access.api.js';
 export {
+  AnalysisRunFailureDtoSchema,
+  AnalysisRunScopeDtoSchema,
+  AnalysisRunStatusDtoSchema,
+  ListAnalysisRunsDtoSchema,
+  type AnalysisRunDto,
+  type AnalysisRunFailureDto,
+  type AnalysisRunPageDto,
+  type AnalysisRunScopeDto,
+  type AnalysisRunStatusDto,
+  type ListAnalysisRunsDto,
+} from './analysis-runs/analysis-run.dto.js';
+export { AnalysisRunsApi } from './analysis-runs/analysis-runs.api.js';
+export {
   AgentKindDtoSchema,
   intentraCaller,
   type AgentDto,

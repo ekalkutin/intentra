@@ -5,11 +5,13 @@ import { ADAPTERS } from './infrastructure/adapters/index.js';
 import { MEMORY_PROVIDER } from './infrastructure/runtime/index.js';
 
 export {
+  AnalysisRunsService,
   ConversationsService,
   PlatformAgentsService,
   ProviderKeyService,
 } from './application/services/index.js';
 export {
+  AnalysisRunRepository,
   ConversationStore,
   ProviderKeyRepository,
 } from './application/ports/outbound/index.js';

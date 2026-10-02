@@ -1,7 +1,12 @@
+export { AnalysisRunForbiddenException } from './analysis-run-forbidden.exception.js';
+export { AnalysisRunFinishedException } from './analysis-run-finished.exception.js';
+export { AuditorExistsException } from './auditor-exists.exception.js';
+export { AuditorNotRemovableException } from './auditor-not-removable.exception.js';
 export { AgentNotFoundException } from './agent-not-found.exception.js';
 export { AgentsNotPublishableException } from './agents-not-publishable.exception.js';
 export { AgentsUnchangedException } from './agents-unchanged.exception.js';
 export { AgentsVersionNotFoundException } from './agents-version-not-found.exception.js';
+export { InvalidAnalysisRunException } from './invalid-analysis-run.exception.js';
 export { InvalidAgentException } from './invalid-agent.exception.js';
 export { InvalidConversationTitleException } from './invalid-conversation-title.exception.js';
 export { InvalidModelProfileException } from './invalid-model-profile.exception.js';

@@ -1,4 +1,5 @@
 import type { AccessApi } from './access/access.api.js';
+import type { AnalysisRunsApi } from './analysis-runs/analysis-runs.api.js';
 import type { ConversationsApi } from './conversations/conversations.api.js';
 import type { InvitationsApi } from './invitations/invitations.api.js';
 import type { KnowledgeApi } from './knowledge/knowledge.api.js';
@@ -21,6 +22,7 @@ export abstract class WorkspaceApi {
   abstract readonly access: AccessApi;
   abstract readonly knowledge: KnowledgeApi;
   abstract readonly conversations: ConversationsApi;
+  abstract readonly analysisRuns: AnalysisRunsApi;
   abstract readonly providerKey: ProviderKeyApi;
   /** Only for a Platform Admin. */
   abstract readonly platformAgents: PlatformAgentsApi;

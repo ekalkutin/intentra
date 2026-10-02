@@ -25,7 +25,7 @@ import type { SaveSkillDto } from './save-skill.dto.js';
 export abstract class PlatformAgentsApi {
   abstract getUnpublished(actor: Actor): Promise<UnpublishedAgentsDto>;
 
-  /** 409 `INTENTRA_EXISTS` for a second Intentra. */
+  /** 409 `INTENTRA_EXISTS` for a second Intentra, `AUDITOR_EXISTS` for a second Auditor. */
   abstract createAgent(
     actor: Actor,
     data: CreateAgentDto,

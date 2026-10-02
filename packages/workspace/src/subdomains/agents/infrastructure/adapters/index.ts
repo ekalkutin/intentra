@@ -1,6 +1,8 @@
 import { Provider } from '@nestjs/common';
 
 import { AGENTS_VERSION_REPOSITORY_PROVIDER } from './outbound/agents-version-repository.adapter.js';
+import { ANALYSIS_RUN_REPOSITORY_PROVIDER } from './outbound/analysis-run-repository.adapter.js';
+import { AUDITOR_PROVIDER } from './outbound/auditor.adapter.js';
 import { CONVERSATION_STORE_PROVIDER } from './outbound/conversation-store.adapter.js';
 import { INTENTRA_PROVIDER } from './outbound/intentra.adapter.js';
 import { PROVIDER_KEY_CIPHER_PROVIDER } from './outbound/provider-key-cipher.adapter.js';
@@ -12,10 +14,12 @@ import { UNPUBLISHED_AGENTS_REPOSITORY_PROVIDER } from './outbound/unpublished-a
 export const ADAPTERS: Provider[] = [
   CONVERSATION_STORE_PROVIDER,
   INTENTRA_PROVIDER,
+  AUDITOR_PROVIDER,
   PROVIDER_KEY_REPOSITORY_PROVIDER,
   PROVIDER_KEY_CIPHER_PROVIDER,
   PROVIDER_KEY_VERIFIER_PROVIDER,
   UNPUBLISHED_AGENTS_REPOSITORY_PROVIDER,
   AGENTS_VERSION_REPOSITORY_PROVIDER,
+  ANALYSIS_RUN_REPOSITORY_PROVIDER,
   TOOL_CATALOG_PROVIDER,
 ];

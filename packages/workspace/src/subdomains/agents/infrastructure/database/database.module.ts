@@ -4,6 +4,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   AgentsVersionModel,
   AgentsVersionSchema,
+  AnalysisRunModel,
+  AnalysisRunSchema,
   ProviderKeyModel,
   ProviderKeySchema,
   UnpublishedAgentsModel,
@@ -16,6 +18,7 @@ import {
       { name: ProviderKeyModel.name, schema: ProviderKeySchema },
       { name: UnpublishedAgentsModel.name, schema: UnpublishedAgentsSchema },
       { name: AgentsVersionModel.name, schema: AgentsVersionSchema },
+      { name: AnalysisRunModel.name, schema: AnalysisRunSchema },
     ]),
   ],
   exports: [MongooseModule],

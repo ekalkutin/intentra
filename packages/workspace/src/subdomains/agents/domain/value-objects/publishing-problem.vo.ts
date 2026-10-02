@@ -3,6 +3,9 @@ export class PublishingProblemKind {
   public static readonly IntentraCount = new PublishingProblemKind(
     'intentra-count',
   );
+  public static readonly AuditorCount = new PublishingProblemKind(
+    'auditor-count',
+  );
   public static readonly DuplicateSkillName = new PublishingProblemKind(
     'duplicate-skill-name',
   );
@@ -62,6 +65,10 @@ export class PublishingProblem {
 
   public static intentraCount(): PublishingProblem {
     return new PublishingProblem(PublishingProblemKind.IntentraCount, null);
+  }
+
+  public static auditorCount(): PublishingProblem {
+    return new PublishingProblem(PublishingProblemKind.AuditorCount, null);
   }
 
   public static duplicateSkillName(name: string): PublishingProblem {
@@ -134,6 +141,8 @@ export class PublishingProblem {
     switch (this.#kind) {
       case PublishingProblemKind.IntentraCount:
         return 'there must be exactly one Intentra';
+      case PublishingProblemKind.AuditorCount:
+        return 'there must be exactly one Auditor';
       case PublishingProblemKind.DuplicateSkillName:
         return `more than one Skill is called "${name}"`;
       case PublishingProblemKind.ToolUnavailable:

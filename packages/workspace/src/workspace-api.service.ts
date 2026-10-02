@@ -4,6 +4,7 @@ import type { WorkspaceApi } from '@intentra/contracts/workspace';
 
 import { PlatformWorkspacesService } from './platform-workspaces.service.js';
 import {
+  AnalysisRunsService,
   ConversationsService,
   PlatformAgentsService,
   ProviderKeyService,
@@ -41,6 +42,8 @@ export class WorkspaceApiService implements WorkspaceApi {
     public readonly knowledge: KnowledgeService,
     @Inject(ConversationsService)
     public readonly conversations: ConversationsService,
+    @Inject(AnalysisRunsService)
+    public readonly analysisRuns: AnalysisRunsService,
     @Inject(ProviderKeyService)
     public readonly providerKey: ProviderKeyService,
     @Inject(PlatformAgentsService)

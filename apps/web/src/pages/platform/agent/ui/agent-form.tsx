@@ -158,11 +158,7 @@ export function AgentForm({
         title={
           agent ? agent.name : t('platformAgent.titleNew', { role: roleName })
         }
-        description={
-          isIntentra
-            ? t('platformAgent.aboutIntentra')
-            : t('platformAgent.aboutSpecialist')
-        }
+        description={t(`platformAgent.about.${role}`)}
       />
       <form
         onSubmit={submit}
@@ -197,9 +193,7 @@ export function AgentForm({
               {...form.register('description')}
             />
             <FieldDescription>
-              {isIntentra
-                ? t('platformAgent.descriptionHintIntentra')
-                : t('platformAgent.descriptionHintSpecialist')}
+              {t(`platformAgent.descriptionHints.${role}`)}
             </FieldDescription>
             <FieldError errors={[errors.description]} />
           </Field>
@@ -420,7 +414,7 @@ export function AgentForm({
               </PageSection>
             )}
           />
-          {agent && !isIntentra && (
+          {agent && role === AgentRoleDtoSchema.enum.specialist && (
             <div>
               <ConfirmDialog
                 trigger={

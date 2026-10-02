@@ -1,7 +1,13 @@
 export {
+  AnalysisRunRepository,
+  type AnalysisRunPage,
+  type AnalysisRunQueryProps,
+} from './analysis-run-repository.port.js';
+export {
   AgentsVersionRepository,
   type AgentsVersionQueryProps,
 } from './agents-version-repository.port.js';
+export { Auditor, type AuditResult, type AuditTask } from './auditor.port.js';
 export {
   ConversationStore,
   type ConversationDeleteProps,

@@ -924,6 +924,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       'Здесь настраивают агентов Intentra. Это может только администратор платформы.',
     roles: {
       intentra: 'Intentra',
+      auditor: 'Auditor',
       specialist: 'Specialist',
     },
     changeKinds: {
@@ -950,6 +951,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     descriptionNothing:
       'Пространства не могут разговаривать с агентами, пока вы не опубликуете первую версию.',
     createIntentra: 'Создать Intentra',
+    createAuditor: 'Создать Auditor',
     createSpecialist: 'Новый Specialist',
     emptyNoModels:
       'Агентов пока нет. Сначала добавьте модель: каждый агент работает на одной из них.',
@@ -960,15 +962,22 @@ bearer_token_env_var = "INTENTRA_TOKEN"
   platformAgent: {
     back: 'Агенты',
     titleNew: 'Новый {{role}}',
-    aboutIntentra:
-      'С ним разговаривают люди в пространствах. Он зовёт Specialists, когда нужна их работа.',
-    aboutSpecialist:
-      'Intentra зовёт его, когда по описанию видит, что задача для него.',
+    about: {
+      intentra:
+        'С ней разговаривают люди в пространствах. Она зовёт Specialists, когда нужна их работа.',
+      auditor:
+        'Проверяет знания проекта без разговора: ищет противоречия и неясности и записывает их открытыми вопросами от имени Intentra.',
+      specialist:
+        'Intentra зовёт его, когда по описанию видит, что задача для него.',
+    },
     name: 'Имя',
     description: 'Описание',
-    descriptionHintIntentra: 'Коротко, что делает агент.',
-    descriptionHintSpecialist:
-      'Intentra читает это, решая, звать ли агента. Напишите, за что он берётся и что возвращает.',
+    descriptionHints: {
+      intentra: 'Коротко, что делает агент.',
+      auditor: 'Коротко, что делает агент.',
+      specialist:
+        'Intentra читает это, решая, звать ли агента. Напишите, за что он берётся и что возвращает.',
+    },
     instructions: 'Инструкции',
     instructionsHint:
       'Как агент работает. Проект и правила роли участника в проекте код добавит сам.',
@@ -1001,8 +1010,10 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       'Агент уйдёт из неопубликованных, и Intentra перестанет его звать. Пространства потеряют его со следующей публикацией.',
     missing: 'Такого агента нет',
     missingHint: 'Возможно, его удалили. Откройте агента из списка.',
-    intentraExists:
-      'Intentra уже есть, второй не нужно. Откройте её из списка.',
+    exists: {
+      intentra: 'Intentra уже есть, второй не нужно. Откройте её из списка.',
+      auditor: 'Auditor уже есть, второй не нужен. Откройте его из списка.',
+    },
     unknownRole: 'Выберите, кого создать, на странице агентов.',
   },
   platformSkills: {
@@ -1135,7 +1146,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     changedFields: 'Изменено: {{fields}}',
     none: 'Неопубликованных изменений нет: пространства работают на том же, что вы видите.',
     noneNothing:
-      'Публиковать пока нечего. Добавьте модель и Intentra: с ними можно выпустить версию 1.',
+      'Публиковать пока нечего. Добавьте модель, Intentra и Auditor: с ними можно выпустить версию 1.',
     publish: 'Публикация',
     publishHint:
       'Пространства перейдут на версию {{number}} со следующего сообщения в разговоре.',
@@ -1146,6 +1157,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     published: 'Версия {{number}} опубликована.',
     problemTexts: {
       'intentra-count': 'Intentra должна быть ровно одна.',
+      'auditor-count': 'Нужен ровно один Auditor.',
       'duplicate-skill-name': 'Несколько Skills называются {{name}}.',
       'tool-unavailable':
         '{{name}} использует инструмент {{tool}}, которого больше нет в коде.',
@@ -1405,6 +1417,8 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     INVALID_MODEL_PROFILE: 'Проверьте поля модели',
     SKILL_NAME_TAKEN: 'Skill с таким именем уже есть',
     INTENTRA_EXISTS: 'Intentra уже есть',
+    AUDITOR_EXISTS: 'Auditor уже есть',
+    AUDITOR_NOT_REMOVABLE: 'Auditor удалить нельзя',
     INTENTRA_NOT_REMOVABLE: 'Intentra удалить нельзя',
     MODEL_PROFILE_IN_USE:
       'На этой модели работают агенты. Сначала переведите их на другую',

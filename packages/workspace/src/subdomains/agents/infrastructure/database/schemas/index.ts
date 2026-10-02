@@ -3,6 +3,7 @@ export {
   toAgentsContentDocument,
   type AgentsContentDocument,
 } from './agents-content.document.js';
+export { AnalysisRunModel, AnalysisRunSchema } from './analysis-run.schema.js';
 export {
   AgentsVersionModel,
   AgentsVersionSchema,

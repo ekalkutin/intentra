@@ -5,7 +5,8 @@ import { createSkill } from '@mastra/core/skills';
 
 import { ProjectRoleDtoSchema } from '@intentra/contracts/workspace';
 
-import { AGENT_TOOLS, isReadOnlyTool, type AgentTool } from '../catalog.js';
+import { agentToolsOf } from '../agent-tools.js';
+import { isReadOnlyTool } from '../catalog.js';
 
 import type { AgentDefinition } from './agent-definition.js';
 import {
@@ -13,10 +14,7 @@ import {
   type IntentraContext,
 } from './intentra-context.js';
 import { frameInstructions } from './intentra-instructions.js';
-import {
-  reportingFailures,
-  type UnexpectedErrorListener,
-} from './reporting-failures.js';
+import type { UnexpectedErrorListener } from './reporting-failures.js';
 
 export type IntentraOptions = {
   readonly intentra: AgentDefinition;
@@ -97,16 +95,7 @@ function createAgent(
     IntentraContext
   > = Agent,
 ) {
-  const tools = reportingFailures(
-    Object.fromEntries(
-      definition.toolIds.flatMap(id => {
-        const tool = (AGENT_TOOLS as Record<string, AgentTool | undefined>)[id];
-
-        return tool ? [[id, tool]] : [];
-      }),
-    ) as Record<string, AgentTool>,
-    onUnexpectedError,
-  );
+  const tools = agentToolsOf(definition.toolIds, onUnexpectedError);
   const readOnlyTools = Object.fromEntries(
     Object.entries(tools).filter(([, tool]) => isReadOnlyTool(tool)),
   );

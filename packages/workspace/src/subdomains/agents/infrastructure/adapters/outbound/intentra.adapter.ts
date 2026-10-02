@@ -8,7 +8,6 @@ import { Inject, Injectable, Logger, type Provider } from '@nestjs/common';
 
 import {
   createIntentra,
-  type AgentDefinition,
   type IntentraContext,
   type ToolApis,
 } from '@intentra/agent-toolkit';
@@ -18,7 +17,6 @@ import {
   ProjectRoleDtoSchema,
   type AgentsInUseDto,
   type ProjectRoleDto,
-  type ReasoningEffortDto,
 } from '@intentra/contracts/workspace';
 
 import { KnowledgeService } from '../../../../knowledge/index.js';
@@ -29,9 +27,11 @@ import {
   type IntentraAnswer,
   type IntentraQuestion,
 } from '../../../application/ports/outbound/index.js';
-import type { Agent, AgentsContent } from '../../../domain/entities/index.js';
-import type { ProviderKeySecret } from '../../../domain/value-objects/index.js';
-import { AGENTS_OPTIONS, type AgentsOptions } from '../../runtime/index.js';
+import {
+  AGENTS_OPTIONS,
+  toAgentDefinition,
+  type AgentsOptions,
+} from '../../runtime/index.js';
 
 /** What the client is told when Intentra itself fails; the cause stays in the logs. */
 const AGENT_FAILED = 'Intentra could not answer. Try again later';
@@ -77,10 +77,17 @@ export class IntentraAdapter implements Intentra {
       throw new Error('The Agents to run hold no Intentra');
     }
     const intentra = createIntentra({
-      intentra: this.toDefinition(agents, intentraAgent, providerKey),
+      intentra: toAgentDefinition(
+        this.options,
+        agents,
+        intentraAgent,
+        providerKey,
+      ),
       specialists: agents
         .specialistsOf(intentraAgent)
-        .map(specialist => this.toDefinition(agents, specialist, providerKey)),
+        .map(specialist =>
+          toAgentDefinition(this.options, agents, specialist, providerKey),
+        ),
       memory: this.memory,
       onUnexpectedError: error => this.#logger.error(error),
     });
@@ -135,34 +142,6 @@ export class IntentraAdapter implements Intentra {
         transient: true,
       }),
       done,
-    };
-  }
-
-  private toDefinition(
-    agents: AgentsContent,
-    agent: Agent,
-    providerKey: ProviderKeySecret,
-  ): AgentDefinition {
-    const profile = agents.modelProfileOf(agent);
-    if (!profile) {
-      throw new Error(`${agent.name.value} is on no Model Profile`);
-    }
-
-    return {
-      name: agent.name.value,
-      description: agent.description.value,
-      instructions: agent.instructions.value,
-      toolIds: agent.tools.map(tool => tool.value),
-      skills: agents.skillsOf(agent).map(skill => ({
-        name: skill.name.value,
-        description: skill.description.value,
-        instructions: skill.instructions.value,
-      })),
-      model: this.options.model(profile.modelId.value, providerKey.value),
-      temperature: profile.temperature?.value ?? null,
-      reasoningEffort: (profile.reasoningEffort?.value ??
-        null) as ReasoningEffortDto | null,
-      maxOutputTokens: profile.maxOutputTokens?.value ?? null,
     };
   }
 

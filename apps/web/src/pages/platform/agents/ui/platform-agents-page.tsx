@@ -31,16 +31,16 @@ import {
   type PlatformAgentDto,
 } from '@intentra/contracts/workspace';
 
-const { intentra, specialist } = AgentRoleDtoSchema.enum;
+const { intentra, auditor, specialist } = AgentRoleDtoSchema.enum;
 
-/** Intentra first, then the Specialists by name. */
+/** Intentra first, the Auditor next, then the Specialists by name. */
 function inOrder(agents: readonly PlatformAgentDto[]): PlatformAgentDto[] {
-  return [...agents].sort((one, other) =>
-    one.role === other.role
-      ? one.name.localeCompare(other.name)
-      : one.role === intentra
-        ? -1
-        : 1,
+  const rank = AgentRoleDtoSchema.options;
+
+  return [...agents].sort(
+    (one, other) =>
+      rank.indexOf(one.role) - rank.indexOf(other.role) ||
+      one.name.localeCompare(other.name),
   );
 }
 
@@ -56,6 +56,8 @@ export function PlatformAgentsPage() {
   const kinds = changeKinds(changes?.agents);
   const hasIntentra =
     content?.agents.some(agent => agent.role === intentra) ?? false;
+  const hasAuditor =
+    content?.agents.some(agent => agent.role === auditor) ?? false;
   const profileName = (id: string) =>
     content?.modelProfiles.find(profile => profile.id === id)?.name;
 
@@ -63,13 +65,25 @@ export function PlatformAgentsPage() {
     content &&
     content.modelProfiles.length > 0 &&
     (hasIntentra ? (
-      <Button
-        render={<Link to={platformAgentPath({ newRole: specialist })} />}
-        nativeButton={false}
-      >
-        <Plus />
-        {t('platformAgents.createSpecialist')}
-      </Button>
+      <>
+        {!hasAuditor && (
+          <Button
+            variant='outline'
+            render={<Link to={platformAgentPath({ newRole: auditor })} />}
+            nativeButton={false}
+          >
+            <Plus />
+            {t('platformAgents.createAuditor')}
+          </Button>
+        )}
+        <Button
+          render={<Link to={platformAgentPath({ newRole: specialist })} />}
+          nativeButton={false}
+        >
+          <Plus />
+          {t('platformAgents.createSpecialist')}
+        </Button>
+      </>
     ) : (
       <Button
         render={<Link to={platformAgentPath({ newRole: intentra })} />}

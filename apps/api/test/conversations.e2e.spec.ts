@@ -197,6 +197,20 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
       .expect(HttpStatus.CREATED);
     await app
       .request()
+      .post(`${AGENTS_PATH}/unpublished/agents`)
+      .set('Authorization', admin)
+      .send({
+        role: 'auditor',
+        name: 'Auditor',
+        description: 'Looks over the knowledge',
+        instructions: 'Find contradictions.',
+        tools: [],
+        skillIds: [],
+        modelProfileId: profile.body.id,
+      })
+      .expect(HttpStatus.CREATED);
+    await app
+      .request()
       .post(`${AGENTS_PATH}/versions`)
       .set('Authorization', admin)
       .send({})

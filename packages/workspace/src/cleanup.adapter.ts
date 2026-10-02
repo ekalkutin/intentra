@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import type { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 
 import {
+  AnalysisRunRepository,
   ConversationStore,
   ProviderKeyRepository,
 } from './subdomains/agents/index.js';
@@ -38,11 +39,13 @@ export class CleanupAdapter implements Cleanup {
     private readonly knowledgeKeyCounter: KnowledgeKeyCounter,
     private readonly conversationStore: ConversationStore,
     private readonly providerKeyRepository: ProviderKeyRepository,
+    private readonly analysisRunRepository: AnalysisRunRepository,
   ) {}
 
   public async afterWorkspaceDeleted(workspaceId: WorkspaceId): Promise<void> {
     await this.conversationStore.deleteMany({ workspaceId });
     await this.providerKeyRepository.deleteMany({ workspaceId });
+    await this.analysisRunRepository.deleteMany({ workspaceId });
     await this.knowledgeItemRepository.deleteMany({ workspaceId });
     await this.knowledgeKeyCounter.deleteMany({ workspaceId });
     await this.personalAccessTokenRepository.deleteMany({ workspaceId });
@@ -54,12 +57,13 @@ export class CleanupAdapter implements Cleanup {
 
   public async afterProjectDeleted(projectId: ProjectId): Promise<void> {
     await this.conversationStore.deleteMany({ projectId });
+    await this.analysisRunRepository.deleteMany({ projectId });
     await this.knowledgeItemRepository.deleteMany({ projectId });
     await this.knowledgeKeyCounter.deleteMany({ projectId });
     await this.projectRoleAssignmentRepository.deleteMany({ projectId });
   }
 
-  /** The Member's Knowledge Items stay: they belong to the Project. Their Conversations go. */
+  /** The Member's Knowledge Items and the Analysis Runs they started stay: they belong to the Project. Their Conversations go. */
   public async afterMemberRemoved(memberId: MemberId): Promise<void> {
     await this.conversationStore.deleteMany({ memberId });
     await this.projectRoleAssignmentRepository.deleteMany({ memberId });

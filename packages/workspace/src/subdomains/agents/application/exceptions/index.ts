@@ -1,3 +1,5 @@
+export { AnalysisRunBusyException } from './analysis-run-busy.exception.js';
+export { AnalysisRunNotFoundException } from './analysis-run-not-found.exception.js';
 export { AgentsNotPublishedException } from './agents-not-published.exception.js';
 export { ConversationBusyException } from './conversation-busy.exception.js';
 export { ConversationNotFoundException } from './conversation-not-found.exception.js';

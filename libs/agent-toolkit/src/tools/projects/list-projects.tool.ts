@@ -28,6 +28,11 @@ export const listProjectsTool = createTool({
   execute: async (_, { requestContext }) => {
     const apis = requestContext.get('apis');
     const caller = requestContext.get('caller');
+    if (caller.actor === null) {
+      throw new Error(
+        'list_projects works for a person, not in an Analysis Run',
+      );
+    }
     const workspaceId = requestContext.get('workspaceId');
     const projects = await apis.projects.list(caller.actor, workspaceId);
     const access = await apis.access.get(caller.actor, workspaceId);

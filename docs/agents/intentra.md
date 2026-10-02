@@ -4,7 +4,8 @@ Intentra's Agents start from nothing: on a fresh database a Platform Admin creat
 
 1. **Model Profile**: name `Default`, model `openrouter/anthropic/claude-sonnet-5`, everything else empty (the model's defaults).
 2. **Agent**: role `intentra`, name `Intentra`, Model Profile `Default`, every tool from the catalog, no Skills, no Specialists, with the description and instructions below.
-3. **Publish**, with a note such as "Intentra from the code".
+3. **Agent**: role `auditor`, as in [auditor.md](auditor.md): a version cannot be published without it.
+4. **Publish**, with a note such as "Intentra from the code".
 
 The code puts the Project and the rules of the Member's Project Role around the instructions, and leaves out every tool that writes for a Viewer; the instructions say only how Intentra works.
 

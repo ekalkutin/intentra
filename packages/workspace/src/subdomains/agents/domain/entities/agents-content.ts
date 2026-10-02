@@ -71,6 +71,11 @@ export class AgentsContent {
     return this.#agents.find(agent => agent.isIntentra()) ?? null;
   }
 
+  /** Null until a Platform Admin creates it. */
+  public auditor(): Agent | null {
+    return this.#agents.find(agent => agent.isAuditor()) ?? null;
+  }
+
   /** The Specialists the Agent may call. */
   public specialistsOf(agent: Agent): Agent[] {
     return this.#agents.filter(other =>
@@ -119,6 +124,9 @@ export class AgentsContent {
     if (intentras.length !== 1) {
       problems.push(PublishingProblem.intentraCount());
     }
+    if (this.#agents.filter(agent => agent.isAuditor()).length !== 1) {
+      problems.push(PublishingProblem.auditorCount());
+    }
     const skillNames = this.#skills.map(skill => skill.name.value);
     for (const name of new Set(skillNames)) {
       if (skillNames.filter(other => other === name).length > 1) {
@@ -150,7 +158,7 @@ export class AgentsContent {
         problems.push(PublishingProblem.specialistCallsAgents(subject));
       }
       const callable = agent.specialistIds.every(id =>
-        this.#agents.some(other => other.id.equals(id) && !other.isIntentra()),
+        this.#agents.some(other => other.id.equals(id) && other.isSpecialist()),
       );
       if (!callable) {
         problems.push(PublishingProblem.callsNonSpecialist(subject));

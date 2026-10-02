@@ -17,20 +17,31 @@ export const toolContextSchema = z.object({
   apis: z.custom<ToolApis>(
     value => typeof value === 'object' && value !== null,
   ),
-  caller: z.object({
-    actor: z.object({
-      accountId: z.string(),
-      email: z.string(),
-      name: z.string(),
-      isPlatformAdmin: z.boolean(),
+  caller: z.union([
+    z.object({
+      actor: z.object({
+        accountId: z.string(),
+        email: z.string(),
+        name: z.string(),
+        isPlatformAdmin: z.boolean(),
+      }),
+      agent: z
+        .object({
+          kind: AgentKindDtoSchema,
+          level: ProjectRoleDtoSchema,
+          projectId: z.string().nullable(),
+        })
+        .nullable(),
     }),
-    agent: z
-      .object({
-        kind: AgentKindDtoSchema,
-        level: ProjectRoleDtoSchema,
-        projectId: z.string().nullable(),
-      })
-      .nullable(),
-  }) satisfies z.ZodType<CallerDto>,
+    // Intentra itself, in an Analysis Run.
+    z.object({
+      actor: z.null(),
+      agent: z.object({
+        kind: z.literal(AgentKindDtoSchema.enum['analysis-run']),
+        level: z.literal(ProjectRoleDtoSchema.enum.contributor),
+        projectId: z.string(),
+      }),
+    }),
+  ]) satisfies z.ZodType<CallerDto>,
   workspaceId: z.string(),
 });

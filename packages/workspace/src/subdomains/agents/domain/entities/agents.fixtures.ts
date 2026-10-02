@@ -59,13 +59,18 @@ export function agentSpec(
   };
 }
 
-/** Unpublished Agents holding Intentra on one Model Profile, the least that can be published. */
-export function unpublishedWithIntentra(): UnpublishedAgents {
+/** Unpublished Agents holding Intentra and the Auditor on one Model Profile, the least that can be published. */
+export function publishableUnpublished(): UnpublishedAgents {
   const unpublished = UnpublishedAgents.empty();
   const profile = unpublished.addModelProfile(profileSpec());
   unpublished.addAgent(
     AgentRole.Intentra,
     agentSpec(profile.id, { name: new AgentName('Intentra') }),
+    TOOLS,
+  );
+  unpublished.addAgent(
+    AgentRole.Auditor,
+    agentSpec(profile.id, { name: new AgentName('Auditor') }),
     TOOLS,
   );
 
@@ -82,4 +87,8 @@ export function unpublishedFrom(content: AgentsContent): UnpublishedAgents {
 
 export function intentraOf(content: AgentsContent): Agent {
   return content.agents.find(agent => agent.isIntentra())!;
+}
+
+export function auditorOf(content: AgentsContent): Agent {
+  return content.agents.find(agent => agent.isAuditor())!;
 }

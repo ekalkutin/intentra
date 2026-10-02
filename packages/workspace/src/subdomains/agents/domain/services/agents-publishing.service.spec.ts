@@ -5,9 +5,9 @@ import { AccountId, Email } from '@intentra/shared-kernel';
 import {
   agentSpec,
   profileSpec,
+  publishableUnpublished,
   TOOLS,
   unpublishedFrom,
-  unpublishedWithIntentra,
 } from '../entities/agents.fixtures.js';
 import { UnpublishedAgents } from '../entities/index.js';
 import {
@@ -33,7 +33,7 @@ describe('AgentsPublishingService', () => {
 
   /** Agents Version 1 and the Unpublished Agents right after it. */
   function publishVersionOne() {
-    const unpublished = unpublishedWithIntentra();
+    const unpublished = publishableUnpublished();
     const versionOne = service.publish(
       unpublished,
       null,
@@ -47,7 +47,7 @@ describe('AgentsPublishingService', () => {
 
   it('publishes Agents Version 1 when nothing was published yet', () => {
     // Arrange
-    const unpublished = unpublishedWithIntentra();
+    const unpublished = publishableUnpublished();
 
     // Act
     const version = service.publish(

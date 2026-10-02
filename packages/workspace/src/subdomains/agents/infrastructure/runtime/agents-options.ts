@@ -15,6 +15,10 @@ export type AgentsOptions = {
   readonly timeoutMs: number;
   /** How much of a Conversation's history the model sees, in tokens; older messages are left out. */
   readonly historyTokens: number;
+  /** The most steps (tool calls or text) in one Analysis Run. */
+  readonly auditMaxSteps: number;
+  /** The longest one Analysis Run may run, in milliseconds. */
+  readonly auditTimeoutMs: number;
 };
 
 export const DEFAULT_AGENTS_OPTIONS: AgentsOptions = {
@@ -27,6 +31,8 @@ export const DEFAULT_AGENTS_OPTIONS: AgentsOptions = {
   maxSteps: 25,
   timeoutMs: 3 * 60 * 1000,
   historyTokens: 64_000,
+  auditMaxSteps: 40,
+  auditTimeoutMs: 10 * 60 * 1000,
 };
 
 export const AGENTS_OPTIONS = Symbol('AGENTS_OPTIONS');

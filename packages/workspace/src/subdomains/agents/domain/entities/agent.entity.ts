@@ -96,6 +96,14 @@ export class Agent {
     return this.#role.equals(AgentRole.Intentra);
   }
 
+  public isAuditor(): boolean {
+    return this.#role.equals(AgentRole.Auditor);
+  }
+
+  public isSpecialist(): boolean {
+    return this.#role.equals(AgentRole.Specialist);
+  }
+
   public with(spec: AgentSpec): Agent {
     return new Agent(this.#id, this.#role, spec);
   }

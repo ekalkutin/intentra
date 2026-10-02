@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   AgentNotFoundException,
+  AuditorExistsException,
+  AuditorNotRemovableException,
   IntentraExistsException,
   IntentraNotRemovableException,
   InvalidAgentException,
@@ -16,20 +18,22 @@ import {
   ToolName,
 } from '../value-objects/index.js';
 
+import { AgentsContent } from './agents-content.js';
 import {
   agentSpec,
+  auditorOf,
   intentraOf,
   profileSpec,
+  publishableUnpublished,
   skillSpec,
   TOOLS,
-  unpublishedWithIntentra,
 } from './agents.fixtures.js';
 
 describe('UnpublishedAgents', () => {
   describe('addAgent', () => {
     it('adds a Specialist on an existing Model Profile', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       const content = unpublished.content;
 
       // Act
@@ -41,12 +45,12 @@ describe('UnpublishedAgents', () => {
 
       // Assert
       expect(specialist.isIntentra()).toBe(false);
-      expect(unpublished.content.agents).toHaveLength(2);
+      expect(unpublished.content.agents).toHaveLength(3);
     });
 
     it('refuses a second Intentra', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       const spec = agentSpec(unpublished.content.modelProfiles[0]!.id);
 
       // Act
@@ -59,7 +63,7 @@ describe('UnpublishedAgents', () => {
 
     it('refuses a tool the code does not have', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       const content = unpublished.content;
       const spec = agentSpec(content.modelProfiles[0]!.id, {
         tools: [new ToolName('send_email')],
@@ -75,7 +79,7 @@ describe('UnpublishedAgents', () => {
 
     it('refuses a Specialist that would call other Agents', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       const content = unpublished.content;
       const versionOne = unpublished.addAgent(
         AgentRole.Specialist,
@@ -96,7 +100,7 @@ describe('UnpublishedAgents', () => {
 
     it('refuses a Model Profile that does not exist', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
 
       // Act
       const adding = () =>
@@ -114,7 +118,7 @@ describe('UnpublishedAgents', () => {
   describe('removeAgent', () => {
     it('takes a removed Specialist away from Intentra', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       const content = unpublished.content;
       const profileId = content.modelProfiles[0]!.id;
       const specialist = unpublished.addAgent(
@@ -141,7 +145,7 @@ describe('UnpublishedAgents', () => {
 
     it('never removes Intentra', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       const content = unpublished.content;
 
       // Act
@@ -150,12 +154,57 @@ describe('UnpublishedAgents', () => {
       // Assert
       expect(removing).toThrow(IntentraNotRemovableException);
     });
+
+    it('never removes the Auditor', () => {
+      // Arrange
+      const unpublished = publishableUnpublished();
+      const content = unpublished.content;
+
+      // Act
+      const removing = () => unpublished.removeAgent(auditorOf(content).id);
+
+      // Assert
+      expect(removing).toThrow(AuditorNotRemovableException);
+    });
+
+    it('refuses a second Auditor', () => {
+      // Arrange
+      const unpublished = publishableUnpublished();
+      const profileId = intentraOf(unpublished.content).modelProfileId;
+
+      // Act
+      const adding = () =>
+        unpublished.addAgent(AgentRole.Auditor, agentSpec(profileId), TOOLS);
+
+      // Assert
+      expect(adding).toThrow(AuditorExistsException);
+    });
+
+    it('lets Intentra call no Auditor', () => {
+      // Arrange
+      const unpublished = publishableUnpublished();
+      const intentra = intentraOf(unpublished.content);
+
+      // Act
+      const editing = () =>
+        unpublished.editAgent(
+          intentra.id,
+          agentSpec(intentra.modelProfileId, {
+            name: intentra.name,
+            specialistIds: [auditorOf(unpublished.content).id],
+          }),
+          TOOLS,
+        );
+
+      // Assert
+      expect(editing).toThrow(InvalidAgentException);
+    });
   });
 
   describe('Skills', () => {
     it('refuses a second Skill with the same name', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       unpublished.addSkill(skillSpec());
 
       // Act
@@ -167,7 +216,7 @@ describe('UnpublishedAgents', () => {
 
     it('takes a deleted Skill away from every Agent', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       const content = unpublished.content;
       const skill = unpublished.addSkill(skillSpec());
       const intentra = intentraOf(content);
@@ -189,7 +238,7 @@ describe('UnpublishedAgents', () => {
   describe('removeModelProfile', () => {
     it('refuses while an Agent is on it, naming the Agent', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       const content = unpublished.content;
 
       // Act
@@ -203,7 +252,7 @@ describe('UnpublishedAgents', () => {
 
     it('removes one no Agent is on', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       const spare = unpublished.addModelProfile(profileSpec('Fast'));
 
       // Act
@@ -217,7 +266,7 @@ describe('UnpublishedAgents', () => {
   describe('changes', () => {
     it('lists what was added, changed and removed against the Published Agents', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       const content = unpublished.content;
       const fast = unpublished.addModelProfile(profileSpec('Fast'));
       const intentra = intentraOf(content);
@@ -258,8 +307,16 @@ describe('UnpublishedAgents', () => {
   describe('problems', () => {
     it('names the Agent and the tool when the code no longer has a tool', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
       const intentra = intentraOf(unpublished.content);
+      unpublished.editAgent(
+        auditorOf(unpublished.content).id,
+        agentSpec(intentra.modelProfileId, {
+          name: auditorOf(unpublished.content).name,
+          tools: [TOOLS[1]!],
+        }),
+        TOOLS,
+      );
       const remaining = [TOOLS[1]!];
 
       // Act
@@ -275,9 +332,28 @@ describe('UnpublishedAgents', () => {
       expect(problems[0]!.tool).toBe('list_knowledge');
     });
 
+    it('asks for exactly one Auditor', () => {
+      // Arrange
+      const unpublished = publishableUnpublished();
+      const content = unpublished.content;
+      const withoutAuditor = new AgentsContent(
+        content.agents.filter(agent => !agent.isAuditor()),
+        content.skills,
+        content.modelProfiles,
+      );
+
+      // Act
+      const problems = withoutAuditor.problems(TOOLS);
+
+      // Assert
+      expect(problems.map(problem => problem.kind)).toEqual([
+        PublishingProblemKind.AuditorCount,
+      ]);
+    });
+
     it('finds nothing in Agents that could be published', () => {
       // Arrange
-      const unpublished = unpublishedWithIntentra();
+      const unpublished = publishableUnpublished();
 
       // Act
       const problems = unpublished.content.problems(TOOLS);
