@@ -61,8 +61,12 @@ export const BLOCK_COMPONENTS: Components = {
       {children}
     </ul>
   ),
-  ol: ({ children }) => (
-    <ol className='flex list-decimal flex-col gap-1 pl-5 marker:font-mono marker:text-xs marker:text-muted-foreground'>
+  // A numbered list broken by other blocks goes on from where it stopped, not from 1.
+  ol: ({ children, start }) => (
+    <ol
+      start={start}
+      className='flex list-decimal flex-col gap-1 pl-5 marker:font-mono marker:text-xs marker:text-muted-foreground'
+    >
       {children}
     </ol>
   ),

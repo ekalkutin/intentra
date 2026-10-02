@@ -237,6 +237,13 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
       .map(link => link.target);
   }
 
+  /** The Open Questions it settles: the targets of its `answers` Links. */
+  public answeredQuestions(): readonly KnowledgeKey[] {
+    return this.#links
+      .filter(link => link.type.equals(KnowledgeLinkType.Answers))
+      .map(link => link.target);
+  }
+
   /** Whether a change of the given item puts this one in question. */
   public restsOn(key: KnowledgeKey): boolean {
     return this.#links.some(

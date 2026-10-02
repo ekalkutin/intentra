@@ -1,4 +1,4 @@
-import { Bot, Heart, SearchCheck, type LucideIcon } from 'lucide-react';
+import { Bot, MessagesSquare, type LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -25,13 +25,15 @@ import {
 /** A hint's trigger sits above the row's cover link, so pointing at it shows the hint. */
 const HINTED = 'relative z-10 cursor-default';
 
+const { manual, 'analysis-run': analysisRun } = KnowledgeSourceDtoSchema.enum;
+
+/** The agent's mark after a Member's name; Intentra's own check of the Project is named whole instead. */
 const SOURCE_ICONS: Record<
-  Exclude<KnowledgeSourceDto, typeof KnowledgeSourceDtoSchema.enum.manual>,
+  Exclude<KnowledgeSourceDto, typeof manual | typeof analysisRun>,
   LucideIcon
 > = {
-  [KnowledgeSourceDtoSchema.enum['intentra-agent']]: Heart,
+  [KnowledgeSourceDtoSchema.enum['intentra-agent']]: MessagesSquare,
   [KnowledgeSourceDtoSchema.enum['external-agent']]: Bot,
-  [KnowledgeSourceDtoSchema.enum['analysis-run']]: SearchCheck,
 };
 
 /**
@@ -70,15 +72,21 @@ export function RowMeta({
 
   return (
     <span className='flex flex-col items-start gap-2 sm:w-56 sm:items-end'>
-      <span className='flex max-w-full min-w-0 items-center gap-1.5 text-foreground/80'>
-        <Avatar className='size-4'>
-          <AvatarFallback className='text-[0.5625rem] font-medium uppercase'>
-            {item.authorId === null ? t('brand').charAt(0) : initialsOf(author)}
-          </AvatarFallback>
-        </Avatar>
-        <span className='truncate'>{authorName}</span>
-        <AgentTag source={item.source} who={authorName} />
-      </span>
+      {item.source === analysisRun ? (
+        <AuditTag />
+      ) : (
+        <span className='flex max-w-full min-w-0 items-center gap-1.5 text-foreground/80'>
+          <Avatar className='size-4'>
+            <AvatarFallback className='text-[0.5625rem] font-medium uppercase'>
+              {item.authorId === null
+                ? t('brand').charAt(0)
+                : initialsOf(author)}
+            </AvatarFallback>
+          </Avatar>
+          <span className='truncate'>{authorName}</span>
+          <AgentTag source={item.source} who={authorName} />
+        </span>
+      )}
       <span className='flex flex-wrap items-center gap-1.5 sm:justify-end'>
         {item.needsReview && <NeedsReviewBadge />}
         <Tooltip>
@@ -115,7 +123,7 @@ function AgentTag({
   readonly who: string;
 }) {
   const { t } = useTranslation();
-  if (source === KnowledgeSourceDtoSchema.enum.manual) {
+  if (source === manual || source === analysisRun) {
     return null;
   }
   const Icon = SOURCE_ICONS[source];
@@ -137,6 +145,28 @@ function AgentTag({
         <span aria-hidden className='font-medium'>
           {t(`knowledge.agentTags.${source}`)}
         </span>
+        <span className='sr-only'>{hint}</span>
+      </TooltipTrigger>
+      <TooltipContent side='bottom' align='end' className='max-w-64'>
+        {hint}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+/** Intentra's own check of the Project as the author: its name alone, no avatar or mark, its meaning in a hint. */
+function AuditTag() {
+  const { t } = useTranslation();
+  const hint = t(`knowledge.agentHints.${analysisRun}`, { who: t('brand') });
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span className={cn('font-medium text-foreground/80', HINTED)} />
+        }
+      >
+        <span aria-hidden>{t(`sources.${analysisRun}`)}</span>
         <span className='sr-only'>{hint}</span>
       </TooltipTrigger>
       <TooltipContent side='bottom' align='end' className='max-w-64'>

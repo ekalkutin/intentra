@@ -17,6 +17,7 @@ describe('dependencyTree', () => {
         { from: 'REQ-2', to: 'PER-1' },
         { from: 'REQ-1', to: 'PER-1' },
       ],
+      answers: [],
     };
 
     // Act
@@ -40,6 +41,7 @@ describe('dependencyTree', () => {
         { from: 'A-1', to: 'A-2' },
         { from: 'A-2', to: 'A-1' },
       ],
+      answers: [],
     };
 
     // Act

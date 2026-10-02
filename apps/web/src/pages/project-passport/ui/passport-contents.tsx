@@ -1,5 +1,5 @@
-import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronDown, CircleDashed } from 'lucide-react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/shared/lib';
@@ -18,17 +18,56 @@ type ContentsProps = {
   readonly open: (id: string) => void;
 };
 
+/** Where the ink segment stands on the rail: the chapter being read, from the rail's top. */
+type Mark = { readonly top: number; readonly height: number };
+
 /**
- * The Passport's chapters: how many items each holds, the empty ones in
- * muted text, the one being read marked; a chapter opens on click.
+ * The Passport's chapters by number, the empty ones in muted text with the
+ * pending mark, the one being read marked by an ink segment on the rail that
+ * slides to it, the stretch above it already read in a fainter ink; a
+ * chapter opens on click.
  */
 function ChapterList({ chapters, current, open }: ContentsProps) {
   const { t } = useTranslation();
+  const list = useRef<HTMLOListElement>(null);
+  const [mark, setMark] = useState<Mark | null>(null);
+
+  // Measured, not computed: a title may wrap, and the folded list only has a size once open.
+  useLayoutEffect(() => {
+    const element = list.current;
+    if (!element) {
+      return;
+    }
+    const measure = () => {
+      const link = element.querySelector<HTMLElement>('[aria-current]');
+      setMark(link ? { top: link.offsetTop, height: link.offsetHeight } : null);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [current, chapters]);
 
   return (
-    <ol className='flex flex-col border-l border-border'>
+    <ol ref={list} className='relative flex flex-col'>
+      <span aria-hidden className='absolute inset-y-0 left-0 w-px bg-border' />
+      {mark && (
+        <>
+          <span
+            aria-hidden
+            className='absolute top-0 left-0 w-px bg-foreground/25 transition-[height] duration-500 ease-out-expo motion-reduce:transition-none'
+            style={{ height: mark.top }}
+          />
+          <span
+            aria-hidden
+            className='absolute top-0 left-0 w-px bg-foreground transition-[translate,height] duration-500 ease-out-expo motion-reduce:transition-none'
+            style={{ translate: `0 ${mark.top}px`, height: mark.height }}
+          />
+        </>
+      )}
       {chapters.map((chapter, index) => {
         const active = chapter.id === current;
+        const written = chapter.count > 0;
         return (
           <li key={chapter.id}>
             <a
@@ -39,25 +78,32 @@ function ChapterList({ chapters, current, open }: ContentsProps) {
                 open(chapter.id);
               }}
               className={cn(
-                '-ml-px flex items-baseline gap-2 border-l py-1 pr-1 pl-3 text-sm transition-colors duration-150 hover:text-foreground',
+                'group/chapter flex items-baseline gap-2 rounded-sm py-1.5 pr-1 pl-3.5 text-sm transition-colors duration-150 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50',
                 active
-                  ? 'border-foreground text-foreground'
-                  : 'border-transparent',
-                !active &&
-                  (chapter.count > 0
-                    ? 'text-foreground/80'
-                    : 'text-muted-foreground'),
+                  ? 'text-foreground'
+                  : written
+                    ? 'text-foreground/70'
+                    : 'text-muted-foreground/80',
               )}
             >
-              <span className='w-3 shrink-0 font-mono text-xs font-normal text-muted-foreground tabular-nums'>
+              <span
+                className={cn(
+                  'w-3 shrink-0 font-mono text-xs tabular-nums transition-colors duration-150 group-hover/chapter:text-foreground',
+                  active ? 'text-foreground' : 'text-muted-foreground',
+                )}
+              >
                 {index + 1}
               </span>
-              <span className='min-w-0 flex-1 text-pretty'>
+              <span className='min-w-0 flex-1 text-balance'>
                 {t(`passport.chapters.${chapter.id}`)}
               </span>
-              <span className='font-mono text-xs font-normal text-muted-foreground tabular-nums'>
-                {chapter.count > 0 ? chapter.count : t('passport.nothing')}
-              </span>
+              {/* Only an empty chapter says so, with the pending mark, so the numbers on the left stand alone. */}
+              {!written && (
+                <CircleDashed
+                  aria-label={t('passport.notDescribed')}
+                  className='size-3.5 shrink-0 translate-y-0.5 text-muted-foreground/70'
+                />
+              )}
             </a>
           </li>
         );
@@ -72,8 +118,16 @@ export function PassportContents(props: ContentsProps) {
 
   return (
     <nav aria-label={t('passport.contents')} className='sticky top-8'>
-      <h2 className='mb-2 text-xs text-muted-foreground'>
-        {t('passport.contents')}
+      <h2 className='mb-3 flex items-baseline justify-between gap-2 pl-3.5 text-xs'>
+        <span className='font-medium text-foreground'>
+          {t('passport.contents')}
+        </span>
+        <span className='text-muted-foreground tabular-nums'>
+          {t('passport.written', {
+            written: props.chapters.filter(chapter => chapter.count > 0).length,
+            total: props.chapters.length,
+          })}
+        </span>
       </h2>
       <ChapterList {...props} />
     </nav>

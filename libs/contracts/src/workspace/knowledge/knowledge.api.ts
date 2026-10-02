@@ -140,8 +140,10 @@ export abstract class KnowledgeApi {
   /**
    * Approving a Draft that `supersedes` an item also makes that item Obsolete.
    * Every `depends-on` target must be Approved already (409
-   * `DEPENDENCIES_NOT_APPROVED` otherwise); approve Drafts together with
-   * `approveTogether`.
+   * `DEPENDENCIES_NOT_APPROVED` otherwise), and a Draft Open Question it
+   * `answers` is approved in the same step (409
+   * `ANSWERED_QUESTIONS_NOT_APPROVED` otherwise); approve Drafts together
+   * with `approveTogether`, the cascade from `dependencies`.
    */
   abstract approve(
     caller: CallerDto,

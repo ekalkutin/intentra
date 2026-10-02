@@ -1,7 +1,6 @@
 import {
   BookText,
   CircleDashed,
-  MessagesSquare,
   SearchCheck,
   TriangleAlert,
 } from 'lucide-react';
@@ -29,12 +28,14 @@ import {
 } from '@/shared/config';
 import { useDescribeError } from '@/shared/i18n';
 import {
-  Button,
   Empty,
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
+  IntentraButton,
+  List,
+  ListSkeleton,
   LoadError,
   Page,
   PageHeader,
@@ -128,9 +129,10 @@ export function ProjectPassportPage() {
       }}
     >
       <Page>
-        <div className='flex flex-col gap-3'>
+        <div className='flex flex-col gap-4'>
           <PageHeader
             title={project.name}
+            description={t('passport.description')}
             actions={
               <>
                 {canRecord.length > 0 && (
@@ -140,18 +142,18 @@ export function ProjectPassportPage() {
                     kinds={canRecord}
                   />
                 )}
-                <Button
+                <IntentraButton
+                  size='default'
                   render={<Link to={interviewPath} />}
                   nativeButton={false}
                 >
-                  <MessagesSquare />
                   {t('passport.startInterview')}
-                </Button>
+                </IntentraButton>
               </>
             }
           />
           {(drafts > 0 || needsReview > 0 || findings) && (
-            <p className='flex flex-wrap gap-x-5 gap-y-1 text-sm'>
+            <p className='flex flex-wrap gap-2'>
               {drafts > 0 && (
                 <SignalLink to={viewPath(KNOWLEDGE_VIEWS.drafts)}>
                   <CircleDashed className='text-muted-foreground' />
@@ -222,8 +224,8 @@ function PassportDocument({
   );
 
   return (
-    <div className='grid gap-x-12 gap-y-8 xl:grid-cols-[minmax(0,1fr)_14rem]'>
-      <div className='flex max-w-2xl min-w-0 flex-col gap-12'>
+    <div className='grid gap-x-12 gap-y-8 xl:grid-cols-[minmax(0,1fr)_15rem]'>
+      <div className='flex min-w-0 flex-col gap-12'>
         <div className='xl:hidden'>
           <PassportContentsFolded
             chapters={chapters}
@@ -240,10 +242,13 @@ function PassportDocument({
               <EmptyDescription>{t('passport.empty')}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button render={<Link to={interviewPath} />} nativeButton={false}>
-                <MessagesSquare />
+              <IntentraButton
+                size='default'
+                render={<Link to={interviewPath} />}
+                nativeButton={false}
+              >
                 {t('passport.startInterview')}
-              </Button>
+              </IntentraButton>
             </EmptyContent>
           </Empty>
         )}
@@ -276,7 +281,7 @@ function SignalLink({
   return (
     <Link
       to={to}
-      className='inline-flex items-center gap-1.5 rounded-sm text-foreground underline decoration-muted-foreground/50 underline-offset-[0.2em] hover:decoration-foreground [&_svg]:size-3.5 [&_svg]:shrink-0'
+      className='inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-background px-2.5 text-xs text-foreground/80 transition-colors duration-150 outline-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-3.5 [&_svg]:shrink-0'
     >
       {children}
     </Link>
@@ -285,12 +290,16 @@ function SignalLink({
 
 function PassportSkeleton() {
   return (
-    <div aria-busy className='flex max-w-2xl flex-col gap-8'>
+    <div aria-busy className='flex flex-col gap-12 xl:mr-[18rem]'>
       {[0, 1].map(index => (
-        <div key={index} className='flex flex-col gap-3'>
-          <span className='block h-4 w-40 animate-pulse rounded-md bg-muted' />
-          <span className='block h-4 w-80 max-w-full animate-pulse rounded-md bg-muted' />
-          <span className='block h-20 animate-pulse rounded-md bg-muted' />
+        <div key={index} className='flex flex-col gap-4'>
+          <div className='flex flex-col gap-2'>
+            <span className='block h-5 w-40 animate-pulse rounded-md bg-muted' />
+            <span className='block h-4 w-80 max-w-full animate-pulse rounded-md bg-muted' />
+          </div>
+          <List>
+            <ListSkeleton rows={index === 0 ? 1 : 3} />
+          </List>
         </div>
       ))}
     </div>

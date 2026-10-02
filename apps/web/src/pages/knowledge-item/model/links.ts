@@ -44,3 +44,19 @@ export function incomingLinks(
       ),
   );
 }
+
+/** The Drafts that answer an Open Question: answers proposed, not yet in force. */
+export function proposedAnswers(
+  key: string,
+  items: readonly KnowledgeItemDto[],
+): KnowledgeItemDto[] {
+  return items.filter(
+    item =>
+      item.status === KnowledgeStatusDtoSchema.enum.draft &&
+      item.links.some(
+        link =>
+          link.type === KnowledgeLinkTypeDtoSchema.enum.answers &&
+          link.key === key,
+      ),
+  );
+}

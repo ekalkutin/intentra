@@ -206,6 +206,27 @@
   background: color-mix(in oklch, oklch(0.15 0.005 286) 35%, transparent);
 }
 
+/* A band of light passes over a running Analysis Run, left to right, then rests. */
+@keyframes analysis-scan {
+  0% {
+    translate: -100% 0;
+  }
+  70%,
+  100% {
+    translate: 400% 0;
+  }
+}
+
+/* A band of light crosses a button once, left to right. */
+@keyframes discuss-sheen {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 250% 0;
+  }
+}
+
 /* A new page settles in. */
 @keyframes page-settle {
   from {

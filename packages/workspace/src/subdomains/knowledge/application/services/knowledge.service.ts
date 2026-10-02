@@ -327,6 +327,10 @@ export class KnowledgeService implements KnowledgeApi {
         from: from.value,
         to: to.value,
       })),
+      answers: cascade.answers.map(({ from, to }) => ({
+        from: from.value,
+        to: to.value,
+      })),
     };
   }
 
@@ -505,6 +509,7 @@ export class KnowledgeService implements KnowledgeApi {
         projectId: project.id,
         keys: drafts.flatMap(({ item }) => [
           ...item.dependencies(),
+          ...item.answeredQuestions(),
           ...(item.supersedes ? [item.supersedes] : []),
         ]),
       });
@@ -939,8 +944,10 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   /**
-   * Walks `depends on` from the item, level by level, each item once, so that
-   * cycles end: the item itself first, then everything it reaches.
+   * Walks from the item, level by level, each item once, so that cycles end:
+   * along `depends on`, and along `answers` to Draft Open Questions, which are
+   * approved in the same step and may depend on more. The item itself first,
+   * then everything it reaches.
    */
   private async findDependencyCascade(
     projectId: ProjectId,
@@ -948,27 +955,42 @@ export class KnowledgeService implements KnowledgeApi {
   ): Promise<DependencyCascade> {
     const items = [root];
     const links: DependencyCascade['links'][number][] = [];
+    const answers: DependencyCascade['answers'][number][] = [];
+    const isNew = (key: KnowledgeKey, index: number, keys: KnowledgeKey[]) =>
+      keys.findIndex(other => other.equals(key)) === index &&
+      !items.some(item => item.key.equals(key));
     let level = [root];
     while (level.length > 0) {
+      // Only a Draft is approved along: an Approved item is current already.
+      const current = level.filter(item => item.isDraft());
       const edges = level.flatMap(item =>
         item.dependencies().map(to => ({ from: item.key, to })),
       );
+      const answering = current.flatMap(item =>
+        item.answeredQuestions().map(to => ({ from: item.key, to })),
+      );
       links.push(...edges);
-      const unseen = edges
-        .map(({ to }) => to)
-        .filter(
-          (key, index, keys) =>
-            keys.findIndex(other => other.equals(key)) === index &&
-            !items.some(item => item.key.equals(key)),
-        );
-      level = await this.knowledgeItemRepository.findMany({
+      const dependencies = await this.knowledgeItemRepository.findMany({
         projectId,
-        keys: unseen,
+        keys: edges.map(({ to }) => to).filter(isNew),
       });
-      items.push(...level);
+      items.push(...dependencies);
+      const questions = (
+        await this.knowledgeItemRepository.findMany({
+          projectId,
+          keys: answering.map(({ to }) => to).filter(isNew),
+        })
+      ).filter(question => question.isDraft());
+      items.push(...questions);
+      answers.push(
+        ...answering.filter(({ to }) =>
+          items.some(item => item.isDraft() && item.key.equals(to)),
+        ),
+      );
+      level = [...dependencies, ...questions];
     }
 
-    return { items, links };
+    return { items, links, answers };
   }
 
   /**
@@ -1010,9 +1032,14 @@ export class KnowledgeService implements KnowledgeApi {
   }
 }
 
+type CascadeLink = { readonly from: KnowledgeKey; readonly to: KnowledgeKey };
+
 type DependencyCascade = {
   readonly items: KnowledgeItem[];
-  readonly links: { readonly from: KnowledgeKey; readonly to: KnowledgeKey }[];
+  /** The `depends on` Links between them. */
+  readonly links: CascadeLink[];
+  /** The `answers` Links from a Draft in it to a Draft Open Question in it. */
+  readonly answers: CascadeLink[];
 };
 
 function answeredBy(

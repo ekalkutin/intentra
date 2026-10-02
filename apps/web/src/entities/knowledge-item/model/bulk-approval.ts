@@ -1,6 +1,7 @@
 import {
   KnowledgeLinkTypeDtoSchema,
   type KnowledgeItemDto,
+  type KnowledgeLinkTypeDto,
 } from '@intentra/contracts/workspace';
 
 /** Why a chosen Draft cannot go: the person may not approve it, it is under review, or it rests on a Draft that cannot go. */
@@ -9,6 +10,11 @@ export const BULK_APPROVAL_BLOCKS = {
   needsReview: 'needs-review',
   dependsOnBlocked: 'depends-on-blocked',
 } as const;
+
+const ALONG: readonly KnowledgeLinkTypeDto[] = [
+  KnowledgeLinkTypeDtoSchema.enum['depends-on'],
+  KnowledgeLinkTypeDtoSchema.enum.answers,
+];
 
 export type BulkApprovalBlock =
   (typeof BULK_APPROVAL_BLOCKS)[keyof typeof BULK_APPROVAL_BLOCKS];
@@ -30,7 +36,7 @@ export type BulkApproval = {
 
 /**
  * What approving the chosen Drafts at once takes: each with every Draft it
- * depends on, at any depth, in one all-or-nothing step. A Draft the person
+ * depends on, at any depth, and every Draft Open Question it answers, in one all-or-nothing step. A Draft the person
  * may not approve or one marked Needs Review is left out, and so is every
  * chosen Draft resting on one. `drafts` holds the Project's Drafts; a target
  * not among them is taken as Approved, since anything else would have marked
@@ -41,11 +47,10 @@ export function planBulkApproval(
   drafts: readonly KnowledgeItemDto[],
 ): BulkApproval {
   const byKey = new Map(drafts.map(item => [item.key, item]));
+  // What a Draft takes along: the Drafts it depends on and the Draft Open Questions it answers.
   const dependsOn = (item: KnowledgeItemDto) =>
     item.links
-      .filter(
-        link => link.type === KnowledgeLinkTypeDtoSchema.enum['depends-on'],
-      )
+      .filter(link => ALONG.includes(link.type))
       .map(link => byKey.get(link.key))
       .filter(target => target !== undefined);
 

@@ -1,6 +1,7 @@
 import type { Member, ProjectRole } from '../../../tenancy/index.js';
 import { KnowledgeItem } from '../entities/index.js';
 import {
+  AnsweredQuestionsNotApprovedException,
   DependenciesNotApprovedException,
   DraftApprovalForbiddenException,
   KnowledgeItemNeedsReviewException,
@@ -20,7 +21,8 @@ export class DraftApprovalService {
   /**
    * A Maintainer of the Project approves Drafts together, all or nothing,
    * their own included. What a Draft depends on must be Approved already or
-   * approved with it. A Draft that replaces an Approved item makes that one
+   * approved with it, and a Draft Open Question it answers is approved with
+   * it, since answering settles it. A Draft that replaces an Approved item makes that one
    * Obsolete at the same moment: a Supersession. A Project has one Approved
    * Product Overview, changed only by Supersession.
    *
@@ -43,6 +45,7 @@ export class DraftApprovalService {
       }
     }
     this.#ensureDependenciesApproved(drafts, context);
+    this.#ensureAnsweredQuestionsTogether(drafts, context);
 
     let approvedProductOverview = context.approvedProductOverview;
     const superseded: KnowledgeItem[] = [];
@@ -90,6 +93,24 @@ export class DraftApprovalService {
       throw new DependenciesNotApprovedException([...missing]);
     }
   }
+
+  #ensureAnsweredQuestionsTogether(
+    drafts: readonly SeenDraft[],
+    context: DraftApprovalContext,
+  ): void {
+    const missing = new Set<string>();
+    for (const { item } of drafts) {
+      for (const question of item.answeredQuestions()) {
+        const together = drafts.some(draft => draft.item.key.equals(question));
+        if (!together && context.find(question)?.isDraft()) {
+          missing.add(question.value);
+        }
+      }
+    }
+    if (missing.size > 0) {
+      throw new AnsweredQuestionsNotApprovedException([...missing]);
+    }
+  }
 }
 
 /** A Draft and the version the approver saw. */
@@ -99,7 +120,7 @@ export type SeenDraft = {
 };
 
 type DraftApprovalContext = {
-  /** Finds an item the Drafts replace or depend on, by its Knowledge Key. */
+  /** Finds an item the Drafts replace, depend on or answer, by its Knowledge Key. */
   readonly find: (key: KnowledgeItem['key']) => KnowledgeItem | null;
   /** The Project's Approved Product Overview, when a Product Overview is approved. */
   readonly approvedProductOverview: KnowledgeItem | null;

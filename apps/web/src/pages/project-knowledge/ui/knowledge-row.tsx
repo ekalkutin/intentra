@@ -13,6 +13,7 @@ import type {
   MemberDto,
 } from '@intentra/contracts/workspace';
 
+import { ItemSignals } from './item-signals';
 import { RowLinks } from './row-links';
 import { RowMeta } from './row-meta';
 
@@ -61,6 +62,7 @@ export function KnowledgeRow({
         {item.mainField}
       </InlineMarkdown>
       <FactChips item={item} className='mt-2.5' />
+      <ItemSignals itemKey={item.key} className='mt-2' />
       <RowLinks item={item} />
     </ListRow>
   );

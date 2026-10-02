@@ -13,7 +13,7 @@ import { keySchema, projectIdSchema } from './knowledge-item.schema.js';
 export const getKnowledgeDependenciesTool = createTool({
   id: 'get_knowledge_dependencies',
   description:
-    'Gives everything a Knowledge Item depends on, at any depth, the item itself first, and the depends-on Links between them. Show it to the person before approving, so that no Draft in the cascade goes unseen; approve the Drafts together with approve_knowledge_items.',
+    'Gives what approving a Knowledge Item takes along: everything it depends on, at any depth, and the Draft Open Questions a Draft among them answers, the item itself first; with the depends-on and answers Links between them. Show it to the person before approving, so that no Draft in the cascade goes unseen; approve the Drafts together with approve_knowledge_items.',
   inputSchema: z.object({ projectId: projectIdSchema, key: keySchema }),
   outputSchema: z.object({
     items: z.array(
@@ -27,7 +27,14 @@ export const getKnowledgeDependenciesTool = createTool({
         version: z.number(),
       }),
     ),
-    links: z.array(z.object({ from: z.string(), to: z.string() })),
+    links: z
+      .array(z.object({ from: z.string(), to: z.string() }))
+      .describe('The depends-on Links.'),
+    answers: z
+      .array(z.object({ from: z.string(), to: z.string() }))
+      .describe(
+        'The answers Links to Draft Open Questions, approved in the same step.',
+      ),
     dependencyNeedsReview: z
       .boolean()
       .describe('Whether anything below the item itself is under review.'),
@@ -47,6 +54,7 @@ export const getKnowledgeDependenciesTool = createTool({
     return {
       items: cascade.items.map(({ access: _access, ...item }) => item),
       links: cascade.links,
+      answers: cascade.answers,
       dependencyNeedsReview: cascade.dependencyNeedsReview,
     };
   },

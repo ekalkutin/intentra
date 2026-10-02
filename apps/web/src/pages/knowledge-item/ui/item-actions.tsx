@@ -1,4 +1,4 @@
-import { Check, Ellipsis, PenLine, Replace } from 'lucide-react';
+import { Archive, Check, PenLine, Replace, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
@@ -19,15 +19,7 @@ import {
   projectPath,
 } from '@/shared/config';
 import { useDescribeError } from '@/shared/i18n';
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  Spinner,
-} from '@/shared/ui';
+import { Spinner } from '@/shared/ui';
 import {
   KnowledgeStatusDtoSchema,
   type KnowledgeItemDto,
@@ -36,6 +28,7 @@ import {
 import type { ProjectSlugs } from '../model/slugs';
 
 import { ActionDialog } from './action-dialog';
+import { IconAction } from './icon-action';
 
 const DIALOGS = {
   reject: 'reject',
@@ -82,7 +75,8 @@ export function ItemActions({
   const isApproved = item.status === KnowledgeStatusDtoSchema.enum.approved;
   const target = { ...scope, key: item.key };
   const together = approval ? approval.items.length - 1 : 0;
-  const blocked = !approval || approval.blockers.length > 0;
+  // Something in the cascade stops it: the notices above say what and how to fix it, so the action is not offered until then.
+  const blocked = approval !== undefined && approval.blockers.length > 0;
 
   /** The failure's text for a dialog, or null once done. */
   const outcome = (error: ApiError | null): string | null => {
@@ -102,35 +96,6 @@ export function ItemActions({
     onFailure(toApiError(result.error));
   };
 
-  const menu = [
-    isDraft && access.canReject && (
-      <DropdownMenuItem
-        key={DIALOGS.reject}
-        onClick={() => setDialog(DIALOGS.reject)}
-      >
-        {t('knowledgeItem.reject')}
-      </DropdownMenuItem>
-    ),
-    isDraft && access.canDelete && (
-      <DropdownMenuItem
-        key={DIALOGS.delete}
-        variant='destructive'
-        onClick={() => setDialog(DIALOGS.delete)}
-      >
-        {t('knowledgeItem.delete')}
-      </DropdownMenuItem>
-    ),
-    isApproved && access.canRetire && (
-      <DropdownMenuItem
-        key={DIALOGS.retire}
-        variant='destructive'
-        onClick={() => setDialog(DIALOGS.retire)}
-      >
-        {t('knowledgeItem.retire')}
-      </DropdownMenuItem>
-    ),
-  ].filter(Boolean);
-
   const dialogProps = (name: Dialog) => ({
     open: dialog === name,
     onOpenChange: (open: boolean) => setDialog(open ? name : null),
@@ -139,8 +104,8 @@ export function ItemActions({
   return (
     <>
       {isApproved && access.canRecordReplacement && (
-        <Button
-          variant='outline'
+        <IconAction
+          label={t('knowledgeItem.recordReplacement')}
           render={
             <Link
               to={newKnowledgeItemPath(
@@ -151,15 +116,22 @@ export function ItemActions({
               )}
             />
           }
-          nativeButton={false}
         >
           <Replace />
-          {t('knowledgeItem.recordReplacement')}
-        </Button>
+        </IconAction>
+      )}
+      {isApproved && access.canRetire && (
+        <IconAction
+          label={t('knowledgeItem.retire')}
+          onClick={() => setDialog(DIALOGS.retire)}
+          className='hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/15'
+        >
+          <Archive />
+        </IconAction>
       )}
       {isDraft && access.canEdit && (
-        <Button
-          variant='outline'
+        <IconAction
+          label={t('knowledgeItem.edit')}
           render={
             <Link
               to={knowledgeItemPath(
@@ -170,40 +142,58 @@ export function ItemActions({
               )}
             />
           }
-          nativeButton={false}
         >
           <PenLine />
-          {t('knowledgeItem.edit')}
-        </Button>
+        </IconAction>
       )}
-      {isDraft && access.canApprove && (
-        <Button
-          disabled={blocked || approving}
-          onClick={() => void runApproval()}
+      {isDraft && access.canDelete && (
+        <IconAction
+          label={t('knowledgeItem.delete')}
+          onClick={() => setDialog(DIALOGS.delete)}
+          className='hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/15'
         >
-          {approving || !approval ? <Spinner /> : <Check />}
-          {together > 0
-            ? t('knowledgeItem.approveWith', { count: together })
-            : t('knowledgeItem.approve')}
-        </Button>
+          <Trash2 />
+        </IconAction>
       )}
-      {menu.length > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant='outline'
-                size='icon'
-                aria-label={t('knowledgeItem.more')}
-              >
-                <Ellipsis />
-              </Button>
-            }
-          />
-          <DropdownMenuContent align='end' className='min-w-60'>
-            <DropdownMenuGroup>{menu}</DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {isDraft && (access.canReject || access.canApprove) && (
+        // The decision stands apart from what only changes the item.
+        <span aria-hidden className='mx-1 h-5 w-px bg-border' />
+      )}
+      {isDraft && access.canReject && (
+        <IconAction
+          label={t('knowledgeItem.reject')}
+          onClick={() => setDialog(DIALOGS.reject)}
+          className='hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/15'
+        >
+          <X />
+        </IconAction>
+      )}
+      {isDraft && access.canApprove && !blocked && (
+        // The decision, as the one action in the success ink; the Drafts it takes along counted on it.
+        <IconAction
+          label={
+            together > 0
+              ? t('knowledgeItem.approveWith', { count: together })
+              : t('knowledgeItem.approve')
+          }
+          disabled={!approval || approving}
+          onClick={() => void runApproval()}
+          className='relative border-success/40 bg-success/10 text-success shadow-[0_1px_2px_oklch(0.56_0.14_155/0.15)] hover:border-success/60 hover:bg-success/18 hover:text-success disabled:opacity-60 dark:border-success/35 dark:bg-success/12 dark:hover:bg-success/20'
+        >
+          {approving || !approval ? (
+            <Spinner />
+          ) : (
+            <Check className='size-4.5' />
+          )}
+          {together > 0 && (
+            <span
+              aria-hidden
+              className='absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-success px-1 text-[0.625rem] leading-none font-semibold text-background tabular-nums'
+            >
+              +{together}
+            </span>
+          )}
+        </IconAction>
       )}
       <ActionDialog
         {...dialogProps(DIALOGS.reject)}

@@ -111,14 +111,18 @@ export type KnowledgeDependencyDto = {
 };
 
 /**
- * Everything a Knowledge Item reaches along `depends-on`, at any depth, the
- * item itself first, each once; and the `depends-on` Links between them.
+ * What approving a Knowledge Item takes along: everything it reaches along
+ * `depends-on`, at any depth, and the Draft Open Questions a Draft among them
+ * answers (with what those depend on), the item itself first, each once.
  */
 export type KnowledgeDependenciesDto = {
   readonly items: KnowledgeDependencyDto[];
   /** Whether anything below the item itself is marked Needs Review. */
   readonly dependencyNeedsReview: boolean;
+  /** The `depends-on` Links between them. */
   readonly links: { readonly from: string; readonly to: string }[];
+  /** The `answers` Links from a Draft among them to a Draft Open Question among them, approved in the same step. */
+  readonly answers: { readonly from: string; readonly to: string }[];
 };
 
 /** How many items one Kind holds, by status. */

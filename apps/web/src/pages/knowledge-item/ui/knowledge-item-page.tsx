@@ -3,19 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
 import {
-  gapKeys,
   gapRulesOf,
-  inListOrder,
-  isListView,
   KindBadge,
   KNOWLEDGE_ERROR_CODES,
-  KNOWLEDGE_VIEWS,
-  knowledgeFilter,
   KnowledgeScopeProvider,
   KnowledgeStatusPair,
-  parseKnowledgeKind,
-  parseKnowledgeOrder,
-  parseKnowledgeView,
   planApproval,
   readKnowledgeListState,
   useConfirmKnowledgeItemMutation,
@@ -23,8 +15,6 @@ import {
   useKnowledgeGapsQuery,
   useKnowledgeIndex,
   useKnowledgeItemQuery,
-  useKnowledgeItemsQuery,
-  type KnowledgeListState,
 } from '@/entities/knowledge-item';
 import { useMembersQuery } from '@/entities/member';
 import { useCurrentProject } from '@/entities/project';
@@ -32,16 +22,17 @@ import { useCurrentWorkspace } from '@/entities/workspace';
 import { toApiError, type ApiError } from '@/shared/api';
 import {
   conversationPath,
-  KNOWLEDGE_SEARCH_PARAMS,
   knowledgeItemPath,
   PROJECT_PAGES,
   projectPath,
   ROUTE_PARAMS,
 } from '@/shared/config';
 import { useDescribeError } from '@/shared/i18n';
+import { RESTORE_SCROLL_STATE } from '@/shared/lib';
 import {
   Alert,
   AlertDescription,
+  BackLink,
   LoadError,
   Page,
   PageHeader,
@@ -52,7 +43,7 @@ import {
   KnowledgeStatusDtoSchema,
 } from '@intentra/contracts/workspace';
 
-import { neighboursOf } from '../model/neighbours';
+import { proposedAnswers } from '../model/links';
 
 import { AgentContext } from './agent-context';
 import { ItemActions } from './item-actions';
@@ -61,7 +52,6 @@ import { ItemFields } from './item-fields';
 import { ItemGaps } from './item-gaps';
 import { ItemNotices } from './item-notices';
 import { ItemProperties } from './item-properties';
-import { ItemStepper } from './item-stepper';
 
 /**
  * One Knowledge Item: what it says, what it rests on, where it came from,
@@ -95,7 +85,6 @@ export function KnowledgeItemPage() {
   );
   const index = useKnowledgeIndex(scope, { skip });
   const { data: gaps } = useKnowledgeGapsQuery(scope, { skip });
-  const neighbours = useNeighbours(scope, listState, key, skip);
   const { data: members = [] } = useMembersQuery(workspace?.id ?? '', {
     skip: !workspace,
   });
@@ -107,12 +96,12 @@ export function KnowledgeItemPage() {
 
   const slugs = { workspaceSlug: workspace.slug, projectSlug: project.slug };
   const listPath = `${projectPath(workspace.slug, project.slug, PROJECT_PAGES.knowledge)}${listState?.listSearch ?? ''}`;
+  // Back to the list as it was left: its view, Kind and order, and its scroll.
   const stepper = (
-    <ItemStepper
-      listPath={listPath}
-      slugs={slugs}
-      neighbours={neighbours}
-      listState={listState}
+    <BackLink
+      to={listPath}
+      label={t('knowledgeItem.back')}
+      state={RESTORE_SCROLL_STATE}
     />
   );
 
@@ -142,8 +131,11 @@ export function KnowledgeItemPage() {
     return <PageSkeleton />;
   }
 
-  const emailOf = (memberId: string) =>
-    members.find(member => member.id === memberId)?.email;
+  // A Member by name, or by email when they have none.
+  const nameOf = (memberId: string) => {
+    const member = members.find(candidate => candidate.id === memberId);
+    return member && (member.name || member.email);
+  };
   const approval =
     isDraft && dependencies.currentData
       ? planApproval(dependencies.currentData)
@@ -173,17 +165,30 @@ export function KnowledgeItemPage() {
     <KnowledgeScopeProvider scope={knowledgeScope}>
       <Page key={item.key}>
         {stepper}
-        <PageHeader
-          title={item.title}
-          description={
-            <span className='flex flex-wrap items-center gap-x-3 gap-y-1.5'>
-              <KindBadge kind={item.kind} className='text-sm' />
-              <span className='font-mono text-xs'>{item.key}</span>
-              <KnowledgeStatusPair item={item} />
-            </span>
-          }
-          actions={
-            <>
+        {/*
+          From 1280px the title is a band across the page, and under it two
+          columns start on one line: the content on the left (what is open
+          about the item, its fields, its Links) and, 3rem on with no rule, what can
+          be done with it and what it is (the actions, then where it came from
+          and its history). Narrower, in reading order: title, actions,
+          content, then the rest.
+        */}
+        <div className='grid gap-y-6 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-x-12 xl:gap-y-8'>
+          <div className='min-w-0 max-xl:order-1 xl:col-span-2 xl:row-start-1'>
+            <PageHeader
+              title={item.title}
+              description={
+                <span className='flex flex-wrap items-center gap-x-3 gap-y-1.5'>
+                  <KindBadge kind={item.kind} className='text-sm' />
+                  <span className='font-mono text-xs'>{item.key}</span>
+                  <KnowledgeStatusPair item={item} />
+                </span>
+              }
+            />
+          </div>
+          {/* One unbroken column from 1280px; narrower its parts take their place in reading order. */}
+          <div className='max-xl:contents xl:col-start-2 xl:row-start-2 xl:flex xl:flex-col xl:gap-8'>
+            <div className='flex flex-wrap items-center gap-2 max-xl:order-2'>
               {item.status === KnowledgeStatusDtoSchema.enum.approved && (
                 <AgentContext scope={scope} itemKey={item.key} />
               )}
@@ -195,73 +200,49 @@ export function KnowledgeItemPage() {
                 onFailure={report}
                 refresh={refresh}
               />
-            </>
-          }
-        />
-        {failure && (
-          <Alert variant='destructive'>
-            <AlertDescription>{describeError(failure).text}</AlertDescription>
-          </Alert>
-        )}
-        <ItemNotices
-          item={item}
-          confirming={confirming}
-          onConfirm={() => void runConfirm()}
-        />
-        <ItemGaps
-          item={item}
-          rules={gapRulesOf(gaps?.gaps ?? [], item.key)}
-          interviewPath={conversationPath(workspace.slug, project.slug)}
-        />
-        <div className='grid gap-10 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-12'>
-          <div className='flex min-w-0 flex-col gap-10'>
-            <ItemFields item={item} />
-            <ItemContext
-              item={item}
-              index={index}
-              dependencies={dependencies.currentData}
-              approval={approval}
-            />
+            </div>
+            <aside className='min-w-0 max-xl:order-4 max-xl:mt-4'>
+              <ItemProperties item={item} nameOf={nameOf} />
+            </aside>
           </div>
-          <aside className='min-w-0 xl:border-l xl:border-border xl:pl-8'>
-            <ItemProperties item={item} emailOf={emailOf} />
-          </aside>
+          <div className='flex min-w-0 flex-col gap-8 max-xl:order-3 xl:col-start-1 xl:row-start-2'>
+            {failure && (
+              <Alert variant='destructive'>
+                <AlertDescription>
+                  {describeError(failure).text}
+                </AlertDescription>
+              </Alert>
+            )}
+            <ItemNotices
+              item={item}
+              approval={approval}
+              editPath={
+                isDraft && item.access.canEdit
+                  ? knowledgeItemPath(workspace.slug, project.slug, item.key, {
+                      edit: true,
+                    })
+                  : undefined
+              }
+              confirming={confirming}
+              onConfirm={() => void runConfirm()}
+            />
+            <ItemGaps
+              item={item}
+              rules={gapRulesOf(gaps?.gaps ?? [], item.key)}
+              proposed={proposedAnswers(item.key, index.items)}
+              interviewPath={conversationPath(workspace.slug, project.slug)}
+            />
+            <div className='flex min-w-0 flex-col gap-10'>
+              <ItemFields item={item} />
+              <ItemContext
+                item={item}
+                index={index}
+                dependencies={dependencies.currentData}
+              />
+            </div>
+          </div>
         </div>
       </Page>
     </KnowledgeScopeProvider>
   );
-}
-
-/** Where the item stands in the list it was opened from; the list is read from the cache. */
-function useNeighbours(
-  scope: { readonly workspaceId: string; readonly projectId: string },
-  listState: KnowledgeListState | null,
-  key: string,
-  skip: boolean,
-) {
-  const params = new URLSearchParams(listState?.listSearch ?? '');
-  const view = parseKnowledgeView(params.get(KNOWLEDGE_SEARCH_PARAMS.view));
-  const kind = parseKnowledgeKind(params.get(KNOWLEDGE_SEARCH_PARAMS.kind));
-  const listView = isListView(view) ? view : null;
-  const { data } = useKnowledgeItemsQuery(
-    {
-      ...scope,
-      filter: knowledgeFilter(
-        listView ?? KNOWLEDGE_VIEWS.all,
-        kind,
-        parseKnowledgeOrder(params.get(KNOWLEDGE_SEARCH_PARAMS.order)),
-      ),
-    },
-    { skip: skip || listState === null || listView === null },
-  );
-  // Opened from the Gaps, it steps through the items they name.
-  const { data: gaps } = useKnowledgeGapsQuery(scope, {
-    skip: skip || listState === null || listView !== null,
-  });
-  const keys =
-    listView === null
-      ? gaps && gapKeys(gaps.gaps, kind)
-      : data && inListOrder(data.items).map(item => item.key);
-
-  return keys ? neighboursOf(keys, key) : null;
 }

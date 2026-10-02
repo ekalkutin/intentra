@@ -6,7 +6,7 @@ import type {
   KnowledgeStatusDto,
 } from '@intentra/contracts/workspace';
 
-import { planApproval } from './approval';
+import { APPROVAL_BLOCKS, approvalBlockOf, planApproval } from './approval';
 
 function dependency(
   key: string,
@@ -33,6 +33,7 @@ describe('planApproval', () => {
       ],
       dependencyNeedsReview: false,
       links: [],
+      answers: [],
     };
 
     // Act
@@ -54,6 +55,7 @@ describe('planApproval', () => {
       items: [dependency('REQ-1', 'draft'), forbidden, marked],
       dependencyNeedsReview: true,
       links: [],
+      answers: [],
     };
 
     // Act
@@ -71,6 +73,7 @@ describe('planApproval', () => {
       items: [dependency('REQ-1', 'draft'), rejected, obsolete],
       dependencyNeedsReview: false,
       links: [],
+      answers: [],
     };
 
     // Act
@@ -78,5 +81,53 @@ describe('planApproval', () => {
 
     // Assert
     expect(approval.blockers).toEqual([rejected, obsolete]);
+  });
+});
+
+describe('planApproval with answers', () => {
+  it('approves a Draft Open Question the Draft answers in the same step', () => {
+    // Arrange
+    const dependencies = {
+      items: [dependency('DEC-3', 'draft'), dependency('TBD-1', 'draft')],
+      dependencyNeedsReview: false,
+      links: [],
+      answers: [{ from: 'DEC-3', to: 'TBD-1' }],
+    };
+
+    // Act
+    const approval = planApproval(dependencies);
+
+    // Assert
+    expect(approval.items).toEqual([
+      { key: 'DEC-3', version: 2 },
+      { key: 'TBD-1', version: 2 },
+    ]);
+  });
+});
+
+describe('approvalBlockOf', () => {
+  it('names why each kind of item stops the cascade', () => {
+    // Arrange
+    const items = [
+      dependency('REQ-1', 'draft'),
+      dependency('PER-1', 'approved', { needsReview: true }),
+      dependency('TERM-1', 'draft', { canApprove: false }),
+      dependency('DEC-1', 'draft', { needsReview: true }),
+      dependency('BR-1', 'rejected'),
+      dependency('PER-2', 'obsolete'),
+    ];
+
+    // Act
+    const blocks = items.map(approvalBlockOf);
+
+    // Assert
+    expect(blocks).toEqual([
+      null,
+      null,
+      APPROVAL_BLOCKS.forbidden,
+      APPROVAL_BLOCKS.needsReview,
+      APPROVAL_BLOCKS.rejected,
+      APPROVAL_BLOCKS.obsolete,
+    ]);
   });
 });

@@ -725,6 +725,77 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
     });
   });
 
+  it('approves an answer together with the Draft Open Question it answers', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    for (const body of [
+      requirement,
+      {
+        kind: 'open-question',
+        title: 'Report format',
+        fields: { question: 'Which format does the export use?' },
+        links: [{ type: 'depends-on', key: 'REQ-1' }],
+      },
+      {
+        kind: 'decision',
+        title: 'PDF export',
+        fields: { decision: 'The report is exported to PDF' },
+        links: [{ type: 'answers', key: 'TBD-1' }],
+      },
+    ]) {
+      await app
+        .request()
+        .post(path)
+        .set('Authorization', ada)
+        .send(body)
+        .expect(HttpStatus.CREATED);
+    }
+    const alone = await app
+      .request()
+      .post(`${path}/DEC-1/approve`)
+      .set('Authorization', ada)
+      .send({ version: 1 });
+    const cascade = await app
+      .request()
+      .get(`${path}/DEC-1/dependencies`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+
+    // Act
+    const approved = await app
+      .request()
+      .post(`${path}/approve`)
+      .set('Authorization', ada)
+      .send({
+        items: cascade.body.items.map(
+          ({ key, version }: { key: string; version: number }) => ({
+            key,
+            version,
+          }),
+        ),
+      });
+
+    // Assert
+    expect(alone.status).toBe(HttpStatus.CONFLICT);
+    expect(alone.body.code).toBe('ANSWERED_QUESTIONS_NOT_APPROVED');
+    expect(cascade.body.items.map(({ key }: { key: string }) => key)).toEqual([
+      'DEC-1',
+      'TBD-1',
+      'REQ-1',
+    ]);
+    expect(cascade.body.answers).toEqual([{ from: 'DEC-1', to: 'TBD-1' }]);
+    expect(approved.status).toBe(HttpStatus.OK);
+    const question = await app
+      .request()
+      .get(`${path}/TBD-1`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(question.body).toMatchObject({
+      status: 'approved',
+      answeredBy: ['DEC-1'],
+    });
+  });
+
   it('lets only an Open Question say what it concerns', async () => {
     // Arrange
     const { ada, path } = await setUp();

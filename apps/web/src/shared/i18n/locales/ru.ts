@@ -121,7 +121,7 @@ export const ru = {
     manual: 'вручную',
     'external-agent': 'внешний агент',
     'intentra-agent': 'Intentra',
-    'analysis-run': 'проверка проекта',
+    'analysis-run': 'Intentra Audit',
   },
   shell: {
     navigation: 'Навигация',
@@ -368,21 +368,41 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       },
     },
     statuses: {
-      running: 'Идёт',
+      running: 'Идёт проверка',
       completed: 'Готово',
       failed: 'Не удалось',
     },
     runningHint:
       'Intentra читает знания проекта. Можно уйти со страницы: проверка продолжится.',
     foundNothing: 'Противоречий и неясностей не нашлось.',
-    found_one: 'Найден {{count}} вопрос:',
-    found_few: 'Найдено {{count}} вопроса:',
-    found_many: 'Найдено {{count}} вопросов:',
-    found_other: 'Найдено {{count}} вопроса:',
-    foundBeforeFailing_one: 'До сбоя записан {{count}} вопрос:',
-    foundBeforeFailing_few: 'До сбоя записано {{count}} вопроса:',
-    foundBeforeFailing_many: 'До сбоя записано {{count}} вопросов:',
-    foundBeforeFailing_other: 'До сбоя записано {{count}} вопроса:',
+    oneWaiting: 'ждёт решения',
+    oneSettled: 'разобран',
+    allWaiting: 'все ждут решения',
+    allSettled: 'все разобраны',
+    waiting_one: '{{count}} ждёт решения',
+    waiting_few: '{{count}} ждут решения',
+    waiting_many: '{{count}} ждут решения',
+    waiting_other: '{{count}} ждут решения',
+    findingStatuses: {
+      draft: 'ждёт решения',
+      approved: 'принят',
+      rejected: 'отклонён',
+      obsolete: 'устарел',
+    },
+    findingGone: 'Черновик удалили',
+    showMore_one: 'Ещё {{count}}',
+    showMore_few: 'Ещё {{count}}',
+    showMore_many: 'Ещё {{count}}',
+    showMore_other: 'Ещё {{count}}',
+    showFewer: 'Свернуть',
+    found_one: 'Найден {{count}} вопрос',
+    found_few: 'Найдено {{count}} вопроса',
+    found_many: 'Найдено {{count}} вопросов',
+    found_other: 'Найдено {{count}} вопроса',
+    foundBeforeFailing_one: 'До сбоя записан {{count}} вопрос',
+    foundBeforeFailing_few: 'До сбоя записано {{count}} вопроса',
+    foundBeforeFailing_many: 'До сбоя записано {{count}} вопросов',
+    foundBeforeFailing_other: 'До сбоя записано {{count}} вопроса',
     stepLimitReached:
       'Проверка упёрлась в предел шагов и могла посмотреть не всё.',
     failures: {
@@ -396,6 +416,8 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     },
   },
   passport: {
+    description:
+      'Продукт таким, каким его утвердила команда. Черновики появятся здесь, когда их утвердят.',
     contents: 'Содержание',
     findings_one: 'Intentra нашла {{count}} вопрос при проверке',
     findings_few: 'Intentra нашла {{count}} вопроса при проверке',
@@ -427,7 +449,8 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     functionalRequirements: 'Требования',
     qualityRequirements: 'Требования к качеству',
     notDescribed: 'Пока не описано.',
-    nothing: '—',
+    moreDetails: 'Подробнее',
+    lessDetails: 'Свернуть',
     discuss: 'Обсудить',
     discussLabel: 'Обсудить раздел «{{chapter}}» с Intentra',
     discussPrompt:
@@ -701,6 +724,17 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       gaps: 'Пробелы',
     },
     viewsLabel: 'Статус',
+    moreViews: 'Ещё',
+    signals: {
+      gaps_one: '{{count}} пробел',
+      gaps_few: '{{count}} пробела',
+      gaps_many: '{{count}} пробелов',
+      gaps_other: '{{count}} пробела',
+      questions_one: '{{count}} открытый вопрос',
+      questions_few: '{{count}} открытых вопроса',
+      questions_many: '{{count}} открытых вопросов',
+      questions_other: '{{count}} открытого вопроса',
+    },
     allKinds: 'Все виды',
     kindLabel: 'Вид знаний',
     record: 'Записать',
@@ -790,13 +824,13 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     agentTags: {
       'intentra-agent': 'Intentra',
       'external-agent': 'MCP',
-      'analysis-run': 'Проверка',
+      'analysis-run': 'Audit',
     },
     agentHints: {
       'intentra-agent': 'Записала Intentra в интервью от имени {{who}}.',
       'external-agent':
         'Записал внешний агент (Claude Code, Codex, Cursor…) через MCP от имени {{who}}, по его токену доступа.',
-      'analysis-run': 'Нашла {{who}}, проверяя знания проекта.',
+      'analysis-run': 'Нашла {{who}} при проверке проекта.',
     },
     orders: {
       'by-key': 'По ключу',
@@ -809,9 +843,6 @@ bearer_token_env_var = "INTENTRA_TOKEN"
   },
   knowledgeItem: {
     back: 'Знания',
-    previous: 'Предыдущая запись',
-    next: 'Следующая запись',
-    position: '{{position}} из {{total}}',
     missing: 'Такой записи нет',
     missingHint: 'Возможно, черновик удалили. Вернитесь к списку знаний.',
     content: 'Содержание',
@@ -819,7 +850,6 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     rationale: 'Обоснование',
     noRationale: 'Обоснование не записано.',
     links: 'Связи',
-    linksDescription: 'На что опирается запись и что опирается на неё.',
     noLinks: 'Связей нет.',
     noLinksHint:
       'Связей пока нет. Свяжите запись с персонами, терминами, решениями и требованиями, на которые она опирается, — так её смысл понятен без пересказа.',
@@ -827,9 +857,13 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     seeAbove: '(см. выше)',
     replaces: 'Заменяет',
     replacedBy: 'Заменена на',
-    dependencies: 'Цепочка зависимостей',
-    dependenciesDescription:
-      'Черновики из цепочки утвердятся вместе с этой записью, одним шагом.',
+    approvesTogether: 'утвердится вместе',
+    approvalBlocks: {
+      forbidden: 'вам не утвердить',
+      'needs-review': 'на проверке',
+      rejected: 'отклонено',
+      obsolete: 'устарело',
+    },
     properties: 'Свойства',
     key: 'Ключ',
     kind: 'Вид',
@@ -851,10 +885,16 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     approveWith_few: 'Утвердить вместе с {{count}} черновиками',
     approveWith_many: 'Утвердить вместе с {{count}} черновиками',
     approveWith_other: 'Утвердить вместе с {{count}} черновика',
-    approveBlocked:
-      'Утвердить пока нельзя: сначала разберите {{keys}} — там черновик на проверке, черновик, который вам не утвердить, или отклонённая либо устаревшая запись.',
+    approveBlockedTitle: 'Утвердить пока нельзя',
+    approveBlockedBy: {
+      obsolete:
+        '<key/> устарела — свяжите запись с актуальной заменой или уберите связь.',
+      rejected: '<key/> отклонена — уберите связь или свяжите запись с другой.',
+      'needs-review': '<key/> сама ждёт проверки — начните с неё.',
+      forbidden:
+        'Черновик <key/> может утвердить только участник с ролью «Утверждает».',
+    },
     edit: 'Править',
-    more: 'Другие действия',
     reject: 'Отклонить',
     rejectTitle: 'Отклонить <mono>{{key}}</mono>?',
     rejectDescription:
@@ -876,10 +916,39 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     needsReviewTitle: 'Требует проверки',
     gapsTitle: 'Чего не хватает',
     discussGaps: 'Обсудить с Intentra',
+    questionOpenTitle: 'Вопрос ждёт ответа',
+    answerProposedTitle_one: 'Предложен ответ',
+    answerProposedTitle_few: 'Предложены ответы',
+    answerProposedTitle_many: 'Предложены ответы',
+    answerProposedTitle_other: 'Предложены ответы',
+    answerProposedHint_one:
+      'Утвердите его — и вопрос закроется вместе с ним. Не согласны — отклоните или обсудите с Intentra.',
+    answerProposedHint_few:
+      'Утвердите подходящий — и вопрос закроется вместе с ним. Не согласны — отклоните или обсудите с Intentra.',
+    answerProposedHint_many:
+      'Утвердите подходящий — и вопрос закроется вместе с ним. Не согласны — отклоните или обсудите с Intentra.',
+    answerProposedHint_other:
+      'Утвердите подходящий — и вопрос закроется вместе с ним. Не согласны — отклоните или обсудите с Intentra.',
+    showAnswer: 'Показать ответ ниже',
+    discussAnswerPrompt:
+      'Давай разберём ответ на открытый вопрос {{key}} «{{title}}»: {{question}} Предложено: {{answers}}. Сверь это с утверждёнными знаниями, назови риски и альтернативы, задавай мне вопросы по одному. Если ответ нужно поправить — запиши исправленный черновиком.',
+    questionOpen:
+      'Обсудите его с Intentra: ответ станет записью, которая закроет вопрос.',
+    discussQuestionPrompt:
+      'Давай разберём открытый вопрос {{key}} «{{title}}»: {{question}} Помоги найти ответ: задавай мне вопросы по одному, предлагай варианты, а когда решим — запиши ответ черновиком, который закроет этот вопрос.',
     discussGapsPrompt:
       'Давай обсудим {{key}} «{{title}}». Чего не хватает: {{gaps}} Задавай мне вопросы по одному и поправь запись, когда выясним.',
-    needsReview:
-      'Изменилось то, на чём держится запись: <keys/>. Проверьте, верна ли она ещё. Если нет — поправьте черновик или запишите замену.',
+    reviewCause: {
+      superseded:
+        'Запись опирается на <key/>, которую заменили на <next/>. Если запись верна и с <next/>, подтвердите — связь переключится сама.',
+      retired:
+        'Запись опирается на <key/>, которую вывели из обращения. Если запись верна и без <key/>, подтвердите — связь уберётся.',
+      rejected:
+        'Запись опирается на <key/>, которую отклонили. Если запись верна и без <key/>, подтвердите — связь уберётся.',
+      changed: 'Изменилась <key/>, на которую опирается запись.',
+    },
+    reviewOtherwiseDraft: 'Если нет — исправьте запись.',
+    reviewOtherwiseApproved: 'Если нет — запишите ей замену.',
     dependencyNeedsReview:
       'Что-то дальше по цепочке зависимостей ждёт проверки.',
     supersedes: 'После утверждения заменит <key/>.',
@@ -1442,6 +1511,8 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       'Контекст для агента собирается только от утверждённых записей',
     DEPENDENCIES_NOT_APPROVED:
       'Не всё, от чего зависит запись, утверждено. Утвердите их вместе',
+    ANSWERED_QUESTIONS_NOT_APPROVED:
+      'Вопрос, на который отвечает запись, ещё черновик. Утвердите их вместе',
     SUPERSEDED_ITEM_NOT_APPROVED:
       'Заменяемая запись уже не утверждена: её заменили или вывели из обращения',
     PRODUCT_OVERVIEW_ALREADY_APPROVED:

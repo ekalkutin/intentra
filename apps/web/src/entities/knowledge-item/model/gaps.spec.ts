@@ -6,7 +6,7 @@ import type {
   KnowledgeKindDto,
 } from '@intentra/contracts/workspace';
 
-import { gapKeys, gapRulesOf, groupGapsByRule } from './gaps';
+import { gapRulesOf, groupGapsByRule } from './gaps';
 
 function gap(
   rule: KnowledgeGapRuleDto,
@@ -64,15 +64,5 @@ describe('gapRulesOf', () => {
       'requirement-without-acceptance-criteria',
       'unlinked',
     ]);
-  });
-});
-
-describe('gapKeys', () => {
-  it('names each item of the view once, in its order', () => {
-    // Act
-    const keys = gapKeys(gaps, null);
-
-    // Assert
-    expect(keys).toEqual(['REQ-2', 'SC-1', 'REQ-1']);
   });
 });

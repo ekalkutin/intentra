@@ -30,6 +30,8 @@ import type {
   KnowledgeKindDto,
 } from '@intentra/contracts/workspace';
 
+import { ItemSignals } from './item-signals';
+
 /** Fields short enough for a column: choices, list sizes and one-line texts. */
 function columnsOf(kind: KnowledgeKindDto): KindField[] {
   const { main, fields } = kindFields(kind);
@@ -126,6 +128,7 @@ export function KindTableRows({
         <InlineMarkdown className='mt-0.5 line-clamp-2 text-sm text-muted-foreground'>
           {item.mainField}
         </InlineMarkdown>
+        <ItemSignals itemKey={item.key} className='mt-1.5' />
       </TableCell>
       {columns.map(column => (
         <TableCell key={column.name} className='py-3 text-sm'>

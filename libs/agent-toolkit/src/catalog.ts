@@ -65,6 +65,7 @@ export const AGENT_TOOLS = Object.fromEntries(
     getKnowledgeItemTool,
     getKnowledgeDependenciesTool,
     getContextTool,
+    getProjectFrameTool,
     ...KIND_TOOLS,
     confirmKnowledgeItemTool,
     deleteKnowledgeDraftTool,

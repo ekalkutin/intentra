@@ -13,7 +13,7 @@ import {
 export const approveKnowledgeItemsTool = createTool({
   id: 'approve_knowledge_items',
   description:
-    "Approves Drafts together, all or nothing: the person confirms they are true for the Project. What a Draft depends on must be Approved already or among them; get_knowledge_dependencies shows the whole cascade. Do it only when the person asks you to, after showing them the versions you send. Needs a Maintainer's token.",
+    "Approves Drafts together, all or nothing: the person confirms they are true for the Project. What a Draft depends on must be Approved already or among them, and so must a Draft Open Question it answers; get_knowledge_dependencies shows the whole cascade. Do it only when the person asks you to, after showing them the versions you send. Needs a Maintainer's token.",
   inputSchema: z.object({
     projectId: projectIdSchema,
     items: z

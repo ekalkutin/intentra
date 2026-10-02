@@ -777,6 +777,8 @@ describe('KnowledgeService Links and Needs Review', () => {
           { type: 'answers', key: 'TBD-1' },
         ]),
       );
+      // An Approved question: a Draft one would be approved along with its answer.
+      await approve('TBD-1');
       const open = await knowledge('get', 'TBD-1');
 
       // Act

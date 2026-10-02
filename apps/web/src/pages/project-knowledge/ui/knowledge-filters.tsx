@@ -1,5 +1,5 @@
-import { ArrowDownUp, Library } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { ArrowDownUp, ChevronDown, Library } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -10,6 +10,11 @@ import {
 } from '@/entities/knowledge-item';
 import { cn } from '@/shared/lib';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
   Select,
   SelectContent,
   SelectItem,
@@ -26,6 +31,19 @@ import {
   type KnowledgeListOrderDto,
 } from '@intentra/contracts/workspace';
 
+/** The views read every day, as tabs; the archive waits under "Ещё". */
+const TAB_VIEWS: readonly KnowledgeView[] = [
+  KNOWLEDGE_VIEWS.all,
+  KNOWLEDGE_VIEWS.approved,
+  KNOWLEDGE_VIEWS.drafts,
+  KNOWLEDGE_VIEWS.review,
+  KNOWLEDGE_VIEWS.gaps,
+];
+const MORE_VIEWS: readonly KnowledgeView[] = [
+  KNOWLEDGE_VIEWS.rejected,
+  KNOWLEDGE_VIEWS.obsolete,
+];
+
 /** Stands for "every Kind" in the Kind select, which needs a value. */
 const ALL_KINDS = 'all';
 
@@ -34,12 +52,15 @@ const QUIET_TRIGGER =
   'border-transparent bg-transparent text-muted-foreground shadow-none hover:bg-accent hover:text-foreground data-popup-open:bg-accent data-popup-open:text-foreground dark:bg-transparent dark:hover:bg-accent';
 
 /**
- * One line above the list: the status views as tabs on a hairline, their
- * labels on the page's left edge, and at its end the Kind and the order as
- * two quiet selects sized to their words (above the tabs where narrow), then
- * the view's own action, when it has one, on the column's right edge.
- * Neither filter locks the other: each shows its counts for the other's
- * current value, and an empty pair says where to look.
+ * One line above the list, the same in every view: the views read every day
+ * as tabs on a hairline, their labels on the page's left edge, then "Ещё" for
+ * the archive (Rejected and Obsolete), which takes the chosen archive view's
+ * name and the tab's line while one is open; at the line's end the Kind and
+ * the order as two quiet selects sized to their words. Where the column is
+ * narrower than the line, the selects stand above the tabs. The tabs never
+ * wrap: where they still do not fit, they scroll sideways and fade out at the
+ * edge that hides more. Neither filter locks the other: each shows its
+ * counts for the other's current value, and an empty pair says where to look.
  */
 export function KnowledgeFilters({
   view,
@@ -51,7 +72,6 @@ export function KnowledgeFilters({
   onView,
   onKind,
   onOrder,
-  action,
 }: {
   readonly view: KnowledgeView;
   /** For the chosen Kind, so every tab says what it would show. */
@@ -64,66 +84,81 @@ export function KnowledgeFilters({
   readonly onView: (view: KnowledgeView) => void;
   readonly onKind: (kind: KnowledgeKindDto | null) => void;
   readonly onOrder: (order: KnowledgeListOrderDto) => void;
-  /** What the current view offers to do with its items, after the filters. */
-  readonly action?: ReactNode;
 }) {
   const { t } = useTranslation();
+  const { ref, fadeStart, fadeEnd, update } = useSideScroll();
+  // The chosen tab stays in sight, also when the page opens on one past the edge.
+  useEffect(() => {
+    ref.current
+      ?.querySelector<HTMLElement>('[data-active]')
+      ?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [ref, view]);
 
   return (
-    <div className='flex flex-col-reverse gap-2 border-b border-border sm:flex-row sm:items-center sm:justify-between sm:gap-6'>
-      <Tabs
-        value={view}
-        onValueChange={value => onView(parseKnowledgeView(String(value)))}
-        className='min-w-0'
-      >
-        <TabsList
-          variant='line'
-          aria-label={t('knowledge.viewsLabel')}
-          className='-mb-px h-auto! flex-wrap justify-start gap-x-5 gap-y-0 px-0'
+    // One line where the column holds it (56rem); narrower, the selects stand above the tabs.
+    <div className='@container'>
+      <div className='flex flex-col-reverse gap-2 border-b border-border @4xl:flex-row @4xl:items-center @4xl:justify-between @4xl:gap-4'>
+        <Tabs
+          value={view}
+          onValueChange={value => onView(parseKnowledgeView(String(value)))}
+          className='min-w-0'
         >
-          {Object.values(KNOWLEDGE_VIEWS).map(option => (
-            <TabsTrigger
-              key={option}
-              value={option}
-              className='h-9 flex-none px-0 sm:h-11'
+          {/* Room below for the active tab's line, which sits on the hairline. */}
+          <div
+            ref={ref}
+            onScroll={update}
+            className={cn(
+              '-mb-px flex items-start gap-x-[1.125rem] overflow-x-auto overflow-y-hidden pb-[5px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+              fadeStart &&
+                fadeEnd &&
+                'mask-[linear-gradient(to_right,transparent,black_2rem,black_calc(100%-2rem),transparent)]',
+              fadeStart &&
+                !fadeEnd &&
+                'mask-[linear-gradient(to_right,transparent,black_2rem)]',
+              !fadeStart &&
+                fadeEnd &&
+                'mask-[linear-gradient(to_right,black_calc(100%-2rem),transparent)]',
+            )}
+          >
+            <TabsList
+              variant='line'
+              aria-label={t('knowledge.viewsLabel')}
+              className='-mb-[5px] h-auto! shrink-0 flex-nowrap justify-start gap-x-[1.125rem] px-0'
             >
-              {t(`knowledge.views.${option}`)}
-              {Boolean(viewCounts[option]) && (
-                <span className='font-mono text-xs font-normal text-muted-foreground tabular-nums'>
-                  {viewCounts[option]}
-                </span>
-              )}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-      <div className='flex shrink-0 items-center gap-1'>
-        <div
-          role='group'
-          aria-label={t('knowledge.filters')}
-          className={cn(
-            '-ml-2.5 flex items-center gap-1 sm:ml-0',
-            // Quiet selects reach past the edge so their words end on it; a framed action ends there itself.
-            !action && 'sm:-mr-2',
-          )}
-        >
-          <KindSelect
-            kind={kind}
-            counts={kindCounts}
-            total={total}
-            onChoose={onKind}
-          />
-          <OrderSelect order={order} onChoose={onOrder} />
-        </div>
-        {action && (
-          <>
-            <span
-              aria-hidden
-              className='mx-1.5 hidden h-4 w-px bg-border sm:block'
+              {TAB_VIEWS.map(option => (
+                <TabsTrigger
+                  key={option}
+                  value={option}
+                  className='h-9 flex-none px-0 sm:h-11'
+                >
+                  {t(`knowledge.views.${option}`)}
+                  {Boolean(viewCounts[option]) && (
+                    <span className='font-mono text-xs font-normal text-muted-foreground tabular-nums'>
+                      {viewCounts[option]}
+                    </span>
+                  )}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <MoreViews view={view} counts={viewCounts} onView={onView} />
+          </div>
+        </Tabs>
+        <div className='flex shrink-0 items-center gap-1 sm:self-end @4xl:self-auto'>
+          <div
+            role='group'
+            aria-label={t('knowledge.filters')}
+            // Quiet selects reach past the edges so their words end on them.
+            className='-ml-2.5 flex items-center gap-1 sm:-mr-2 sm:ml-0'
+          >
+            <KindSelect
+              kind={kind}
+              counts={kindCounts}
+              total={total}
+              onChoose={onKind}
             />
-            <span className='ml-auto sm:ml-0'>{action}</span>
-          </>
-        )}
+            <OrderSelect order={order} onChoose={onOrder} />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -259,5 +294,96 @@ function OrderSelect({
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+/**
+ * Whether a sideways scroller hides more at its start or its end, kept true
+ * as it scrolls and as its width changes.
+ */
+function useSideScroll() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [fadeStart, setFadeStart] = useState(false);
+  const [fadeEnd, setFadeEnd] = useState(false);
+  const update = useCallback(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+    // A pixel's slack: fractional widths leave the last one unreachable.
+    setFadeStart(element.scrollLeft > 1);
+    setFadeEnd(
+      element.scrollLeft + element.clientWidth < element.scrollWidth - 1,
+    );
+  }, []);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    if (element.firstElementChild) {
+      observer.observe(element.firstElementChild);
+    }
+
+    return () => observer.disconnect();
+  }, [update]);
+
+  return { ref, fadeStart, fadeEnd, update };
+}
+
+/**
+ * "Ещё": the archive views in a menu, after the tabs and looking like one. While
+ * an archive view is open it carries that view's name and count and the tab's
+ * line, so the chosen view is always named on the line.
+ */
+function MoreViews({
+  view,
+  counts,
+  onView,
+}: {
+  readonly view: KnowledgeView;
+  readonly counts: Partial<Record<KnowledgeView, number>>;
+  readonly onView: (view: KnowledgeView) => void;
+}) {
+  const { t } = useTranslation();
+  const chosen = MORE_VIEWS.includes(view) ? view : null;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        data-active={chosen ? '' : undefined}
+        className={cn(
+          // The tab's own geometry: its 3px inset, its height, its line on the hairline.
+          'relative mt-[3px] inline-flex h-9 shrink-0 items-center gap-1.5 text-sm font-medium whitespace-nowrap text-foreground/60 outline-none hover:text-foreground focus-visible:rounded-md focus-visible:ring-[3px] focus-visible:ring-ring/50 data-popup-open:text-foreground sm:h-11 dark:text-muted-foreground dark:hover:text-foreground',
+          'after:absolute after:inset-x-0 after:bottom-[-5px] after:h-0.5 after:bg-foreground after:opacity-0 after:transition-opacity data-active:text-foreground data-active:after:opacity-100',
+        )}
+      >
+        {chosen ? t(`knowledge.views.${chosen}`) : t('knowledge.moreViews')}
+        {chosen && Boolean(counts[chosen]) && (
+          <span className='font-mono text-xs font-normal text-muted-foreground tabular-nums'>
+            {counts[chosen]}
+          </span>
+        )}
+        <ChevronDown aria-hidden className='size-3.5 text-muted-foreground' />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align='start' className='min-w-44'>
+        <DropdownMenuRadioGroup
+          value={chosen ?? ''}
+          onValueChange={value => onView(parseKnowledgeView(String(value)))}
+        >
+          {MORE_VIEWS.map(option => (
+            <DropdownMenuRadioItem key={option} value={option}>
+              {t(`knowledge.views.${option}`)}
+              <span className='ml-auto font-mono text-xs text-muted-foreground tabular-nums'>
+                {counts[option] ?? 0}
+              </span>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

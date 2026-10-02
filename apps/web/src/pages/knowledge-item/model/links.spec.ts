@@ -6,7 +6,7 @@ import type {
   KnowledgeStatusDto,
 } from '@intentra/contracts/workspace';
 
-import { groupLinks, incomingLinks } from './links';
+import { groupLinks, incomingLinks, proposedAnswers } from './links';
 
 function item(
   key: string,
@@ -54,5 +54,23 @@ describe('incomingLinks', () => {
       { type: 'depends-on', keys: ['REQ-2'] },
       { type: 'uses-term', keys: ['REQ-1'] },
     ]);
+  });
+});
+
+describe('proposedAnswers', () => {
+  it('finds the Drafts that answer the question, not the Approved ones', () => {
+    // Arrange
+    const items = [
+      item('DEC-1', 'draft', [{ type: 'answers', key: 'TBD-1' }]),
+      item('DEC-2', 'approved', [{ type: 'answers', key: 'TBD-1' }]),
+      item('DEC-3', 'draft', [{ type: 'answers', key: 'TBD-2' }]),
+      item('REQ-1', 'draft', [{ type: 'depends-on', key: 'TBD-1' }]),
+    ];
+
+    // Act
+    const proposed = proposedAnswers('TBD-1', items);
+
+    // Assert
+    expect(proposed.map(answer => answer.key)).toEqual(['DEC-1']);
   });
 });

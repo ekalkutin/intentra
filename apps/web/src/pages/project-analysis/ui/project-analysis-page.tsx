@@ -1,4 +1,3 @@
-import { SearchCheck } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
@@ -9,17 +8,22 @@ import {
   useAnalysisRunsQuery,
   useStartAnalysisRunMutation,
 } from '@/entities/analysis-run';
-import { KnowledgeScopeProvider } from '@/entities/knowledge-item';
+import {
+  KNOWLEDGE_LIST_SIZE,
+  KnowledgeScopeProvider,
+  useKnowledgeItemsQuery,
+} from '@/entities/knowledge-item';
 import { useMembersQuery } from '@/entities/member';
 import { useCurrentProject } from '@/entities/project';
 import { useCurrentWorkspace } from '@/entities/workspace';
 import { API_TAGS, baseApi, toApiError, type ApiError } from '@/shared/api';
 import { knowledgeItemPath } from '@/shared/config';
 import { useDescribeError } from '@/shared/i18n';
+import { cn } from '@/shared/lib';
 import {
   Alert,
   AlertDescription,
-  Button,
+  IntentraButton,
   List,
   ListSkeleton,
   LoadError,
@@ -27,8 +31,11 @@ import {
   PageHeader,
   PageSection,
   PageSkeleton,
-  Spinner,
 } from '@/shared/ui';
+import {
+  KnowledgeKindDtoSchema,
+  KnowledgeStatusDtoSchema,
+} from '@intentra/contracts/workspace';
 
 import { AnalysisEmpty } from './analysis-empty';
 import { NightlySchedule } from './nightly-schedule';
@@ -64,9 +71,26 @@ export function ProjectAnalysisPage() {
   const { data: members = [] } = useMembersQuery(workspace?.id ?? '', {
     skip: !workspace,
   });
+  // What each finding asks: the Project's Open Questions, read once.
+  const { data: questions } = useKnowledgeItemsQuery(
+    {
+      ...scope,
+      filter: {
+        kind: KnowledgeKindDtoSchema.enum['open-question'],
+        statuses: KnowledgeStatusDtoSchema.options,
+        take: KNOWLEDGE_LIST_SIZE,
+      },
+    },
+    { skip },
+  );
   const items = runs.data?.items ?? [];
   const running = items.some(isRunning);
   const wasRunning = useRef(false);
+  // The runs on the page when it first showed them: any other is new, and enters.
+  const [known, setKnown] = useState<ReadonlySet<string> | null>(null);
+  if (runs.data && known === null) {
+    setKnown(new Set(runs.data.items.map(run => run.id)));
+  }
 
   useEffect(() => {
     setPolling(running);
@@ -90,13 +114,28 @@ export function ProjectAnalysisPage() {
     const result = await start(scope);
     setFailure(toApiError(result.error));
   };
-  // Beside what it changes: above the runs, or inside the empty state.
+  // The page's one action, in Intentra's ink: in the header, or inside the
+  // empty state. While one runs the row says so and there is nothing to
+  // start: the action fades out where it stood, and back once it is done.
   const startButton = runs.data?.access.canStart && (
-    <Button disabled={running || starting} onClick={() => void runStart()}>
-      {running || starting ? <Spinner /> : <SearchCheck />}
-      {running ? t('analysis.running') : t('analysis.start')}
-    </Button>
+    <span
+      inert={running}
+      className={cn(
+        'inline-flex transition-[opacity,scale,filter,visibility] duration-300 ease-out motion-reduce:transition-none',
+        running && 'invisible scale-95 opacity-0 blur-[2px]',
+      )}
+    >
+      <IntentraButton
+        size='default'
+        busy={starting}
+        disabled={starting || running}
+        onClick={() => void runStart()}
+      >
+        {t('analysis.start')}
+      </IntentraButton>
+    </span>
   );
+  const hasRuns = items.length > 0;
 
   return (
     <KnowledgeScopeProvider
@@ -109,6 +148,7 @@ export function ProjectAnalysisPage() {
         <PageHeader
           title={t('analysis.title')}
           description={t('analysis.description')}
+          actions={hasRuns && startButton}
         />
         {failure && (
           <Alert variant='destructive'>
@@ -137,11 +177,16 @@ export function ProjectAnalysisPage() {
                 </span>
               </span>
             }
-            actions={startButton}
           >
             <List>
               {items.map(run => (
-                <RunRow key={run.id} run={run} nameOf={nameOf} />
+                <RunRow
+                  entering={known !== null && !known.has(run.id)}
+                  key={run.id}
+                  run={run}
+                  nameOf={nameOf}
+                  questions={questions?.items ?? []}
+                />
               ))}
             </List>
           </PageSection>

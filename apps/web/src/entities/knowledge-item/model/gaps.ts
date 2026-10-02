@@ -32,15 +32,3 @@ export function gapRulesOf(
 ): KnowledgeGapRuleDto[] {
   return gaps.filter(gap => gap.item?.key === key).map(gap => gap.rule);
 }
-
-/** The Knowledge Keys the Gaps view shows, each once, in its order. */
-export function gapKeys(
-  gaps: readonly KnowledgeGapDto[],
-  kind: KnowledgeKindDto | null,
-): string[] {
-  const keys = groupGapsByRule(gaps, kind).flatMap(group =>
-    group.gaps.flatMap(gap => (gap.item ? [gap.item.key] : [])),
-  );
-
-  return [...new Set(keys)];
-}

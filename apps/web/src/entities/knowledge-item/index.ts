@@ -17,13 +17,14 @@ export {
   useRetireKnowledgeItemMutation,
   type InProject,
 } from './api/knowledge-api';
-export { planApproval, type Approval } from './model/approval';
 export {
-  gapKeys,
-  gapRulesOf,
-  groupGapsByRule,
-  type GapGroup,
-} from './model/gaps';
+  APPROVAL_BLOCKS,
+  approvalBlockOf,
+  planApproval,
+  type Approval,
+  type ApprovalBlock,
+} from './model/approval';
+export { gapRulesOf, groupGapsByRule, type GapGroup } from './model/gaps';
 export {
   BULK_APPROVAL_BLOCKS,
   planBulkApproval,

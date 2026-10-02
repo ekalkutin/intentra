@@ -30,6 +30,8 @@ import {
   Spinner,
 } from '@/shared/ui';
 
+import { IconAction } from './icon-action';
+
 /**
  * The Context Pack an agent gets with this Approved item as its Anchor, as
  * the agent reads it, and the same text to copy into any chat, the Project
@@ -47,10 +49,13 @@ export function AgentContext({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger render={<Button variant='outline' />}>
+      <IconAction
+        label={t('agentContext.open')}
+        render={<SheetTrigger />}
+        nativeButton
+      >
         <Bot />
-        {t('agentContext.open')}
-      </SheetTrigger>
+      </IconAction>
       <SheetContent side='right' className='w-full gap-0 sm:max-w-2xl'>
         <SheetHeader className='border-b border-border'>
           <SheetTitle>{t('agentContext.title')}</SheetTitle>

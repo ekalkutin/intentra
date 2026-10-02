@@ -50,7 +50,13 @@ export function PageHeader({
         )}
       </div>
       {actions && (
-        <div className='flex max-w-full shrink-0 flex-wrap items-center gap-2'>
+        <div
+          className={cn(
+            'flex max-w-full shrink-0 flex-wrap items-center gap-2',
+            // Beside a title with a description under it: centred on the title's line, and 2px lower, on its lowercase letters rather than its line box, so the action does not read as riding high.
+            description && 'sm:min-h-8 sm:translate-y-0.5',
+          )}
+        >
           {actions}
         </div>
       )}

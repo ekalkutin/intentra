@@ -1,10 +1,11 @@
-import { ArrowRight, MessagesSquare } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 import { KindIcon } from '@/entities/knowledge-item';
 import type { InterviewOpening } from '@/shared/config';
-import { Button } from '@/shared/ui';
+import { IntentraButton, List, ListEmpty } from '@/shared/ui';
+import { KnowledgeKindDtoSchema } from '@intentra/contracts/workspace';
 
 import { chapterItems } from '../model/chapter-items';
 import {
@@ -14,7 +15,7 @@ import {
 } from '../model/chapters';
 import { chapterAnchor } from '../model/use-chapter-in-view';
 
-import { PassportEntry } from './passport-entry';
+import { PassportEntry, PassportOverview } from './passport-entry';
 
 /** How many items a group shows; the rest wait in Knowledge. */
 export const ENTRIES_SHOWN = 10;
@@ -65,35 +66,42 @@ export function PassportChapter({
     <section
       id={chapterAnchor(chapter.id)}
       aria-labelledby={titleId}
-      className='flex scroll-mt-8 flex-col gap-6 border-t border-border pt-12 first:border-t-0 first:pt-0'
+      className='flex scroll-mt-8 flex-col gap-4'
     >
       <header className='flex items-start justify-between gap-4'>
         <div className='min-w-0'>
+          {/* The number leads the title; the line under it steps in to the title's edge. */}
           <h2
             id={titleId}
-            className='flex items-baseline gap-2.5 text-sm font-semibold'
+            className='flex items-baseline gap-2.5 text-base font-semibold tracking-[-0.01em]'
           >
-            <span className='font-mono text-xs font-normal text-muted-foreground tabular-nums'>
+            <span className='w-4 shrink-0 font-mono text-xs font-normal tracking-normal text-muted-foreground tabular-nums'>
               {number}
             </span>
             {name}
           </h2>
-          <p className='mt-0.5 max-w-2xl text-sm text-pretty text-muted-foreground'>
+          <p className='mt-0.5 max-w-2xl text-sm text-pretty text-muted-foreground pl-6.5'>
             {about}
           </p>
         </div>
         {interviewPath && (
-          <DiscussButton
-            to={interviewPath}
-            opening={opening}
-            label={t('passport.discussLabel', { chapter: name })}
-          />
+          <IntentraButton
+            quiet
+            aria-label={t('passport.discussLabel', { chapter: name })}
+            className='-mt-0.5 -mr-2 shrink-0'
+            // A new Conversation that opens with the chapter as its first message, dissolving into it (a view transition; still under reduced motion).
+            render={<Link to={interviewPath} state={opening} viewTransition />}
+            nativeButton={false}
+          >
+            {/* Icon only below 640px, so the chapter's line keeps its width. */}
+            <span className='max-sm:hidden'>{t('passport.discuss')}</span>
+          </IntentraButton>
         )}
       </header>
       {chapter.count === 0 ? (
-        <p className='text-sm text-muted-foreground'>
-          {t('passport.notDescribed')}
-        </p>
+        <List>
+          <ListEmpty>{t('passport.notDescribed')}</ListEmpty>
+        </List>
       ) : (
         chapter.groups.map(group => (
           <Group
@@ -127,62 +135,38 @@ function Group({
         ? t('passport.qualityRequirements')
         : t(`kinds.${group.kind}`);
 
+  // The Product Overview opens the Passport: one item, read in full.
+  if (group.kind === KnowledgeKindDtoSchema.enum['product-overview']) {
+    return shown.map(item => <PassportOverview key={item.id} item={item} />);
+  }
+
   return (
-    <div className='flex flex-col gap-6 [&+&]:mt-4'>
+    <div className='flex flex-col gap-1 [&+&]:mt-4'>
       {titled && (
-        <h3 className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
+        <h3 className='flex items-center gap-2 py-2 text-sm font-semibold'>
           <KindIcon kind={group.kind} />
           {title}
-          <span className='font-mono text-xs font-normal tabular-nums'>
+          <span className='font-mono font-normal text-muted-foreground tabular-nums'>
             {group.total}
           </span>
         </h3>
       )}
-      {shown.map(item => (
-        <PassportEntry key={item.id} item={item} />
-      ))}
-      {hidden > 0 && (
-        <Link
-          to={morePath}
-          className='inline-flex w-fit items-center gap-1.5 rounded-sm text-sm text-muted-foreground underline decoration-muted-foreground/50 underline-offset-[0.2em] hover:text-foreground hover:decoration-foreground'
-        >
-          {t('passport.more', { count: hidden })}
-          <ArrowRight aria-hidden className='size-3.5' />
-        </Link>
-      )}
+      <List>
+        {shown.map(item => (
+          <PassportEntry key={item.id} item={item} />
+        ))}
+        {hidden > 0 && (
+          <li>
+            <Link
+              to={morePath}
+              className='flex items-center gap-1.5 px-4 py-2.5 text-sm text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent/60 hover:text-foreground focus-visible:bg-accent/60 focus-visible:text-foreground'
+            >
+              {t('passport.more', { count: hidden })}
+              <ArrowRight aria-hidden className='size-3.5' />
+            </Link>
+          </li>
+        )}
+      </List>
     </div>
-  );
-}
-
-/**
- * The way into the Interview: a quiet ghost button like the rest of the
- * Passport. Only the page change it starts is animated, dissolving into the
- * Conversation it opens (a view transition; still under reduced motion).
- */
-function DiscussButton({
-  to,
-  opening,
-  label,
-}: {
-  readonly to: string;
-  readonly opening: InterviewOpening;
-  readonly label: string;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <Button
-      variant='ghost'
-      size='sm'
-      aria-label={label}
-      className='-mt-1 -mr-2 shrink-0 text-muted-foreground hover:text-foreground'
-      // A new Conversation that opens with the chapter as its first message.
-      render={<Link to={to} state={opening} viewTransition />}
-      nativeButton={false}
-    >
-      <MessagesSquare />
-      {/* Icon only below 640px, so the chapter's line keeps its width. */}
-      <span className='max-sm:hidden'>{t('passport.discuss')}</span>
-    </Button>
   );
 }

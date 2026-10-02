@@ -4,7 +4,6 @@ Plans only (decided 2026-10-03): what is built lives in the code and the git his
 
 ## Now
 
-- [ ] **Re-create the Agents.** The database still holds Agents with the role `orchestrator` (from before the renames), which no longer read: drop `unpublished_agents` and `agents_versions`, create Intentra and the Auditor in the admin area from `docs/agents/intentra.md` and `docs/agents/auditor.md`, publish. Until then the chat and Analysis Runs fail.
 - [ ] **Try the analyst on dogfooding.** On the Project "Intentra": an Analysis Run by hand over its Approved knowledge, the nightly check on, Intentra in an interview with `list_gaps` and `get_context`; note what the Auditor finds, misses and invents, then tune `docs/agents/auditor.md`.
 
 ## Admin area (`/platform`)
@@ -15,8 +14,7 @@ Plans only (decided 2026-10-03): what is built lives in the code and the git his
 
 ## Web UI
 
-- [ ] **Keyboard shortcuts.** Decide the set of keys (single letters such as J / K, modifier chords, or both), one registry that names each once with its keys per platform and its scope, one way of showing them (`Kbd` in tooltips, menus, perhaps a `?` dialog) and one rule for when they stay quiet; then bring ⌘K, ⌘B and the Knowledge Item's J / K onto it. What exists and the open questions: `apps/web/docs/notes/keyboard-shortcuts.md`.
-- [ ] **Dates in the interface's language.** Moments (`useFormatMoment`) came out in English ("Oct 3, 2026, 12:12 PM") in a browser with an English locale while the interface was Russian; check that they follow the interface's language.
+- [ ] **Keyboard shortcuts.** Decide the set of keys (single letters, modifier chords, or both), one registry that names each once with its keys per platform and its scope, one way of showing them (`Kbd` in tooltips, menus, perhaps a `?` dialog) and one rule for when they stay quiet; then bring ⌘K and ⌘B onto it. What exists and the open questions: `apps/web/docs/notes/keyboard-shortcuts.md`.
 
 ## Later
 

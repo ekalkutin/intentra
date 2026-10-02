@@ -1,63 +1,37 @@
-import { Bot, UserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
   HISTORY_EVENTS,
   historyOf,
-  KindBadge,
   KnowledgeKeyLink,
-  KnowledgeStatusPair,
   type HistoryEvent,
 } from '@/entities/knowledge-item';
 import { useFormatDate } from '@/shared/i18n';
 import { cn } from '@/shared/lib';
-import {
-  KnowledgeSourceDtoSchema,
-  type KnowledgeItemDto,
-} from '@intentra/contracts/workspace';
+import type { KnowledgeItemDto } from '@intentra/contracts/workspace';
 
-/** The item's frame at a glance, then what happened to it, who did it and why. */
+/** Where the item came from and its version, then what happened to it, who did it and why. */
 export function ItemProperties({
   item,
-  emailOf,
+  nameOf,
 }: {
   readonly item: KnowledgeItemDto;
-  readonly emailOf: (memberId: string) => string | undefined;
+  readonly nameOf: (memberId: string) => string | undefined;
 }) {
   const { t } = useTranslation();
-  const SourceIcon =
-    item.source === KnowledgeSourceDtoSchema.enum.manual ? UserRound : Bot;
 
   return (
     <div className='flex flex-col gap-8'>
-      <section className='flex flex-col gap-3'>
-        <h2 className='text-sm font-semibold'>
-          {t('knowledgeItem.properties')}
-        </h2>
+      {/* No headings: label and value pairs speak for themselves, and so does the timeline under them. */}
+      <section aria-label={t('knowledgeItem.properties')}>
         <dl className='grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-sm'>
-          <Property label={t('knowledgeItem.key')}>
-            <span className='font-mono text-xs'>{item.key}</span>
-          </Property>
-          <Property label={t('knowledgeItem.kind')}>
-            <KindBadge kind={item.kind} className='text-sm text-foreground' />
-          </Property>
-          <Property label={t('knowledgeItem.status')}>
-            <KnowledgeStatusPair item={item} />
+          {/* Its Kind, key and status lead the page under the title; here only what they do not say, as plain values. */}
+          <Property label={t('knowledgeItem.source')}>
+            {t(`sources.${item.source}`)}
           </Property>
           <Property label={t('knowledgeItem.version')}>
-            <span className='font-mono text-xs tabular-nums'>
-              {t('knowledgeItem.versionValue', { version: item.version })}
-            </span>
-          </Property>
-          <Property label={t('knowledgeItem.source')}>
-            <span className='inline-flex items-center gap-1.5'>
-              <SourceIcon
-                aria-hidden
-                className='size-3.5 text-muted-foreground'
-              />
-              {t(`sources.${item.source}`)}
-            </span>
+            <span className='tabular-nums'>{item.version}</span>
           </Property>
           {item.supersedes && (
             <Property label={t('knowledgeItem.replaces')}>
@@ -71,15 +45,14 @@ export function ItemProperties({
           )}
         </dl>
       </section>
-      <section className='flex flex-col gap-3'>
-        <h2 className='text-sm font-semibold'>{t('knowledgeItem.history')}</h2>
+      <section aria-label={t('knowledgeItem.history')}>
         <ol className='relative flex flex-col gap-4 before:absolute before:top-2 before:bottom-2 before:left-[0.1875rem] before:w-px before:bg-border'>
           {historyOf(item).map(event => (
             <HistoryEntry
               key={event.type}
               event={event}
               who={
-                event.memberId === null ? t('brand') : emailOf(event.memberId)
+                event.memberId === null ? t('brand') : nameOf(event.memberId)
               }
               reason={reasonOf(item, event)}
             />
@@ -134,7 +107,7 @@ function HistoryEntry({
       <div className='min-w-0'>
         <p>
           {t(`knowledgeItem.events.${event.type}`)}{' '}
-          <span className='font-mono text-xs text-muted-foreground tabular-nums'>
+          <span className='text-xs text-muted-foreground tabular-nums'>
             {formatDate(event.at)}
           </span>
         </p>

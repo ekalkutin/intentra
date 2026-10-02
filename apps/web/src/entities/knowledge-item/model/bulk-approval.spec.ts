@@ -81,3 +81,24 @@ describe('planBulkApproval', () => {
     expect(plan.items.map(({ key }) => key)).toEqual(['REQ-1', 'REQ-2']);
   });
 });
+
+describe('planBulkApproval with answers', () => {
+  it('takes along the Draft Open Question a chosen Draft answers', () => {
+    // Arrange
+    const question = draft('TBD-1');
+    const decision = {
+      ...draft('DEC-1'),
+      links: [{ type: 'answers', key: 'TBD-1' }],
+    } as KnowledgeItemDto;
+
+    // Act
+    const plan = planBulkApproval([decision], [question, decision]);
+
+    // Assert
+    expect(plan.items).toEqual([
+      { key: 'DEC-1', version: 1 },
+      { key: 'TBD-1', version: 1 },
+    ]);
+    expect(plan.dependencies).toBe(1);
+  });
+});

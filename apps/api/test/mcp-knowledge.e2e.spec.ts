@@ -342,6 +342,7 @@ describe('Knowledge tools over MCP', () => {
         expect.objectContaining({ key: 'PER-1', status: 'draft' }),
       ],
       links: [{ from: 'SC-1', to: 'PER-1' }],
+      answers: [],
       dependencyNeedsReview: false,
     });
   });
