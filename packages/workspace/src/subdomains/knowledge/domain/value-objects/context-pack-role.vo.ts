@@ -5,13 +5,15 @@
 export class ContextPackRole {
   /** The subject of the task. */
   public static readonly Anchor = new ContextPackRole('anchor', true);
+  /** Part of a Feature that is an Anchor: a subject of the task too. */
+  public static readonly Part = new ContextPackRole('part', true);
   /** It contradicts an item of the pack. */
   public static readonly Conflict = new ContextPackRole('conflict', true);
   /** An Open Question about an item of the pack, not answered yet. */
   public static readonly Unsettled = new ContextPackRole('unsettled', true);
   /** A Business Rule on an Anchor or on what they rest on: the code must keep it. */
   public static readonly Rule = new ContextPackRole('rule', true);
-  /** What the Anchors rest on, at any depth. */
+  /** What the Anchors rest on, at any depth, the Feature an Anchor is part of included. */
   public static readonly Foundation = new ContextPackRole('foundation', false);
   /** It links to an Anchor, so changing the Anchor may break it. */
   public static readonly MayBeAffected = new ContextPackRole(
@@ -23,6 +25,7 @@ export class ContextPackRole {
 
   static readonly #all: readonly ContextPackRole[] = [
     ContextPackRole.Anchor,
+    ContextPackRole.Part,
     ContextPackRole.Conflict,
     ContextPackRole.Unsettled,
     ContextPackRole.Rule,

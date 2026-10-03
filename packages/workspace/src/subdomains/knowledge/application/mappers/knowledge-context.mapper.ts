@@ -60,6 +60,11 @@ const ROLE_SECTIONS: readonly {
 }[] = [
   { role: 'anchor', heading: 'Anchors: the subject of this task' },
   {
+    role: 'part',
+    heading:
+      'Parts: what the Features among the Anchors hold, each a subject of this task too',
+  },
+  {
     role: 'conflict',
     heading: 'Conflicts: they contradict an item of this context',
   },

@@ -376,6 +376,98 @@ describe('KnowledgeService Links and Needs Review', () => {
       );
     });
 
+    describe('in a Context Pack', () => {
+      /** GOAL-1 ← FEAT-1 ← REQ-1 (part, on DEC-1), BR-1 (part); REQ-2 on REQ-1, outside. */
+      async function givenFeature(setup: Setup): Promise<void> {
+        const { record, approve } = setup;
+        await record({
+          kind: 'goal',
+          title: 'Paid on time',
+          rationale: null,
+          supersedes: null,
+          links: [],
+          fields: { outcome: 'Invoices are paid on time', successMetric: null },
+        });
+        await record(decision('Stripe for cards'));
+        await record({
+          ...feature('Pay invoices online'),
+          links: [{ type: 'depends-on', key: 'GOAL-1' }],
+        });
+        await record(
+          requirement('Pay by card', [
+            ...partOfFeature,
+            { type: 'justified-by', key: 'DEC-1' },
+          ]),
+        );
+        await record({
+          kind: 'business-rule',
+          title: 'No partial payments',
+          rationale: null,
+          supersedes: null,
+          links: [...partOfFeature],
+          fields: { rule: 'An invoice is paid in full or not at all' },
+        });
+        await record(
+          requirement('A receipt after paying', [
+            { type: 'depends-on', key: 'REQ-1' },
+          ]),
+        );
+        for (const key of ['GOAL-1', 'DEC-1', 'FEAT-1', 'REQ-1', 'BR-1']) {
+          await approve(key);
+        }
+        await approve('REQ-2');
+      }
+
+      it('gathers from the parts of a Feature as if they were Anchors', async () => {
+        // Arrange
+        const setup = await setUp();
+        await givenFeature(setup);
+        const { ada, workspaceId, projectId } = setup;
+
+        // Act
+        const pack = await app
+          .get(KnowledgeService)
+          .context(ada, workspaceId, projectId, { anchors: ['FEAT-1'] });
+
+        // Assert
+        const roles = Object.fromEntries(
+          pack.items.map(item => [item.key, item.role]),
+        );
+        expect(roles).toEqual({
+          'FEAT-1': 'anchor',
+          'REQ-1': 'part',
+          'BR-1': 'part',
+          'GOAL-1': 'foundation',
+          'DEC-1': 'foundation',
+          'REQ-2': 'may-be-affected',
+        });
+      });
+
+      it('takes the Feature of an Anchor, and its Goal, as foundation', async () => {
+        // Arrange
+        const setup = await setUp();
+        await givenFeature(setup);
+        const { ada, workspaceId, projectId } = setup;
+
+        // Act
+        const pack = await app
+          .get(KnowledgeService)
+          .context(ada, workspaceId, projectId, { anchors: ['REQ-1'] });
+
+        // Assert
+        const roles = Object.fromEntries(
+          pack.items.map(item => [item.key, item.role]),
+        );
+        expect(roles).toMatchObject({
+          'REQ-1': 'anchor',
+          'FEAT-1': 'foundation',
+          'GOAL-1': 'foundation',
+          'DEC-1': 'foundation',
+        });
+        expect(roles['BR-1']).toBeUndefined();
+      });
+    });
+
     it('marks the parts of a retired Feature', async () => {
       // Arrange
       const { record, approve, knowledge, ada, workspaceId, projectId } =

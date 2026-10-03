@@ -111,10 +111,11 @@ const DRAFT_NEARBY_LINKS: readonly KnowledgeLinkType[] = [
   KnowledgeLinkType.ConflictsWith,
 ];
 
-/** What a Context Pack's foundation walks along: what an item rests on. */
+/** What a Context Pack's foundation walks along: what an item rests on, and its Feature. */
 const FOUNDATION_LINKS: readonly KnowledgeLinkType[] = [
   KnowledgeLinkType.DependsOn,
   KnowledgeLinkType.JustifiedBy,
+  KnowledgeLinkType.PartOf,
 ];
 
 @Injectable()
@@ -781,8 +782,9 @@ export class KnowledgeService implements KnowledgeApi {
 
   /**
    * Every Approved item a Context Pack takes, for each reason it is found:
-   * the Anchors; what they rest on, level by level, each once, so that cycles
-   * end; the Business Rules that depend on any of those; what links to an
+   * the Anchors, and the parts of a Feature among them, gathered from as if
+   * they were Anchors; what they rest on, level by level, each once, so that
+   * cycles end; the Business Rules that depend on any of those; what links to an
    * Anchor; the Terms used; what conflicts with any of
    * them; and the Open Questions about any of them not answered yet.
    */
@@ -822,7 +824,29 @@ export class KnowledgeService implements KnowledgeApi {
     const nearest = (keys: readonly KnowledgeKey[]) =>
       Math.min(...keys.map(key => distances.get(key.value) ?? Infinity));
 
-    let level: readonly KnowledgeItem[] = anchors;
+    const features = anchors.filter(anchor =>
+      anchor.kind.equals(KnowledgeKind.Feature),
+    );
+    const parts =
+      features.length === 0
+        ? []
+        : take(
+            (
+              await this.knowledgeItemRepository.findMany({
+                projectId,
+                linkingTo: {
+                  keys: features.map(feature => feature.key),
+                  types: [KnowledgeLinkType.PartOf],
+                },
+                statuses: [KnowledgeStatus.Approved],
+              })
+            ).filter(part => !distances.has(part.key.value)),
+            ContextPackRole.Part,
+            () => 0,
+          );
+    const subjects = [...anchors, ...parts];
+
+    let level: readonly KnowledgeItem[] = subjects;
     for (let distance = 1; level.length > 0; distance++) {
       const targets = await this.findLinked(projectId, level, FOUNDATION_LINKS);
       level = take(
@@ -844,7 +868,7 @@ export class KnowledgeService implements KnowledgeApi {
     });
     take(rules, ContextPackRole.Rule, rule => 1 + nearest(rule.dependencies()));
 
-    const anchorKeys = anchors.map(anchor => anchor.key);
+    const anchorKeys = subjects.map(subject => subject.key);
     const linkingToAnchors = await this.knowledgeItemRepository.findMany({
       projectId,
       linkingTo: { keys: anchorKeys },
