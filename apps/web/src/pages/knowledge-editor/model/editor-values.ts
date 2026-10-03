@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-import { FIELD_CONTROLS, kindFields } from '@/entities/knowledge-item';
+import {
+  canBePart,
+  FIELD_CONTROLS,
+  kindFields,
+} from '@/entities/knowledge-item';
 import {
   KnowledgeKindDtoSchema,
   KnowledgeLinkDtoSchema,
@@ -28,12 +32,17 @@ export type EditorValues = {
   links: KnowledgeLinkDto[];
 };
 
-/** The types of Link an item of a Kind may hold: only an Open Question `concerns`. */
+/**
+ * The types of Link an item of a Kind may hold: only an Open Question
+ * `concerns`, only a Scenario, Requirement or Business Rule is `part-of` a
+ * Feature.
+ */
 export function linkTypesFor(kind: KnowledgeKindDto): KnowledgeLinkTypeDto[] {
   return KnowledgeLinkTypeDtoSchema.options.filter(
     type =>
-      type !== KnowledgeLinkTypeDtoSchema.enum.concerns ||
-      kind === KnowledgeKindDtoSchema.enum['open-question'],
+      (type !== KnowledgeLinkTypeDtoSchema.enum.concerns ||
+        kind === KnowledgeKindDtoSchema.enum['open-question']) &&
+      (type !== KnowledgeLinkTypeDtoSchema.enum['part-of'] || canBePart(kind)),
   );
 }
 

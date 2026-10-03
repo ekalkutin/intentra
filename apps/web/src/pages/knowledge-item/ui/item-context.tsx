@@ -28,6 +28,8 @@ import { REVEALABLE_KEY_ATTRIBUTE } from './reveal-related';
 const { rejected, obsolete, draft, approved } = KnowledgeStatusDtoSchema.enum;
 const DEPENDS_ON = KnowledgeLinkTypeDtoSchema.enum['depends-on'];
 const ANSWERS = KnowledgeLinkTypeDtoSchema.enum.answers;
+// A Feature's parts have a section of their own above.
+const PART_OF = KnowledgeLinkTypeDtoSchema.enum['part-of'];
 
 /**
  * Everything around the item, readable without opening it: what it rests on,
@@ -46,7 +48,9 @@ export function ItemContext({
 }) {
   const { t } = useTranslation();
   const outgoing = groupLinks(item.links);
-  const incoming = incomingLinks(item.key, index.items);
+  const incoming = incomingLinks(item.key, index.items).filter(
+    group => group.type !== PART_OF,
+  );
   const tree = dependencies ? dependencyTree(item.key, dependencies) : [];
   const cascade = item.status === draft && tree.length > 1;
   const asTree = cascade || tree.some(row => row.depth > 1);

@@ -5,6 +5,9 @@ import { RU_THINKING_PHRASES } from './ru';
 import { nextPhrase, thinkingPhrases } from './thinking-phrases';
 import { SYSTEM_TONES } from './tone';
 
+/** The most words a phrase may have, so the status stays short. */
+const WORDS_MAX = 3;
+
 describe('thinkingPhrases', () => {
   it('gives about fifty playful phrases in each language', () => {
     // Act
@@ -14,6 +17,16 @@ describe('thinkingPhrases', () => {
     // Assert
     expect(ru.length).toBeGreaterThanOrEqual(50);
     expect(en.length).toBeGreaterThanOrEqual(50);
+  });
+
+  it('keeps every phrase to one, two or three words', () => {
+    // Act
+    const long = [...RU_THINKING_PHRASES, ...EN_THINKING_PHRASES].filter(
+      phrase => phrase.text.split(/\s+/).length > WORDS_MAX,
+    );
+
+    // Assert
+    expect(long).toEqual([]);
   });
 
   it('keeps each language free of repeats', () => {

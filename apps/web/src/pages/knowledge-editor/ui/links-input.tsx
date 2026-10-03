@@ -1,6 +1,7 @@
 import { Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { kindOfKey } from '@/entities/knowledge-item';
 import {
   Button,
   Select,
@@ -10,6 +11,7 @@ import {
   SelectValue,
 } from '@/shared/ui';
 import {
+  KnowledgeKindDtoSchema,
   KnowledgeLinkTypeDtoSchema,
   type KnowledgeKindDto,
   type KnowledgeLinkDto,
@@ -47,11 +49,19 @@ export function LinksInput({
     value: type,
     label: t(`linkTypes.${type}`),
   }));
-  const targetItems = targets.map(target => ({
+  const allTargets = targets.map(target => ({
     value: target.key,
     title: target.title,
     label: `${target.key} · ${target.title}`,
   }));
+  // A part-of Link leads only to a Feature.
+  const targetsFor = (type: KnowledgeLinkTypeDto) =>
+    type === KnowledgeLinkTypeDtoSchema.enum['part-of']
+      ? allTargets.filter(
+          target =>
+            kindOfKey(target.value) === KnowledgeKindDtoSchema.enum.feature,
+        )
+      : allTargets;
   const set = (index: number, change: Partial<KnowledgeLinkDto>) =>
     onChange(
       value.map((current, at) =>
@@ -90,7 +100,7 @@ export function LinksInput({
           </Select>
           <div className='order-last col-span-2 min-w-0 sm:order-none sm:col-span-1'>
             <Select
-              items={targetItems}
+              items={targetsFor(link.type)}
               value={link.key || null}
               onValueChange={key => set(index, { key: key ?? '' })}
             >
@@ -102,7 +112,7 @@ export function LinksInput({
                 <SelectValue placeholder={t('knowledgeEditor.chooseTarget')} />
               </SelectTrigger>
               <SelectContent>
-                {targetItems.map(target => (
+                {targetsFor(link.type).map(target => (
                   <SelectItem key={target.value} value={target.value}>
                     <span className='truncate'>
                       <span className='font-mono text-xs'>{target.value}</span>

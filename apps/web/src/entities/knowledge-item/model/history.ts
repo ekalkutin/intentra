@@ -8,6 +8,8 @@ export const HISTORY_EVENTS = {
   rejected: 'rejected',
   superseded: 'superseded',
   retired: 'retired',
+  /** Put into a Feature, moved or taken out once Approved. */
+  featureAssigned: 'featureAssigned',
 } as const;
 
 export type HistoryEventType =
@@ -62,6 +64,13 @@ export function historyOf(item: KnowledgeItemDto): HistoryEvent[] {
           type: HISTORY_EVENTS.retired,
           memberId: item.retiredBy,
           at: item.retiredAt,
+        }
+      : null,
+    item.featureAssignedBy && item.featureAssignedAt
+      ? {
+          type: HISTORY_EVENTS.featureAssigned,
+          memberId: item.featureAssignedBy,
+          at: item.featureAssignedAt,
         }
       : null,
   ];

@@ -1,3 +1,4 @@
+import { featureOf, partsOf } from '@/entities/knowledge-item';
 import {
   KnowledgeKindDtoSchema,
   RequirementFieldsDtoSchema,
@@ -62,6 +63,10 @@ export type PassportGroup = GroupSource & {
   readonly items: readonly KnowledgeItemDto[];
   /** How many Approved items the group holds, loaded or not. */
   readonly total: number;
+  /** The Feature whose parts the group holds, which leads it. */
+  readonly feature?: KnowledgeItemDto;
+  /** Its items are part of no Feature, while the Project has Features. */
+  readonly withoutFeature?: boolean;
 };
 
 /** How many Approved items each Kind holds, from the Project's summary. */
@@ -97,33 +102,63 @@ function belongs(item: KnowledgeItemDto, source: GroupSource): boolean {
 
 /**
  * Approved items laid out in the Passport's chapters, each keeping the given
- * order. A group's total comes from the summary when the loaded items may be
- * only part of it; Requirements split by type, which the summary does not
- * count, so theirs are what was loaded.
+ * order. Each Feature leads a group of its own in the capabilities, holding
+ * all its parts, whatever their Kind; the other chapters keep only what is
+ * part of no Feature. A group's total comes from the summary when the loaded
+ * items may be only part of it; Requirements split by type, which the summary
+ * does not count, so theirs are what was loaded, as are a Feature's parts.
  */
 export function layOutPassport(
   items: readonly KnowledgeItemDto[],
   totals: ApprovedTotals = {},
 ): PassportChapter[] {
+  const features = items.filter(item => item.kind === KIND.feature);
+  const featureKeys = new Set(features.map(feature => feature.key));
+  const inFeature = (item: KnowledgeItemDto) => {
+    const key = featureOf(item);
+    return key !== null && featureKeys.has(key);
+  };
+
   return Object.values(PASSPORT_CHAPTERS).map(id => {
+    const featureGroups: PassportGroup[] =
+      id === PASSPORT_CHAPTERS.capabilities
+        ? features.map(feature => {
+            const parts = partsOf(feature.key, items);
+            return {
+              kind: KIND.feature,
+              feature,
+              items: parts,
+              total: parts.length,
+            };
+          })
+        : [];
     const groups = CHAPTER_SOURCES[id]
       .map(source => {
-        const loaded = items.filter(item => belongs(item, source));
+        const ofSource = items.filter(item => belongs(item, source));
+        const loaded = ofSource.filter(item => !inFeature(item));
         const counted =
-          source.requirements === undefined ? totals[source.kind] : undefined;
+          source.requirements === undefined
+            ? (totals[source.kind] ?? 0) - (ofSource.length - loaded.length)
+            : undefined;
         return {
           ...source,
           items: loaded,
           total: Math.max(counted ?? 0, loaded.length),
+          ...(featureGroups.length > 0 && { withoutFeature: true }),
         };
       })
       .filter(group => group.total > 0);
 
     return {
       id,
-      groups,
-      count: groups.reduce((sum, group) => sum + group.total, 0),
-      mixed: CHAPTER_SOURCES[id].length > 1,
+      groups: [...featureGroups, ...groups],
+      count:
+        featureGroups.length +
+        [...featureGroups, ...groups].reduce(
+          (sum, group) => sum + group.total,
+          0,
+        ),
+      mixed: CHAPTER_SOURCES[id].length > 1 || featureGroups.length > 0,
     };
   });
 }

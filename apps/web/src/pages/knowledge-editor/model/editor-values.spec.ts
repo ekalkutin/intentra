@@ -165,4 +165,14 @@ describe('linkTypesFor', () => {
     expect(requirement).not.toContain('concerns');
     expect(requirement).toContain('depends-on');
   });
+
+  it('offers part-of only to a Scenario, Requirement or Business Rule', () => {
+    // Act
+    const rule = linkTypesFor('business-rule');
+    const decision = linkTypesFor('decision');
+
+    // Assert
+    expect(rule).toContain('part-of');
+    expect(decision).not.toContain('part-of');
+  });
 });

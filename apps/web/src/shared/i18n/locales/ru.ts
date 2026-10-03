@@ -445,7 +445,8 @@ bearer_token_env_var = "INTENTRA_TOKEN"
         'Что это за продукт, какую проблему решает, для кого и что они получают.',
       goals: 'Чего проект хочет достичь и как понять, что достиг.',
       users: 'Кто пользуется продуктом и что им от него нужно.',
-      capabilities: 'Что можно сделать в продукте и какой результат ожидается.',
+      capabilities:
+        'Из каких возможностей состоит продукт: что в каждой можно сделать и какой результат ожидается.',
       rules:
         'Правила, по которым работает продукт, и слова, которыми о нём говорят.',
       integrations: 'С какими внешними системами продукт обменивается данными.',
@@ -453,6 +454,10 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       decisions: 'Что уже решено и почему, и что ещё не решено.',
     },
     functionalRequirements: 'Требования',
+    scenariosWithoutFeature: 'Сценарии вне фич',
+    functionalWithoutFeature: 'Требования вне фич',
+    outOfScope: 'Не входит:',
+    featureEmpty: 'В фичу пока ничего не входит.',
     qualityRequirements: 'Требования к качеству',
     notDescribed: 'Пока не описано.',
     moreDetails: 'Подробнее',
@@ -873,6 +878,28 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     more_many: 'Ещё {{count}}',
     more_other: 'Ещё {{count}}',
   },
+  featureParts: {
+    title: 'Части фичи',
+    empty:
+      'В фичу пока ничего не входит. Добавьте сценарии, требования и правила, которые описывают эту возможность, — агент получит их вместе с фичей.',
+    add: 'Добавить',
+    addCount_one: 'Добавить {{count}}',
+    addCount_few: 'Добавить {{count}}',
+    addCount_many: 'Добавить {{count}}',
+    addCount_other: 'Добавить {{count}}',
+    search: 'Ключ или название',
+    nothingFound: 'Ничего не нашлось.',
+    from: 'сейчас в {{key}}, переедет сюда',
+    moving_one: '{{count}} запись переедет из другой фичи',
+    moving_few: '{{count}} записи переедут из других фич',
+    moving_many: '{{count}} записей переедут из других фич',
+    moving_other: '{{count}} записи переедут из других фич',
+    remove: 'Убрать {{key}} из фичи',
+    blocks: {
+      featureNotApproved:
+        'утверждённую запись можно добавить после утверждения фичи',
+    },
+  },
   knowledgeItem: {
     back: 'Знания',
     missing: 'Такой записи нет',
@@ -911,6 +938,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       rejected: 'Отклонено',
       superseded: 'Заменено',
       retired: 'Выведено из обращения',
+      featureAssigned: 'Изменена фича',
     },
     approve: 'Утвердить',
     approveWith_one: 'Утвердить вместе с {{count}} черновиком',

@@ -12,7 +12,9 @@ export function chapterItems(chapter: PassportChapter): {
   readonly rest: number;
 } {
   const named = chapter.groups
-    .flatMap(group => group.items)
+    .flatMap(group =>
+      group.feature ? [group.feature, ...group.items] : group.items,
+    )
     .slice(0, ITEMS_NAMED)
     .map(item => `${item.key} «${item.title}»`);
 

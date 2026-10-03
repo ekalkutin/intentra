@@ -1,6 +1,7 @@
 import { API_TAGS, baseApi } from '@/shared/api';
 import type {
   ApproveKnowledgeItemsDto,
+  AssignToFeatureDto,
   ConfirmKnowledgeItemDto,
   DeleteKnowledgeItemDto,
   EditKnowledgeItemDto,
@@ -167,6 +168,17 @@ export const knowledgeApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [API_TAGS.knowledge],
     }),
+    assignToFeature: build.mutation<
+      KnowledgeItemDto[],
+      InProject & { readonly body: AssignToFeatureDto }
+    >({
+      query: ({ body, ...scope }) => ({
+        url: `${knowledgePath(scope)}/assign-to-feature`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [API_TAGS.knowledge],
+    }),
     confirmKnowledgeItem: build.mutation<
       KnowledgeItemDto,
       OneItem & { readonly body: ConfirmKnowledgeItemDto }
@@ -196,5 +208,6 @@ export const {
   useRejectKnowledgeItemMutation,
   useRetireKnowledgeItemMutation,
   useConfirmKnowledgeItemMutation,
+  useAssignToFeatureMutation,
   usePrefetch: useKnowledgePrefetch,
 } = knowledgeApi;

@@ -2,10 +2,18 @@ import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
-import { KindIcon } from '@/entities/knowledge-item';
+import {
+  KindIcon,
+  KnowledgeKeyLink,
+  KnowledgeMarkdown,
+  useKnowledgeScope,
+} from '@/entities/knowledge-item';
 import type { InterviewOpening } from '@/shared/config';
 import { IntentraButton, List, ListEmpty } from '@/shared/ui';
-import { KnowledgeKindDtoSchema } from '@intentra/contracts/workspace';
+import {
+  KnowledgeKindDtoSchema,
+  type KnowledgeItemDto,
+} from '@intentra/contracts/workspace';
 
 import { chapterItems } from '../model/chapter-items';
 import {
@@ -103,14 +111,22 @@ export function PassportChapter({
           <ListEmpty>{t('passport.notDescribed')}</ListEmpty>
         </List>
       ) : (
-        chapter.groups.map(group => (
-          <Group
-            key={`${group.kind}-${group.requirements ?? ''}`}
-            group={group}
-            titled={chapter.mixed}
-            morePath={kindPath(group)}
-          />
-        ))
+        chapter.groups.map(group =>
+          group.feature ? (
+            <FeatureGroup
+              key={group.feature.key}
+              feature={group.feature}
+              group={group}
+            />
+          ) : (
+            <Group
+              key={`${group.kind}-${group.requirements ?? ''}`}
+              group={group}
+              titled={chapter.mixed}
+              morePath={kindPath(group)}
+            />
+          ),
+        )
       )}
     </section>
   );
@@ -128,8 +144,11 @@ function Group({
   const { t } = useTranslation();
   const shown = group.items.slice(0, ENTRIES_SHOWN);
   const hidden = group.total - shown.length;
-  const title =
-    group.requirements === REQUIREMENT_SORTS.functional
+  const title = group.withoutFeature
+    ? group.requirements === REQUIREMENT_SORTS.functional
+      ? t('passport.functionalWithoutFeature')
+      : t('passport.scenariosWithoutFeature')
+    : group.requirements === REQUIREMENT_SORTS.functional
       ? t('passport.functionalRequirements')
       : group.requirements === REQUIREMENT_SORTS.quality
         ? t('passport.qualityRequirements')
@@ -159,6 +178,77 @@ function Group({
           <li>
             <Link
               to={morePath}
+              className='flex items-center gap-1.5 px-4 py-2.5 text-sm text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent/60 hover:text-foreground focus-visible:bg-accent/60 focus-visible:text-foreground'
+            >
+              {t('passport.more', { count: hidden })}
+              <ArrowRight aria-hidden className='size-3.5' />
+            </Link>
+          </li>
+        )}
+      </List>
+    </div>
+  );
+}
+
+/**
+ * A Feature as the capabilities chapter reads it: its name and key, what it
+ * lets users do and what it leaves out, then everything that is part of it,
+ * Scenarios first, each a Passport row. Past the shown rows, the rest waits
+ * on the Feature's own page.
+ */
+function FeatureGroup({
+  feature,
+  group,
+}: {
+  readonly feature: KnowledgeItemDto;
+  readonly group: PassportGroup;
+}) {
+  const { t } = useTranslation();
+  const scope = useKnowledgeScope();
+  const shown = group.items.slice(0, ENTRIES_SHOWN);
+  const hidden = group.total - shown.length;
+  const outOfScope =
+    feature.kind === KnowledgeKindDtoSchema.enum.feature
+      ? feature.fields.outOfScope
+      : [];
+
+  return (
+    <div className='flex flex-col gap-1 [&+&]:mt-4'>
+      <h3 className='flex min-w-0 items-center gap-2 py-2 text-sm font-semibold'>
+        <KindIcon kind={feature.kind} />
+        <span className='min-w-0 truncate'>{feature.title}</span>
+        <KnowledgeKeyLink
+          itemKey={feature.key}
+          className='shrink-0 text-xs font-normal text-muted-foreground no-underline hover:text-foreground hover:underline'
+        />
+        {group.total > 0 && (
+          <span className='ml-auto shrink-0 font-mono text-xs font-normal text-muted-foreground tabular-nums'>
+            {group.total}
+          </span>
+        )}
+      </h3>
+      <List>
+        {/* What the Feature is opens its block, set apart by a quiet ground. */}
+        <li className='bg-muted/40 px-4 py-3.5'>
+          <KnowledgeMarkdown>{feature.mainField}</KnowledgeMarkdown>
+          {outOfScope.length > 0 && (
+            <p className='mt-2 text-xs text-pretty text-muted-foreground'>
+              <span className='font-medium text-foreground/80'>
+                {t('passport.outOfScope')}
+              </span>{' '}
+              {outOfScope.join(' · ')}
+            </p>
+          )}
+        </li>
+        {shown.length === 0 ? (
+          <ListEmpty>{t('passport.featureEmpty')}</ListEmpty>
+        ) : (
+          shown.map(item => <PassportEntry key={item.id} item={item} />)
+        )}
+        {hidden > 0 && (
+          <li>
+            <Link
+              to={scope.itemPath(feature.key)}
               className='flex items-center gap-1.5 px-4 py-2.5 text-sm text-muted-foreground transition-colors duration-150 outline-none hover:bg-accent/60 hover:text-foreground focus-visible:bg-accent/60 focus-visible:text-foreground'
             >
               {t('passport.more', { count: hidden })}

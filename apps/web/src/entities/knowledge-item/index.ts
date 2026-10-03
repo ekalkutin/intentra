@@ -1,6 +1,7 @@
 export {
   knowledgeApi,
   useApproveKnowledgeItemsMutation,
+  useAssignToFeatureMutation,
   useConfirmKnowledgeItemMutation,
   useDeleteKnowledgeItemMutation,
   useEditKnowledgeItemMutation,
@@ -24,6 +25,7 @@ export {
   type Approval,
   type ApprovalBlock,
 } from './model/approval';
+export { canBePart, featureOf, partsOf, withFeature } from './model/features';
 export { gapRulesOf, groupGapsByRule, type GapGroup } from './model/gaps';
 export {
   BULK_APPROVAL_BLOCKS,

@@ -39,6 +39,7 @@ import {
   PageSkeleton,
 } from '@/shared/ui';
 import {
+  KnowledgeKindDtoSchema,
   KnowledgeLinkTypeDtoSchema,
   KnowledgeStatusDtoSchema,
 } from '@intentra/contracts/workspace';
@@ -46,6 +47,7 @@ import {
 import { proposedAnswers } from '../model/links';
 
 import { AgentContext } from './agent-context';
+import { FeatureParts } from './feature-parts';
 import { ItemActions } from './item-actions';
 import { ItemContext } from './item-context';
 import { ItemFields } from './item-fields';
@@ -84,6 +86,7 @@ export function KnowledgeItemPage() {
     { skip: skip || !(isDraft || dependsOnSomething) },
   );
   const index = useKnowledgeIndex(scope, { skip });
+  const isFeature = item?.kind === KnowledgeKindDtoSchema.enum.feature;
   const { data: gaps } = useKnowledgeGapsQuery(scope, { skip });
   const { data: members = [] } = useMembersQuery(workspace?.id ?? '', {
     skip: !workspace,
@@ -234,6 +237,9 @@ export function KnowledgeItemPage() {
             />
             <div className='flex min-w-0 flex-col gap-10'>
               <ItemFields item={item} />
+              {isFeature && (
+                <FeatureParts feature={item} index={index} scope={scope} />
+              )}
               <ItemContext
                 item={item}
                 index={index}

@@ -1,9 +1,20 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import type { KnowledgeItemDto } from '@intentra/contracts/workspace';
 
 import { chapterItems, ITEMS_NAMED } from './chapter-items';
 import { PASSPORT_CHAPTERS, type PassportChapter } from './chapters';
+
+// The Feature helpers come through the slice's public API, which also sets up
+// its endpoints; those touch the browser's window when imported.
+vi.hoisted(() => {
+  Object.assign(globalThis, {
+    window: {
+      addEventListener: () => undefined,
+      matchMedia: () => ({ matches: false }),
+    },
+  });
+});
 
 function chapterOf(count: number, loaded: number): PassportChapter {
   const items = Array.from(

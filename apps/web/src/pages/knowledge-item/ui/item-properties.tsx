@@ -81,6 +81,7 @@ const DOTS: Record<HistoryEvent['type'], string> = {
   rejected: 'bg-destructive',
   superseded: 'bg-muted-foreground/60',
   retired: 'bg-muted-foreground/60',
+  featureAssigned: 'bg-muted-foreground/60',
 };
 
 function HistoryEntry({
