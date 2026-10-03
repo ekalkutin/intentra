@@ -10,11 +10,12 @@ export const AnalysisRunStatusDtoSchema = z.enum([
 export type AnalysisRunStatusDto = z.infer<typeof AnalysisRunStatusDtoSchema>;
 
 /**
- * What it looks at: `whole-project`, a run started by hand; `changes`, a run
- * the schedule started, over what was approved or retired since the last
- * completed run.
+ * What it looks at: `unchecked`, the Drafts and Approved items no run has
+ * looked at since they last changed (by hand or by the schedule);
+ * `whole-project`, every one of them, checked or not (by hand, a Maintainer
+ * only).
  */
-export const AnalysisRunScopeDtoSchema = z.enum(['whole-project', 'changes']);
+export const AnalysisRunScopeDtoSchema = z.enum(['unchecked', 'whole-project']);
 
 export type AnalysisRunScopeDto = z.infer<typeof AnalysisRunScopeDtoSchema>;
 
@@ -36,12 +37,14 @@ export const AnalysisRunFailureDtoSchema = z.enum([
 
 export type AnalysisRunFailureDto = z.infer<typeof AnalysisRunFailureDtoSchema>;
 
-/** One pass in which the Auditor looked over a Project's Approved knowledge. */
+/** One pass in which the Auditor looked over a Project's knowledge, item by item. */
 export type AnalysisRunDto = {
   readonly id: string;
   readonly scope: AnalysisRunScopeDto;
-  /** For `changes`, the Knowledge Keys of what was approved or retired; empty for the whole Project. */
-  readonly changedKeys: string[];
+  /** How many items it was to look at. */
+  readonly itemCount: number;
+  /** How many of them it has looked at so far; fewer than `itemCount` when it stopped halfway. */
+  readonly checkedCount: number;
   readonly status: AnalysisRunStatusDto;
   /** The Member who started it; null for one the schedule started. */
   readonly startedBy: string | null;
@@ -53,7 +56,7 @@ export type AnalysisRunDto = {
   readonly agentsVersion: number | null;
   /** The Open Questions it recorded, as Intentra, by Knowledge Key. */
   readonly questionKeys: string[];
-  /** The Auditor stopped at the most steps a run may take, perhaps before it was through. */
+  /** A run from before runs went item by item stopped at the most steps it could take; always false since. */
   readonly stepLimitReached: boolean;
   /** Null unless it failed. */
   readonly failure: AnalysisRunFailureDto | null;
@@ -64,11 +67,24 @@ export type AnalysisRunPageDto = {
   readonly items: AnalysisRunDto[];
   /** How many there are, across every page. */
   readonly total: number;
+  /** How much of the Project's knowledge has been checked: its Drafts and Approved items, Open Questions aside. */
+  readonly coverage: {
+    readonly checked: number;
+    readonly total: number;
+  };
   readonly access: {
-    /** Whether the caller may start one: a Contributor or Maintainer. */
+    /** Whether the caller may start one over the Unchecked items: a Contributor or Maintainer. */
     readonly canStart: boolean;
+    /** Whether the caller may start one over the whole Project: a Maintainer. */
+    readonly canStartWholeProject: boolean;
   };
 };
+
+export const StartAnalysisRunDtoSchema = z.object({
+  scope: AnalysisRunScopeDtoSchema.default('unchecked'),
+});
+
+export type StartAnalysisRunDto = z.infer<typeof StartAnalysisRunDtoSchema>;
 
 export const ListAnalysisRunsDtoSchema = z.object({
   take: z.coerce.number().int().min(1).max(200).default(20),
@@ -91,7 +107,7 @@ export type AnalysisScheduleBlockDto = z.infer<
   typeof AnalysisScheduleBlockDtoSchema
 >;
 
-/** Whether the Project is checked every night, over what changed since the last completed run. */
+/** Whether the Project is checked every night, over its Unchecked items. */
 export type AnalysisScheduleDto = {
   readonly enabled: boolean;
   /** The Member who last turned it on or off; null if no one ever did. */

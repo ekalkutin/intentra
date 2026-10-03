@@ -6,25 +6,28 @@ import type {
   AnalysisScheduleDto,
   ChangeAnalysisScheduleDto,
   ListAnalysisRunsDto,
+  StartAnalysisRunDto,
 } from './analysis-run.dto.js';
 
 /**
- * A Project's Analysis Runs: the Auditor looking over its Approved knowledge,
- * as Intentra, and recording what it finds as Open Questions. Every Member
- * reads them; a Contributor or Maintainer starts one (403
+ * A Project's Analysis Runs: the Auditor looking over its knowledge item by
+ * item, as Intentra, and recording what it finds as Open Questions. Every
+ * Member reads them; a Contributor or Maintainer starts one over the
+ * Unchecked items, only a Maintainer one over the whole Project (403
  * `ANALYSIS_RUN_FORBIDDEN` otherwise).
  */
 export abstract class AnalysisRunsApi {
   /**
-   * Starts a run over the whole Project and answers at once, the run still
-   * running; it goes on in the background, and its result is read with
-   * `get`. One at a time in a Project (409 `ANALYSIS_RUN_BUSY`). Without a
-   * Provider Key or Published Agents it is kept as failed.
+   * Starts a run and answers at once, the run still running; it goes on in
+   * the background, and its result is read with `get`. One at a time in a
+   * Project (409 `ANALYSIS_RUN_BUSY`). Without a Provider Key or Published
+   * Agents it is kept as failed.
    */
   abstract start(
     actor: Actor,
     workspaceId: string,
     projectId: string,
+    data: StartAnalysisRunDto,
   ): Promise<AnalysisRunDto>;
 
   /** The newest first. */

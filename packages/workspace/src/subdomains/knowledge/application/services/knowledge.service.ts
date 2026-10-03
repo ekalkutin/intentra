@@ -1096,9 +1096,10 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   /**
-   * Marks the current items that rest on the changed ones, or moves them onto
-   * a replacement in hand that only adds Links. An item already in hand is
-   * marked as that same object, so that no copy overwrites it.
+   * Marks the current items that rest on the changed ones, and the Open
+   * Questions about a rejected one, or moves them onto a replacement in hand
+   * that only adds Links. An item already in hand is marked as that same
+   * object, so that no copy overwrites it.
    */
   private async markSourcesOf(
     projectId: ProjectId,
@@ -1109,7 +1110,9 @@ export class KnowledgeService implements KnowledgeApi {
       projectId,
       linkingTo: {
         keys: changed.map(item => item.key),
-        types: KnowledgeLinkType.MarkingForReview,
+        types: changed.some(item => item.isRejected())
+          ? KnowledgeLinkType.MarkingOnRejection
+          : KnowledgeLinkType.MarkingForReview,
       },
       statuses: CURRENT,
     });

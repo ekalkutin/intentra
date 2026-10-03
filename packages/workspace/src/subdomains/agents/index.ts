@@ -14,6 +14,7 @@ export {
   AnalysisRunRepository,
   AnalysisScheduleRepository,
   ConversationStore,
+  KnowledgeCheckRepository,
   ProviderKeyCipher,
   ProviderKeyRepository,
 } from './application/ports/outbound/index.js';

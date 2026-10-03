@@ -70,6 +70,15 @@ export class KnowledgeLinkType {
     KnowledgeLinkType.PartOf,
   ];
 
+  /**
+   * What a rejection of the target puts in question: what rests on it, and an
+   * Open Question about it, since what it asked about may be gone.
+   */
+  public static readonly MarkingOnRejection: readonly KnowledgeLinkType[] = [
+    ...KnowledgeLinkType.MarkingForReview,
+    KnowledgeLinkType.Concerns,
+  ];
+
   readonly #value: string;
   readonly #sourceKinds: readonly KnowledgeKind[] | null;
   readonly #targetKind: KnowledgeKind | null;

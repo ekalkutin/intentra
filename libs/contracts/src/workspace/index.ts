@@ -6,6 +6,7 @@ export {
   AnalysisScheduleBlockDtoSchema,
   ChangeAnalysisScheduleDtoSchema,
   ListAnalysisRunsDtoSchema,
+  StartAnalysisRunDtoSchema,
   type AnalysisScheduleBlockDto,
   type AnalysisScheduleDto,
   type ChangeAnalysisScheduleDto,
@@ -15,6 +16,7 @@ export {
   type AnalysisRunScopeDto,
   type AnalysisRunStatusDto,
   type ListAnalysisRunsDto,
+  type StartAnalysisRunDto,
 } from './analysis-runs/analysis-run.dto.js';
 export { AnalysisRunsApi } from './analysis-runs/analysis-runs.api.js';
 export {

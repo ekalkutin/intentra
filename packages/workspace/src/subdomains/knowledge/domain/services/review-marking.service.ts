@@ -4,7 +4,9 @@ import { KnowledgeKind } from '../value-objects/index.js';
 export class ReviewMarkingService {
   /**
    * An item was rejected, superseded or retired: whatever depends on it, is
-   * justified by it or is part of it may no longer be true. Only its direct
+   * justified by it or is part of it may no longer be true. A rejected one
+   * also puts in question the Open Questions about it, since what they asked
+   * about may be gone; its replacement or Retirement does not. Only its direct
    * sources are marked; the mark goes further only when one of them changes
    * in turn. A `replacement` that says the same and only adds Links marks
    * nothing: its sources rest on it instead. Nor does any replacement of a
@@ -23,6 +25,9 @@ export class ReviewMarkingService {
         ? replacement
         : null;
     for (const source of sources) {
+      if (changed.isRejected() && source.concerns(changed.key)) {
+        source.markForReview(changed.key);
+      }
       if (!source.restsOn(changed.key)) {
         continue;
       }

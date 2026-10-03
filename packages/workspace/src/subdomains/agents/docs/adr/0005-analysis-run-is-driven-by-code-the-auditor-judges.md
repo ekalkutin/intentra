@@ -12,4 +12,6 @@ The Auditor used to carry out an Analysis Run as one agent loop with tools: it l
 
 - The Auditor has no tools: in the admin area it is instructions for a judge and a Model Profile. Agents ADR 0004 still holds: what it records is authored by Intentra.
 - Duplicates are kept out by the model, not by a search before recording: each group carries the Open Questions about its items, Rejected ones included.
+- Open Questions are never judged themselves: they only come along as what was already asked. An item is Unchecked unless a check holds its current version, and since a Knowledge Item's version grows with every change, no list of what changed is kept.
+- A few items are judged at once; a run that stops on a model outage or an Auditor failure keeps what it recorded and the checks it made.
 - Whether this checks better than the loop is measured on a benchmark Project with planted traps (Intentra's own documents, and a second project as a control), not assumed.

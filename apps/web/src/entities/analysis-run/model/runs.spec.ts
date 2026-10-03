@@ -2,17 +2,21 @@ import { describe, expect, it } from 'vitest';
 
 import type { AnalysisRunDto } from '@intentra/contracts/workspace';
 
-import { latestFindings } from './runs';
+import { latestFindings, leftUnchecked, uncheckedCount } from './runs';
 
 function run(
   id: string,
   status: AnalysisRunDto['status'],
   questionKeys: string[] = [],
+  counts: Pick<AnalysisRunDto, 'itemCount' | 'checkedCount'> = {
+    itemCount: 0,
+    checkedCount: 0,
+  },
 ): AnalysisRunDto {
   return {
     id,
-    scope: 'whole-project',
-    changedKeys: [],
+    scope: 'unchecked',
+    ...counts,
     status,
     startedBy: null,
     startedAt: '2026-10-03T00:00:00.000Z',
@@ -49,5 +53,59 @@ describe('latestFindings', () => {
 
     // Assert
     expect(findings).toBeNull();
+  });
+});
+
+describe('leftUnchecked', () => {
+  it('counts the items a failed run did not reach', () => {
+    // Arrange
+    const failed = run('failed', 'failed', [], {
+      itemCount: 40,
+      checkedCount: 12,
+    });
+
+    // Act
+    const left = leftUnchecked(failed);
+
+    // Assert
+    expect(left).toBe(28);
+  });
+
+  it('leaves nothing over for a run still running', () => {
+    // Arrange
+    const running = run('running', 'running', [], {
+      itemCount: 40,
+      checkedCount: 12,
+    });
+
+    // Act
+    const left = leftUnchecked(running);
+
+    // Assert
+    expect(left).toBe(0);
+  });
+
+  it('leaves nothing over for a failed run from before runs counted items', () => {
+    // Arrange
+    const old = run('old', 'failed');
+
+    // Act
+    const left = leftUnchecked(old);
+
+    // Assert
+    expect(left).toBe(0);
+  });
+});
+
+describe('uncheckedCount', () => {
+  it('tells how many items are still to check', () => {
+    // Arrange
+    const coverage = { checked: 412, total: 500 };
+
+    // Act
+    const unchecked = uncheckedCount(coverage);
+
+    // Assert
+    expect(unchecked).toBe(88);
   });
 });

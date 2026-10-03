@@ -25,7 +25,7 @@ The main Agent, and the only one people talk to: it interviews them about their 
 _Avoid_: Analyst, Orchestrator, Interviewer, Main agent, Router, Supervisor
 
 **Auditor**:
-The Agent that carries out Analysis Runs. People do not talk to it, and it works without a Conversation, as Intentra itself. Every Agents Version has exactly one Auditor; a Platform Admin creates it once, can then change everything about it, but cannot remove it, add a second one or turn it into another sort of Agent.
+The Agent that judges for Analysis Runs. People do not talk to it, and it works without a Conversation, as Intentra itself. It has no tools: the run hands it one Knowledge Item at a time with the knowledge around it, and it answers with what it finds. Every Agents Version has exactly one Auditor; a Platform Admin creates it once, can then change everything about it, but cannot remove it, add a second one or turn it into another sort of Agent.
 _Avoid_: Analyst, Inspector, Reviewer
 
 **Specialist**:

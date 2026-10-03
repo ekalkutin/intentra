@@ -157,6 +157,7 @@ export {
   SidebarTrigger,
   useSidebar,
 } from './primitives/sidebar';
+export { Progress, ProgressLabel, ProgressValue } from './primitives/progress';
 export { Spinner } from './primitives/spinner';
 export {
   Table,

@@ -11,8 +11,18 @@ import {
   EmptyTitle,
 } from '@/shared/ui';
 
-/** A Project that was never checked: one line on what a check finds, and the action to start it for whoever may. */
-export function AnalysisEmpty({ action }: { readonly action: ReactNode }) {
+/**
+ * A Project that was never checked: one line on what a check finds, and the
+ * action to start it for whoever may; or, with nothing in it to check, that.
+ */
+export function AnalysisEmpty({
+  action,
+  nothingToCheck = false,
+}: {
+  readonly action: ReactNode;
+  /** The Project has no Drafts or Approved items, Open Questions aside. */
+  readonly nothingToCheck?: boolean;
+}) {
   const { t } = useTranslation();
 
   return (
@@ -29,7 +39,11 @@ export function AnalysisEmpty({ action }: { readonly action: ReactNode }) {
         <EmptyTitle className='text-lg font-semibold tracking-[-0.015em]'>
           {t('analysis.emptyTitle')}
         </EmptyTitle>
-        <EmptyDescription>{t('analysis.emptyDescription')}</EmptyDescription>
+        <EmptyDescription>
+          {nothingToCheck
+            ? t('analysis.emptyNothing')
+            : t('analysis.emptyDescription')}
+        </EmptyDescription>
       </EmptyHeader>
       {action && <EmptyContent>{action}</EmptyContent>}
     </Empty>

@@ -1,3 +1,4 @@
+import { MockEmbeddingModelV4 } from 'ai/test';
 import {
   afterAll,
   afterEach,
@@ -25,7 +26,10 @@ import {
   AnalysisRunScope,
   AnalysisRunStatus,
 } from '../../domain/value-objects/index.js';
-import { AnalysisRunBusyException } from '../exceptions/index.js';
+import {
+  AnalysisRunBusyException,
+  ModelUnavailableException,
+} from '../exceptions/index.js';
 import {
   AgentsVersionRepository,
   AnalysisRunRepository,
@@ -39,10 +43,19 @@ function startRun(projectId = new ProjectId()): AnalysisRun {
   return AnalysisRun.start({
     workspaceId: new WorkspaceId().value,
     projectId: projectId.value,
-    scope: AnalysisRunScope.WholeProject,
+    scope: AnalysisRunScope.Unchecked,
     startedBy: null,
   });
 }
+
+/** Every text reads as the same meaning: Similar Items are then every other item. */
+const sameMeaning = new MockEmbeddingModelV4({
+  maxEmbeddingsPerCall: null,
+  doEmbed: async ({ values }) => ({
+    embeddings: values.map(() => [1, 0]),
+    warnings: [],
+  }),
+});
 
 describe('AnalysisRunsService integration', () => {
   let app: TestingApp;
@@ -54,6 +67,7 @@ describe('AnalysisRunsService integration', () => {
           agents: {
             providerKeyEncryptionKey: Buffer.alloc(32, 7).toString('base64'),
           },
+          knowledge: { embeddingModel: () => sameMeaning },
         }),
       ],
     });
@@ -79,7 +93,8 @@ describe('AnalysisRunsService integration', () => {
     const left = startRun();
     await save(left);
     const done = startRun();
-    done.complete({ questionKeys: ['TBD-1'], stepLimitReached: false });
+    done.checkOne(['TBD-1']);
+    done.complete();
     await save(done);
 
     // Act
@@ -107,63 +122,59 @@ describe('AnalysisRunsService integration', () => {
     await expect(saving).rejects.toBeInstanceOf(AnalysisRunBusyException);
   });
 
-  describe('nightly', () => {
-    type Setup = { ada: Actor; workspaceId: string; projectId: string };
+  type Setup = { ada: Actor; workspaceId: string; projectId: string };
 
-    /** Ada owns the Workspace and its Project, with a Provider Key and Published Agents; the Auditor finds nothing. */
-    async function setUp({ providerKey = true } = {}): Promise<Setup> {
-      const ada = await givenAccount(app, 'ada@example.com');
-      const workspace = await app
-        .get(WorkspacesService)
-        .create(ada, { name: 'Acme', slug: 'acme' });
-      const project = await app
-        .get(ProjectsService)
-        .create(ada, workspace.id, { name: 'Billing', slug: 'billing' });
-      if (providerKey) {
-        vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-          new Response('{}', { status: 200 }),
-        );
-        await app
-          .get(ProviderKeyService)
-          .set(ada, workspace.id, { key: 'sk-or-v1-0123456789abcdef' });
-      }
-      const version = AgentsVersion.publish({
-        number: 1,
-        content: publishableUnpublished().content,
-        note: null,
-        publisherAccountId: ada.accountId,
-        publisherEmail: ada.email,
-      });
+  /** Ada owns the Workspace and its Project, with a Provider Key and Published Agents; the Auditor finds nothing. */
+  async function setUp({ providerKey = true } = {}): Promise<Setup> {
+    const ada = await givenAccount(app, 'ada@example.com');
+    const workspace = await app
+      .get(WorkspacesService)
+      .create(ada, { name: 'Acme', slug: 'acme' });
+    const project = await app
+      .get(ProjectsService)
+      .create(ada, workspace.id, { name: 'Billing', slug: 'billing' });
+    if (providerKey) {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response('{}', { status: 200 }),
+      );
       await app
-        .get(UnitOfWork)
-        .run(() => app.get(AgentsVersionRepository).save(version));
-      vi.spyOn(app.get(Auditor), 'audit').mockResolvedValue({
-        failure: null,
-        questionKeys: [],
-        stepLimitReached: false,
-      });
-
-      return { ada, workspaceId: workspace.id, projectId: project.id };
+        .get(ProviderKeyService)
+        .set(ada, workspace.id, { key: 'sk-or-v1-0123456789abcdef' });
     }
+    const version = AgentsVersion.publish({
+      number: 1,
+      content: publishableUnpublished().content,
+      note: null,
+      publisherAccountId: ada.accountId,
+      publisherEmail: ada.email,
+    });
+    await app
+      .get(UnitOfWork)
+      .run(() => app.get(AgentsVersionRepository).save(version));
+    vi.spyOn(app.get(Auditor), 'judge').mockResolvedValue([]);
 
-    async function turnOn({ ada, workspaceId, projectId }: Setup) {
-      await app
-        .get(AnalysisRunsService)
-        .changeSchedule(ada, workspaceId, projectId, { enabled: true });
-    }
+    return { ada, workspaceId: workspace.id, projectId: project.id };
+  }
 
-    async function approveRequirement(
-      { ada, workspaceId, projectId }: Setup,
-      title: string,
-    ): Promise<string> {
-      const knowledge = app.get(KnowledgeService);
-      const caller = { actor: ada, agent: null };
-      const recorded = await knowledge.record(caller, workspaceId, projectId, {
+  async function turnOn({ ada, workspaceId, projectId }: Setup) {
+    await app
+      .get(AnalysisRunsService)
+      .changeSchedule(ada, workspaceId, projectId, { enabled: true });
+  }
+
+  async function recordRequirement(
+    { ada, workspaceId, projectId }: Setup,
+    title: string,
+    links: { type: 'depends-on'; key: string }[] = [],
+  ): Promise<string> {
+    const recorded = await app
+      .get(KnowledgeService)
+      .record({ actor: ada, agent: null }, workspaceId, projectId, {
         kind: 'requirement',
         title,
         rationale: null,
         supersedes: null,
-        links: [],
+        links,
         fields: {
           statement: title,
           type: 'functional',
@@ -171,80 +182,208 @@ describe('AnalysisRunsService integration', () => {
           acceptanceCriteria: [],
         },
       });
-      await knowledge.approve(caller, workspaceId, projectId, recorded.key, {
-        version: recorded.version,
-      });
 
-      return recorded.key;
+    return recorded.key;
+  }
+
+  async function listRuns({ ada, workspaceId, projectId }: Setup) {
+    return app
+      .get(AnalysisRunsService)
+      .list(ada, workspaceId, projectId, { take: 20, offset: 0 });
+  }
+
+  /** Starts a run by hand and waits until it is through. */
+  async function runByHand(
+    setup: Setup,
+    scope: 'unchecked' | 'whole-project' = 'unchecked',
+  ) {
+    const service = app.get(AnalysisRunsService);
+    const started = await service.start(
+      setup.ada,
+      setup.workspaceId,
+      setup.projectId,
+      { scope },
+    );
+    for (;;) {
+      const run = await service.get(
+        setup.ada,
+        setup.workspaceId,
+        setup.projectId,
+        started.id,
+      );
+      if (run.status !== 'running') {
+        return run;
+      }
+      await new Promise(resolve => setTimeout(resolve, 10));
     }
+  }
 
-    async function runsOf({ ada, workspaceId, projectId }: Setup) {
-      const page = await app
-        .get(AnalysisRunsService)
-        .list(ada, workspaceId, projectId, { take: 20, offset: 0 });
-
-      return page.items;
-    }
-
-    it('checks the whole Project the first night, as the schedule', async () => {
+  describe('by hand', () => {
+    it('judges each item with what it links to, what links to it and its Similar Items', async () => {
       // Arrange
       const setup = await setUp();
-      await turnOn(setup);
+      const base = await recordRequirement(setup, 'Export a report');
+      const pdf = await recordRequirement(setup, 'PDF export', [
+        { type: 'depends-on', key: base },
+      ]);
 
       // Act
-      await app.get(AnalysisRunsService).runScheduled();
+      const run = await runByHand(setup);
 
       // Assert
-      const runs = await runsOf(setup);
-      expect(runs).toMatchObject([
-        {
-          scope: 'whole-project',
-          startedBy: null,
-          status: 'completed',
-          changedKeys: [],
-        },
-      ]);
+      expect(run).toMatchObject({
+        scope: 'unchecked',
+        status: 'completed',
+        itemCount: 2,
+        checkedCount: 2,
+      });
+      const groups = vi
+        .mocked(app.get(Auditor).judge)
+        .mock.calls.map(([{ group }]) => [
+          group.item.key,
+          group.around.map(item => item.key),
+        ]);
+      expect(groups).toEqual(
+        expect.arrayContaining([
+          [base, [pdf]],
+          [pdf, [base]],
+        ]),
+      );
     });
 
-    it('then checks only what was approved since the last completed run, and nothing when nothing changed', async () => {
+    it('records each finding as an Open Question concerning the group, the item under check always among them', async () => {
+      // Arrange
+      const setup = await setUp();
+      const key = await recordRequirement(setup, 'PDF export');
+      vi.mocked(app.get(Auditor).judge).mockResolvedValue([
+        {
+          title: 'Which viewer',
+          question: 'Which PDF viewers must open the file?',
+          rationale: `${key} names no viewer`,
+          concerns: ['REQ-99'],
+        },
+      ]);
+
+      // Act
+      const run = await runByHand(setup);
+
+      // Assert
+      const [questionKey] = run.questionKeys;
+      const question = await app
+        .get(KnowledgeService)
+        .get(
+          { actor: setup.ada, agent: null },
+          setup.workspaceId,
+          setup.projectId,
+          questionKey!,
+        );
+      expect(question).toMatchObject({
+        kind: 'open-question',
+        status: 'draft',
+        source: 'analysis-run',
+        fields: { question: 'Which PDF viewers must open the file?' },
+        links: [{ type: 'concerns', key }],
+      });
+      expect((await listRuns(setup)).coverage).toEqual({
+        checked: 1,
+        total: 1,
+      });
+    });
+
+    it('looks again only at what changed since, unless a Maintainer asks for the whole Project', async () => {
+      // Arrange
+      const setup = await setUp();
+      await recordRequirement(setup, 'PDF export');
+      await runByHand(setup);
+      const added = await recordRequirement(setup, 'CSV export');
+
+      // Act
+      const unchecked = await runByHand(setup);
+      const whole = await runByHand(setup, 'whole-project');
+
+      // Assert
+      expect(unchecked).toMatchObject({ itemCount: 1, checkedCount: 1 });
+      expect(whole).toMatchObject({
+        scope: 'whole-project',
+        itemCount: 2,
+        checkedCount: 2,
+      });
+      expect(
+        vi.mocked(app.get(Auditor).judge).mock.calls[1]![0].group.item.key,
+      ).toBe(added);
+    });
+
+    it('stops when the model is unavailable, leaving the items it did not reach Unchecked', async () => {
+      // Arrange
+      const setup = await setUp();
+      await recordRequirement(setup, 'PDF export');
+      await recordRequirement(setup, 'CSV export');
+      vi.mocked(app.get(Auditor).judge)
+        .mockResolvedValueOnce([])
+        .mockImplementationOnce(
+          () =>
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new ModelUnavailableException()), 50),
+            ),
+        );
+
+      // Act
+      const run = await runByHand(setup);
+
+      // Assert
+      expect(run).toMatchObject({
+        status: 'failed',
+        failure: 'model-unavailable',
+        itemCount: 2,
+        checkedCount: 1,
+      });
+      expect((await listRuns(setup)).coverage).toEqual({
+        checked: 1,
+        total: 2,
+      });
+    });
+  });
+
+  describe('nightly', () => {
+    it('checks the Unchecked items, and leaves the Project alone while none are', async () => {
       // Arrange
       const setup = await setUp();
       await turnOn(setup);
+      await recordRequirement(setup, 'PDF export');
       await app.get(AnalysisRunsService).runScheduled();
       await app.get(AnalysisRunsService).runScheduled();
-      const key = await approveRequirement(setup, 'PDF export');
+      await recordRequirement(setup, 'CSV export');
 
       // Act
       await app.get(AnalysisRunsService).runScheduled();
 
       // Assert
-      const runs = await runsOf(setup);
-      expect(runs.map(run => [run.scope, run.changedKeys])).toEqual([
-        ['changes', [key]],
-        ['whole-project', []],
+      const { items } = await listRuns(setup);
+      expect(
+        items.map(run => [run.scope, run.startedBy, run.itemCount]),
+      ).toEqual([
+        ['unchecked', null, 1],
+        ['unchecked', null, 1],
       ]);
-      expect(vi.mocked(app.get(Auditor).audit)).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          changes: { approved: [key], retired: [] },
-        }),
-      );
     });
 
     it('leaves a Project alone while its schedule is off', async () => {
       // Arrange
       const setup = await setUp();
+      await recordRequirement(setup, 'PDF export');
 
       // Act
       await app.get(AnalysisRunsService).runScheduled();
 
       // Assert
-      expect(await runsOf(setup)).toEqual([]);
+      expect((await listRuns(setup)).items).toEqual([]);
     });
 
     it('tells why a schedule that is on cannot run', async () => {
       // Arrange
       const setup = await setUp({ providerKey: false });
       await turnOn(setup);
+      await recordRequirement(setup, 'PDF export');
 
       // Act
       const schedule = await app
@@ -258,7 +397,7 @@ describe('AnalysisRunsService integration', () => {
         blockedBy: 'provider-key-missing',
         access: { canChange: true },
       });
-      expect(await runsOf(setup)).toEqual([]);
+      expect((await listRuns(setup)).items).toEqual([]);
     });
   });
 });

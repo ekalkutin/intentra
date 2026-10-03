@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
 
+import { countsItems, leftUnchecked } from '@/entities/analysis-run';
 import { useFormatMoment } from '@/shared/i18n';
 import { cn } from '@/shared/lib';
-import { AgentSpark, ListRow, StatusBadge } from '@/shared/ui';
+import { AgentSpark, ListRow, Progress, StatusBadge } from '@/shared/ui';
 import {
-  AnalysisRunScopeDtoSchema,
   AnalysisRunStatusDtoSchema,
   type AnalysisRunDto,
   type AnalysisRunStatusDto,
@@ -24,8 +24,9 @@ const STATUSES = {
 } as const satisfies Record<Exclude<AnalysisRunStatusDto, 'running'>, unknown>;
 
 /**
- * One run: when and by whom it was started, its status, and what came of it:
- * the Open Questions it recorded, each with what it asks, or why it failed.
+ * One run: when and by whom it was started, over what, its status, and what
+ * came of it: how many items it checked, the Open Questions it recorded, each
+ * with what it asks, or why it failed and what it left Unchecked.
  */
 export function RunRow({
   run,
@@ -73,12 +74,10 @@ export function RunRow({
           <p className='text-sm font-medium'>
             {formatMoment(run.startedAt)}
             <span className='font-normal text-muted-foreground'> · {who}</span>
-            {run.scope === AnalysisRunScopeDtoSchema.enum.changes && (
-              <span className='font-normal text-muted-foreground'>
-                {' · '}
-                {t('analysis.changesScope', { count: run.changedKeys.length })}
-              </span>
-            )}
+            <span className='font-normal text-muted-foreground'>
+              {' · '}
+              {t(`analysis.scopes.${run.scope}`)}
+            </span>
           </p>
           <p
             className={cn(
@@ -88,6 +87,14 @@ export function RunRow({
           >
             <Outcome run={run} findings={findings} />
           </p>
+          {isRunning && countsItems(run) && (
+            <Progress
+              value={run.checkedCount}
+              max={run.itemCount}
+              aria-label={t('analysis.progressLabel')}
+              className='mt-2.5 max-w-xs [&_[data-slot=progress-indicator]]:bg-brand [&_[data-slot=progress-indicator]]:duration-700 [&_[data-slot=progress-track]]:bg-brand/15'
+            />
+          )}
         </div>
         {run.status === running ? (
           <RunningBadge />
@@ -149,19 +156,40 @@ function Outcome({
   );
 
   if (run.status === running) {
-    return t('analysis.runningHint');
+    return countsItems(run)
+      ? t('analysis.runningProgress', {
+          checked: run.checkedCount,
+          count: run.itemCount,
+        })
+      : t('analysis.runningHint');
   }
   if (run.status === failed) {
+    const left = leftUnchecked(run);
+
     return (
       <>
         {t(`analysis.failures.${run.failure ?? 'auditor-failed'}`)}
+        {left > 0 && (
+          <>
+            {' '}
+            {t('analysis.stoppedHalfway', {
+              checked: run.checkedCount,
+              total: run.itemCount,
+              count: left,
+            })}
+          </>
+        )}
         {tally && <> {tally}</>}
       </>
     );
   }
 
+  // A run from before runs counted their items, or one with nothing Unchecked to look at, tells only what it found.
   return (
     <>
+      {countsItems(run) && (
+        <>{t('analysis.checked', { count: run.itemCount })} </>
+      )}
       {found === 0 ? t('analysis.foundNothing') : tally}
       {run.stepLimitReached && <> {t('analysis.stepLimitReached')}</>}
     </>

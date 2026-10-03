@@ -11,15 +11,16 @@ import {
 } from '../value-objects/index.js';
 
 /**
- * One pass in which the Auditor looks over a Project's Approved knowledge,
- * without a Conversation. It remembers who started it and what it found:
- * the Open Questions it recorded, as Intentra, by Knowledge Key.
+ * One pass in which the Auditor looks over a Project's knowledge item by item,
+ * without a Conversation. It remembers who started it, how far it got and
+ * what it found: the Open Questions it recorded, as Intentra, by Knowledge Key.
  */
 export class AnalysisRun extends Aggregate<AnalysisRunId> {
   readonly #workspaceId: WorkspaceId;
   readonly #projectId: ProjectId;
   readonly #scope: AnalysisRunScope;
-  readonly #changedKeys: readonly string[];
+  #itemCount: number;
+  #checkedCount: number;
   readonly #startedBy: MemberId | null;
   readonly #startedAt: Temporal.Instant;
   #agentsVersion: AgentsVersionNumber | null;
@@ -34,7 +35,8 @@ export class AnalysisRun extends Aggregate<AnalysisRunId> {
     this.#workspaceId = state.workspaceId;
     this.#projectId = state.projectId;
     this.#scope = state.scope;
-    this.#changedKeys = state.changedKeys;
+    this.#itemCount = state.itemCount;
+    this.#checkedCount = state.checkedCount;
     this.#startedBy = state.startedBy;
     this.#startedAt = state.startedAt;
     this.#agentsVersion = state.agentsVersion;
@@ -57,9 +59,14 @@ export class AnalysisRun extends Aggregate<AnalysisRunId> {
     return this.#scope;
   }
 
-  /** For a run over the changes, the Knowledge Keys of what was approved or retired; empty for the whole Project. */
-  get changedKeys(): readonly string[] {
-    return this.#changedKeys;
+  /** How many items it is to look at; 0 until it knows. */
+  get itemCount(): number {
+    return this.#itemCount;
+  }
+
+  /** How many of them it has looked at so far. */
+  get checkedCount(): number {
+    return this.#checkedCount;
   }
 
   /** The Member who started it by hand; null for one the schedule started. */
@@ -89,7 +96,7 @@ export class AnalysisRun extends Aggregate<AnalysisRunId> {
     return this.#questionKeys;
   }
 
-  /** Whether the Auditor stopped at the most steps a run may take, perhaps before it was through. */
+  /** Whether a run from before runs went item by item stopped at the most steps it could take; always false since. */
   get stepLimitReached(): boolean {
     return this.#stepLimitReached;
   }
@@ -107,7 +114,8 @@ export class AnalysisRun extends Aggregate<AnalysisRunId> {
       workspaceId: new WorkspaceId(props.workspaceId),
       projectId: new ProjectId(props.projectId),
       scope: props.scope,
-      changedKeys: props.changedKeys ?? [],
+      itemCount: 0,
+      checkedCount: 0,
       startedBy:
         props.startedBy === null ? null : new MemberId(props.startedBy),
       startedAt: Temporal.Now.instant(),
@@ -125,7 +133,8 @@ export class AnalysisRun extends Aggregate<AnalysisRunId> {
       workspaceId: new WorkspaceId(props.workspaceId),
       projectId: new ProjectId(props.projectId),
       scope: AnalysisRunScope.from(props.scope),
-      changedKeys: props.changedKeys,
+      itemCount: props.itemCount,
+      checkedCount: props.checkedCount,
       startedBy:
         props.startedBy === null ? null : new MemberId(props.startedBy),
       startedAt: props.startedAt,
@@ -148,26 +157,30 @@ export class AnalysisRun extends Aggregate<AnalysisRunId> {
     this.#agentsVersion = agentsVersion;
   }
 
-  public complete(result: {
-    readonly questionKeys: readonly string[];
-    readonly stepLimitReached: boolean;
-  }): void {
+  /** It is to look at this many items. */
+  public plan(itemCount: number): void {
+    this.ensureRunning();
+    this.#itemCount = itemCount;
+  }
+
+  /** One more item looked at, with the Open Questions recorded about it. */
+  public checkOne(questionKeys: readonly string[]): void {
+    this.ensureRunning();
+    this.#checkedCount += 1;
+    this.#questionKeys = [...new Set([...this.#questionKeys, ...questionKeys])];
+  }
+
+  public complete(): void {
     this.ensureRunning();
     this.#status = AnalysisRunStatus.Completed;
     this.#finishedAt = Temporal.Now.instant();
-    this.#questionKeys = [...new Set(result.questionKeys)];
-    this.#stepLimitReached = result.stepLimitReached;
   }
 
-  /** What it recorded before failing stays recorded. */
-  public fail(
-    failure: AnalysisRunFailure,
-    questionKeys: readonly string[] = [],
-  ): void {
+  /** What it recorded and the items it looked at before failing stay so; the rest stay Unchecked. */
+  public fail(failure: AnalysisRunFailure): void {
     this.ensureRunning();
     this.#status = AnalysisRunStatus.Failed;
     this.#finishedAt = Temporal.Now.instant();
-    this.#questionKeys = [...new Set(questionKeys)];
     this.#failure = failure;
   }
 
@@ -182,7 +195,8 @@ type AnalysisRunState = {
   readonly workspaceId: WorkspaceId;
   readonly projectId: ProjectId;
   readonly scope: AnalysisRunScope;
-  readonly changedKeys: readonly string[];
+  readonly itemCount: number;
+  readonly checkedCount: number;
   readonly startedBy: MemberId | null;
   readonly startedAt: Temporal.Instant;
   readonly agentsVersion: AgentsVersionNumber | null;
@@ -197,8 +211,6 @@ type AnalysisRunStartProps = {
   readonly workspaceId: string;
   readonly projectId: string;
   readonly scope: AnalysisRunScope;
-  /** For a run over the changes, what changed. */
-  readonly changedKeys?: readonly string[];
   /** The Member who starts it by hand; null for the schedule. */
   readonly startedBy: string | null;
 };
@@ -208,7 +220,8 @@ type AnalysisRunRestoreProps = {
   readonly workspaceId: string;
   readonly projectId: string;
   readonly scope: string;
-  readonly changedKeys: readonly string[];
+  readonly itemCount: number;
+  readonly checkedCount: number;
   readonly startedBy: string | null;
   readonly startedAt: Temporal.Instant;
   readonly agentsVersion: number | null;

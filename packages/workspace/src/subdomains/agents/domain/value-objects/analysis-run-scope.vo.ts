@@ -2,14 +2,16 @@ import { InvalidAnalysisRunException } from '../exceptions/index.js';
 
 /** What an Analysis Run looks at. */
 export class AnalysisRunScope {
-  /** Every Approved Knowledge Item of the Project: a run started by hand. */
+  /** The Unchecked Drafts and Approved items: a run by hand or by the schedule. */
+  public static readonly Unchecked = new AnalysisRunScope('unchecked');
+  /** Every Draft and Approved item, checked or not: a run a Maintainer starts by hand. */
   public static readonly WholeProject = new AnalysisRunScope('whole-project');
-  /** What was approved or retired since the last completed run: a run the schedule started. */
-  public static readonly Changes = new AnalysisRunScope('changes');
+  /** Runs from before runs went item by item, over what was approved or retired since the last one; read as Unchecked. */
+  static readonly #legacyChanges = 'changes';
 
   static readonly #all: readonly AnalysisRunScope[] = [
+    AnalysisRunScope.Unchecked,
     AnalysisRunScope.WholeProject,
-    AnalysisRunScope.Changes,
   ];
 
   readonly #value: string;
@@ -19,12 +21,15 @@ export class AnalysisRunScope {
   }
 
   public static from(value: string): AnalysisRunScope {
+    if (value === AnalysisRunScope.#legacyChanges) {
+      return AnalysisRunScope.Unchecked;
+    }
     const scope = AnalysisRunScope.#all.find(
       candidate => candidate.value === value,
     );
     if (!scope) {
       throw new InvalidAnalysisRunException(
-        'Analysis Run scope must be whole-project or changes',
+        'Analysis Run scope must be unchecked or whole-project',
       );
     }
 
@@ -33,5 +38,9 @@ export class AnalysisRunScope {
 
   public get value(): string {
     return this.#value;
+  }
+
+  public equals(other: AnalysisRunScope): boolean {
+    return this.#value === other.#value;
   }
 }

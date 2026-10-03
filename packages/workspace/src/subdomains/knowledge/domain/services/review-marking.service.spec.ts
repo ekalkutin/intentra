@@ -5,11 +5,13 @@ import { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 import { MemberId } from '../../../tenancy/index.js';
 import { KnowledgeItem } from '../entities/index.js';
 import {
+  BusinessRuleContent,
   FeatureContent,
   KnowledgeKey,
   KnowledgeLink,
   KnowledgeLinkType,
   KnowledgeSource,
+  OpenQuestionContent,
   RequirementContent,
   TermContent,
 } from '../value-objects/index.js';
@@ -99,6 +101,49 @@ function partOf(key: KnowledgeKey): KnowledgeLink {
   return new KnowledgeLink(KnowledgeLinkType.PartOf, key);
 }
 
+function concerns(key: KnowledgeKey): KnowledgeLink {
+  return new KnowledgeLink(KnowledgeLinkType.Concerns, key);
+}
+
+/** BR-`number`, a Draft. */
+function businessRule(number: number): KnowledgeItem {
+  return KnowledgeItem.record({
+    workspaceId: new WorkspaceId().value,
+    projectId: new ProjectId().value,
+    source: KnowledgeSource.Manual,
+    number,
+    title: 'Card refunds',
+    rationale: null,
+    content: new BusinessRuleContent({
+      rule: 'A card payment is refunded within 14 days',
+    }),
+    authorId: new MemberId().value,
+    supersedes: null,
+    links: [],
+  });
+}
+
+/** TBD-`number`, a Draft about the given items, as an Analysis Run records it. */
+function openQuestion(
+  number: number,
+  links: readonly KnowledgeLink[],
+): KnowledgeItem {
+  return KnowledgeItem.record({
+    workspaceId: new WorkspaceId().value,
+    projectId: new ProjectId().value,
+    source: KnowledgeSource.AnalysisRun,
+    number,
+    title: 'Refund format',
+    rationale: 'BR-7 and REQ-3 say different things about refunds',
+    content: new OpenQuestionContent({
+      question: 'Is a refund exported to PDF?',
+    }),
+    authorId: null,
+    supersedes: null,
+    links,
+  });
+}
+
 describe('ReviewMarkingService', () => {
   const service = new ReviewMarkingService();
 
@@ -184,6 +229,76 @@ describe('ReviewMarkingService', () => {
     // Assert
     expect(part.needsReview()).toBe(true);
     expect(part.reviewCauses.map(cause => cause.value)).toEqual(['FEAT-1']);
+  });
+
+  describe('Open Questions', () => {
+    it('marks a Draft and an Approved Open Question about a rejected item, naming it as the cause', () => {
+      // Arrange
+      const rejected = businessRule(7);
+      const concerned = requirement(3);
+      const draft = openQuestion(9, [
+        concerns(rejected.key),
+        concerns(concerned.key),
+      ]);
+      const approved = openQuestion(10, [concerns(rejected.key)]);
+      approved.approve(new MemberId(), approved.version);
+      rejected.reject(new MemberId(), rejected.version, null);
+
+      // Act
+      service.markSources(rejected, [draft, approved]);
+
+      // Assert
+      expect(draft.reviewCauses).toEqual([rejected.key]);
+      expect(approved.reviewCauses).toEqual([rejected.key]);
+    });
+
+    it('does not mark an Open Question about a retired item', () => {
+      // Arrange
+      const retired = requirement(3);
+      retired.approve(new MemberId(), retired.version);
+      retired.retire(new MemberId(), retired.version, null);
+      const question = openQuestion(9, [concerns(retired.key)]);
+
+      // Act
+      service.markSources(retired, [question]);
+
+      // Assert
+      expect(question.needsReview()).toBe(false);
+    });
+
+    it('does not mark an Open Question about a replaced item', () => {
+      // Arrange
+      const replaced = requirement(1);
+      replaced.approve(new MemberId(), replaced.version);
+      const replacement = requirement(2, {
+        title: 'PDF export button',
+        supersedes: replaced.key,
+      });
+      replacement.approve(new MemberId(), replacement.version);
+      replaced.becomeSupersededBy(replacement.key, new MemberId());
+      const question = openQuestion(9, [concerns(replaced.key)]);
+
+      // Act
+      service.markSources(replaced, [question], replacement);
+
+      // Assert
+      expect(question.needsReview()).toBe(false);
+      expect(question.links).toEqual([concerns(replaced.key)]);
+    });
+
+    it('marks nothing when the rejected item is concerned by no Open Question', () => {
+      // Arrange
+      const rejected = businessRule(7);
+      rejected.reject(new MemberId(), rejected.version, null);
+      const question = openQuestion(9, [concerns(KnowledgeKey.parse('REQ-3'))]);
+
+      // Act
+      service.markSources(rejected, [question]);
+
+      // Assert
+      expect(question.needsReview()).toBe(false);
+      expect(question.version.value).toBe(1);
+    });
   });
 
   it('moves what uses a replaced Term onto its replacement, with no mark', () => {

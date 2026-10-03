@@ -6,6 +6,7 @@ import {
   AnalysisRunRepository,
   AnalysisScheduleRepository,
   ConversationStore,
+  KnowledgeCheckRepository,
   ProviderKeyRepository,
 } from './subdomains/agents/index.js';
 import {
@@ -46,6 +47,7 @@ export class CleanupAdapter implements Cleanup {
     private readonly providerKeyRepository: ProviderKeyRepository,
     private readonly analysisRunRepository: AnalysisRunRepository,
     private readonly analysisScheduleRepository: AnalysisScheduleRepository,
+    private readonly knowledgeCheckRepository: KnowledgeCheckRepository,
   ) {}
 
   public async afterWorkspaceDeleted(workspaceId: WorkspaceId): Promise<void> {
@@ -53,6 +55,7 @@ export class CleanupAdapter implements Cleanup {
     await this.providerKeyRepository.deleteMany({ workspaceId });
     await this.analysisRunRepository.deleteMany({ workspaceId });
     await this.analysisScheduleRepository.deleteMany({ workspaceId });
+    await this.knowledgeCheckRepository.deleteMany({ workspaceId });
     await this.knowledgeItemRepository.deleteMany({ workspaceId });
     await this.knowledgeKeyCounter.deleteMany({ workspaceId });
     await this.similarItemsIndex.deleteMany({ workspaceId });
@@ -67,6 +70,7 @@ export class CleanupAdapter implements Cleanup {
     await this.conversationStore.deleteMany({ projectId });
     await this.analysisRunRepository.deleteMany({ projectId });
     await this.analysisScheduleRepository.deleteMany({ projectId });
+    await this.knowledgeCheckRepository.deleteMany({ projectId });
     await this.knowledgeItemRepository.deleteMany({ projectId });
     await this.knowledgeKeyCounter.deleteMany({ projectId });
     await this.similarItemsIndex.deleteMany({ projectId });

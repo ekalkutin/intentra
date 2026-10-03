@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import {
   isRunning,
   RUNNING_POLL_MS,
+  uncheckedCount,
   useAnalysisRunsQuery,
   useStartAnalysisRunMutation,
 } from '@/entities/analysis-run';
@@ -33,22 +34,28 @@ import {
   PageSkeleton,
 } from '@/shared/ui';
 import {
+  AnalysisRunScopeDtoSchema,
   KnowledgeKindDtoSchema,
   KnowledgeStatusDtoSchema,
+  type AnalysisRunScopeDto,
 } from '@intentra/contracts/workspace';
 
 import { AnalysisEmpty } from './analysis-empty';
+import { CoverageRow } from './coverage-row';
 import { NightlySchedule } from './nightly-schedule';
 import { RunRow } from './run-row';
+import { WholeProjectRow } from './whole-project-row';
 
 /** The runs the page shows, the newest first. */
 const RUNS_SHOWN = 50;
 
 /**
- * A Project's Analysis Runs: Intentra looking over the Approved knowledge for
- * contradictions and ambiguities, started here, and what each run found. A
- * running run is asked after until it finishes; then the knowledge it added
- * is read again.
+ * A Project's Analysis Runs: Intentra looking over the Drafts and Approved
+ * knowledge, item by item, for contradictions and ambiguities; how much of it
+ * is checked; the run over the Unchecked items started here, or, for a
+ * Maintainer, one over the whole Project; and what each run found. A running
+ * run is asked after until it finishes; then the knowledge it added is read
+ * again.
  */
 export function ProjectAnalysisPage() {
   const { t } = useTranslation();
@@ -66,7 +73,9 @@ export function ProjectAnalysisPage() {
     { ...scope, page: { take: RUNS_SHOWN } },
     { skip, pollingInterval: polling ? RUNNING_POLL_MS : 0 },
   );
-  const [start, { isLoading: starting }] = useStartAnalysisRunMutation();
+  const [start, { isLoading: starting, originalArgs: startedWith }] =
+    useStartAnalysisRunMutation();
+  const coverageHintId = useId();
   const [failure, setFailure] = useState<ApiError | null>(null);
   const { data: members = [] } = useMembersQuery(workspace?.id ?? '', {
     skip: !workspace,
@@ -110,10 +119,15 @@ export function ProjectAnalysisPage() {
     const member = members.find(candidate => candidate.id === memberId);
     return member ? member.name || member.email : undefined;
   };
-  const runStart = async () => {
-    const result = await start(scope);
+  const runStart = async (runScope: AnalysisRunScopeDto) => {
+    const result = await start({ ...scope, body: { scope: runScope } });
     setFailure(toApiError(result.error));
   };
+  const startingScope = starting ? startedWith?.body.scope : undefined;
+  const coverage = runs.data?.coverage;
+  // Nothing Unchecked: the main action has nothing to do, and the coverage row says so.
+  const nothingUnchecked =
+    coverage !== undefined && uncheckedCount(coverage) === 0;
   // The page's one action, in Intentra's ink: in the header, or inside the
   // empty state. While one runs the row says so and there is nothing to
   // start: the action fades out where it stood, and back once it is done.
@@ -127,15 +141,19 @@ export function ProjectAnalysisPage() {
     >
       <IntentraButton
         size='default'
-        busy={starting}
-        disabled={starting || running}
-        onClick={() => void runStart()}
+        busy={startingScope === AnalysisRunScopeDtoSchema.enum.unchecked}
+        disabled={starting || running || nothingUnchecked}
+        aria-describedby={nothingUnchecked ? coverageHintId : undefined}
+        onClick={() => void runStart(AnalysisRunScopeDtoSchema.enum.unchecked)}
       >
         {t('analysis.start')}
       </IntentraButton>
     </span>
   );
   const hasRuns = items.length > 0;
+  // Before the first run everything is Unchecked: the empty state says it all.
+  const showWholeProject =
+    hasRuns && runs.data?.access.canStartWholeProject === true;
 
   return (
     <KnowledgeScopeProvider
@@ -155,7 +173,27 @@ export function ProjectAnalysisPage() {
             <AlertDescription>{describeError(failure).text}</AlertDescription>
           </Alert>
         )}
-        {runs.data && <NightlySchedule scope={scope} />}
+        {runs.data && (
+          // Until the schedule is read, a block with nothing in it stays hidden.
+          <List className='empty:hidden'>
+            {hasRuns && coverage && (
+              <CoverageRow coverage={coverage} hintId={coverageHintId} />
+            )}
+            <NightlySchedule scope={scope} />
+            {showWholeProject && (
+              <WholeProjectRow
+                busy={
+                  startingScope ===
+                  AnalysisRunScopeDtoSchema.enum['whole-project']
+                }
+                disabled={starting || running}
+                onStart={() =>
+                  void runStart(AnalysisRunScopeDtoSchema.enum['whole-project'])
+                }
+              />
+            )}
+          </List>
+        )}
         {loadError ? (
           <LoadError
             text={describeError(loadError).text}
@@ -166,7 +204,10 @@ export function ProjectAnalysisPage() {
             <ListSkeleton />
           </List>
         ) : items.length === 0 ? (
-          <AnalysisEmpty action={startButton} />
+          <AnalysisEmpty
+            nothingToCheck={coverage?.total === 0}
+            action={coverage?.total === 0 ? null : startButton}
+          />
         ) : (
           <PageSection
             title={

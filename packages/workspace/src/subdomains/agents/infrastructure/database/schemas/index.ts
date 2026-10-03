@@ -17,3 +17,7 @@ export {
   UnpublishedAgentsModel,
   UnpublishedAgentsSchema,
 } from './unpublished-agents.schema.js';
+export {
+  KnowledgeCheckModel,
+  KnowledgeCheckSchema,
+} from './knowledge-check.schema.js';

@@ -295,12 +295,27 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     );
   }
 
+  /**
+   * Whether it is an Open Question about the given item: a rejection of that
+   * item puts it in question, since what it asked about may be gone.
+   */
+  public concerns(key: KnowledgeKey): boolean {
+    return this.#links.some(
+      link =>
+        link.type.equals(KnowledgeLinkType.Concerns) && link.target.equals(key),
+    );
+  }
+
   public isDraft(): boolean {
     return this.#status.equals(KnowledgeStatus.Draft);
   }
 
   public isApproved(): boolean {
     return this.#status.equals(KnowledgeStatus.Approved);
+  }
+
+  public isRejected(): boolean {
+    return this.#status.equals(KnowledgeStatus.Rejected);
   }
 
   /**
@@ -430,9 +445,10 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     if (changes.links) {
       ensureValidLinks(this.#key, changes.links);
       this.#links = changes.links;
-      // Editing clears the mark only where it no longer rests on what changed.
-      this.#reviewCauses = this.#reviewCauses.filter(cause =>
-        this.restsOn(cause),
+      // Editing clears the mark only where it no longer rests on what changed,
+      // or, as an Open Question, no longer concerns it.
+      this.#reviewCauses = this.#reviewCauses.filter(
+        cause => this.restsOn(cause) || this.concerns(cause),
       );
     }
     this.#lastEditedBy = editorId;
@@ -548,8 +564,9 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
 
   /**
    * Something it depends on, is justified by or is part of was rejected,
-   * superseded or retired. Only a Draft or an Approved item is marked; Rejected and Obsolete
-   * ones are no longer part of the knowledge.
+   * superseded or retired; or, as an Open Question, something it concerns was
+   * rejected. Only a Draft or an Approved item is marked; Rejected and
+   * Obsolete ones are no longer part of the knowledge.
    */
   public markForReview(cause: KnowledgeKey): void {
     const current = this.isDraft() || this.isApproved();

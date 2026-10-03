@@ -1,25 +1,18 @@
-import { RequestContext } from '@mastra/core/request-context';
-import { Inject, Injectable, Logger, type Provider } from '@nestjs/common';
+import { Inject, Injectable, type Provider } from '@nestjs/common';
 
 import {
-  AUDIT_TASKS,
   createAuditor,
-  type AuditorContext,
-  type ToolApis,
+  judge,
+  type AuditedItem,
 } from '@intentra/agent-toolkit';
-import {
-  intentraCaller,
-  type KnowledgeApi,
-} from '@intentra/contracts/workspace';
+import type { KnowledgeItemDto } from '@intentra/contracts/workspace';
 
-import { KnowledgeService } from '../../../../knowledge/index.js';
-import { AccessService, ProjectsService } from '../../../../tenancy/index.js';
+import { ModelUnavailableException } from '../../../application/exceptions/index.js';
 import {
   Auditor,
-  type AuditResult,
-  type AuditTask,
+  type AuditFinding,
+  type AuditJudgement,
 } from '../../../application/ports/outbound/index.js';
-import { AnalysisRunFailure } from '../../../domain/value-objects/index.js';
 import {
   AGENTS_OPTIONS,
   toAgentDefinition,
@@ -28,105 +21,65 @@ import {
 
 /**
  * Runs the Auditor from `@intentra/agent-toolkit` on the Agents given, its
- * Model Profile and the Workspace's Provider Key. Its tools call back into
- * Knowledge through the published sub-APIs as Intentra itself, which may
- * only read and record Open Questions (Agents ADR 0004).
+ * Model Profile and the Workspace's Provider Key: one model call per group,
+ * with no tools (Agents ADR 0005).
  */
 @Injectable()
 export class AuditorAdapter implements Auditor {
-  readonly #logger = new Logger(AuditorAdapter.name);
-
   constructor(
     @Inject(AGENTS_OPTIONS) private readonly options: AgentsOptions,
-    private readonly knowledgeService: KnowledgeService,
-    private readonly projectsService: ProjectsService,
-    private readonly accessService: AccessService,
   ) {}
 
-  public async audit({
+  public async judge({
     project,
     agents,
     providerKey,
-    changes,
-  }: AuditTask): Promise<AuditResult> {
-    const questionKeys: string[] = [];
+    group,
+  }: AuditJudgement): Promise<AuditFinding[]> {
+    const auditorAgent = agents.auditor();
+    if (!auditorAgent) {
+      throw new Error('The Agents to run hold no Auditor');
+    }
+    const auditor = createAuditor({
+      auditor: toAgentDefinition(
+        this.options,
+        agents,
+        auditorAgent,
+        providerKey,
+      ),
+      project: { name: project.name.value },
+    });
     try {
-      const auditorAgent = agents.auditor();
-      if (!auditorAgent) {
-        throw new Error('The Agents to run hold no Auditor');
-      }
-      const auditor = createAuditor({
-        auditor: toAgentDefinition(
-          this.options,
-          agents,
-          auditorAgent,
-          providerKey,
-        ),
-        onUnexpectedError: error => this.#logger.error(error),
-      });
-      const apis: ToolApis = {
-        knowledge: recordingKeys(this.knowledgeService, questionKeys),
-        projects: this.projectsService,
-        access: this.accessService,
-      };
-      const requestContext = new RequestContext<AuditorContext>();
-      requestContext.set('apis', apis);
-      requestContext.set('caller', intentraCaller(project.id.value));
-      requestContext.set('workspaceId', project.workspaceId.value);
-      requestContext.set('project', {
-        id: project.id.value,
-        name: project.name.value,
-      });
-
-      const task = changes
-        ? AUDIT_TASKS.changes(changes.approved, changes.retired)
-        : AUDIT_TASKS.wholeProject;
-      const output = await auditor.generate(task, {
-        requestContext,
-        modelSettings: { maxRetries: this.options.auditMaxRetries },
-        maxSteps: this.options.auditMaxSteps,
-        abortSignal: AbortSignal.timeout(this.options.auditTimeoutMs),
-      });
-      if (output.error) {
-        throw output.error;
-      }
-
-      return {
-        failure: null,
-        questionKeys,
-        stepLimitReached: output.steps.length >= this.options.auditMaxSteps,
-      };
+      return await judge(
+        auditor,
+        {
+          item: toAuditedItem(group.item),
+          around: group.around.map(toAuditedItem),
+          questions: group.questions.map(toAuditedItem),
+        },
+        {
+          maxRetries: this.options.auditMaxRetries,
+          abortSignal: AbortSignal.timeout(this.options.auditTimeoutMs),
+        },
+      );
     } catch (error) {
-      this.#logger.error(error);
-
-      return {
-        failure: isProviderOutage(error)
-          ? AnalysisRunFailure.ModelUnavailable
-          : AnalysisRunFailure.AuditorFailed,
-        questionKeys,
-        stepLimitReached: false,
-      };
+      if (isProviderOutage(error)) {
+        throw new ModelUnavailableException();
+      }
+      throw error;
     }
   }
 }
 
-/** The Knowledge API as it is, noting the key of every item recorded through it. */
-function recordingKeys(knowledge: KnowledgeApi, keys: string[]): KnowledgeApi {
-  return new Proxy(knowledge, {
-    get(target, property) {
-      const value: unknown = Reflect.get(target, property, target);
-      if (property === 'record') {
-        return async (...args: Parameters<KnowledgeApi['record']>) => {
-          const item = await target.record(...args);
-          keys.push(item.key);
-
-          return item;
-        };
-      }
-
-      return typeof value === 'function' ? value.bind(target) : value;
-    },
-  });
+function toAuditedItem(item: KnowledgeItemDto): AuditedItem {
+  return {
+    key: item.key,
+    kind: item.kind,
+    status: item.status,
+    title: item.title,
+    fields: item.fields,
+    links: item.links,
+  };
 }
 
 export const AUDITOR_PROVIDER: Provider = {

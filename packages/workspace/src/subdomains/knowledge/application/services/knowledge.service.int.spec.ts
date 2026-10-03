@@ -41,6 +41,7 @@ import {
   DraftEditingForbiddenException,
   IntentraRecordingForbiddenException,
   KnowledgeItemChangedException,
+  KnowledgeItemNeedsReviewException,
   KnowledgeItemNotApprovedException,
   KnowledgeItemNotDraftException,
   KnowledgeKindMismatchException,
@@ -855,6 +856,204 @@ describe('KnowledgeService integration', () => {
         'REQ-1',
       );
       expect(read).toEqual({ ...rejected, dependencyNeedsReview: false });
+    });
+
+    describe('what an Open Question concerns', () => {
+      const rule: RecordKnowledgeItemDto = {
+        kind: 'business-rule',
+        title: 'Card refunds',
+        rationale: null,
+        supersedes: null,
+        links: [],
+        fields: { rule: 'A card payment is refunded within 14 days' },
+      };
+      const question: RecordKnowledgeItemDto = {
+        kind: 'open-question',
+        title: 'Refund format',
+        rationale: 'BR-1 and REQ-1 say different things about refunds',
+        supersedes: null,
+        links: [
+          { type: 'concerns', key: 'BR-1' },
+          { type: 'concerns', key: 'REQ-1' },
+        ],
+        fields: { question: 'Is a refund exported to PDF?' },
+      };
+
+      /** Ada records Drafts BR-1 and REQ-1; the Auditor records Draft TBD-1 about both. */
+      async function recordQuestion(setup: Setup): Promise<void> {
+        const knowledgeService = app.get(KnowledgeService);
+        const { workspaceId, projectId } = setup;
+        const ada = person(setup.ada);
+        await knowledgeService.record(ada, workspaceId, projectId, rule);
+        await knowledgeService.record(ada, workspaceId, projectId, requirement);
+        await knowledgeService.record(
+          intentraCaller(projectId),
+          workspaceId,
+          projectId,
+          question,
+        );
+      }
+
+      it('marks a Draft Open Question about a rejected item, naming it as the cause', async () => {
+        // Arrange
+        const setup = await setUp();
+        const { workspaceId, projectId } = setup;
+        const ada = person(setup.ada);
+        const knowledgeService = app.get(KnowledgeService);
+        await recordQuestion(setup);
+
+        // Act
+        await knowledgeService.reject(ada, workspaceId, projectId, 'BR-1', {
+          version: 1,
+          reason: 'Refunds are manual',
+        });
+
+        // Assert
+        const marked = await knowledgeService.get(
+          ada,
+          workspaceId,
+          projectId,
+          'TBD-1',
+        );
+        expect(marked).toMatchObject({
+          status: 'draft',
+          needsReview: true,
+          reviewCauses: ['BR-1'],
+          version: 2,
+        });
+        const listed = await knowledgeService.list(
+          ada,
+          workspaceId,
+          projectId,
+          {
+            needsReview: true,
+            ...firstPage,
+          },
+        );
+        expect(listed.items.map(({ key }) => key)).toEqual(['TBD-1']);
+      });
+
+      it('marks an Approved Open Question about a rejected Draft', async () => {
+        // Arrange
+        const setup = await setUp();
+        const { workspaceId, projectId } = setup;
+        const ada = person(setup.ada);
+        const knowledgeService = app.get(KnowledgeService);
+        await recordQuestion(setup);
+        await knowledgeService.approve(ada, workspaceId, projectId, 'TBD-1', {
+          version: 1,
+        });
+
+        // Act
+        await knowledgeService.reject(ada, workspaceId, projectId, 'BR-1', {
+          version: 1,
+          reason: null,
+        });
+
+        // Assert
+        const marked = await knowledgeService.get(
+          ada,
+          workspaceId,
+          projectId,
+          'TBD-1',
+        );
+        expect(marked).toMatchObject({
+          status: 'approved',
+          needsReview: true,
+          reviewCauses: ['BR-1'],
+        });
+      });
+
+      it('clears the mark on confirming, dropping only the Link to the rejected item', async () => {
+        // Arrange
+        const setup = await setUp();
+        const { workspaceId, projectId } = setup;
+        const ada = person(setup.ada);
+        const knowledgeService = app.get(KnowledgeService);
+        await recordQuestion(setup);
+        await knowledgeService.reject(ada, workspaceId, projectId, 'BR-1', {
+          version: 1,
+          reason: null,
+        });
+
+        // Act
+        const confirmed = await knowledgeService.confirm(
+          ada,
+          workspaceId,
+          projectId,
+          'TBD-1',
+          { version: 2 },
+        );
+
+        // Assert
+        expect(confirmed).toMatchObject({
+          needsReview: false,
+          reviewCauses: [],
+          links: [{ type: 'concerns', key: 'REQ-1' }],
+        });
+      });
+
+      it('keeps a marked Draft Open Question from being approved', async () => {
+        // Arrange
+        const setup = await setUp();
+        const { workspaceId, projectId } = setup;
+        const ada = person(setup.ada);
+        const knowledgeService = app.get(KnowledgeService);
+        await recordQuestion(setup);
+        await knowledgeService.reject(ada, workspaceId, projectId, 'BR-1', {
+          version: 1,
+          reason: null,
+        });
+
+        // Act
+        const approving = knowledgeService.approve(
+          ada,
+          workspaceId,
+          projectId,
+          'TBD-1',
+          { version: 2 },
+        );
+
+        // Assert
+        await expect(approving).rejects.toBeInstanceOf(
+          KnowledgeItemNeedsReviewException,
+        );
+      });
+
+      it('marks nothing when the rejected item is concerned by no Open Question', async () => {
+        // Arrange
+        const setup = await setUp();
+        const { workspaceId, projectId } = setup;
+        const ada = person(setup.ada);
+        const knowledgeService = app.get(KnowledgeService);
+        await recordQuestion(setup);
+        await knowledgeService.record(ada, workspaceId, projectId, decision);
+
+        // Act
+        await knowledgeService.reject(ada, workspaceId, projectId, 'DEC-1', {
+          version: 1,
+          reason: null,
+        });
+
+        // Assert
+        const listed = await knowledgeService.list(
+          ada,
+          workspaceId,
+          projectId,
+          {
+            needsReview: true,
+            ...firstPage,
+          },
+        );
+        expect(listed.items).toEqual([]);
+        const question = await knowledgeService.get(
+          ada,
+          workspaceId,
+          projectId,
+          'TBD-1',
+        );
+        expect(question).toMatchObject({ needsReview: false, version: 1 });
+      });
     });
   });
 

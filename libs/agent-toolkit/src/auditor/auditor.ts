@@ -1,58 +1,36 @@
-import { Agent, type ToolsInput } from '@mastra/core/agent';
+import { Agent } from '@mastra/core/agent';
 
-import { agentToolsOf } from '../agent-tools.js';
 import { cachedInstructions } from '../cached-instructions.js';
 import type { AgentDefinition } from '../intentra/agent-definition.js';
-import type { UnexpectedErrorListener } from '../intentra/reporting-failures.js';
 
 import {
-  auditorContextSchema,
-  type AuditorContext,
-} from './auditor-context.js';
+  auditFindingsSchema,
+  auditTask,
+  type AuditFinding,
+  type AuditGroup,
+} from './audit-group.js';
 import { frameAuditorInstructions } from './auditor-instructions.js';
 
 export type AuditorOptions = {
   readonly auditor: AgentDefinition;
-  readonly onUnexpectedError: UnexpectedErrorListener;
-};
-
-/** What an Analysis Run asks the Auditor to look over. */
-export const AUDIT_TASKS = {
-  wholeProject:
-    "Look over the whole Project's Approved knowledge for contradictions, ambiguities and doubtful rules, and record each finding as an Open Question.",
-  /** Only what changed since the last run, each with the knowledge around it. */
-  changes: (approved: readonly string[], retired: readonly string[]) =>
-    [
-      'Since the last check of this Project, some of its knowledge changed. Look at each changed item with the knowledge around it (get_context with it as an Anchor) for contradictions, ambiguities and doubtful rules it brings in, and record each finding as an Open Question. Leave the rest of the Project alone.',
-      approved.length > 0 ? `Approved since then: ${approved.join(', ')}.` : '',
-      retired.length > 0
-        ? `Retired since then (read them with get_knowledge_item; check what still relies on them): ${retired.join(', ')}.`
-        : '',
-    ]
-      .filter(Boolean)
-      .join('\n\n'),
+  /** The Project it checks, named in its instructions. */
+  readonly project: { readonly name: string };
 };
 
 /**
- * The Agent that carries out Analysis Runs: no memory and no Conversation, a
- * task given by the code, the Project taken from the request context. Its
- * tools work as Intentra itself, so whatever tools it is given, it reads and
- * records Open Questions only.
+ * The Agent that judges for Analysis Runs: no memory, no Conversation and no
+ * tools, whatever tools its definition names. The code walks the Project and
+ * hands it one group at a time (Agents ADR 0005).
  */
-export function createAuditor({ auditor, onUnexpectedError }: AuditorOptions) {
-  return new Agent<string, ToolsInput, undefined, AuditorContext>({
+export function createAuditor({ auditor, project }: AuditorOptions) {
+  return new Agent({
     id: 'auditor',
     name: auditor.name,
     description: auditor.description,
-    instructions: ({ requestContext }) =>
-      cachedInstructions(
-        frameAuditorInstructions(
-          requestContext.get('project'),
-          auditor.instructions,
-        ),
-      ),
+    instructions: cachedInstructions(
+      frameAuditorInstructions(project, auditor.instructions),
+    ),
     model: auditor.model,
-    tools: agentToolsOf(auditor.toolIds, onUnexpectedError),
     defaultOptions: {
       modelSettings: {
         ...(auditor.temperature !== null && {
@@ -68,8 +46,31 @@ export function createAuditor({ auditor, onUnexpectedError }: AuditorOptions) {
         },
       }),
     },
-    requestContextSchema: auditorContextSchema,
   });
 }
 
 export type Auditor = ReturnType<typeof createAuditor>;
+
+export type JudgeOptions = {
+  readonly abortSignal?: AbortSignal;
+  /** How many times a call its provider failed for a while is tried again. */
+  readonly maxRetries?: number;
+};
+
+/** One model call: the findings about the group's item under check; rejects when the model fails. */
+export async function judge(
+  auditor: Auditor,
+  group: AuditGroup,
+  { abortSignal, maxRetries }: JudgeOptions = {},
+): Promise<AuditFinding[]> {
+  const output = await auditor.generate(auditTask(group), {
+    structuredOutput: { schema: auditFindingsSchema },
+    ...(maxRetries !== undefined && { modelSettings: { maxRetries } }),
+    abortSignal,
+  });
+  if (output.error) {
+    throw output.error;
+  }
+
+  return output.object.findings;
+}

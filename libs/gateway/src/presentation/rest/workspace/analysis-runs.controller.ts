@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Inject,
@@ -11,10 +12,12 @@ import {
 import type { Actor } from '@intentra/contracts/iam';
 import {
   ListAnalysisRunsDtoSchema,
+  StartAnalysisRunDtoSchema,
   WorkspaceApi,
   type AnalysisRunDto,
   type AnalysisRunPageDto,
   type ListAnalysisRunsDto,
+  type StartAnalysisRunDto,
 } from '@intentra/contracts/workspace';
 
 import { ActorGuard, CurrentActor } from '../auth/index.js';
@@ -30,8 +33,14 @@ export class AnalysisRunsController {
     @CurrentActor() actor: Actor,
     @Param('workspaceId') workspaceId: string,
     @Param('projectId') projectId: string,
+    @Body({ schema: StartAnalysisRunDtoSchema }) data: StartAnalysisRunDto,
   ): Promise<AnalysisRunDto> {
-    return this.workspace.analysisRuns.start(actor, workspaceId, projectId);
+    return this.workspace.analysisRuns.start(
+      actor,
+      workspaceId,
+      projectId,
+      data,
+    );
   }
 
   @Get()

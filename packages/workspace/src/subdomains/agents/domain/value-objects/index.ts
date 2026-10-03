@@ -21,6 +21,7 @@ export { ModelProfileName } from './model-profile-name.vo.js';
 export { ProviderKeyHint } from './provider-key-hint.vo.js';
 export { ProviderKeyId } from './provider-key-id.vo.js';
 export { ProviderKeySecret } from './provider-key-secret.vo.js';
+export { KnowledgeCheck } from './knowledge-check.vo.js';
 export { Publisher } from './publisher.vo.js';
 export { PublishingNote } from './publishing-note.vo.js';
 export {

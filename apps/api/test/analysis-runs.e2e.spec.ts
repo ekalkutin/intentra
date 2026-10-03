@@ -41,16 +41,9 @@ function answer(text: string): StreamPart[] {
   ];
 }
 
-function toolCall(toolName: string, input: object): StreamPart[] {
-  return [
-    {
-      type: 'tool-call',
-      toolCallId: `call-${toolName}`,
-      toolName,
-      input: JSON.stringify(input),
-    },
-    { type: 'finish', finishReason: 'tool-calls', usage },
-  ];
+/** The Auditor's answer about one item: what it found, as the code asks for it. */
+function findings(...found: object[]): StreamPart[] {
+  return answer(JSON.stringify({ findings: found }));
 }
 
 type GeneratedContent =
@@ -77,7 +70,7 @@ const scriptedModel = {
         isRetryable: true,
       });
     }
-    const parts = turns.shift() ?? answer('Nothing more.');
+    const parts = turns.shift() ?? findings();
     const finish = parts.find(part => part.type === 'finish');
 
     return {
@@ -107,6 +100,18 @@ const scriptedModel = {
   },
 } as const;
 
+/** Every text reads as the same meaning, so every other item is a Similar Item. */
+const sameMeaning = {
+  specificationVersion: 'v2',
+  provider: 'test',
+  modelId: 'same-meaning',
+  maxEmbeddingsPerCall: undefined,
+  supportsParallelCalls: true,
+  doEmbed: async ({ values }: { values: string[] }) => ({
+    embeddings: values.map(() => [1, 0]),
+  }),
+} as const;
+
 /** A stand-in that always fails, as a provider refusing the key would. */
 let failing = false;
 /** The model's provider times out on every call. */
@@ -120,10 +125,11 @@ const PLATFORM_ADMIN = {
   password: 'correct-horse-battery-staple',
 };
 
-const question = {
+const finding = {
   title: 'Export format',
-  rationale: 'REQ-1 says PDF, BR-1 says CSV',
-  fields: { question: 'Which format does an export use?' },
+  question: 'Which format does an export use?',
+  rationale: 'REQ-1 says PDF, but names no viewer',
+  concerns: ['REQ-1'],
 };
 
 function createApp() {
@@ -151,6 +157,7 @@ function createApp() {
               // One retry after a second keeps a provider outage quick here.
               auditMaxRetries: 1,
             },
+            knowledge: { embeddingModel: () => sameMeaning },
           }),
         ],
       }),
@@ -228,8 +235,9 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
   type Setup = { ada: string; bob: string; base: string; projectId: string };
 
   /**
-   * Ada owns the Workspace and the Project; Bob joined by Invitation and is
-   * a Viewer. A Provider Key and the Agents are there unless told otherwise.
+   * Ada owns the Workspace and the Project, which holds one Draft, REQ-1; Bob
+   * joined by Invitation and is a Viewer. A Provider Key and the Agents are
+   * there unless told otherwise.
    */
   async function setUp({
     providerKey = true,
@@ -260,6 +268,25 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
       .set('Authorization', ada)
       .send({ name: 'Billing', slug: 'billing' })
       .expect(HttpStatus.CREATED);
+    const base = `${WORKSPACES_PATH}/${workspace.body.id}/projects/${project.body.id}`;
+    await app
+      .request()
+      .post(`${base}/knowledge`)
+      .set('Authorization', ada)
+      .send({
+        kind: 'requirement',
+        title: 'PDF export',
+        rationale: null,
+        supersedes: null,
+        links: [],
+        fields: {
+          statement: 'Export a report to PDF',
+          type: 'functional',
+          priority: null,
+          acceptanceCriteria: [],
+        },
+      })
+      .expect(HttpStatus.CREATED);
     if (providerKey) {
       await addProviderKey(ada, workspace.body.id);
     }
@@ -267,12 +294,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
       await publishAgents();
     }
 
-    return {
-      ada,
-      bob,
-      projectId: project.body.id,
-      base: `${WORKSPACES_PATH}/${workspace.body.id}/projects/${project.body.id}`,
-    };
+    return { ada, bob, projectId: project.body.id, base };
   }
 
   /** The run once it is no longer running. */
@@ -317,33 +339,32 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
 
   afterAll(() => app?.close());
 
-  it('runs the Auditor in the background and keeps the Open Questions it recorded as Intentra', async () => {
+  it('runs the Auditor in the background, item by item, and records what it finds as Open Questions by Intentra', async () => {
     // Arrange
-    const { ada, base, projectId } = await setUp();
-    turns = [
-      toolCall('list_knowledge', { projectId }),
-      toolCall('record_open_question', { projectId, ...question }),
-      answer('One contradiction found.'),
-    ];
+    const { ada, base } = await setUp();
+    turns = [findings(finding)];
 
     // Act
     const started = await app
       .request()
       .post(`${base}/analysis-runs`)
-      .set('Authorization', ada);
+      .set('Authorization', ada)
+      .send({});
     const run = await finished(base, ada, started.body.id);
 
     // Assert
     expect(started.status).toBe(HttpStatus.CREATED);
     expect(started.body).toMatchObject({
       status: 'running',
-      scope: 'whole-project',
+      scope: 'unchecked',
       startedBy: expect.any(String),
       finishedAt: null,
     });
     expect(run).toMatchObject({
       status: 'completed',
       agentsVersion: 1,
+      itemCount: 1,
+      checkedCount: 1,
       questionKeys: ['TBD-1'],
       stepLimitReached: false,
       failure: null,
@@ -358,39 +379,53 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
       status: 'draft',
       source: 'analysis-run',
       authorId: null,
-      rationale: question.rationale,
+      rationale: finding.rationale,
+      fields: { question: finding.question },
+      links: [{ type: 'concerns', key: 'REQ-1' }],
     });
   });
 
-  it('records nothing but Open Questions, whatever the Auditor tries', async () => {
+  it('looks only at the Unchecked items, unless a Maintainer asks for the whole Project', async () => {
     // Arrange
-    const { ada, base, projectId } = await setUp();
-    turns = [
-      toolCall('record_requirement', {
-        projectId,
-        title: 'CSV export',
-        rationale: 'The Auditor thinks so',
-        fields: { statement: 'Export to CSV' },
-      }),
-      answer('Done.'),
-    ];
-
-    // Act
-    const started = await app
+    const { ada, base } = await setUp();
+    const first = await app
       .request()
       .post(`${base}/analysis-runs`)
-      .set('Authorization', ada);
-    const run = await finished(base, ada, started.body.id);
+      .set('Authorization', ada)
+      .send({ scope: 'unchecked' })
+      .expect(HttpStatus.CREATED);
+    await finished(base, ada, first.body.id);
 
-    // Assert
-    expect(run).toMatchObject({ status: 'completed', questionKeys: [] });
-    const knowledge = await app
+    // Act
+    const again = await app
       .request()
-      .get(`${base}/knowledge`)
-      .query({ statuses: 'draft' })
+      .post(`${base}/analysis-runs`)
+      .set('Authorization', ada)
+      .send({});
+    const nothingLeft = await finished(base, ada, again.body.id);
+    const whole = await app
+      .request()
+      .post(`${base}/analysis-runs`)
+      .set('Authorization', ada)
+      .send({ scope: 'whole-project' });
+    const everything = await finished(base, ada, whole.body.id);
+    const listing = await app
+      .request()
+      .get(`${base}/analysis-runs`)
       .set('Authorization', ada)
       .expect(HttpStatus.OK);
-    expect(knowledge.body.total).toBe(0);
+
+    // Assert
+    expect(nothingLeft).toMatchObject({ status: 'completed', itemCount: 0 });
+    expect(everything).toMatchObject({
+      scope: 'whole-project',
+      status: 'completed',
+      itemCount: 1,
+    });
+    expect(listing.body).toMatchObject({
+      coverage: { checked: 1, total: 1 },
+      access: { canStart: true, canStartWholeProject: true },
+    });
   });
 
   it('runs one at a time in a Project', async () => {
@@ -402,13 +437,15 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
       .request()
       .post(`${base}/analysis-runs`)
       .set('Authorization', ada)
+      .send({})
       .expect(HttpStatus.CREATED);
 
     // Act
     const second = await app
       .request()
       .post(`${base}/analysis-runs`)
-      .set('Authorization', ada);
+      .set('Authorization', ada)
+      .send({});
 
     // Assert
     expect(second.status).toBe(HttpStatus.CONFLICT);
@@ -430,7 +467,8 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
       const started = await app
         .request()
         .post(`${base}/analysis-runs`)
-        .set('Authorization', ada);
+        .set('Authorization', ada)
+        .send({});
       const run = await finished(base, ada, started.body.id);
 
       // Assert
@@ -451,7 +489,8 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
     const started = await app
       .request()
       .post(`${base}/analysis-runs`)
-      .set('Authorization', ada);
+      .set('Authorization', ada)
+      .send({});
     const run = await finished(base, ada, started.body.id);
 
     // Assert
@@ -467,7 +506,8 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
     const started = await app
       .request()
       .post(`${base}/analysis-runs`)
-      .set('Authorization', ada);
+      .set('Authorization', ada)
+      .send({});
     const run = await finished(base, ada, started.body.id);
 
     // Assert
@@ -480,11 +520,11 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
   it('lets a Viewer read the runs but not start one', async () => {
     // Arrange
     const { ada, bob, base } = await setUp();
-    turns = [answer('Nothing found.')];
     const started = await app
       .request()
       .post(`${base}/analysis-runs`)
       .set('Authorization', ada)
+      .send({})
       .expect(HttpStatus.CREATED);
     await finished(base, ada, started.body.id);
 
@@ -492,7 +532,8 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
     const starting = await app
       .request()
       .post(`${base}/analysis-runs`)
-      .set('Authorization', bob);
+      .set('Authorization', bob)
+      .send({ scope: 'whole-project' });
     const listing = await app
       .request()
       .get(`${base}/analysis-runs`)
@@ -505,7 +546,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
     expect(listing.body).toMatchObject({
       total: 1,
       items: [{ id: started.body.id, status: 'completed' }],
-      access: { canStart: false },
+      access: { canStart: false, canStartWholeProject: false },
     });
   });
 

@@ -59,4 +59,17 @@ describe('KnowledgeLinkType', () => {
       KnowledgeLinkType.PartOf,
     ]);
   });
+
+  it('marks for review on a rejection through concerns as well', () => {
+    // Act
+    const marking = KnowledgeLinkType.MarkingOnRejection;
+
+    // Assert
+    expect(marking).toEqual([
+      KnowledgeLinkType.DependsOn,
+      KnowledgeLinkType.JustifiedBy,
+      KnowledgeLinkType.PartOf,
+      KnowledgeLinkType.Concerns,
+    ]);
+  });
 });

@@ -21,9 +21,7 @@ export type AgentsOptions = {
    * the model sees.
    */
   readonly historyTokens: number;
-  /** The most steps (tool calls or text) in one Analysis Run. */
-  readonly auditMaxSteps: number;
-  /** The longest one Analysis Run may run, in milliseconds. */
+  /** The longest the Auditor may judge one item, in milliseconds. */
   readonly auditTimeoutMs: number;
   /**
    * How many times an Analysis Run retries a model call its provider failed
@@ -46,8 +44,7 @@ export const DEFAULT_AGENTS_OPTIONS: AgentsOptions = {
   timeoutMs: 3 * 60 * 1000,
   historyMessages: 40,
   historyTokens: 300_000,
-  auditMaxSteps: 40,
-  auditTimeoutMs: 10 * 60 * 1000,
+  auditTimeoutMs: 2 * 60 * 1000,
   auditMaxRetries: 5,
   analysisScheduleHourUtc: null,
 };

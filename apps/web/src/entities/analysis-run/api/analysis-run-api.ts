@@ -5,6 +5,7 @@ import type {
   AnalysisScheduleDto,
   ChangeAnalysisScheduleDto,
   ListAnalysisRunsDto,
+  StartAnalysisRunDto,
 } from '@intentra/contracts/workspace';
 
 type InProject = {
@@ -39,8 +40,15 @@ export const analysisRunApi = baseApi.injectEndpoints({
       },
       providesTags: [API_TAGS.analysisRun],
     }),
-    startAnalysisRun: build.mutation<AnalysisRunDto, InProject>({
-      query: scope => ({ url: runsPath(scope), method: 'POST' }),
+    startAnalysisRun: build.mutation<
+      AnalysisRunDto,
+      InProject & { readonly body: StartAnalysisRunDto }
+    >({
+      query: ({ body, ...scope }) => ({
+        url: runsPath(scope),
+        method: 'POST',
+        body,
+      }),
       invalidatesTags: [API_TAGS.analysisRun],
     }),
     // What blocks it follows the Provider Key and the Published Agents.

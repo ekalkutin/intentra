@@ -11,7 +11,16 @@ export {
   AnalysisScheduleRepository,
   type AnalysisScheduleQueryProps,
 } from './analysis-schedule-repository.port.js';
-export { Auditor, type AuditResult, type AuditTask } from './auditor.port.js';
+export {
+  AuditedKnowledge,
+  type AuditQuestion,
+} from './audited-knowledge.port.js';
+export {
+  Auditor,
+  type AuditFinding,
+  type AuditGroup,
+  type AuditJudgement,
+} from './auditor.port.js';
 export {
   ConversationStore,
   type ConversationDeleteProps,
@@ -20,10 +29,7 @@ export {
   type ConversationPage,
   type ConversationQueryProps,
 } from './conversation-store.port.js';
-export {
-  KnowledgeChangesReader,
-  type KnowledgeChanges,
-} from './knowledge-changes.port.js';
+export { KnowledgeCheckRepository } from './knowledge-check-repository.port.js';
 export {
   Intentra,
   type AnswerStream,

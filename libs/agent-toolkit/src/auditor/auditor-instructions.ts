@@ -1,16 +1,14 @@
-import type { AuditorContext } from './auditor-context.js';
-
 /**
- * What the code puts around the Auditor's instructions: the Project and what
- * it may do there, which no edit of the instructions can change.
+ * What the code puts around the Auditor's instructions: the Project and how
+ * the work reaches it, which no edit of the instructions can change.
  */
 export function frameAuditorInstructions(
-  project: AuditorContext['project'],
+  project: { readonly name: string },
   instructions: string,
 ): string {
   return [
-    `You look over the knowledge of the Project "${project.name}" on your own, with no person to talk to. Pass projectId "${project.id}" to every tool that takes one; work in no other Project.`,
-    'You act as Intentra itself: you read the knowledge and record what you find as Open Questions; nothing else you may change, and whatever you write no one answers until a person reads it.',
+    `You check the knowledge of the Project "${project.name}" on your own, with no person to talk to. The code hands you one item at a time, with the knowledge around it and the Open Questions already asked about them, and you answer with what you find; you have no tools and need none.`,
+    'You act as Intentra itself: each finding becomes an Open Question that a person reads and answers; you change nothing else.',
     '---',
     instructions,
   ].join('\n\n');

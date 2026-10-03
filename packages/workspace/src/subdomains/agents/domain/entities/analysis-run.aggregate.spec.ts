@@ -15,7 +15,7 @@ function startRun(): AnalysisRun {
   return AnalysisRun.start({
     workspaceId: new WorkspaceId().value,
     projectId: new ProjectId().value,
-    scope: AnalysisRunScope.WholeProject,
+    scope: AnalysisRunScope.Unchecked,
     startedBy: null,
   });
 }
@@ -31,40 +31,41 @@ describe('AnalysisRun', () => {
     expect(run.questionKeys).toEqual([]);
   });
 
-  it('completes with the questions it recorded, each once', () => {
+  it('counts the items it looks at and the questions recorded about them, each once', () => {
     // Arrange
     const run = startRun();
+    run.plan(3);
 
     // Act
-    run.complete({
-      questionKeys: ['TBD-1', 'TBD-2', 'TBD-1'],
-      stepLimitReached: true,
-    });
+    run.checkOne(['TBD-1', 'TBD-2']);
+    run.checkOne(['TBD-1']);
 
     // Assert
-    expect(run.status).toBe(AnalysisRunStatus.Completed);
+    expect(run.itemCount).toBe(3);
+    expect(run.checkedCount).toBe(2);
     expect(run.questionKeys).toEqual(['TBD-1', 'TBD-2']);
-    expect(run.stepLimitReached).toBe(true);
-    expect(run.finishedAt).not.toBeNull();
   });
 
-  it('fails keeping what it recorded before', () => {
+  it('fails keeping what it recorded and looked at before', () => {
     // Arrange
     const run = startRun();
+    run.plan(2);
+    run.checkOne(['TBD-3']);
 
     // Act
-    run.fail(AnalysisRunFailure.AuditorFailed, ['TBD-3']);
+    run.fail(AnalysisRunFailure.ModelUnavailable);
 
     // Assert
     expect(run.status).toBe(AnalysisRunStatus.Failed);
-    expect(run.failure).toBe(AnalysisRunFailure.AuditorFailed);
+    expect(run.failure).toBe(AnalysisRunFailure.ModelUnavailable);
     expect(run.questionKeys).toEqual(['TBD-3']);
+    expect(run.checkedCount).toBe(1);
   });
 
   it('changes no more once finished', () => {
     // Arrange
     const run = startRun();
-    run.complete({ questionKeys: [], stepLimitReached: false });
+    run.complete();
 
     // Act
     const failing = () => run.fail(AnalysisRunFailure.Interrupted);

@@ -7,13 +7,16 @@ import {
 import type { Actor } from '@intentra/contracts/iam';
 import {
   AnalysisScheduleBlockDtoSchema,
+  KnowledgeKindDtoSchema,
   type AnalysisRunDto,
   type AnalysisRunPageDto,
   type AnalysisRunsApi,
   type AnalysisScheduleBlockDto,
   type AnalysisScheduleDto,
   type ChangeAnalysisScheduleDto,
+  type KnowledgeItemDto,
   type ListAnalysisRunsDto,
+  type StartAnalysisRunDto,
 } from '@intentra/contracts/workspace';
 import { ProjectId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
@@ -35,26 +38,44 @@ import {
   AnalysisRunId,
   AnalysisRunScope,
   AnalysisRunStatus,
+  KnowledgeCheck,
 } from '../../domain/value-objects/index.js';
-import { AnalysisRunBusyException } from '../exceptions/index.js';
+import {
+  AnalysisRunBusyException,
+  ModelUnavailableException,
+} from '../exceptions/index.js';
 import { toAnalysisRunDto } from '../mappers/index.js';
 import { toIsoString } from '../mappers/instant.mapper.js';
 import {
   AgentsVersionRepository,
   AnalysisRunRepository,
   AnalysisScheduleRepository,
+  AuditedKnowledge,
   Auditor,
-  KnowledgeChangesReader,
+  KnowledgeCheckRepository,
   ProviderKeyCipher,
   ProviderKeyRepository,
-  type KnowledgeChanges,
+  type AuditJudgement,
 } from '../ports/outbound/index.js';
+
+import {
+  concernedKeys,
+  isAudited,
+  isChecked,
+  SIMILAR_TAKE,
+  toAuditGroup,
+} from './audit-plan.js';
+
+/** How many items of a run are judged at once. */
+const CONCURRENCY = 4;
 
 /**
  * A Project's Analysis Runs and its nightly schedule. A run started here goes
- * on in the background in this process, on the Published Agents' Auditor; one
- * left running when the process stopped is marked interrupted when it starts
- * again. The nightly runs go one Project after another.
+ * on in the background in this process: it walks the Project's items and has
+ * the Published Agents' Auditor judge each with the knowledge around it
+ * (Agents ADR 0005). One left running when the process stopped is marked
+ * interrupted when it starts again; what it looked at stays checked. The
+ * nightly runs go one Project after another.
  */
 @Injectable()
 export class AnalysisRunsService
@@ -73,7 +94,8 @@ export class AnalysisRunsService
     private readonly providerKeyCipher: ProviderKeyCipher,
     private readonly projectRepository: ProjectRepository,
     private readonly workspaceRepository: WorkspaceRepository,
-    private readonly knowledgeChangesReader: KnowledgeChangesReader,
+    private readonly auditedKnowledge: AuditedKnowledge,
+    private readonly knowledgeCheckRepository: KnowledgeCheckRepository,
     private readonly auditor: Auditor,
   ) {}
 
@@ -83,7 +105,7 @@ export class AnalysisRunsService
         status: AnalysisRunStatus.Running,
       });
       for (const run of left) {
-        run.fail(AnalysisRunFailure.Interrupted, run.questionKeys);
+        run.fail(AnalysisRunFailure.Interrupted);
         await this.analysisRunRepository.save(run);
       }
     });
@@ -93,7 +115,9 @@ export class AnalysisRunsService
     actor: Actor,
     workspaceId: string,
     projectId: string,
+    data: StartAnalysisRunDto,
   ): Promise<AnalysisRunDto> {
+    const scope = AnalysisRunScope.from(data.scope);
     const run = await this.unitOfWork.run(async () => {
       const { member, project, projectRole } =
         await this.accessResolver.resolveInProjectForChange(
@@ -101,20 +125,23 @@ export class AnalysisRunsService
           new WorkspaceId(workspaceId),
           new ProjectId(projectId),
         );
-      if (!this.#analysisRunPolicyService.canStart(projectRole)) {
+      const allowed = scope.equals(AnalysisRunScope.WholeProject)
+        ? this.#analysisRunPolicyService.canStartWholeProject(projectRole)
+        : this.#analysisRunPolicyService.canStart(projectRole);
+      if (!allowed) {
         throw new AnalysisRunForbiddenException();
       }
       const started = AnalysisRun.start({
         workspaceId: project.workspaceId.value,
         projectId: project.id.value,
-        scope: AnalysisRunScope.WholeProject,
+        scope,
         startedBy: member.id.value,
       });
       await this.analysisRunRepository.save(started);
 
       return { run: started, project };
     });
-    void this.carryOut(run.run, run.project, null);
+    void this.carryOut(run.run, run.project);
 
     return toAnalysisRunDto(run.run);
   }
@@ -178,10 +205,9 @@ export class AnalysisRunsService
 
   /**
    * The nightly runs: each Project whose schedule is on, one after another,
-   * over what was approved or retired since its last completed run (the whole
-   * Project if it has none). A Project is left alone, with nothing kept, when
+   * over its Unchecked items. A Project is left alone, with nothing kept, when
    * its Workspace is suspended, a run cannot go ahead (no Provider Key, no
-   * Published Agents), one is already running, or nothing changed.
+   * Published Agents), one is already running, or nothing is Unchecked.
    */
   public async runScheduled(): Promise<void> {
     const schedules = await this.analysisScheduleRepository.findMany({
@@ -212,28 +238,14 @@ export class AnalysisRunsService
     ) {
       return;
     }
-    const [lastCompleted] = await this.analysisRunRepository.findMany(
-      { projectId: project.id, status: AnalysisRunStatus.Completed },
-      { take: 1, offset: 0 },
-    );
-    const changes = lastCompleted
-      ? await this.knowledgeChangesReader.since(
-          project,
-          lastCompleted.startedAt,
-        )
-      : null;
-    if (
-      changes &&
-      changes.approved.length === 0 &&
-      changes.retired.length === 0
-    ) {
+    const { checked, total } = await this.coverageOf(project);
+    if (checked === total) {
       return;
     }
     const run = AnalysisRun.start({
       workspaceId: project.workspaceId.value,
       projectId: project.id.value,
-      scope: changes ? AnalysisRunScope.Changes : AnalysisRunScope.WholeProject,
-      changedKeys: changes ? [...changes.approved, ...changes.retired] : [],
+      scope: AnalysisRunScope.Unchecked,
       startedBy: null,
     });
     try {
@@ -244,7 +256,7 @@ export class AnalysisRunsService
       }
       throw error;
     }
-    await this.carryOut(run, project, changes);
+    await this.carryOut(run, project);
   }
 
   /** What keeps a run from going ahead in the Project now; null when nothing does. */
@@ -301,8 +313,11 @@ export class AnalysisRunsService
     return {
       items: runs.map(toAnalysisRunDto),
       total: await this.analysisRunRepository.count(props),
+      coverage: await this.coverageOf(project),
       access: {
         canStart: this.#analysisRunPolicyService.canStart(projectRole),
+        canStartWholeProject:
+          this.#analysisRunPolicyService.canStartWholeProject(projectRole),
       },
     };
   }
@@ -322,12 +337,28 @@ export class AnalysisRunsService
     return toAnalysisRunDto(run);
   }
 
-  /** Runs the Auditor and keeps what came of it; never rejects. */
-  private async carryOut(
-    run: AnalysisRun,
+  /** How many of the Project's audited items are checked, of how many. */
+  private async coverageOf(
     project: Project,
-    changes: KnowledgeChanges | null,
-  ): Promise<void> {
+  ): Promise<{ checked: number; total: number }> {
+    const items = (await this.auditedKnowledge.read(project)).filter(isAudited);
+    const checks = await this.knowledgeCheckRepository.findMany({
+      projectId: project.id,
+    });
+
+    return {
+      checked: items.filter(item => isChecked(item, checks)).length,
+      total: items.length,
+    };
+  }
+
+  /**
+   * Walks the run's items, a few at a time, has the Auditor judge each with
+   * its group, records what it finds and marks the item checked; keeps what
+   * came of it. Never rejects: a failure stops the run, and the items it did
+   * not reach stay Unchecked.
+   */
+  private async carryOut(run: AnalysisRun, project: Project): Promise<void> {
     try {
       const providerKey = await this.providerKeyRepository.findOne({
         workspaceId: project.workspaceId,
@@ -343,28 +374,100 @@ export class AnalysisRunsService
         run.fail(AnalysisRunFailure.AgentsNotPublished);
         return await this.keep(run);
       }
+      const items = await this.auditedKnowledge.read(project);
+      const checks = await this.knowledgeCheckRepository.findMany({
+        projectId: project.id,
+      });
+      const targets = items
+        .filter(isAudited)
+        .filter(
+          item =>
+            run.scope.equals(AnalysisRunScope.WholeProject) ||
+            !isChecked(item, checks),
+        );
       run.runOn(published.number);
+      run.plan(targets.length);
       await this.keep(run);
 
-      const result = await this.auditor.audit({
+      const judgement = {
         project,
-        scope: run.scope,
-        changes,
         agents: published.content,
         providerKey: this.providerKeyCipher.decrypt(providerKey.encryptedKey),
-      });
-      if (result.failure) {
-        run.fail(result.failure, result.questionKeys);
-      } else {
-        run.complete(result);
-      }
+      };
+      const questions = items.filter(
+        item => item.kind === KnowledgeKindDtoSchema.enum['open-question'],
+      );
+      const queue = [...targets];
+      await Promise.all(
+        Array.from(
+          { length: Math.min(CONCURRENCY, queue.length) },
+          async () => {
+            for (let item = queue.shift(); item; item = queue.shift()) {
+              await this.checkOne(run, item, items, questions, judgement);
+            }
+          },
+        ),
+      );
+      run.complete();
       await this.keep(run);
     } catch (error) {
       this.#logger.error(error);
       if (run.isRunning()) {
-        run.fail(AnalysisRunFailure.AuditorFailed, run.questionKeys);
+        run.fail(
+          error instanceof ModelUnavailableException
+            ? AnalysisRunFailure.ModelUnavailable
+            : AnalysisRunFailure.AuditorFailed,
+        );
         await this.keep(run).catch(failure => this.#logger.error(failure));
       }
+    }
+  }
+
+  /** Judges one item, records the findings and marks it checked at the version read. */
+  private async checkOne(
+    run: AnalysisRun,
+    item: KnowledgeItemDto,
+    items: readonly KnowledgeItemDto[],
+    questions: KnowledgeItemDto[],
+    judgement: Omit<AuditJudgement, 'group'>,
+  ): Promise<void> {
+    if (!run.isRunning()) {
+      return;
+    }
+    const { project } = judgement;
+    const similar = await this.auditedKnowledge.similar(
+      project,
+      item.key,
+      SIMILAR_TAKE,
+    );
+    const group = toAuditGroup(item, similar, items, questions);
+    const findings = await this.auditor.judge({ ...judgement, group });
+    if (!run.isRunning()) {
+      return;
+    }
+    const recorded: string[] = [];
+    for (const finding of findings) {
+      const question = await this.auditedKnowledge.record(project, {
+        ...finding,
+        concerns: concernedKeys(group, finding.concerns),
+      });
+      questions.push(question);
+      recorded.push(question.key);
+    }
+    await this.unitOfWork.run(() =>
+      this.knowledgeCheckRepository.save(
+        project.workspaceId,
+        project.id,
+        new KnowledgeCheck({
+          key: item.key,
+          version: item.version,
+          checkedAt: Temporal.Now.instant(),
+        }),
+      ),
+    );
+    if (run.isRunning()) {
+      run.checkOne(recorded);
+      await this.keep(run);
     }
   }
 

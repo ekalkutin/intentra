@@ -6,4 +6,12 @@ export {
   useStartAnalysisRunMutation,
 } from './api/analysis-run-api';
 export { ANALYSIS_ERROR_CODES } from './model/error-codes';
-export { isRunning, latestFindings, RUNNING_POLL_MS } from './model/runs';
+export {
+  countsItems,
+  isRunning,
+  latestFindings,
+  leftUnchecked,
+  RUNNING_POLL_MS,
+  uncheckedCount,
+  type AnalysisCoverage,
+} from './model/runs';

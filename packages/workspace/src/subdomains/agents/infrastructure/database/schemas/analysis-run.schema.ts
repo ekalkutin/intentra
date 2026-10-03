@@ -15,8 +15,12 @@ export class AnalysisRunModel {
   @Prop({ type: String, required: true })
   readonly scope: string;
 
-  @Prop({ type: [String], default: [] })
-  readonly changedKeys: string[];
+  /** 0 for a run from before runs went item by item. */
+  @Prop({ type: Number, default: 0 })
+  readonly itemCount: number;
+
+  @Prop({ type: Number, default: 0 })
+  readonly checkedCount: number;
 
   /** Null for a run the schedule started. */
   @Prop({ type: SchemaTypes.UUID, default: null })

@@ -284,6 +284,75 @@ describe('KnowledgeItem Links', () => {
       expect(item.needsReview()).toBe(false);
     });
 
+    describe('of an Open Question', () => {
+      const BR_7 = KnowledgeKey.parse('BR-7');
+      const REQ_3 = KnowledgeKey.parse('REQ-3');
+
+      /** TBD-2 about BR-7 and REQ-3, marked because BR-7 was rejected. */
+      function markedQuestion(): KnowledgeItem {
+        const question = recordOpenQuestion([concerns(BR_7), concerns(REQ_3)]);
+        question.markForReview(BR_7);
+
+        return question;
+      }
+
+      it('concerns what its concerns Links point to, and nothing else', () => {
+        // Arrange
+        const question = recordOpenQuestion([concerns(BR_7)]);
+        const dependent = recordRequirement([dependsOn(BR_7)]);
+
+        // Act
+        const verdicts = [
+          question.concerns(BR_7),
+          question.concerns(REQ_3),
+          dependent.concerns(BR_7),
+        ];
+
+        // Assert
+        expect(verdicts).toEqual([true, false, false]);
+      });
+
+      it('drops only the Link to the rejected item when confirmed', () => {
+        // Arrange
+        const question = markedQuestion();
+
+        // Act
+        question.confirm(question.version, () => null);
+
+        // Assert
+        expect(question.needsReview()).toBe(false);
+        expect(question.links).toEqual([concerns(REQ_3)]);
+      });
+
+      it('cannot be approved while marked', () => {
+        // Arrange
+        const question = markedQuestion();
+
+        // Act
+        const approving = () =>
+          question.approve(new MemberId(), question.version);
+
+        // Assert
+        expect(approving).toThrow(KnowledgeItemNeedsReviewException);
+      });
+
+      it('is cleared by an edit only where it no longer concerns the rejected item', () => {
+        // Arrange
+        const kept = markedQuestion();
+        const relinked = markedQuestion();
+
+        // Act
+        kept.edit(new MemberId(), kept.version, { title: 'Refunds' });
+        relinked.edit(new MemberId(), relinked.version, {
+          links: [concerns(REQ_3)],
+        });
+
+        // Assert
+        expect(kept.reviewCauses).toEqual([BR_7]);
+        expect(relinked.needsReview()).toBe(false);
+      });
+    });
+
     it('refuses to confirm an unmarked item', () => {
       // Arrange
       const item = recordRequirement([]);
