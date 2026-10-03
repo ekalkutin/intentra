@@ -40,7 +40,7 @@ describe('KnowledgeLinkType', () => {
     expect(verdict).toBe(allowed);
   });
 
-  it('marks for review only through depends-on and justified-by', () => {
+  it('marks for review only through depends-on, justified-by and part-of', () => {
     // Act
     const marking = [
       KnowledgeLinkType.DependsOn,
@@ -56,6 +56,7 @@ describe('KnowledgeLinkType', () => {
     expect(marking).toEqual([
       KnowledgeLinkType.DependsOn,
       KnowledgeLinkType.JustifiedBy,
+      KnowledgeLinkType.PartOf,
     ]);
   });
 });

@@ -492,8 +492,8 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   }
 
   /**
-   * Something it depends on or is justified by was rejected, superseded or
-   * retired. Only a Draft or an Approved item is marked; Rejected and Obsolete
+   * Something it depends on, is justified by or is part of was rejected,
+   * superseded or retired. Only a Draft or an Approved item is marked; Rejected and Obsolete
    * ones are no longer part of the knowledge.
    */
   public markForReview(cause: KnowledgeKey): void {

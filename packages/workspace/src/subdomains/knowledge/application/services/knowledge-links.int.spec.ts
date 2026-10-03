@@ -108,6 +108,20 @@ function productOverview(
   };
 }
 
+function feature(
+  capability: string,
+  supersedes: string | null = null,
+): RecordKnowledgeItemDto {
+  return {
+    kind: 'feature',
+    title: 'Invoices',
+    rationale: null,
+    supersedes,
+    links: [],
+    fields: { capability, outOfScope: [] },
+  };
+}
+
 const firstPage = { take: 50, offset: 0 };
 
 describe('KnowledgeService Links and Needs Review', () => {
@@ -258,6 +272,69 @@ describe('KnowledgeService Links and Needs Review', () => {
       LinkTargetNotCurrentException,
     );
     await expect(recording).rejects.toThrow(/REQ-2/);
+  });
+
+  describe('Features', () => {
+    const partOfFeature = [{ type: 'part-of', key: 'FEAT-1' }] as const;
+
+    it('refuses to approve a part before its Feature', async () => {
+      // Arrange
+      const { record, approve } = await setUp();
+      await record(feature('Pay invoices online'));
+      await record(requirement('Pay by card', [...partOfFeature]));
+
+      // Act
+      const approving = approve('REQ-1');
+
+      // Assert
+      await expect(approving).rejects.toBeInstanceOf(
+        DependenciesNotApprovedException,
+      );
+      await expect(approving).rejects.toThrow(/FEAT-1/);
+    });
+
+    it('moves the parts onto a reworded replacement of their Feature, with no mark', async () => {
+      // Arrange
+      const { record, approve, knowledge } = await setUp();
+      await record(feature('Pay invoices online'));
+      await approve('FEAT-1');
+      await record(requirement('Pay by card', [...partOfFeature]));
+      await approve('REQ-1');
+      await record(feature('Pay and refund invoices online', 'FEAT-1'));
+
+      // Act
+      await approve('FEAT-2');
+
+      // Assert
+      expect(await knowledge('get', 'REQ-1')).toMatchObject({
+        needsReview: false,
+        links: [{ type: 'part-of', key: 'FEAT-2' }],
+      });
+    });
+
+    it('marks the parts of a retired Feature', async () => {
+      // Arrange
+      const { record, approve, knowledge, ada, workspaceId, projectId } =
+        await setUp();
+      await record(feature('Pay invoices online'));
+      await approve('FEAT-1');
+      await record(requirement('Pay by card', [...partOfFeature]));
+      await approve('REQ-1');
+
+      // Act
+      await app
+        .get(KnowledgeService)
+        .retire(ada, workspaceId, projectId, 'FEAT-1', {
+          version: 2,
+          reason: 'Online payment was dropped',
+        });
+
+      // Assert
+      expect(await knowledge('get', 'REQ-1')).toMatchObject({
+        needsReview: true,
+        reviewCauses: ['FEAT-1'],
+      });
+    });
   });
 
   describe('approving together', () => {

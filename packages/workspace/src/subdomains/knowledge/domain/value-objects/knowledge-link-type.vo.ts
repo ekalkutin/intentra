@@ -59,10 +59,15 @@ export class KnowledgeLinkType {
     KnowledgeLinkType.ConflictsWith,
   ];
 
-  /** What a change of the target puts in question: the item rests on it. */
+  /**
+   * What a change of the target puts in question: the item rests on it. A
+   * Feature's parts are put in question when it is retired or rejected, not
+   * when it is replaced: they move onto the replacement.
+   */
   public static readonly MarkingForReview: readonly KnowledgeLinkType[] = [
     KnowledgeLinkType.DependsOn,
     KnowledgeLinkType.JustifiedBy,
+    KnowledgeLinkType.PartOf,
   ];
 
   readonly #value: string;

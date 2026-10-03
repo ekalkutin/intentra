@@ -5,6 +5,7 @@ import { ProjectId, WorkspaceId } from '@intentra/shared-kernel';
 import { MemberId } from '../../../tenancy/index.js';
 import { KnowledgeItem } from '../entities/index.js';
 import {
+  FeatureContent,
   KnowledgeKey,
   KnowledgeLink,
   KnowledgeLinkType,
@@ -74,6 +75,30 @@ function term(
   });
 }
 
+/** A Feature numbered `number` with the given capability. */
+function feature(
+  number: number,
+  capability: string,
+  supersedes: KnowledgeKey | null = null,
+): KnowledgeItem {
+  return KnowledgeItem.record({
+    workspaceId: new WorkspaceId().value,
+    projectId: new ProjectId().value,
+    source: KnowledgeSource.Manual,
+    number,
+    title: 'Invitations',
+    rationale: null,
+    content: new FeatureContent({ capability, outOfScope: [] }),
+    authorId: new MemberId().value,
+    supersedes,
+    links: [dependsOn(GOAL_1)],
+  });
+}
+
+function partOf(key: KnowledgeKey): KnowledgeLink {
+  return new KnowledgeLink(KnowledgeLinkType.PartOf, key);
+}
+
 describe('ReviewMarkingService', () => {
   const service = new ReviewMarkingService();
 
@@ -126,6 +151,39 @@ describe('ReviewMarkingService', () => {
 
     // Assert
     expect(source.needsReview()).toBe(true);
+  });
+
+  it('moves the parts of a Feature onto its replacement, with no mark, even when it says something else', () => {
+    // Arrange
+    const replaced = feature(1, 'Invite a colleague by email');
+    const replacement = feature(
+      2,
+      'Invite a colleague by email or by link',
+      replaced.key,
+    );
+    const part = requirement(3, {
+      links: [dependsOn(SC_1), partOf(replaced.key)],
+    });
+
+    // Act
+    service.markSources(replaced, [part], replacement);
+
+    // Assert
+    expect(part.needsReview()).toBe(false);
+    expect(part.feature?.value).toBe('FEAT-2');
+  });
+
+  it('marks the parts of a Feature retired or rejected', () => {
+    // Arrange
+    const dropped = feature(1, 'Invite a colleague by email');
+    const part = requirement(3, { links: [partOf(dropped.key)] });
+
+    // Act
+    service.markSources(dropped, [part]);
+
+    // Assert
+    expect(part.needsReview()).toBe(true);
+    expect(part.reviewCauses.map(cause => cause.value)).toEqual(['FEAT-1']);
   });
 
   it('moves what uses a replaced Term onto its replacement, with no mark', () => {
