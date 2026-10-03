@@ -7,9 +7,9 @@ export const landingEn = {
     benefits: 'Capabilities',
     agents: 'For AI agents',
     faq: 'Questions',
-    label: 'Navigation',
     open: 'Open menu',
     close: 'Close menu',
+    label: 'Navigation',
   },
   signIn: 'Sign in',
   start: 'Start with an idea',
@@ -22,121 +22,430 @@ export const landingEn = {
     line2b: 'Clear requirements.',
     line2c: 'Settled decisions.',
     text: 'An AI analyst turns discussions into reviewed knowledge. The team makes the decisions. AI developers get the context.',
-    flow: {
-      idle: 'waiting for context',
-      note: 'An example from the fictional Orbit project',
-      label:
-        'The team discusses the product, Intentra records drafts, a person approves them, and AI agents receive the context over MCP.',
-      roles: {
-        refund: 'Product manager',
-        cancellation: 'Analyst',
-        notification: 'Tech lead',
-      },
-      says: {
-        refund: 'A day before the meeting, it is a full refund.',
-        cancellation: 'Before cancelling we show the refund amount.',
-        notification: 'The cancellation email goes to guest and host.',
-      },
-    },
   },
   strip: {
-    text: 'One context. For people and agents.',
-    team: 'Product team',
     claude: 'Claude Code',
     codex: 'Codex',
     cursor: 'Cursor',
-    protocol: 'over MCP',
-    web: 'in the web app',
   },
   demoSection: {
     title: 'Start a conversation.\nGet clarity.',
-    text: 'Question by question, from an idea to requirements. Watch a short interview and review the drafts it creates.',
-    label: 'Interactive example · fictional data',
-    project: 'Orbit / Cancellation rules',
+    text: 'Question by question, from an idea to requirements. Answer Intentra and see what comes of it.',
     analyst: 'Intentra · AI analyst',
     user: 'You',
-    intro:
-      "We are building Orbit, a meeting booking service. Let's work through cancellation: what happens to the payment and who needs to be notified.",
     progress: 'Question {{current}} of {{total}}',
     questionNumber: 'Question {{number}}',
     transcript: 'A sample product interview',
     latest: 'To the latest message',
-    typing: 'Typing an answer…',
-    play: 'Watch the interview',
-    pause: 'Pause',
-    resume: 'Continue',
-    showAnswer: 'Show the answer',
-    next: 'Next',
-    recording: 'Creating a draft…',
-    drafts: 'Project drafts',
-    emptyTitle: 'The conversation becomes knowledge',
-    emptyText:
-      'Four questions. Four drafts. See how the answers add up to the logic of the product.',
-    emptyHint: 'Start the sample interview',
-    reviewHint: 'Open a card to review and approve it.',
-    complete: 'Four drafts are ready. The last word is yours.',
+    recording: 'Recording a draft…',
+    checking: 'Checking against what is already recorded…',
+    drafts: 'Drafts',
+    emptyTitle: 'Drafts will appear here',
+    choose: 'Pick an answer and Intentra will record it as a draft.',
+    reviewHint: 'Open a draft to review and approve it.',
+    complete_one: '{{count}} draft is ready. The last word is yours.',
+    complete_other: '{{count}} drafts are ready. The last word is yours.',
+    closing:
+      'That is all for today. The drafts are on the right: open any, review it and approve it. I kept the open questions so we can come back to them.',
     sourceQuestion: 'From the answer to question {{number}}',
     approve: 'Approve',
-    reset: 'Watch again',
-    restart: 'From the start',
+    restart: 'Another example',
+    more: 'Another example',
+    next: 'What next?',
     ready: 'Available to the team and AI agents.',
-    footnote: 'AI proposes. You review and approve.',
-    turns: {
-      refund: {
-        question: 'A guest cancels a booking. When do we refund the payment?',
-        answer:
-          'Up to 24 hours before the meeting, a full refund. Later they can still cancel, but with no refund.',
-        title: 'Refund on cancellation',
-        text: 'When a booking is cancelled at least 24 hours before the meeting, the payment is refunded in full. A later cancellation is not refunded.',
+    invite: {
+      title: 'Tell me what you are building.',
+      action: 'Start the interview',
+      note: 'Building a product has never been this simple.',
+    },
+    cases: {
+      orbit: {
+        intro:
+          "We are building Orbit, a meeting booking service. Let's work through cancellation: what happens to the payment and who is notified.",
+        rule: {
+          question: 'A guest cancels a booking. When do we refund the payment?',
+          title: 'Refund on cancellation',
+          a: {
+            answer:
+              'Up to 24 hours before the meeting, a full refund; later, none.',
+            text: 'When a booking is cancelled at least 24 hours before the meeting, the payment is refunded in full. Later there is no refund.',
+            finding: '',
+            issueTitle: '',
+            issueText: '',
+          },
+          b: {
+            answer: 'We always refund, at any moment before the meeting.',
+            text: 'When a booking is cancelled at any moment before the meeting starts, the payment is refunded in full.',
+            finding:
+              'I see a gap: nothing says what happens if the guest cancels after the meeting has started. I am recording an open question.',
+            issueTitle: 'Cancelling after the start',
+            issueText:
+              'Is the payment refunded if the guest cancels after the meeting has started?',
+          },
+        },
+        flow: {
+          question: 'How does the guest cancel a meeting?',
+          title: 'Guest cancels a meeting',
+          a: {
+            answer:
+              'In their bookings: we show the refund amount and ask to confirm.',
+            text: 'The guest opens the booking, sees the refund amount and confirms the cancellation.',
+            finding: '',
+            issueTitle: '',
+            issueText: '',
+          },
+          b: {
+            answer: 'By a link in the email, without signing in.',
+            text: 'The guest cancels the meeting by a link in the email, without signing in.',
+            finding:
+              'There is a risk here: anyone can open a link from an email. We need to decide how to make sure it is the guest who cancels. I am recording a question.',
+            issueTitle: 'Who can cancel by the link',
+            issueText:
+              'How do we make sure it is the guest who cancels a meeting by the email link?',
+          },
+        },
+        need: {
+          question: 'Who is notified about the cancellation?',
+          title: 'Cancellation notice',
+          a: {
+            answer: 'The guest and the host, at once, by email.',
+            text: 'After a cancellation the system at once emails the guest and the host.',
+            finding:
+              'I see a gap: nothing says what to do if the email is not delivered. I am recording an open question.',
+            issueTitle: 'Undelivered notice',
+            issueText:
+              'What does the system do if the cancellation email does not reach its recipient?',
+          },
+          b: {
+            answer: 'Only the host; the guest sees the status anyway.',
+            text: 'After a cancellation the system at once emails the host. The guest sees the status in their bookings.',
+            finding:
+              'There is a contradiction: the guest confirms the cancellation but gets no email about the result. I am recording a question.',
+            issueTitle: 'Confirmation for the guest',
+            issueText:
+              'How does the guest learn the cancellation went through if no email is sent to them?',
+          },
+        },
       },
-      cancellation: {
-        question: 'How does a person cancel a meeting? Do we ask to confirm?',
-        answer:
-          'In their bookings. We show the refund amount and ask them to confirm the cancellation.',
-        title: 'Meeting cancellation scenario',
-        text: 'The guest opens a booking and chooses to cancel. The system shows the refund amount under rule BR-12. After confirmation the booking is cancelled.',
+      kettle: {
+        intro:
+          "We are building Kettle, grocery delivery within an hour. Let's work through substitutions: what to do when an item is out of stock.",
+        rule: {
+          question: 'An item is out of stock. What does the picker do?',
+          title: 'Substituting a missing item',
+          a: {
+            answer:
+              'Picks a similar item that costs no more than the original.',
+            text: 'When an item is out of stock, the picker chooses a similar item that costs no more than the original.',
+            finding: '',
+            issueTitle: '',
+            issueText: '',
+          },
+          b: {
+            answer: 'Calls the customer and offers a substitute.',
+            text: 'When an item is out of stock, the picker calls the customer and agrees on a substitute.',
+            finding:
+              'I see a gap: what if the customer does not pick up? I am recording an open question.',
+            issueTitle: 'The customer does not answer',
+            issueText:
+              'What does the picker do if the customer does not answer the call about a substitute?',
+          },
+        },
+        flow: {
+          question: 'How does the customer learn about a substitute?',
+          title: 'Agreeing on a substitute',
+          a: {
+            answer: 'In the app: they see it and can decline before paying.',
+            text: 'The customer sees the substitute in the app and can decline it before paying.',
+            finding: '',
+            issueTitle: '',
+            issueText: '',
+          },
+          b: {
+            answer: 'Only on delivery, from the courier.',
+            text: 'The customer learns about the substitute from the courier on delivery.',
+            finding:
+              'There is a risk here: the customer cannot decline in advance. We need a rule for refusals at the door. I am recording a question.',
+            issueTitle: 'Declining a substitute on delivery',
+            issueText:
+              'What happens to the item and the money if the customer declines the substitute at the door?',
+          },
+        },
+        need: {
+          question: 'What about the price if the substitute is cheaper?',
+          title: 'Price difference on substitution',
+          a: {
+            answer: 'We refund the difference to the card.',
+            text: 'When the substitute is cheaper than the original, the difference is refunded to the customer’s card.',
+            finding:
+              'I see a gap: nothing says how soon the difference is refunded. I am recording an open question.',
+            issueTitle: 'Time to refund the difference',
+            issueText:
+              'How soon does the customer get the price difference after a substitution?',
+          },
+          b: {
+            answer: 'We credit the difference as bonus points.',
+            text: 'When the substitute is cheaper, the difference is credited to the customer as bonus points.',
+            finding:
+              'There is a contradiction: bonus points are not described in the project yet. I am recording a question.',
+            issueTitle: 'Bonus programme',
+            issueText:
+              'How do bonus points work: where are they kept and what can they be spent on?',
+          },
+        },
       },
-      notification: {
-        question: 'Who needs to learn about the cancellation, and how fast?',
-        answer:
-          'The guest and the host. We email both at once with the cancellation details.',
-        title: 'Cancellation notice',
-        text: 'Once the cancellation is confirmed in scenario SC-08, the system at once emails the guest and the host the details of the cancelled meeting.',
-      },
-      exception: {
-        question:
-          'And if the host cancels the meeting? Is the refund rule the same?',
-        answer:
-          "We haven't decided that yet. It needs a team discussion, so let's keep the question.",
-        title: 'Cancellation by the host',
-        text: 'How is the payment refunded when the host cancels the meeting? The team needs to define an exception to BR-12. No answer has been agreed yet.',
+      ledger: {
+        intro:
+          "We are building Ledger, invoicing for freelancers. Let's work through late payment: what happens when a client does not pay.",
+        rule: {
+          question: 'An invoice is not paid on time. What next?',
+          title: 'Action on a late invoice',
+          a: {
+            answer: 'After 3 days we send the client a reminder.',
+            text: 'When an invoice is unpaid, a reminder goes to the client 3 days after the due date.',
+            finding: '',
+            issueTitle: '',
+            issueText: '',
+          },
+          b: {
+            answer: 'We charge a late fee of 0.1% a day at once.',
+            text: 'From the first day past due, a late fee of 0.1% a day is charged on the invoice amount.',
+            finding:
+              'I see a gap: nothing says whether the late fee has a limit. I am recording an open question.',
+            issueTitle: 'Late fee limit',
+            issueText:
+              'Up to what amount or for how long is the late fee charged on an overdue invoice?',
+          },
+        },
+        flow: {
+          question: 'How does the freelancer see a late invoice?',
+          title: 'A late invoice for the freelancer',
+          a: {
+            answer:
+              'In the invoice list: an “Overdue” status and the number of days.',
+            text: 'In the invoice list the freelancer sees an “Overdue” status and how many days it is late.',
+            finding: '',
+            issueTitle: '',
+            issueText: '',
+          },
+          b: {
+            answer: 'They get a weekly email with everything owed.',
+            text: 'Once a week the freelancer gets an email listing all overdue invoices.',
+            finding:
+              'There is a risk here: they may learn about a late invoice a week late. I am recording a question.',
+            issueTitle: 'Delayed alert',
+            issueText:
+              'Is it acceptable that the freelancer learns about a late invoice only a week later?',
+          },
+        },
+        need: {
+          question: 'Can an invoice be settled by a part payment?',
+          title: 'Part payment of an invoice',
+          a: {
+            answer: 'Yes, the invoice stays open for the remainder.',
+            text: 'An invoice can be paid in parts; it stays open until the remainder is settled.',
+            finding:
+              'I see a gap: it is unclear whether the remainder counts as overdue. I am recording an open question.',
+            issueTitle: 'Overdue remainder',
+            issueText:
+              'Does the unpaid remainder of an invoice count as overdue?',
+          },
+          b: {
+            answer: 'No, only in full.',
+            text: 'An invoice is paid only in full; part payments are not accepted.',
+            finding:
+              'I see a gap: what happens to a payment that does not cover the full amount? I am recording an open question.',
+            issueTitle: 'Short payment',
+            issueText:
+              'What happens to a payment if the client transfers less than the invoice amount?',
+          },
+        },
       },
     },
   },
   knowledge: {
     title: 'Decisions are linked.',
-    text: 'One rule changes.\nYou see what to check next.',
-    passport: 'Orbit passport',
-    chapters: 'Chapters of the product passport',
-    overview: 'About the product',
-    people: 'Users',
-    rules: 'Rules and scenarios',
-    decisions: 'Decisions',
-    question: 'What if the host cancels?',
-    rule: 'Refund on cancellation',
-    hoursFew: 'hours',
-    hoursMany: 'hours',
-    meaning: 'Before the meeting, a full refund.',
-    sourceBefore: '“A day ahead, a full refund.”',
-    sourceAfter: '“Let’s change the window to two days.”',
+    text: 'A new draft comes in.\nYour decision changes everything that rests on it.',
+    inbox: 'Incoming drafts',
+    approve: 'Approve',
+    decline: 'Decline',
+    next: 'What next?',
+    more: 'Another example',
+    waiting_one: '{{count}} more draft is waiting for a decision',
+    waiting_other: '{{count}} more drafts are waiting for a decision',
+    done: 'All drafts have been decided.',
+    summary: 'Approved: {{approved}}. Declined: {{declined}}.',
+    linked: 'Project records',
+    focus: 'The record the draft is about',
+    unanswered:
+      'The team has not decided yet. The question is waiting for an answer.',
+    events: {
+      replaced: '{{by}} replaces {{was}} · history kept',
+      declined: '{{by}} declined · the record is unchanged',
+      answered: '{{by}} answers the question · the question is closed',
+      review: 'The rule was replaced by {{by}} · needs review',
+      linked: '{{by}} · {{link}} {{id}}',
+    },
+    delivery: 'Agents receive only what was approved',
+    links: {
+      replaces: 'Replaces',
+      answers: 'Answers',
+      dependsOn: 'Depends on',
+      concerns: 'Concerns',
+    },
+    sources: {
+      interview: 'Intentra · from the interview',
+      agent: 'Claude Code · over MCP',
+      manual: 'Recorded by hand',
+      audit: 'Intentra · on a project check',
+    },
+    states: { open: 'waiting for an answer', answered: 'answered' },
+    cases: {
+      orbit: {
+        rule: {
+          title: 'Refund on cancellation',
+          meaning: 'Before the meeting, a full refund.',
+          before: {
+            value: '24',
+            unit: 'hours',
+            source: '“A day ahead, a full refund.”',
+          },
+          after: {
+            value: '48',
+            unit: 'hours',
+            source: '“Let’s change the window to two days.”',
+          },
+        },
+        records: {
+          scenario: 'Guest cancels a meeting',
+          requirement: 'Cancellation notice',
+          question: 'What if the host cancels?',
+        },
+        proposals: {
+          rule: {
+            title: 'Refund on cancellation: 48 hours',
+            text: 'A full refund when the booking is cancelled at least 48 hours before the meeting.',
+          },
+          scenario: {
+            title: 'Meeting cancellation: show the deadline',
+            text: 'Before confirming, the guest sees the refund amount and the time until which it holds.',
+          },
+          answer: {
+            title: 'The host cancels: a full refund',
+            text: 'When the host cancels the meeting, the guest gets a full refund whatever the timing.',
+          },
+          need: {
+            title: 'Refund amount in the email',
+            text: 'The cancellation email tells the guest the refund amount and when it will arrive.',
+          },
+          audit: {
+            title: 'Rescheduling instead of cancelling',
+            text: 'The refund rule does not say whether rescheduling a meeting counts as cancelling it. This needs a decision.',
+          },
+          limit: {
+            title: 'Refund to the same payment method',
+            text: 'Money is refunded only to the method the guest paid with.',
+          },
+        },
+      },
+      kettle: {
+        rule: {
+          title: 'Price of a substitute',
+          meaning:
+            'How much more a substitute may cost than the original item.',
+          before: {
+            value: '0',
+            unit: '%',
+            source: '“A substitute costs no more than the original.”',
+          },
+          after: {
+            value: '10',
+            unit: '%',
+            source: '“Let it be up to ten per cent more.”',
+          },
+        },
+        records: {
+          scenario: 'Agreeing on a substitute',
+          requirement: 'Price difference on substitution',
+          question: 'What if the customer does not answer?',
+        },
+        proposals: {
+          rule: {
+            title: 'Price of a substitute: up to 10% more',
+            text: 'The picker may choose a substitute that costs at most 10% more than the original item.',
+          },
+          scenario: {
+            title: 'Agreeing on a substitute: with a surcharge',
+            text: 'The customer sees the substitute and the surcharge in the app and confirms it before paying.',
+          },
+          answer: {
+            title: 'No answer: substitute by the rule',
+            text: 'If the customer has not answered within 5 minutes, the picker substitutes by the price rule.',
+          },
+          need: {
+            title: 'Surcharge as a separate line',
+            text: 'The receipt shows the surcharge for a substitute as a separate line next to the item.',
+          },
+          audit: {
+            title: 'Substituting a discounted item',
+            text: 'The price rule does not say what to do when the original item was on offer. This needs a decision.',
+          },
+          limit: {
+            title: 'No substitutes for alcohol or medicine',
+            text: 'Age-restricted items and medicine are not substituted: the line is removed from the order.',
+          },
+        },
+      },
+      ledger: {
+        rule: {
+          title: 'Late-payment reminder',
+          meaning:
+            'How long we wait after the due date before reminding the client.',
+          before: {
+            value: '3',
+            unit: 'days',
+            source: '“We remind after three days.”',
+          },
+          after: {
+            value: '5',
+            unit: 'days',
+            source: '“Three days is early, let’s make it five.”',
+          },
+        },
+        records: {
+          scenario: 'A late invoice for the freelancer',
+          requirement: 'Part payment of an invoice',
+          question: 'What if the client disputes the invoice?',
+        },
+        proposals: {
+          rule: {
+            title: 'Late-payment reminder: after 5 days',
+            text: 'The reminder goes to the client 5 days after the due date.',
+          },
+          scenario: {
+            title: 'Late invoice: the reminder date',
+            text: 'In the invoice list the freelancer sees an “Overdue” status and the date the client will be reminded.',
+          },
+          answer: {
+            title: 'Disputed invoice: reminders paused',
+            text: 'While the client disputes an invoice, reminders are paused.',
+          },
+          need: {
+            title: 'The remainder in the reminder',
+            text: 'The reminder names the amount still owed when the invoice is partly paid.',
+          },
+          audit: {
+            title: 'Overdue over a weekend',
+            text: 'The rule does not say whether weekends and holidays count towards the days. This needs a decision.',
+          },
+          limit: {
+            title: 'No more than three reminders',
+            text: 'A client gets no more than three reminders for one invoice.',
+          },
+        },
+      },
+    },
     historyBefore: 'From the interview · version 1',
-    historyAfter: 'BR-13 replaces BR-12 · history kept',
-    scenario: 'Meeting cancellation',
-    scenarioText: 'What the guest sees before confirming.',
-    requirement: 'Notice to participants',
-    requirementText: 'What to send after a cancellation.',
-    change: 'Approve a 48-hour window',
-    changed: 'New version approved',
   },
   agents: {
     title: 'Your AI writes the code.\nLet it know why.',
@@ -199,7 +508,6 @@ export const landingEn = {
         status: 'Task suggested from Intentra knowledge',
       },
     },
-    note: 'Access is by a member’s personal token.',
   },
   faq: {
     title: 'To the point.',
@@ -217,23 +525,14 @@ export const landingEn = {
     a6: 'Yes. A workspace has members and projects. Roles define who reads knowledge, creates drafts and approves changes.',
   },
   closing: {
-    title: 'Start with a conversation.\nKeep what matters.',
+    title: 'Your agents can’t read minds.\nNow they don’t have to.',
     text: 'One context for the team and the AI.',
     action: 'Start with Intentra',
   },
   footer: {
     tagline: 'From intent to understanding.',
-    top: 'Back to top',
     copyright: '© {{year}} Intentra',
     note: 'Made for people who make products.',
-    sheet: {
-      label: 'Who is responsible for what',
-      drafted: 'Proposes',
-      draftedBy: 'AI analyst',
-      checked: 'Reviews',
-      checkedBy: 'The team',
-      approved: 'Approves',
-      approvedBy: 'A person',
-    },
+    developer: 'Built by',
   },
 } as const;

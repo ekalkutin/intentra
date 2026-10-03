@@ -61,48 +61,58 @@ export function useSheetMotion(scope: RefObject<HTMLElement | null>) {
             { autoAlpha: 0, y: 16, duration: 0.9, stagger: 0.08 },
             0.6,
           )
-          .from('.landing-flow', { autoAlpha: 0, y: 28, duration: 1.2 }, 0.75);
+          .from(
+            '.landing-hero-lines',
+            {
+              clipPath: 'inset(0 0 100% 0)',
+              duration: 2,
+              ease: 'power2.inOut',
+              clearProps: 'clipPath',
+            },
+            0.2,
+          );
 
-        // The second line keeps naming what the intent turns into.
+        // The second line keeps naming what the intent turns into. Every swap
+        // states both ends of both phrases, so none is ever left half-way.
         const phrases = gsap.utils.toArray<HTMLElement>(
           '.landing-rotator > span',
         );
-        const rotation = gsap.timeline({
-          repeat: -1,
-          delay: 1.6,
-          scrollTrigger: {
-            trigger: '.landing-hero',
-            start: 'top bottom',
-            end: 'bottom top',
-            toggleActions: 'play pause resume pause',
-          },
-        });
-        phrases.forEach((phrase, index) => {
-          rotation
-            .to(
-              phrase,
-              {
-                yPercent: -110,
-                autoAlpha: 0,
-                filter: 'blur(8px)',
-                duration: 0.6,
-                ease: 'power3.in',
-              },
-              '+=2.6',
-            )
-            .fromTo(
-              phrases[(index + 1) % phrases.length]!,
-              { yPercent: 110, autoAlpha: 0, filter: 'blur(8px)' },
-              {
-                yPercent: 0,
-                autoAlpha: 1,
-                filter: 'blur(0px)',
-                duration: 0.9,
-                ease: EASE,
-                immediateRender: false,
-              },
-              '>-0.1',
-            );
+        const shownAt = { yPercent: 0, autoAlpha: 1, filter: 'blur(0px)' };
+        const below = { yPercent: 110, autoAlpha: 0, filter: 'blur(8px)' };
+        gsap.set(phrases, below);
+        gsap.set(phrases[0]!, shownAt);
+        let shown = 0;
+        const rotate = () => {
+          const leaving = phrases[shown]!;
+          shown = (shown + 1) % phrases.length;
+          const coming = phrases[shown]!;
+          gsap.set(
+            phrases.filter(phrase => phrase !== leaving && phrase !== coming),
+            below,
+          );
+          gsap.fromTo(leaving, shownAt, {
+            yPercent: -110,
+            autoAlpha: 0,
+            filter: 'blur(8px)',
+            duration: 0.6,
+            ease: 'power3.in',
+            overwrite: true,
+          });
+          gsap.fromTo(coming, below, {
+            ...shownAt,
+            duration: 0.9,
+            ease: EASE,
+            delay: 0.55,
+            overwrite: true,
+          });
+          next = gsap.delayedCall(3.6, rotate);
+        };
+        let next = gsap.delayedCall(4.4, rotate);
+        ScrollTrigger.create({
+          trigger: '.landing-hero',
+          start: 'top bottom',
+          end: 'bottom top',
+          onToggle: self => (self.isActive ? next.resume() : next.pause()),
         });
 
         gsap.utils.toArray<HTMLElement>('.landing-divider').forEach(divider => {
@@ -161,17 +171,7 @@ export function useSheetMotion(scope: RefObject<HTMLElement | null>) {
             clearProps: 'clipPath',
           })
           .from(
-            '.landing-knowledge-wires',
-            {
-              clipPath: 'inset(0 100% 0 0)',
-              duration: 1.1,
-              ease: 'power2.inOut',
-              clearProps: 'clipPath',
-            },
-            0.2,
-          )
-          .from(
-            '.landing-model-index, .landing-linked-record',
+            '.landing-inbox, .landing-linked-record, .landing-delivery-agent',
             { autoAlpha: 0, duration: 0.8, stagger: 0.12 },
             0.45,
           );
@@ -222,17 +222,6 @@ export function useSheetMotion(scope: RefObject<HTMLElement | null>) {
             start: 'top 92%',
             end: 'top 38%',
             scrub: 0.6,
-          },
-        });
-
-        gsap.from('.landing-sign path', {
-          drawSVG: 0,
-          duration: 0.8,
-          ease: 'power2.inOut',
-          scrollTrigger: {
-            trigger: '.landing-title-block',
-            start: 'top 88%',
-            once: true,
           },
         });
       });

@@ -1,0 +1,137 @@
+/* Inlined by Vite: this screen must paint before any app asset arrives. */
+html[data-starting] {
+  overflow: hidden;
+}
+html[data-starting] #root {
+  visibility: hidden;
+}
+#startup {
+  --startup-bg: oklch(0.992 0 0);
+  --startup-ink: oklch(0.21 0.006 286);
+  --startup-muted: oklch(0.51 0.014 286);
+  --startup-line: oklch(0.92 0.004 286);
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: 32px 24px;
+  background: var(--startup-bg);
+  color: var(--startup-ink);
+  font:
+    400 16px/1.5 system-ui,
+    sans-serif;
+  text-align: center;
+  transition: opacity 240ms ease-out;
+}
+.dark #startup,
+html[data-startup-landing] #startup {
+  --startup-bg: #0c0d0f;
+  --startup-ink: #e9eaee;
+  --startup-muted: #9a9ca8;
+  --startup-line: #2a2b32;
+}
+#startup .startup-content {
+  width: min(100%, 440px);
+}
+#startup .startup-logo {
+  width: min(100%, 320px);
+  margin: 0 auto 40px;
+}
+#startup .startup-logo svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: inherit;
+  animation: startup-assemble 2s steps(1, end) both;
+}
+#startup .startup-track {
+  height: 2px;
+  width: min(100%, 240px);
+  margin: 0 auto 16px;
+  overflow: hidden;
+  background: var(--startup-line);
+}
+#startup .startup-bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--startup-ink);
+  transform: translateX(-100%);
+  animation: startup-progress 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+#startup .startup-status {
+  margin: 0;
+  color: var(--startup-muted);
+  font-size: 13px;
+}
+#startup .startup-recovery {
+  margin-top: 24px;
+  font-size: 14px;
+}
+#startup .startup-recovery[hidden] {
+  display: none;
+}
+#startup .startup-recovery p {
+  margin: 0 0 12px;
+}
+#startup button {
+  min-height: 44px;
+  padding: 8px 20px;
+  border: 1px solid var(--startup-muted);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+#startup button:hover {
+  background: var(--startup-line);
+}
+#startup button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+#startup[data-leaving] {
+  opacity: 0;
+  pointer-events: none;
+}
+#startup[data-leaving] .startup-bar {
+  animation: none;
+  transform: none;
+}
+@keyframes startup-assemble {
+  0% {
+    clip-path: inset(0 0 60%);
+    transform: translateX(-4px);
+  }
+  20% {
+    clip-path: inset(35% 0 20%);
+    transform: translateX(4px);
+  }
+  40% {
+    clip-path: inset(0 0 25%);
+    transform: translateX(-2px);
+  }
+  60%,
+  100% {
+    clip-path: inset(0);
+    transform: none;
+  }
+}
+@keyframes startup-progress {
+  to {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #startup,
+  #startup * {
+    animation: none !important;
+    transition: none !important;
+  }
+  #startup .startup-bar {
+    transform: scaleX(0.35);
+    transform-origin: left;
+  }
+}

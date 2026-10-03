@@ -4,9 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Intentra</title>
-    <link id="intentra-favicon" rel="icon" href="/favicon.svg?v=2" type="image/svg+xml" />
+    <link
+      id="intentra-favicon"
+      rel="icon"
+      href="/favicon.svg?v=2"
+      type="image/svg+xml"
+    />
     <link rel="apple-touch-icon" href="/intentra-avatar.svg?v=2" />
     <script>
+      document.documentElement.setAttribute('data-starting', '');
+      if (location.pathname === '/') {
+        document.documentElement.setAttribute('data-startup-landing', '');
+      }
       // Apply the chosen theme before the app renders, so a dark page never flashes white.
       try {
         const theme = JSON.parse(
@@ -20,9 +29,25 @@
         document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
       } catch {}
     </script>
+    <!-- startup:css -->
   </head>
   <body>
+    <div id="startup">
+      <div class="startup-content">
+        <div class="startup-logo"><!-- startup:logo --></div>
+        <div class="startup-track" role="progressbar">
+          <span class="startup-bar"></span>
+        </div>
+        <p class="startup-status" role="status"></p>
+        <div class="startup-recovery" hidden>
+          <p role="status"></p>
+          <button type="button"></button>
+        </div>
+        <noscript><!-- startup:noscript --></noscript>
+      </div>
+    </div>
     <div id="root"></div>
+    <!-- startup:script -->
     <script type="module" src="/src/app/entrypoint/main.tsx"></script>
   </body>
 </html>

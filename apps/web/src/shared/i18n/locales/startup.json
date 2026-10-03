@@ -1,0 +1,14 @@
+{
+  "ru": {
+    "loading": "Открываем Intentra",
+    "slow": "Загрузка занимает больше времени, чем обычно.",
+    "retry": "Перезагрузить",
+    "noScript": "Для работы Intentra включите JavaScript в браузере."
+  },
+  "en": {
+    "loading": "Opening Intentra",
+    "slow": "Loading is taking longer than usual.",
+    "retry": "Reload",
+    "noScript": "Enable JavaScript in your browser to use Intentra."
+  }
+}

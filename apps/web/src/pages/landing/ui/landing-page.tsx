@@ -1,4 +1,4 @@
-import { Menu, Users, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -15,18 +15,18 @@ import {
 } from '@/shared/ui';
 
 import { useSheetMotion } from '../lib/use-sheet-motion';
+import { another, DEMO_CASES } from '../model/demo-interview';
+import { DEVELOPER } from '../model/developer';
 
-import { HeroFlow } from './hero-flow';
 import { KnowledgeScene } from './knowledge-scene';
 import { LandingAction } from './landing-action';
 import { LandingLanguage } from './landing-language';
 import { McpShowcase } from './mcp-showcase';
 import { ProductDemo } from './product-demo';
+import { SocialIcon } from './social-icon';
 
 const navigation = ['product', 'benefits', 'agents', 'faq'] as const;
 const faqs = ['1', '2', '3', '4', '5', '6'] as const;
-const agents = ['claude', 'codex', 'cursor'] as const;
-const signatures = ['drafted', 'checked', 'approved'] as const;
 const phrases = ['line2', 'line2b', 'line2c'] as const;
 
 function StartLink({ closing = false }: { readonly closing?: boolean }) {
@@ -59,6 +59,8 @@ function SheetRule() {
 export function LandingPage() {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  // One fictional product runs through the interview and the scene after it.
+  const [topic, setTopic] = useState(() => another(DEMO_CASES, null));
   const root = useRef<HTMLDivElement>(null);
   useSheetMotion(root);
   useEffect(() => {
@@ -153,6 +155,7 @@ export function LandingPage() {
         )}
         <main id='main'>
           <section className='landing-hero' aria-labelledby='hero-title'>
+            <div className='landing-hero-lines' aria-hidden='true' />
             <div className='landing-hero-copy'>
               <h1
                 id='hero-title'
@@ -179,7 +182,6 @@ export function LandingPage() {
                 </a>
               </div>
             </div>
-            <HeroFlow />
           </section>
           <SheetRule />
           <section id='product' className='landing-product'>
@@ -187,27 +189,14 @@ export function LandingPage() {
               <h2>{t('landing.demoSection.title')}</h2>
               <p>{t('landing.demoSection.text')}</p>
             </div>
-            <ProductDemo paused={false} autoPlay />
+            <ProductDemo topic={topic} onTopicChange={setTopic} />
           </section>
           <SheetRule />
-          <div className='landing-partners'>
-            <p>{t('landing.strip.text')}</p>
-            <div>
-              <strong>
-                <Users size={18} aria-hidden='true' />
-                {t('landing.strip.team')}
-              </strong>
-              <small>{t('landing.strip.web')}</small>
-            </div>
-            {agents.map(agent => (
-              <div key={agent}>
-                <strong>{t(`landing.strip.${agent}`)}</strong>
-                <small>{t('landing.strip.protocol')}</small>
-              </div>
-            ))}
-          </div>
-          <SheetRule />
-          <KnowledgeScene paused={false} />
+          <KnowledgeScene
+            key={topic}
+            topic={topic}
+            onAnother={() => setTopic(another(DEMO_CASES, topic))}
+          />
           <SheetRule />
           <section id='agents' className='landing-agents'>
             <McpShowcase paused={false} />
@@ -247,47 +236,33 @@ export function LandingPage() {
             <Brand className='landing-wordmark' />
           </a>
           <div className='landing-footer-row'>
-            <div className='landing-footer-meta'>
-              <p>{t('landing.footer.note')}</p>
-              <p>{t('landing.demoSection.label')}</p>
-              <p>
-                <span>
-                  {t('landing.footer.copyright', {
-                    year: new Date().getFullYear(),
-                  })}
-                </span>
-                <a href='#top'>{t('landing.footer.top')}</a>
+            <p>
+              {t('landing.footer.copyright', {
+                year: new Date().getFullYear(),
+              })}
+              <span>{t('landing.footer.note')}</span>
+            </p>
+            <address className='landing-developer'>
+              <p className='landing-built'>
+                <span>{t('landing.footer.developer')}</span>{' '}
+                <a href={`mailto:${DEVELOPER.email}`}>{DEVELOPER.name}</a>
               </p>
-            </div>
-            <div
-              className='landing-title-block'
-              role='group'
-              aria-label={t('landing.footer.sheet.label')}
-            >
-              <div className='landing-title-roles'>
-                {signatures.map(role => (
-                  <div key={role}>
-                    <span>{t(`landing.footer.sheet.${role}`)}</span>
-                    <span>{t(`landing.footer.sheet.${role}By`)}</span>
-                    <span>
-                      {role === 'approved' && (
-                        <svg
-                          className='landing-sign'
-                          viewBox='0 0 24 24'
-                          aria-hidden='true'
-                        >
-                          <path d='M4 12.5 9.5 18 20 6.5' />
-                        </svg>
-                      )}
-                    </span>
-                  </div>
+              <ul>
+                {DEVELOPER.links.map(link => (
+                  <li key={link.id}>
+                    <a
+                      href={link.href}
+                      target='_blank'
+                      rel='noreferrer'
+                      aria-label={link.label}
+                      title={link.label}
+                    >
+                      <SocialIcon id={link.id} />
+                    </a>
+                  </li>
                 ))}
-              </div>
-              <div className='landing-title-name'>
-                <strong>{t('brand')}</strong>
-                <span>{t('landing.footer.tagline')}</span>
-              </div>
-            </div>
+              </ul>
+            </address>
           </div>
         </footer>
       </div>

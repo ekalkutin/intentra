@@ -18,8 +18,15 @@ export const en = {
     scenario: 'Scenario',
     requirement: 'Requirement',
     'open-question': 'Open question',
+    decision: 'Decision',
+    constraint: 'Constraint',
   },
-  statuses: { draft: 'draft', approved: 'approved' },
+  statuses: {
+    draft: 'draft',
+    approved: 'approved',
+    rejected: 'declined',
+    obsolete: 'obsolete',
+  },
   knowledge: { needsReview: 'needs review' },
   fields: {
     email: 'Email',

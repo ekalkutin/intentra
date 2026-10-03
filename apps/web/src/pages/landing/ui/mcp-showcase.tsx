@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 
+import { useHasSession } from '@/entities/session';
 import { ROUTES } from '@/shared/config';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui';
 
@@ -11,11 +11,13 @@ import {
   MCP_SCENARIOS,
 } from '../model/mcp-scenarios';
 
+import { LandingAction } from './landing-action';
 import { McpTerminal, type TerminalStep } from './mcp-terminal';
 
 /** Local, rotating examples: no MCP calls or project mutations. */
 export function McpShowcase({ paused }: { readonly paused: boolean }) {
   const { t } = useTranslation();
+  const signedIn = useHasSession();
   const [playhead, setPlayhead] = useState({ index: 0, elapsed: 0 });
   const [visible, setVisible] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -118,11 +120,6 @@ export function McpShowcase({ paused }: { readonly paused: boolean }) {
       <div className='landing-agents-story'>
         <h2>{t('landing.agents.title')}</h2>
         <p>{t('landing.agents.text')}</p>
-        <div className='landing-agent-names'>
-          <span>{t('landing.strip.claude')}</span>
-          <span>{t('landing.strip.codex')}</span>
-          <span>{t('landing.strip.cursor')}</span>
-        </div>
         <TabsList
           variant='line'
           className='landing-mcp-scenarios'
@@ -135,13 +132,26 @@ export function McpShowcase({ paused }: { readonly paused: boolean }) {
               className='landing-mcp-scenario'
             >
               <span>{t(`landing.agents.scenarios.${item.id}.title`)}</span>
+              <small>{t(`landing.agents.scenarios.${item.id}.prompt`)}</small>
+              {/* How far the scenario on screen has played, hold included. */}
+              <i
+                aria-hidden
+                style={{
+                  scale: `${
+                    item.id === script.id
+                      ? Math.min(1, time / (item.duration + MCP_SCENARIO_HOLD))
+                      : 0
+                  } 1`,
+                }}
+              />
             </TabsTrigger>
           ))}
         </TabsList>
-        <Link to={ROUTES.signUp} className='landing-agent-link'>
-          {t('landing.agents.link')}
-        </Link>
-        <p className='landing-agent-note'>{t('landing.agents.note')}</p>
+        <div className='landing-agent-action'>
+          <LandingAction to={signedIn ? ROUTES.home : ROUTES.signUp}>
+            {t('landing.agents.link')}
+          </LandingAction>
+        </div>
       </div>
       <div className='landing-mcp-panels'>
         {scripts.map((item, index) => (

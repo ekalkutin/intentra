@@ -2,9 +2,12 @@ import {
   ArrowDown,
   Check,
   CheckCheck,
-  CircleDashed,
+  Layers,
   MessageSquare,
+  PenLine,
   RotateCcw,
+  SearchCheck,
+  TriangleAlert,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +17,7 @@ import {
   KindIcon,
   KnowledgeStatusBadge,
 } from '@/entities/knowledge-item';
+import { DEFAULT_TONE, nextPhrase, useThinkingPhrases } from '@/shared/i18n';
 import { cn } from '@/shared/lib';
 import {
   Accordion,
@@ -26,16 +30,7 @@ import {
   Button,
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-  IntentraButton,
   MATERIALISE,
   Message,
   MessageContent,
@@ -51,101 +46,256 @@ import {
 } from '@/shared/ui';
 
 import {
-  DEMO_DELAY,
+  another,
+  DEMO_CASES,
+  DEMO_ISSUE,
+  DEMO_OPTIONS,
+  DEMO_PACE,
   DEMO_TURNS,
-  type DemoPhase,
+  type DemoCase,
+  type DemoOption,
 } from '../model/demo-interview';
 
-const AUTOPLAY_DELAY = 500;
+import { DemoInvite } from './demo-invite';
 
-/** A finite, local interview rehearsal using the product's actual card choreography. */
+type DraftKind = (typeof DEMO_TURNS)[number]['kind'] | typeof DEMO_ISSUE.kind;
+
+interface Draft {
+  readonly id: string;
+  readonly kind: DraftKind;
+  readonly title: string;
+  readonly text: string;
+  /** The question whose answer it came from. */
+  readonly from: number;
+  readonly landed: boolean;
+}
+
+/** What the transcript holds, in order. */
+type Entry =
+  | { readonly id: string; readonly type: 'user'; readonly text: string }
+  | {
+      readonly id: string;
+      readonly type: 'agent';
+      readonly text: string;
+      /** A question carries its number; a finding carries a warning mark. */
+      readonly question?: number;
+      readonly finding?: boolean;
+    }
+  | {
+      readonly id: string;
+      readonly type: 'choices';
+      readonly turn: number;
+      readonly order: readonly DemoOption[];
+    }
+  | { readonly id: string; readonly type: 'record'; readonly draft: string }
+  /** The two ways on, once the interview is over. */
+  | { readonly id: string; readonly type: 'outro' };
+
+/** What Intentra does next; the conversation is a list of these, played one by one. */
+type Step =
+  | { readonly do: 'show'; readonly entry: Entry }
+  | {
+      readonly do: 'work';
+      readonly ms: number;
+      readonly status?: 'recording' | 'checking';
+    }
+  | { readonly do: 'say'; readonly entry: Entry & { type: 'agent' } }
+  | { readonly do: 'record'; readonly draft: Draft }
+  | { readonly do: 'wait' };
+
+type Live =
+  | { readonly kind: 'thinking'; readonly phrase: string }
+  | { readonly kind: 'status'; readonly status: 'recording' | 'checking' }
+  | null;
+
+const add = <T extends { readonly id: string }>(
+  items: readonly T[],
+  item: T,
+) =>
+  items.some(existing => existing.id === item.id) ? items : [...items, item];
+
+/**
+ * A short interview the visitor answers themselves, played the way the real
+ * chat behaves: the message is sent, Intentra thinks, its question streams in,
+ * the answer is recorded as a Draft that flies to the panel, and where an
+ * answer leaves something open Intentra says so and records the question.
+ * Each run takes one of several fictional products. Local only.
+ */
 export function ProductDemo({
-  paused,
-  autoPlay = false,
+  topic,
+  onTopicChange,
 }: {
-  readonly paused: boolean;
-  readonly autoPlay?: boolean;
+  readonly topic: DemoCase;
+  /** The scenes below continue whichever product the interview is about. */
+  readonly onTopicChange: (topic: DemoCase) => void;
 }) {
   const { t } = useTranslation();
+  const phrases = useThinkingPhrases(DEFAULT_TONE);
+  const [open, setOpen] = useState(false);
+  /** The product this interview last started on, to tell its own change from the page's. */
+  const chosen = useRef(topic);
+  const [script, setScript] = useState<readonly Step[]>([]);
+  const [cursor, setCursor] = useState(0);
+  const [feed, setFeed] = useState<readonly Entry[]>([]);
+  const [live, setLive] = useState<Live>(null);
+  const [stream, setStream] = useState<{ id: string; shown: number } | null>(
+    null,
+  );
+  const [drafts, setDrafts] = useState<readonly Draft[]>([]);
   const [turn, setTurn] = useState(0);
-  const [phase, setPhase] = useState<DemoPhase>('question');
-  const [started, setStarted] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const [available, setAvailable] = useState(true);
-  const [reduced, setReduced] = useState(false);
   const [approved, setApproved] = useState<string[]>([]);
   const [expanded, setExpanded] = useState<string[]>([]);
   const [run, setRun] = useState(0);
   const root = useRef<HTMLDivElement>(null);
   const source = useRef<HTMLDivElement>(null);
   const target = useRef<HTMLDivElement>(null);
-  const cancelFlight = useRef<() => void>(() => {});
-  const complete = phase === 'done';
-  const count = turn + (phase === 'settled' || complete ? 1 : 0);
-  const running = playing && available && !complete;
-  const still = paused || reduced;
+  const phrase = useRef<string | null>(null);
+  const landed = drafts.filter(draft => draft.landed);
+  const incoming = drafts.find(draft => !draft.landed);
+  const step = script[cursor];
+  const complete = open && cursor >= script.length && script.length > 0;
 
-  useEffect(() => {
-    const media = matchMedia('(prefers-reduced-motion: reduce)');
-    const syncMotion = () => setReduced(media.matches);
-    syncMotion();
-    media.addEventListener('change', syncMotion);
-    let inView = true;
-    const syncVisibility = () => setAvailable(inView && !document.hidden);
-    const observer = new IntersectionObserver(([entry]) => {
-      inView = entry?.isIntersecting ?? false;
-      syncVisibility();
-    });
-    if (root.current) observer.observe(root.current);
-    document.addEventListener('visibilitychange', syncVisibility);
-    return () => {
-      observer.disconnect();
-      media.removeEventListener('change', syncMotion);
-      document.removeEventListener('visibilitychange', syncVisibility);
-      cancelFlight.current();
-    };
-  }, []);
-
-  // In the first viewport the rehearsal begins on its own, once enough of it is in view.
-  useEffect(() => {
-    if (!autoPlay || started || paused || !root.current) return;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        clearTimeout(timer);
-        if (!entry?.isIntersecting) return;
-        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        timer = setTimeout(() => {
-          setStarted(true);
-          setPlaying(true);
-        }, AUTOPLAY_DELAY);
+  const question = (index: number): Step[] => [
+    { do: 'work', ms: DEMO_PACE.think },
+    {
+      do: 'say',
+      entry: {
+        id: `q-${run}-${index}`,
+        type: 'agent',
+        question: index + 1,
+        text: t(
+          `landing.demoSection.cases.${topic}.${DEMO_TURNS[index]!.key}.question`,
+        ),
       },
-      { threshold: 0.35 },
-    );
-    observer.observe(root.current);
-    return () => {
-      clearTimeout(timer);
-      observer.disconnect();
-    };
-  }, [autoPlay, started, paused]);
+    },
+    {
+      do: 'show',
+      entry: {
+        id: `c-${run}-${index}`,
+        type: 'choices',
+        turn: index,
+        order: Math.random() < 0.5 ? DEMO_OPTIONS : [...DEMO_OPTIONS].reverse(),
+      },
+    },
+    { do: 'wait' },
+  ];
 
+  const begin = (subject: DemoCase, next: number) => {
+    chosen.current = subject;
+    onTopicChange(subject);
+    setRun(next);
+    setFeed([]);
+    setDrafts([]);
+    setApproved([]);
+    setExpanded([]);
+    setLive(null);
+    setStream(null);
+    setTurn(0);
+    setCursor(0);
+    setScript([]);
+    setOpen(true);
+  };
+
+  // A product picked further down the page starts the interview over, at its invitation.
   useEffect(() => {
-    if (!running) return;
-    if (phase === 'recording') {
-      let landed = false;
-      const timer = setTimeout(
+    if (chosen.current === topic) return;
+    chosen.current = topic;
+    setOpen(false);
+    setScript([]);
+    setCursor(0);
+    setFeed([]);
+    setDrafts([]);
+    setLive(null);
+    setStream(null);
+  }, [topic]);
+
+  // The opening script is built once the topic and run are in place.
+  useEffect(() => {
+    if (!open || script.length > 0) return;
+    setScript([
+      {
+        do: 'show',
+        entry: {
+          id: `intro-${run}`,
+          type: 'user',
+          text: t(`landing.demoSection.cases.${topic}.intro`),
+        },
+      },
+      ...question(0),
+    ]);
+    // Rebuilding on a language change would restart a conversation in progress.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, run]);
+
+  // Plays the current step. Every branch is safe to run twice.
+  useEffect(() => {
+    if (!step) return;
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const advance = () => setCursor(value => value + 1);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let ticker: ReturnType<typeof setInterval> | undefined;
+    let cancelFlight = () => {};
+
+    if (step.do === 'show') {
+      setFeed(items => add(items, step.entry));
+      timer = setTimeout(advance, still ? 0 : DEMO_PACE.sent);
+    } else if (step.do === 'work') {
+      if (step.status) setLive({ kind: 'status', status: step.status });
+      else {
+        phrase.current = nextPhrase(phrases, phrase.current);
+        setLive({ kind: 'thinking', phrase: phrase.current });
+      }
+      timer = setTimeout(
         () => {
-          const onLand = () => {
-            landed = true;
-            setPhase('settled');
-          };
-          if (!source.current || !target.current) {
-            onLand();
+          setLive(null);
+          advance();
+        },
+        still ? 0 : step.ms,
+      );
+    } else if (step.do === 'say') {
+      const { entry } = step;
+      setFeed(items => add(items, entry));
+      if (entry.question) setTurn(entry.question - 1);
+      if (still) {
+        timer = setTimeout(advance, 0);
+      } else {
+        let shown = 0;
+        setStream({ id: entry.id, shown });
+        ticker = setInterval(() => {
+          shown += DEMO_PACE.streamChars;
+          if (shown < entry.text.length) {
+            setStream({ id: entry.id, shown });
             return;
           }
-          cancelFlight.current();
-          cancelFlight.current = transferCard(source.current, target.current, {
-            onLand,
+          clearInterval(ticker);
+          setStream(null);
+          timer = setTimeout(advance, DEMO_PACE.settle);
+        }, DEMO_PACE.streamTick);
+      }
+    } else if (step.do === 'record') {
+      const { draft } = step;
+      setDrafts(items => add(items, draft));
+      setFeed(items =>
+        add(items, { id: `r-${draft.id}`, type: 'record', draft: draft.id }),
+      );
+      const land = () => {
+        // The arrival ring outlives the step; only an unfinished flight is cancelled.
+        cancelFlight = () => {};
+        setDrafts(items =>
+          items.map(item =>
+            item.id === draft.id ? { ...item, landed: true } : item,
+          ),
+        );
+        timer = setTimeout(advance, still ? 0 : DEMO_PACE.settle);
+      };
+      timer = setTimeout(
+        () => {
+          if (!source.current || !target.current) {
+            land();
+            return;
+          }
+          cancelFlight = transferCard(source.current, target.current, {
+            onLand: land,
             surface:
               root.current?.closest<HTMLElement>('.landing') ?? document.body,
             reduced: still,
@@ -156,71 +306,107 @@ export function ProductDemo({
         },
         still ? 0 : MATERIALISE.waveMs * MATERIALISE.wavePasses + 50,
       );
-      return () => {
-        clearTimeout(timer);
-        // Keep the arrival ring alive after landing; interruption cancels the flight.
-        if (!landed) cancelFlight.current();
-      };
     }
-    const timer = setTimeout(() => {
-      if (phase === 'question') setPhase('typing');
-      else if (phase === 'typing') setPhase('answer');
-      else if (phase === 'answer') setPhase('recording');
-      else if (turn === DEMO_TURNS.length - 1) {
-        setPhase('done');
-        setPlaying(false);
-      } else {
-        setTurn(value => value + 1);
-        setPhase('question');
-      }
-    }, DEMO_DELAY[phase]);
-    return () => clearTimeout(timer);
-  }, [phase, running, still, turn, run]);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(ticker);
+      cancelFlight();
+    };
+    // The step is the only thing this plays; phrases and refs are read as they are.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
-  const restart = () => {
-    cancelFlight.current();
-    setTurn(0);
-    setPhase('question');
-    setApproved([]);
+  const answer = (entry: Entry & { type: 'choices' }, option: DemoOption) => {
+    const spec = DEMO_TURNS[entry.turn]!;
+    const copy = `landing.demoSection.cases.${topic}.${spec.key}` as const;
+    const finding = t(`${copy}.${option}.finding`);
+    const issues = drafts.filter(draft => draft.kind === DEMO_ISSUE.kind);
+    const next: Step[] = [
+      { do: 'work', ms: DEMO_PACE.record, status: 'recording' },
+      {
+        do: 'record',
+        draft: {
+          id: `${spec.prefix}-${spec.first}`,
+          kind: spec.kind,
+          title: t(`${copy}.title`),
+          text: t(`${copy}.${option}.text`),
+          from: entry.turn + 1,
+          landed: false,
+        },
+      },
+    ];
+    // Where the answer leaves something open, Intentra says so and keeps the question.
+    if (finding)
+      next.push(
+        { do: 'work', ms: DEMO_PACE.check, status: 'checking' },
+        {
+          do: 'say',
+          entry: {
+            id: `f-${run}-${entry.turn}`,
+            type: 'agent',
+            finding: true,
+            text: finding,
+          },
+        },
+        { do: 'work', ms: DEMO_PACE.record, status: 'recording' },
+        {
+          do: 'record',
+          draft: {
+            id: `${DEMO_ISSUE.prefix}-${DEMO_ISSUE.first + issues.length}`,
+            kind: DEMO_ISSUE.kind,
+            title: t(`${copy}.${option}.issueTitle`),
+            text: t(`${copy}.${option}.issueText`),
+            from: entry.turn + 1,
+            landed: false,
+          },
+        },
+      );
+    if (entry.turn + 1 < DEMO_TURNS.length)
+      next.push(...question(entry.turn + 1));
+    else
+      next.push(
+        { do: 'work', ms: DEMO_PACE.think },
+        {
+          do: 'say',
+          entry: {
+            id: `end-${run}`,
+            type: 'agent',
+            text: t('landing.demoSection.closing'),
+          },
+        },
+        { do: 'show', entry: { id: `outro-${run}`, type: 'outro' } },
+      );
+    setFeed(items =>
+      items.map(item =>
+        item.id === entry.id
+          ? {
+              id: entry.id,
+              type: 'user',
+              text: t(`${copy}.${option}.answer`),
+            }
+          : item,
+      ),
+    );
     setExpanded([]);
-    setRun(value => value + 1);
-    setStarted(true);
-    setPlaying(true);
+    setScript(steps => [...steps.slice(0, cursor + 1), ...next]);
+    setCursor(value => value + 1);
   };
-  const advance = () => {
-    setStarted(true);
-    setPlaying(true);
-    setExpanded([]);
-    if (phase === 'settled') {
-      if (turn === DEMO_TURNS.length - 1) {
-        setPhase('done');
-        setPlaying(false);
-      } else {
-        setTurn(value => value + 1);
-        setPhase('question');
-      }
-    } else setPhase('recording');
-  };
+
+  if (!open)
+    return (
+      <DemoInvite
+        message={t(`landing.demoSection.cases.${topic}.intro`)}
+        onStart={() => begin(topic, run)}
+      />
+    );
 
   return (
-    <Card
-      ref={root}
-      className='landing-demo landing-interview'
-      data-phase={phase}
-      data-playing={running}
-    >
-      <CardHeader className='landing-demo-bar'>
-        <CardTitle>
-          <MessageSquare size={14} aria-hidden />
-          {t('landing.demoSection.project')}
-        </CardTitle>
-        <CardDescription>{t('landing.demoSection.label')}</CardDescription>
-      </CardHeader>
+    <Card ref={root} className='landing-demo landing-interview'>
       <CardContent className='landing-demo-body'>
         <div className='landing-interview-chat'>
           <div className='landing-interview-heading'>
             <span className='landing-speaker'>
-              <AgentSpark active={running && !still} />
+              <AgentSpark active={!!live || !!stream} />
               {t('landing.demoSection.analyst')}
             </span>
             <span>
@@ -237,107 +423,145 @@ export function ProductDemo({
                 aria-label={t('landing.demoSection.transcript')}
               >
                 <MessageScrollerContent className='landing-conversation'>
-                  <MessageScrollerItem
-                    messageId='intro'
-                    className='landing-interview-turn'
-                  >
-                    <Message align='end'>
-                      <MessageContent>
-                        <Bubble variant='muted' align='end'>
-                          <BubbleContent className='landing-answer'>
-                            <span>{t('landing.demoSection.user')}</span>
-                            <p>{t('landing.demoSection.intro')}</p>
-                          </BubbleContent>
-                        </Bubble>
-                      </MessageContent>
-                    </Message>
-                  </MessageScrollerItem>
-                  {DEMO_TURNS.slice(0, turn + 1).map((item, index) => {
-                    const current = index === turn;
-                    const hasAnswer =
-                      !current || !['question', 'typing'].includes(phase);
-                    const hasRecord =
-                      index < count || (current && phase === 'recording');
-                    return (
-                      <MessageScrollerItem
-                        key={item.id}
-                        messageId={item.id}
-                        className='landing-interview-turn'
-                      >
-                        <Message>
+                  {feed.map(entry => (
+                    <MessageScrollerItem
+                      key={entry.id}
+                      messageId={entry.id}
+                      className='landing-interview-turn'
+                    >
+                      {entry.type === 'user' && (
+                        <Message align='end'>
                           <MessageContent>
-                            <MessageHeader>
-                              {t('landing.demoSection.questionNumber', {
-                                number: index + 1,
-                              })}
-                            </MessageHeader>
-                            <Bubble variant='ghost'>
-                              <BubbleContent className='landing-analyst-question'>
-                                {t(
-                                  `landing.demoSection.turns.${item.key}.question`,
-                                )}
+                            <Bubble variant='muted' align='end'>
+                              <BubbleContent className='landing-answer'>
+                                <span>{t('landing.demoSection.user')}</span>
+                                <p>{entry.text}</p>
                               </BubbleContent>
                             </Bubble>
                           </MessageContent>
                         </Message>
-                        {(hasAnswer || (current && phase === 'typing')) && (
-                          <Message align='end'>
-                            <MessageContent>
-                              <Bubble variant='muted' align='end'>
-                                <BubbleContent className='landing-answer'>
-                                  <span>{t('landing.demoSection.user')}</span>
-                                  {hasAnswer ? (
-                                    <p>
-                                      {t(
-                                        `landing.demoSection.turns.${item.key}.answer`,
-                                      )}
-                                    </p>
-                                  ) : (
-                                    <span
-                                      className={cn(
-                                        'landing-demo-typing',
-                                        running && !still && 'shimmer',
-                                      )}
-                                    >
-                                      {t('landing.demoSection.typing')}
-                                    </span>
-                                  )}
-                                </BubbleContent>
-                              </Bubble>
-                            </MessageContent>
-                          </Message>
-                        )}
-                        {hasRecord && (
-                          <div
-                            ref={current ? source : undefined}
-                            className='landing-record-line'
-                          >
-                            <RecordWave
-                              key={`${run}-${running}`}
-                              play={
-                                current &&
-                                phase === 'recording' &&
-                                running &&
-                                !still
-                              }
-                            >
-                              {index < count ? (
-                                <Check size={14} aria-hidden />
-                              ) : (
-                                <KindIcon kind={item.kind} />
-                              )}
-                              <code>{item.id}</code>
-                              <span>
-                                {t(
-                                  `landing.demoSection.turns.${item.key}.title`,
+                      )}
+                      {entry.type === 'agent' && (
+                        <Message>
+                          <MessageContent>
+                            {entry.question && (
+                              <MessageHeader>
+                                {t('landing.demoSection.questionNumber', {
+                                  number: entry.question,
+                                })}
+                              </MessageHeader>
+                            )}
+                            <Bubble variant='ghost'>
+                              <BubbleContent
+                                className={cn(
+                                  entry.question
+                                    ? 'landing-analyst-question'
+                                    : 'landing-analyst-note',
+                                  entry.finding && 'is-finding',
                                 )}
-                              </span>
-                            </RecordWave>
-                          </div>
+                              >
+                                {entry.finding && (
+                                  <TriangleAlert size={16} aria-hidden />
+                                )}
+                                <span>
+                                  {stream?.id === entry.id
+                                    ? entry.text.slice(0, stream.shown)
+                                    : entry.text}
+                                  {stream?.id === entry.id && (
+                                    <i className='landing-terminal-caret' />
+                                  )}
+                                </span>
+                              </BubbleContent>
+                            </Bubble>
+                          </MessageContent>
+                        </Message>
+                      )}
+                      {entry.type === 'choices' && (
+                        <div className='landing-choices'>
+                          <p>{t('landing.demoSection.choose')}</p>
+                          {entry.order.map((option, number) => (
+                            <Button
+                              key={option}
+                              variant='outline'
+                              className='landing-choice'
+                              onClick={() => answer(entry, option)}
+                            >
+                              <code>{number + 1}</code>
+                              {t(
+                                `landing.demoSection.cases.${topic}.${DEMO_TURNS[entry.turn]!.key}.${option}.answer`,
+                              )}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                      {entry.type === 'outro' && (
+                        <div className='landing-outro'>
+                          <Button
+                            render={<a href='#benefits' />}
+                            nativeButton={false}
+                          >
+                            {t('landing.demoSection.next')}
+                            <ArrowDown data-icon='inline-end' />
+                          </Button>
+                          <Button
+                            variant='outline'
+                            onClick={() =>
+                              begin(another(DEMO_CASES, topic), run + 1)
+                            }
+                          >
+                            <RotateCcw data-icon='inline-start' />
+                            {t('landing.demoSection.more')}
+                          </Button>
+                        </div>
+                      )}
+                      {entry.type === 'record' &&
+                        drafts
+                          .filter(draft => draft.id === entry.draft)
+                          .map(draft => (
+                            <div
+                              key={draft.id}
+                              ref={draft.landed ? undefined : source}
+                              className='landing-record-line'
+                            >
+                              <RecordWave play={!draft.landed}>
+                                {draft.landed ? (
+                                  <Check size={14} aria-hidden />
+                                ) : (
+                                  <KindIcon kind={draft.kind} />
+                                )}
+                                <code>{draft.id}</code>
+                                <span>{draft.title}</span>
+                              </RecordWave>
+                            </div>
+                          ))}
+                    </MessageScrollerItem>
+                  ))}
+                  {live && (
+                    <MessageScrollerItem
+                      messageId='live'
+                      className='landing-interview-turn'
+                    >
+                      <p className='landing-live' role='status'>
+                        {live.kind === 'thinking' ? (
+                          <>
+                            <AgentSpark active />
+                            <span className='shimmer'>{live.phrase}…</span>
+                          </>
+                        ) : (
+                          <>
+                            {live.status === 'recording' ? (
+                              <PenLine size={16} aria-hidden />
+                            ) : (
+                              <SearchCheck size={16} aria-hidden />
+                            )}
+                            <span className='shimmer'>
+                              {t(`landing.demoSection.${live.status}`)}
+                            </span>
+                          </>
                         )}
-                      </MessageScrollerItem>
-                    );
-                  })}
+                      </p>
+                    </MessageScrollerItem>
+                  )}
                 </MessageScrollerContent>
               </MessageScrollerViewport>
               <MessageScrollerButton
@@ -347,170 +571,107 @@ export function ProductDemo({
               </MessageScrollerButton>
             </MessageScroller>
           </MessageScrollerProvider>
-          <div className='landing-interview-controls'>
-            <IntentraButton
-              size='default'
-              onClick={() => {
-                if (complete) restart();
-                else {
-                  setStarted(true);
-                  setPlaying(value => !value);
-                }
-              }}
-              aria-label={t(
-                complete
-                  ? 'landing.demoSection.reset'
-                  : playing
-                    ? 'landing.demoSection.pause'
-                    : started
-                      ? 'landing.demoSection.resume'
-                      : 'landing.demoSection.play',
-              )}
-            >
-              {t(
-                complete
-                  ? 'landing.demoSection.reset'
-                  : playing
-                    ? 'landing.demoSection.pause'
-                    : started
-                      ? 'landing.demoSection.resume'
-                      : 'landing.demoSection.play',
-              )}
-            </IntentraButton>
-            {!complete && (
-              <Button
-                variant='ghost'
-                size='sm'
-                disabled={phase === 'recording'}
-                onClick={advance}
-              >
-                {t(
-                  phase === 'recording'
-                    ? 'landing.demoSection.recording'
-                    : phase === 'settled'
-                      ? 'landing.demoSection.next'
-                      : 'landing.demoSection.showAnswer',
-                )}
-              </Button>
-            )}
-          </div>
         </div>
         <aside
           className='landing-drafts'
           aria-label={t('landing.demoSection.drafts')}
         >
           <div className='landing-drafts-heading'>
-            <CircleDashed size={16} aria-hidden />
+            <Layers size={16} aria-hidden />
             <span>{t('landing.demoSection.drafts')}</span>
-            <span>
-              {count} / {DEMO_TURNS.length}
-            </span>
+            <span>{landed.length}</span>
           </div>
           <div className='landing-interview-draft-area'>
-            {count === 0 && phase !== 'recording' && (
-              <Empty className='landing-draft-empty'>
-                <EmptyHeader>
-                  <EmptyMedia>
-                    <CircleDashed size={28} />
-                  </EmptyMedia>
-                  <EmptyTitle>{t('landing.demoSection.emptyTitle')}</EmptyTitle>
-                  <EmptyDescription>
-                    {t('landing.demoSection.emptyText')}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
+            {drafts.length === 0 && (
+              <p className='landing-draft-empty'>
+                {t('landing.demoSection.emptyTitle')}
+              </p>
             )}
             <Accordion
               value={expanded}
-              onValueChange={value => {
-                setExpanded(value as string[]);
-                if (value.length) setPlaying(false);
-              }}
+              onValueChange={value => setExpanded(value as string[])}
               className='landing-interview-records'
             >
-              {DEMO_TURNS.slice(0, count + (phase === 'recording' ? 1 : 0)).map(
-                (item, index) => {
-                  const incoming = index === count;
-                  const isApproved = approved.includes(item.id);
-                  return (
-                    <div
-                      key={item.id}
-                      ref={incoming ? target : undefined}
-                      className={cn(
-                        'landing-draft-record',
-                        isApproved && 'is-approved',
-                      )}
-                      style={{ visibility: incoming ? 'hidden' : 'visible' }}
-                      inert={incoming}
-                      aria-hidden={incoming}
-                    >
-                      <AccordionItem value={item.id}>
-                        <AccordionTrigger>
-                          <span className='landing-draft-summary'>
-                            <span className='landing-knowledge-top'>
-                              <code>{item.id}</code>
-                              <KnowledgeStatusBadge
-                                status={isApproved ? 'approved' : 'draft'}
-                              />
-                            </span>
-                            <span className='landing-draft-title'>
-                              {t(`landing.demoSection.turns.${item.key}.title`)}
-                            </span>
-                            <KindBadge kind={item.kind} />
+              {drafts.map(draft => {
+                const isApproved = approved.includes(draft.id);
+                return (
+                  <div
+                    key={draft.id}
+                    ref={draft.landed ? undefined : target}
+                    className={cn(
+                      'landing-draft-record',
+                      isApproved && 'is-approved',
+                    )}
+                    style={{
+                      visibility: draft.landed ? 'visible' : 'hidden',
+                    }}
+                    inert={!draft.landed}
+                    aria-hidden={!draft.landed}
+                  >
+                    <AccordionItem value={draft.id}>
+                      <AccordionTrigger>
+                        <span className='landing-draft-summary'>
+                          <span className='landing-knowledge-top'>
+                            <code>{draft.id}</code>
+                            <KnowledgeStatusBadge
+                              status={isApproved ? 'approved' : 'draft'}
+                            />
                           </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <p className='landing-draft-description'>
-                            {t(`landing.demoSection.turns.${item.key}.text`)}
+                          <span className='landing-draft-title'>
+                            {draft.title}
+                          </span>
+                          <KindBadge kind={draft.kind} />
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <p className='landing-draft-description'>
+                          {draft.text}
+                        </p>
+                        <p className='landing-draft-source'>
+                          <MessageSquare size={13} aria-hidden />
+                          {t('landing.demoSection.sourceQuestion', {
+                            number: draft.from,
+                          })}
+                        </p>
+                        {isApproved ? (
+                          <p className='landing-approved-note'>
+                            <CheckCheck size={16} aria-hidden />
+                            {t('landing.demoSection.ready')}
                           </p>
-                          <p className='landing-draft-source'>
-                            <MessageSquare size={13} aria-hidden />
-                            {t('landing.demoSection.sourceQuestion', {
-                              number: index + 1,
-                            })}
-                          </p>
-                          {isApproved ? (
-                            <p className='landing-approved-note'>
-                              <CheckCheck size={16} aria-hidden />
-                              {t('landing.demoSection.ready')}
-                            </p>
-                          ) : (
-                            <Button
-                              size='sm'
-                              onClick={() =>
-                                setApproved(value => [...value, item.id])
-                              }
-                            >
-                              <Check data-icon='inline-start' />
-                              {t('landing.demoSection.approve')}
-                            </Button>
-                          )}
-                        </AccordionContent>
-                      </AccordionItem>
-                    </div>
-                  );
-                },
-              )}
+                        ) : (
+                          <Button
+                            size='sm'
+                            onClick={() =>
+                              setApproved(value => [...value, draft.id])
+                            }
+                          >
+                            <Check data-icon='inline-start' />
+                            {t('landing.demoSection.approve')}
+                          </Button>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </div>
+                );
+              })}
             </Accordion>
           </div>
           <p className='landing-demo-status' role='status'>
-            {t(
-              complete
-                ? 'landing.demoSection.complete'
-                : phase === 'recording'
-                  ? 'landing.demoSection.recording'
-                  : count
-                    ? 'landing.demoSection.reviewHint'
-                    : started
-                      ? 'landing.demoSection.footnote'
-                      : 'landing.demoSection.emptyHint',
-            )}
+            {complete
+              ? t('landing.demoSection.complete', { count: landed.length })
+              : incoming
+                ? t('landing.demoSection.recording')
+                : landed.length > 0 && t('landing.demoSection.reviewHint')}
           </p>
         </aside>
       </CardContent>
       <CardFooter className='landing-demo-footer'>
-        <span>{t('landing.demoSection.footnote')}</span>
-        <Button variant='ghost' size='sm' disabled={!started} onClick={restart}>
+        <Button
+          variant='ghost'
+          size='sm'
+          disabled={feed.length < 2}
+          onClick={() => begin(another(DEMO_CASES, topic), run + 1)}
+        >
           <RotateCcw data-icon='inline-start' />
           {t('landing.demoSection.restart')}
         </Button>
