@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-01T12:00:00+00:00",
+  "generatedAt": "2026-10-03T01:35:37.691132+00:00",
   "title": "Design System: Intentra",
   "extensions": {
     "colorMeta": {
@@ -258,6 +258,244 @@
           "oklch(0.84 0.215 27)",
           "oklch(0.95 0.215 27)"
         ]
+      },
+      "landing-cobalt": {
+        "role": "primary",
+        "displayName": "Cobalt (landing only)",
+        "canonical": "#2549e8",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.2405 266.40)",
+          "oklch(0.26 0.2405 266.40)",
+          "oklch(0.37 0.2405 266.40)",
+          "oklch(0.48 0.2405 266.40)",
+          "oklch(0.6 0.2405 266.40)",
+          "oklch(0.72 0.2405 266.40)",
+          "oklch(0.84 0.2405 266.40)",
+          "oklch(0.95 0.2405 266.40)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-cobalt-deep": {
+        "role": "neutral",
+        "displayName": "Cobalt Deep (landing only)",
+        "canonical": "#1b36bd",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.2105 266.61)",
+          "oklch(0.26 0.2105 266.61)",
+          "oklch(0.37 0.2105 266.61)",
+          "oklch(0.48 0.2105 266.61)",
+          "oklch(0.6 0.2105 266.61)",
+          "oklch(0.72 0.2105 266.61)",
+          "oklch(0.84 0.2105 266.61)",
+          "oklch(0.95 0.2105 266.61)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-paper": {
+        "role": "neutral",
+        "displayName": "Paper (landing only)",
+        "canonical": "#f7f8f4",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0054 117.92)",
+          "oklch(0.26 0.0054 117.92)",
+          "oklch(0.37 0.0054 117.92)",
+          "oklch(0.48 0.0054 117.92)",
+          "oklch(0.6 0.0054 117.92)",
+          "oklch(0.72 0.0054 117.92)",
+          "oklch(0.84 0.0054 117.92)",
+          "oklch(0.95 0.0054 117.92)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-ink": {
+        "role": "neutral",
+        "displayName": "Ink (landing only)",
+        "canonical": "#192323",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0141 196.27)",
+          "oklch(0.26 0.0141 196.27)",
+          "oklch(0.37 0.0141 196.27)",
+          "oklch(0.48 0.0141 196.27)",
+          "oklch(0.6 0.0141 196.27)",
+          "oklch(0.72 0.0141 196.27)",
+          "oklch(0.84 0.0141 196.27)",
+          "oklch(0.95 0.0141 196.27)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-subtle": {
+        "role": "neutral",
+        "displayName": "Subtle (landing only)",
+        "canonical": "#586160",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0113 188.75)",
+          "oklch(0.26 0.0113 188.75)",
+          "oklch(0.37 0.0113 188.75)",
+          "oklch(0.48 0.0113 188.75)",
+          "oklch(0.6 0.0113 188.75)",
+          "oklch(0.72 0.0113 188.75)",
+          "oklch(0.84 0.0113 188.75)",
+          "oklch(0.95 0.0113 188.75)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-yellow": {
+        "role": "secondary",
+        "displayName": "Yellow (landing only)",
+        "canonical": "#e3fa83",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.1467 118.32)",
+          "oklch(0.26 0.1467 118.32)",
+          "oklch(0.37 0.1467 118.32)",
+          "oklch(0.48 0.1467 118.32)",
+          "oklch(0.6 0.1467 118.32)",
+          "oklch(0.72 0.1467 118.32)",
+          "oklch(0.84 0.1467 118.32)",
+          "oklch(0.95 0.1467 118.32)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-line": {
+        "role": "neutral",
+        "displayName": "Line (landing only)",
+        "canonical": "#d9dfd8",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0114 141.26)",
+          "oklch(0.26 0.0114 141.26)",
+          "oklch(0.37 0.0114 141.26)",
+          "oklch(0.48 0.0114 141.26)",
+          "oklch(0.6 0.0114 141.26)",
+          "oklch(0.72 0.0114 141.26)",
+          "oklch(0.84 0.0114 141.26)",
+          "oklch(0.95 0.0114 141.26)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-white": {
+        "role": "neutral",
+        "displayName": "White (landing only)",
+        "canonical": "#fff",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0000 89.88)",
+          "oklch(0.26 0.0000 89.88)",
+          "oklch(0.37 0.0000 89.88)",
+          "oklch(0.48 0.0000 89.88)",
+          "oklch(0.6 0.0000 89.88)",
+          "oklch(0.72 0.0000 89.88)",
+          "oklch(0.84 0.0000 89.88)",
+          "oklch(0.95 0.0000 89.88)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-muted": {
+        "role": "neutral",
+        "displayName": "Muted (landing only)",
+        "canonical": "#e9ede5",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0114 128.60)",
+          "oklch(0.26 0.0114 128.60)",
+          "oklch(0.37 0.0114 128.60)",
+          "oklch(0.48 0.0114 128.60)",
+          "oklch(0.6 0.0114 128.60)",
+          "oklch(0.72 0.0114 128.60)",
+          "oklch(0.84 0.0114 128.60)",
+          "oklch(0.95 0.0114 128.60)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-blue-text": {
+        "role": "neutral",
+        "displayName": "Blue Text (landing only)",
+        "canonical": "#d2daff",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0516 275.69)",
+          "oklch(0.26 0.0516 275.69)",
+          "oklch(0.37 0.0516 275.69)",
+          "oklch(0.48 0.0516 275.69)",
+          "oklch(0.6 0.0516 275.69)",
+          "oklch(0.72 0.0516 275.69)",
+          "oklch(0.84 0.0516 275.69)",
+          "oklch(0.95 0.0516 275.69)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-feature": {
+        "role": "neutral",
+        "displayName": "Feature (landing only)",
+        "canonical": "#e9eedf",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0206 121.85)",
+          "oklch(0.26 0.0206 121.85)",
+          "oklch(0.37 0.0206 121.85)",
+          "oklch(0.48 0.0206 121.85)",
+          "oklch(0.6 0.0206 121.85)",
+          "oklch(0.72 0.0206 121.85)",
+          "oklch(0.84 0.0206 121.85)",
+          "oklch(0.95 0.0206 121.85)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-night": {
+        "role": "neutral",
+        "displayName": "Night (landing only)",
+        "canonical": "#171e2b",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0273 262.50)",
+          "oklch(0.26 0.0273 262.50)",
+          "oklch(0.37 0.0273 262.50)",
+          "oklch(0.48 0.0273 262.50)",
+          "oklch(0.6 0.0273 262.50)",
+          "oklch(0.72 0.0273 262.50)",
+          "oklch(0.84 0.0273 262.50)",
+          "oklch(0.95 0.0273 262.50)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-terminal": {
+        "role": "neutral",
+        "displayName": "Terminal (landing only)",
+        "canonical": "#1d2635",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0310 260.45)",
+          "oklch(0.26 0.0310 260.45)",
+          "oklch(0.37 0.0310 260.45)",
+          "oklch(0.48 0.0310 260.45)",
+          "oklch(0.6 0.0310 260.45)",
+          "oklch(0.72 0.0310 260.45)",
+          "oklch(0.84 0.0310 260.45)",
+          "oklch(0.95 0.0310 260.45)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-terminal-line": {
+        "role": "neutral",
+        "displayName": "Terminal Line (landing only)",
+        "canonical": "#3b4352",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0278 262.96)",
+          "oklch(0.26 0.0278 262.96)",
+          "oklch(0.37 0.0278 262.96)",
+          "oklch(0.48 0.0278 262.96)",
+          "oklch(0.6 0.0278 262.96)",
+          "oklch(0.72 0.0278 262.96)",
+          "oklch(0.84 0.0278 262.96)",
+          "oklch(0.95 0.0278 262.96)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
       }
     },
     "typographyMeta": {
@@ -284,6 +522,36 @@
       "mono": {
         "displayName": "Mono",
         "purpose": "Knowledge Keys, slugs, counts, dates, URLs, secrets, keyboard hints; tabular figures."
+      },
+      "landing-display": {
+        "displayName": "Landing Display",
+        "purpose": "Public landing only; see DESIGN.md for responsive overrides.",
+        "scope": ".landing"
+      },
+      "landing-headline": {
+        "displayName": "Landing Headline",
+        "purpose": "Public landing only; see DESIGN.md for responsive overrides.",
+        "scope": ".landing"
+      },
+      "landing-title": {
+        "displayName": "Landing Title",
+        "purpose": "Public landing only; see DESIGN.md for responsive overrides.",
+        "scope": ".landing"
+      },
+      "landing-body": {
+        "displayName": "Landing Body",
+        "purpose": "Public landing only; see DESIGN.md for responsive overrides.",
+        "scope": ".landing"
+      },
+      "landing-lead": {
+        "displayName": "Landing Lead",
+        "purpose": "Public landing only; see DESIGN.md for responsive overrides.",
+        "scope": ".landing"
+      },
+      "landing-feature-body": {
+        "displayName": "Landing Feature Body",
+        "purpose": "Public landing only; see DESIGN.md for responsive overrides.",
+        "scope": ".landing"
       }
     },
     "shadows": [
@@ -339,6 +607,36 @@
         "name": "shimmer",
         "value": "shadcn `shimmer` utility (shadcn/tailwind.css): a moving highlight clipped to the text, currentColor base",
         "purpose": "The live status word while an agent works; the only loading motion in a conversation, collapsed under reduced motion."
+      },
+      {
+        "name": "landing-enter",
+        "value": "900ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Hero enters once; disabled under reduced motion.",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-arrow",
+        "value": "220ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "CTA arrow translates 3px up and right.",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-drift",
+        "value": "8s ease-in-out infinite alternate",
+        "purpose": "Ambient fragments; pause control and reduced motion stop animation.",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-cursor",
+        "value": "1.3s step-end infinite",
+        "purpose": "Terminal cursor; pause control and reduced motion stop animation.",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-approval",
+        "value": "450ms",
+        "purpose": "Demonstration knowledge background transition.",
+        "scope": ".landing"
       }
     ],
     "breakpoints": [
@@ -356,6 +654,30 @@
         "name": "xl",
         "value": "1280px",
         "purpose": "Two-column layouts (Project overview 2fr / 3fr); the Interview's recorded panel (18rem)."
+      },
+      {
+        "name": "landing-small",
+        "value": "380px",
+        "query": "max-width",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-mobile",
+        "value": "760px",
+        "query": "max-width",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-tablet",
+        "value": "1100px",
+        "query": "max-width",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-wide",
+        "value": "1600px",
+        "query": "min-width",
+        "scope": ".landing"
       }
     ],
     "unusedTokens": [
@@ -366,17 +688,32 @@
     ],
     "scales": {
       "fontSizes": {
-        "closed": ["1.5rem", "0.875rem", "0.75rem"],
+        "closed": [
+          "1.5rem",
+          "0.875rem",
+          "0.75rem"
+        ],
         "note": "Own code only; primitive sizes (e.g. button sm 0.8rem) are primitive-owned."
       },
       "fontWeights": {
-        "closed": [400, 500, 600]
+        "closed": [
+          400,
+          500,
+          600
+        ]
       },
       "tracking": {
-        "closed": ["-0.02em (page title only)"]
+        "closed": [
+          "-0.02em (page title only)"
+        ]
       },
       "radius": {
-        "closed": ["md 0.4rem", "lg 0.5rem", "xl 0.7rem", "full"]
+        "closed": [
+          "md 0.4rem",
+          "lg 0.5rem",
+          "xl 0.7rem",
+          "full"
+        ]
       },
       "listRow": {
         "padding": "0.75rem 1rem",
@@ -391,7 +728,14 @@
         "formDialog": "28rem (max-w-md)",
         "pageColumn": "72rem (max-w-6xl)"
       },
-      "spacing": ["0.25rem", "0.5rem", "0.75rem", "1rem", "2rem", "4rem"],
+      "spacing": [
+        "0.25rem",
+        "0.5rem",
+        "0.75rem",
+        "1rem",
+        "2rem",
+        "4rem"
+      ],
       "propertiesColumn": "17rem, from 1280px, hairline rule on its left",
       "markdownEditor": {
         "minHeight": "24rem",
@@ -406,6 +750,49 @@
         "turnGap": "2rem",
         "choicesMeasure": "36rem (max-w-xl)",
         "composer": "min 3rem, max 15rem, 1.5rem leading, 0.7rem radius"
+      }
+    },
+    "scopes": {
+      "landing": {
+        "selector": ".landing",
+        "route": "/",
+        "tokenPrefix": "landing-",
+        "source": [
+          "src/pages/landing/ui/landing-page.tsx",
+          "src/pages/landing/ui/context-sculpture.tsx",
+          "src/app/styles/index.css (Public landing block)"
+        ],
+        "inherits": "Existing shadcn primitives and mono font; local semantic color overrides.",
+        "appBoundary": "Unprefixed tokens and existing narrative describe the authenticated Operate app; this extension does not replace them.",
+        "colorScheme": "light",
+        "shadows": "No landing-specific shadow or blur.",
+        "narrative": {
+          "northStar": "Kinetic pixel identity",
+          "overview": "The public landing uses a kinetic pixel identity: saturated cobalt stages, warm paper, pale yellow emphasis, and substantial Onest typography. Open compositions and thin structural lines connect the current pixel wordmark with a canvas assembly; the team’s AI analyst and the coding agent’s context receive equal visual weight. Product examples explain actual capabilities and explicitly identify the synthetic demonstration.",
+          "rules": [
+            {
+              "name": "The Landing Boundary Rule",
+              "body": "Marketing color and Onest typography belong inside `.landing`; preserve the authenticated app’s own tokens and theme behavior.",
+              "section": "colors"
+            }
+          ],
+          "dos": [
+            "Do keep marketing overrides inside `.landing` and preserve the Operate application’s design.",
+            "Do give the AI analyst and coding-agent context equal weight, with human approval visible in examples.",
+            "Do reuse shadcn primitives, localized copy, the existing SVG brand and the licensed self-hosted Onest faces.",
+            "Do keep the canvas pausable, reduced-motion compatible and subordinate to readable content."
+          ],
+          "donts": [
+            "Don't carry the landing palette, display sizes or ambient motion into authenticated app screens.",
+            "Don't invent customer logos, testimonials, metrics, pricing or capabilities; identify synthetic demonstrations.",
+            "Don't promote tiny ancillary metadata or existing app rule conflicts into new global design tokens."
+          ]
+        },
+        "assets": {
+          "raster": "None added; no raster provenance required.",
+          "brand": "Existing SVG wordmark/avatar; procedural canvas assembly.",
+          "fonts": "Self-hosted Onest regular and bold with bundled license."
+        }
       }
     }
   },
@@ -489,6 +876,22 @@
       "description": "The person's turn as a muted bubble on the right, the agent's answer as plain text with an inline write row, the live status line shimmering, and the composer under it.",
       "html": "<div class=\"ds-tx\"><div class=\"ds-tx-me\">Давай начнём с требований ко входу</div><p class=\"ds-tx-write\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M12 20h9\"/><path d=\"M16.4 3.6a2 2 0 0 1 3 3L7 19l-4 1 1-4z\"/></svg><span class=\"ds-tx-verb\">Записан черновик</span><a class=\"ds-tx-key\" href=\"#\">REQ-1</a><span>Вход по email и паролю</span></p><p class=\"ds-tx-ans\">Записал черновик: вход по email и паролю. Его утвердит тот, кто ведёт проект.</p><p class=\"ds-tx-status\" role=\"status\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M2 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1zM12 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1z\"/></svg><span class=\"ds-shimmer\">Читает знания проекта</span></p><form class=\"ds-tx-comp\"><textarea placeholder=\"Сообщение агенту\" aria-label=\"Сообщение агенту\"></textarea><div class=\"ds-tx-row\"><span>Enter — отправить, Shift+Enter — новая строка</span><button type=\"button\" aria-label=\"Отправить\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"m5 12 7-7 7 7M12 19V5\"/></svg></button></div></form></div>",
       "css": ".ds-tx{display:flex;flex-direction:column;gap:1rem;width:36rem;font:400 .875rem/1.5rem \"Geist Variable\",sans-serif;color:var(--foreground)}.ds-tx-me{align-self:flex-end;max-width:80%;padding:.5rem .75rem;border-radius:calc(var(--radius)*1.4);background:var(--muted);line-height:1.625}.ds-tx-ans{margin:0}.ds-tx-write{margin:0;display:flex;align-items:center;gap:.5rem}.ds-tx-write svg{color:var(--muted-foreground);flex-shrink:0}.ds-tx-verb{color:var(--muted-foreground)}.ds-tx-key{font:400 .75rem/1.25rem \"Geist Mono Variable\",ui-monospace,monospace;font-variant-numeric:tabular-nums;color:inherit;text-decoration:underline;text-underline-offset:.2em;outline:none;border-radius:4px}.ds-tx-key:focus-visible{box-shadow:0 0 0 3px color-mix(in oklch,var(--ring) 50%,transparent)}.ds-tx-status{margin:0;display:flex;align-items:center;gap:.5rem;color:var(--muted-foreground)}.ds-shimmer{color:transparent;background:linear-gradient(100deg,var(--muted-foreground) 40%,var(--foreground) 50%,var(--muted-foreground) 60%) 0 0/300% 100%;-webkit-background-clip:text;background-clip:text;animation:ds-shimmer 2s linear infinite}@keyframes ds-shimmer{from{background-position:100% 0}to{background-position:0 0}}@media (prefers-reduced-motion:reduce){.ds-shimmer{animation:none;color:var(--muted-foreground)}}.ds-tx-comp{display:flex;flex-direction:column;border:1px solid var(--input);border-radius:calc(var(--radius)*1.4);background:var(--background);transition:border-color .15s,box-shadow .15s}.ds-tx-comp:focus-within{border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in oklch,var(--ring) 50%,transparent)}.ds-tx-comp textarea{min-height:3rem;resize:none;border:0;outline:none;background:transparent;padding:.75rem .875rem 0;font:inherit;color:inherit}.ds-tx-row{display:flex;align-items:center;justify-content:space-between;padding:.5rem}.ds-tx-row span{font-size:.75rem;color:var(--muted-foreground)}.ds-tx-row button{display:flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:0;border-radius:var(--radius);background:var(--primary);color:var(--primary-foreground);cursor:pointer}.ds-tx-row button:hover{background:color-mix(in oklch,var(--primary) 80%,transparent)}.ds-tx-row button:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in oklch,var(--ring) 50%,transparent)}"
+    },
+    {
+      "name": "Landing primary invitation",
+      "kind": "button",
+      "refersTo": "landing-button-primary",
+      "description": "Public landing only. Shadcn route-link styling, captured as a standalone preview.",
+      "html": "<a class=\"ds-landing-primary\" href=\"#\">Начать с идеи<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 17 17 7M7 7h10v10\"/></svg></a>",
+      "css": ".ds-landing-primary{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:54px;padding:0 23px;border-radius:6px;text-decoration:none;font:500 14px/1.6 Onest,sans-serif;background:#e3fa83;color:#192323;}.ds-landing-primary:hover{background:color-mix(in oklch,#e3fa83 80%,transparent)}.ds-landing-primary svg{transition:transform 220ms cubic-bezier(.16,1,.3,1)}.ds-landing-primary:hover svg{transform:translate(3px,-3px)}.ds-landing-primary:focus-visible{outline:3px solid currentColor;outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-landing-primary svg{transition:none}}.ds-landing-primary:active{transform:translateY(1px)}@media(max-width:760px){.ds-landing-primary{min-height:49px;padding-inline:18px;font-size:12px;gap:18px}}"
+    },
+    {
+      "name": "Landing closing invitation",
+      "kind": "button",
+      "refersTo": "landing-button-closing",
+      "description": "Public landing only. Shadcn route-link styling, captured as a standalone preview.",
+      "html": "<a class=\"ds-landing-closing\" href=\"#\">Создать аккаунт<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 17 17 7M7 7h10v10\"/></svg></a>",
+      "css": ".ds-landing-closing{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:54px;padding:0 23px;border-radius:6px;text-decoration:none;font:500 14px/1.6 Onest,sans-serif;background:#192323;color:#fff;}.ds-landing-closing:hover{background:color-mix(in oklch,#192323 80%,transparent)}.ds-landing-closing svg{transition:transform 220ms cubic-bezier(.16,1,.3,1)}.ds-landing-closing:hover svg{transform:translate(3px,-3px)}.ds-landing-closing:focus-visible{outline:3px solid currentColor;outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-landing-closing svg{transition:none}}.ds-landing-closing:active{transform:translateY(1px)}@media(max-width:760px){.ds-landing-closing{min-height:49px;padding-inline:18px;font-size:12px;gap:18px}}"
     }
   ],
   "narrative": {

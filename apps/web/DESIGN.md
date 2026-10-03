@@ -17,6 +17,20 @@ colors:
   success: 'oklch(0.56 0.14 155)'
   warning: 'oklch(0.66 0.15 65)'
   destructive: 'oklch(0.577 0.215 27)'
+  landing-cobalt: '#2549e8'
+  landing-cobalt-deep: '#1b36bd'
+  landing-paper: '#f7f8f4'
+  landing-ink: '#192323'
+  landing-subtle: '#586160'
+  landing-yellow: '#e3fa83'
+  landing-line: '#d9dfd8'
+  landing-white: '#fff'
+  landing-muted: '#e9ede5'
+  landing-blue-text: '#d2daff'
+  landing-feature: '#e9eedf'
+  landing-night: '#171e2b'
+  landing-terminal: '#1d2635'
+  landing-terminal-line: '#3b4352'
 typography:
   headline:
     fontFamily: 'Geist Variable, sans-serif'
@@ -50,11 +64,46 @@ typography:
     fontWeight: 400
     lineHeight: '1.25rem'
     fontFeature: 'tnum'
+  landing-display:
+    fontFamily: 'Onest, sans-serif'
+    fontSize: 'clamp(50px, 5.7vw, 82px)'
+    fontWeight: 700
+    lineHeight: 1.06
+    letterSpacing: '-0.04em'
+  landing-headline:
+    fontFamily: 'Onest, sans-serif'
+    fontSize: 'clamp(32px, 3.6vw, 52px)'
+    fontWeight: 700
+    lineHeight: 1.12
+    letterSpacing: '-0.035em'
+  landing-title:
+    fontFamily: 'Onest, sans-serif'
+    fontSize: '31px'
+    fontWeight: 700
+    lineHeight: 1.18
+    letterSpacing: '-0.025em'
+  landing-body:
+    fontFamily: 'Onest, sans-serif'
+    fontSize: '16px'
+    fontWeight: 400
+    lineHeight: 1.6
+  landing-lead:
+    fontFamily: 'Onest, sans-serif'
+    fontSize: '17px'
+    fontWeight: 400
+    lineHeight: 1.7
+  landing-feature-body:
+    fontFamily: 'Onest, sans-serif'
+    fontSize: '14px'
+    fontWeight: 400
+    lineHeight: 1.75
 rounded:
   md: '0.4rem'
   lg: '0.5rem'
   xl: '0.7rem'
   full: '9999px'
+  landing-control: '6px'
+  landing-panel: '12px'
 spacing:
   xs: '0.25rem'
   sm: '0.5rem'
@@ -62,6 +111,11 @@ spacing:
   lg: '1rem'
   xl: '2rem'
   2xl: '4rem'
+  landing-section: '112px'
+  landing-section-mobile: '66px'
+  landing-gutter: '56px'
+  landing-gutter-tablet: '36px'
+  landing-gutter-mobile: '20px'
 components:
   button-primary:
     backgroundColor: '{colors.ink}'
@@ -125,11 +179,33 @@ components:
     textColor: '{colors.muted-text}'
     rounded: '{rounded.md}'
     size: '2rem'
+  landing-button-primary:
+    backgroundColor: '{colors.landing-yellow}'
+    textColor: '{colors.landing-ink}'
+    rounded: '{rounded.landing-control}'
+    padding: '0 23px'
+  landing-button-closing:
+    backgroundColor: '{colors.landing-ink}'
+    textColor: '{colors.landing-white}'
+    rounded: '{rounded.landing-control}'
+    padding: '0 23px'
+  landing-demo:
+    backgroundColor: '{colors.landing-white}'
+    rounded: '{rounded.landing-panel}'
+  landing-feature:
+    backgroundColor: '{colors.landing-feature}'
+    rounded: '{rounded.landing-panel}'
+    padding: '42px 46px'
+  landing-terminal:
+    backgroundColor: '{colors.landing-terminal}'
+    rounded: '{rounded.landing-panel}'
 ---
 
 # Design System: Intentra
 
 ## Overview
+
+**Scope:** Unprefixed tokens and the incumbent guidance below describe the authenticated Operate application. Tokens named `landing-*` and subsections titled “Public landing” describe only `.landing` on `/`, implemented in `src/pages/landing` and the `Public landing` block of `src/app/styles/index.css`. They are an intentional marketing extension, not replacements for the app palette, type scale, density, dark theme or motion rules. `/app` enters the existing workspace.
 
 **Creative North Star: "The Category Standard, Played Straight"**
 
@@ -147,6 +223,10 @@ The interface is composed from shadcn primitives (base-nova style on Base UI). T
 - Statuses always as icon plus word.
 - Geist for words, Geist Mono (tabular) only for machine-shaped values.
 - Flat content; shadow only on the canvas and on floating layers.
+
+### Public landing — scoped overview
+
+The public landing uses a kinetic pixel identity: saturated cobalt stages, warm paper, pale yellow emphasis, and substantial Onest typography. Open compositions and thin structural lines connect the current pixel wordmark with a canvas assembly; the team’s AI analyst and the coding agent’s context receive equal visual weight. Product examples explain actual capabilities and explicitly identify the synthetic demonstration.
 
 ## Colors
 
@@ -190,6 +270,12 @@ A cool neutral ramp (hue 286, near-zero chroma) with one muted indigo accent and
 
 **The Inverted Night Rule.** Dark mode is the same system inverted: the frame goes darker than the canvas, the primary button turns near-white, the indigo accent and the signal hues lighten to hold contrast, so focus rings and the unread dot stay visible on the dark canvas. Borders become white at 11% (input 14%, sidebar 8%).
 
+### Public landing — palette
+
+Cobalt (`landing-cobalt`) is a full section ground, the light-surface action color and a focus color; deep cobalt is its local ghost-control hover fill. Pale yellow (`landing-yellow`) marks the hero emphasis, primary invitation and closing stage. Warm paper, ink, subtle text and structural lines use the corresponding `landing-*` tokens. The feature panel uses pale green; the coding-agent stage uses `landing-night` with the lighter `landing-terminal` and its hairline. These are fixed light-mode marketing assignments, including when the enclosing app preference is dark.
+
+**The Landing Boundary Rule.** Marketing color and Onest typography belong inside `.landing`; preserve the authenticated app’s own tokens and theme behavior.
+
 ## Typography
 
 **Body Font:** Geist Variable (with sans-serif)
@@ -210,6 +296,12 @@ A cool neutral ramp (hue 286, near-zero chroma) with one muted indigo accent and
 **The Mono Is for Values Rule.** Geist Mono sets only keys, slugs, counts, dates and URLs (and secrets in copy fields). Names, roles and prose stay in Geist.
 
 **The No Kicker Rule.** No eyebrows, kickers or uppercase tracked labels above headings. A section is its title plus at most one muted description line.
+
+### Public landing — typography
+
+Onest is self-hosted from `/fonts/onest-regular.ttf` and `/fonts/onest-bold.ttf`, with `font-display: swap` and the bundled license. The authored faces are regular and bold; CSS maps them across 400–600 and 700–900 respectively. The `landing-display`, `landing-headline`, `landing-title`, `landing-body`, `landing-lead` and `landing-feature-body` tokens record the main desktop roles. Knowledge Keys retain the existing mono family.
+
+The hero changes to 64px at ≤1100px, `clamp(39px, 8.5vw, 62px)` with 1.08 leading at ≤760px, 36px at ≤380px, and 90px at ≥1600px. Mobile section headings use `clamp(30px, 7.5vw, 44px)` before component-specific overrides. Supporting copy ranges from 13–17px; small demo metadata is an ancillary detail, not a scale for new main content.
 
 ## Layout
 
@@ -247,6 +339,12 @@ These sets are closed. New work reuses a step; it does not add one.
 - **Measure:** descriptions 42rem; inline forms and fields 32rem; page column 72rem.
 - **Spacing rhythm:** 0.25, 0.5, 0.75, 1, 2, 4rem.
 
+### Public landing — layout and motion
+
+The container is at most 1328px with 56px side gutters, reduced to 36px at ≤1100px and 20px at ≤760px. Main sections commonly use 112px vertical padding, reduced to 66px on mobile; section-specific spacing stays in the stylesheet. Desktop uses an asymmetric hero and paired explanation/example columns. At ≤760px these become one column, the demo stacks conversation above knowledge, and navigation becomes an inline expanding menu. The existing pixel wordmark spans the footer.
+
+The canvas assembles a deterministic pixel ring using time, pointer position and native scroll progress. A pause control stops ambient animation; reduced motion shows a fully assembled still mark. Offscreen drawing stops. The hero enters once over 900ms with the existing ease-out-expo curve; supported view timelines move the feature and terminal by 30px. Ambient fragments drift over 8s, the terminal cursor blinks over 1.3s, and arrow feedback takes 220ms. Reduced motion removes animation and transitions. The landing uses native scrolling, with smooth anchor behavior only when reduced motion is not requested.
+
 ## Elevation & Depth
 
 Content is flat. Depth comes from the tonal step between the frame and the canvas and from 1px hairlines. Shadow appears in exactly two places: the canvas (soft, ambient, always paired with a 1px ring) and floating layers the primitives own (menus, popovers). Dialogs rely on a ring and a plain scrim.
@@ -262,9 +360,17 @@ Content is flat. Depth comes from the tonal step between the frame and the canva
 
 **The Flat Content Rule.** Lists, sections and headers carry no shadow. If something needs separating, use a hairline.
 
+### Public landing — depth
+
+Marketing sections and examples are flat. Solid color changes, whitespace and 1px structural rules create separation; no landing-specific shadow or blur is introduced. The canvas suggests assembly through position, scale and opacity, without turning the page into a floating dashboard.
+
 ## Shapes
 
 One base radius (0.5rem) scaled by multiplier, four steps only: controls, list blocks, menus and cards at 0.5rem; initial tiles, skeletons, sidebar items and small controls at 0.4rem; the canvas at 0.7rem; the avatar and dots round. Dialog corners (0.7rem), chat bubbles (0.7rem) and badge pills are owned by their primitives; the composer takes 0.7rem to match the bubbles it faces. Every border is 1px. Rows inside a list are divided, never separately rounded; the list block clips them.
+
+### Public landing — shapes
+
+Controls have a 6px radius; the demo, primary feature example and terminal use 12px. Smaller inset content uses 7–8px corners, while the canvas and wordmark keep their native square pixel geometry. These radii belong to the marketing extension and do not enlarge application controls.
 
 ## Components
 
@@ -364,6 +470,14 @@ A conversation that visibly turns into knowledge, in the app's own materials: no
 - **Recorded panel:** the items a Conversation recorded or changed, newest first, as bordered navigating tiles (0.5rem radius, 0.75rem padding) with the Knowledge Item summary read live, so a status follows approvals made elsewhere; its title carries a mono count.
 - **Empty conversation:** set low in the transcript above the composer: the Project's name as the one heading (Headline) with one muted line under it; then "Что уже известно", a borderless map of all eleven Kinds in up to three columns (the Kind's toned icon, its name, Approved in mono and Drafts after a muted plus; an empty Kind fades its icon and shows a muted dash), each row starting a Conversation that fills or adds to that Kind; then "С чего начать", up to three starters in one bordered list, most pressing first (needs review, Drafts waiting, open questions, empty Kinds in the model's order, or "what is missing"), each with its icon, its words and a muted action with an arrow on the right. The map's rows come in once, 35ms apart (fade and a 4px rise, none under reduced motion); that is the screen's one motion.
 
+### Public landing — components
+
+- **Invitation:** existing shadcn button styling on a route link, pale yellow with dark ink; the closing variant uses dark ink with white text. Minimum height is 54px (49px mobile), horizontal padding 23px (18px mobile). The arrow shifts 3px up and right on hover; keyboard focus uses a 3px current-color outline offset by 5px. Existing sessions enter the workspace; new visitors enter registration.
+- **Product demonstration:** a white bordered 12px panel, conversation and knowledge side by side, stacked on mobile. A shadcn Button switches a clearly synthetic Draft to Approved and back; a Badge and live status text carry the change, while the knowledge surface subtly changes fill. The example keeps key, source and links visible.
+- **Navigation and FAQ:** existing shadcn controls provide the menu toggle and accordion behavior. Desktop navigation uses 13px text; mobile expands inline with 16px links. FAQ triggers have 16px text (14px mobile), generous vertical padding and structural row dividers.
+- **Context example:** a dark terminal-like panel with a plain-language request, tool name and linked knowledge rows. It explains the shared model; it does not claim a live connection.
+- **Brand assembly:** the existing SVG wordmark and avatar are reused; the hero mark is drawn in canvas. No generated raster ships with this surface, so no raster provenance record is required.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -391,3 +505,13 @@ A conversation that visibly turns into knowledge, in the app's own materials: no
 - **Don't** set names, roles or prose in mono.
 - **Don't** add hover states to rows or blocks that do not navigate.
 - **Don't** hard-code copy in components.
+
+### Public landing — scoped guardrails
+
+- Do keep marketing overrides inside `.landing` and preserve the Operate application’s design.
+- Do give the AI analyst and coding-agent context equal weight, with human approval visible in examples.
+- Do reuse shadcn primitives, localized copy, the existing SVG brand and the licensed self-hosted Onest faces.
+- Do keep the canvas pausable, reduced-motion compatible and subordinate to readable content.
+- Don't carry the landing palette, display sizes or ambient motion into authenticated app screens.
+- Don't invent customer logos, testimonials, metrics, pricing or capabilities; identify synthetic demonstrations.
+- Don't promote tiny ancillary metadata or existing app rule conflicts into new global design tokens.

@@ -1,6 +1,9 @@
+import { landingRu } from './landing-ru';
+
 /** The interface's Russian texts, the full set; English covers only part (ADR 0003). */
 export const ru = {
   brand: 'Intentra',
+  landing: landingRu,
   fields: {
     email: 'Email',
     password: 'Пароль',

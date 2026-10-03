@@ -14,7 +14,8 @@ const PROJECT_BASE = 'p';
 
 /** The app's paths, in one place. */
 export const ROUTES = {
-  home: '/',
+  landing: '/',
+  home: '/app',
   auth: '/auth',
   signIn: '/auth/sign-in',
   signUp: '/auth/sign-up',

@@ -32,6 +32,12 @@ import { SessionRedirects } from './session-redirects';
 
 export const router = createBrowserRouter([
   {
+    path: ROUTES.landing,
+    lazy: async () => ({
+      Component: (await import('@/pages/landing')).LandingPage,
+    }),
+  },
+  {
     Component: SessionRedirects,
     children: [
       { path: ROUTES.home, loader: requireSession, Component: StartPage },

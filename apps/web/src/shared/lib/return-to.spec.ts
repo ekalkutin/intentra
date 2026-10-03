@@ -30,7 +30,7 @@ describe('safeReturnTo', () => {
     const path = safeReturnTo(value);
 
     // Assert
-    expect(path).toBe('/');
+    expect(path).toBe('/app');
   });
 });
 
@@ -45,7 +45,7 @@ describe('signInPath', () => {
 
   it('needs no reminder for home', () => {
     // Act
-    const path = signInPath('/');
+    const path = signInPath('/app');
 
     // Assert
     expect(path).toBe('/auth/sign-in');

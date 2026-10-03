@@ -235,3 +235,10 @@ export {
   SheetTrigger,
 } from './primitives/sheet';
 export { Skeleton } from './primitives/skeleton';
+
+export {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from './primitives/accordion';
