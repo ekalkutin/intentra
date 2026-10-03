@@ -300,6 +300,20 @@ bearer_token_env_var = "INTENTRA_TOKEN"
 
 Потом проверь, что инструменты intentra доступны, и коротко скажи, что подключено.`,
   },
+  oauthAuthorize: {
+    title: '{{client}} просит доступ к Intentra',
+    description:
+      'Агент будет работать от вашего имени по токену доступа. После разрешения вы вернётесь на {{host}}.',
+    workspace: 'Пространство',
+    noWorkspaces: 'У вас пока нет пространств.',
+    tokenHint:
+      'Токен появится в списке токенов пространства, отозвать его можно в любой момент.',
+    allow: 'Разрешить',
+    deny: 'Отклонить',
+    problemTitle: 'Не удалось подключить агента',
+    malformed:
+      'В ссылке не хватает данных. Начните подключение в агенте заново.',
+  },
   lifetimes: {
     days30: '30 дней',
     days90: '90 дней',
@@ -1541,6 +1555,8 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     INVITATION_EXPIRED: 'Срок приглашения истёк',
     INVITATION_NOT_PENDING: 'На это приглашение уже ответили',
     INVITATION_NOT_FOUND: 'Приглашение не найдено',
+    INVALID_OAUTH_REQUEST:
+      'Агент прислал неверную ссылку. Начните подключение в нём заново.',
     INVALID_PERSONAL_ACCESS_TOKEN_NAME: 'Введите название токена',
     INVALID_PERSONAL_ACCESS_TOKEN_LIFETIME: 'Выберите срок действия',
     PERSONAL_ACCESS_TOKEN_NOT_FOUND: 'Токен не найден',

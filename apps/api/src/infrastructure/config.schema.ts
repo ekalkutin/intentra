@@ -44,6 +44,8 @@ export const EnvironmentSchema = z
       )
       .pipe(z.array(z.string()).min(1))
       .optional(),
+    /** Where people open Intentra, such as https://intentra.example.com; turns on OAuth for MCP clients (ChatGPT). */
+    PUBLIC_URL: z.url({ protocol: /^https?$/ }).optional(),
   })
   .refine(env => env.IAM_ACCESS_TOKEN_SECRET !== env.IAM_REFRESH_TOKEN_SECRET, {
     message: 'IAM_ACCESS_TOKEN_SECRET and IAM_REFRESH_TOKEN_SECRET must differ',
@@ -81,6 +83,7 @@ export const EnvironmentSchema = z
     },
     gateway: {
       mcp: { allowedHosts: env.MCP_ALLOWED_HOSTS },
+      oauth: { publicUrl: env.PUBLIC_URL },
     },
     workspace: {
       agents: {

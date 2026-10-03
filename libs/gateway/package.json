@@ -25,7 +25,8 @@
     "@modelcontextprotocol/server": "catalog:",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/core": "catalog:nestjs12",
-    "ai": "catalog:"
+    "ai": "catalog:",
+    "zod": "catalog:"
   },
   "nx": {
     "tags": [

@@ -4,6 +4,7 @@ import { SignInPage, SignUpPage } from '@/pages/auth';
 import { InvitationsPage } from '@/pages/invitations';
 import { KnowledgeEditorPage } from '@/pages/knowledge-editor';
 import { KnowledgeItemPage } from '@/pages/knowledge-item';
+import { OAuthAuthorizePage } from '@/pages/oauth-authorize';
 import { ProjectAccessPage } from '@/pages/project-access';
 import { ProjectAnalysisPage } from '@/pages/project-analysis';
 import { ProjectInterviewPage } from '@/pages/project-interview';
@@ -45,6 +46,11 @@ export const router = createBrowserRouter([
         path: ROUTES.invitations,
         loader: requireSession,
         Component: InvitationsPage,
+      },
+      {
+        path: ROUTES.oauthAuthorize,
+        loader: requireSession,
+        Component: OAuthAuthorizePage,
       },
       {
         path: ROUTES.workspace,

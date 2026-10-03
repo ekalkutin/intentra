@@ -24,6 +24,10 @@
     "./workspace": {
       "types": "./build/workspace/index.d.ts",
       "import": "./build/workspace/index.js"
+    },
+    "./oauth": {
+      "types": "./build/oauth/index.d.ts",
+      "import": "./build/oauth/index.js"
     }
   },
   "files": [

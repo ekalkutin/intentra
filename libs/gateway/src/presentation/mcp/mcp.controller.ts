@@ -16,7 +16,7 @@ import { toAuthInfo } from './mcp-caller.js';
 import { MCP_OPTIONS, type McpOptions } from './mcp-options.js';
 import { McpHandler } from './mcp.handler.js';
 
-/** External agents authenticate with a Personal Access Token. */
+/** External agents authenticate with a Personal Access Token, typed in by hand or received over OAuth. */
 @Controller('mcp')
 export class McpController {
   // DNS rebinding protection by the Host header. Origin is not checked:
@@ -25,6 +25,7 @@ export class McpController {
     req: IncomingMessage,
     res: ServerResponse,
   ) => boolean;
+  readonly #challenge: string;
 
   constructor(
     private readonly mcpHandler: McpHandler,
@@ -34,6 +35,10 @@ export class McpController {
     this.#validateHost = options.allowedHosts
       ? hostHeaderValidation([...options.allowedHosts])
       : localhostHostValidation();
+    // RFC 9728: tells an OAuth client where to start; plain Bearer while OAuth is off.
+    this.#challenge = options.resourceMetadataUrl
+      ? `Bearer resource_metadata="${options.resourceMetadataUrl}"`
+      : 'Bearer';
   }
 
   @All()
@@ -45,10 +50,15 @@ export class McpController {
 
     const secret = readBearerToken(req.headers);
     if (!secret) {
+      res.setHeader('WWW-Authenticate', this.#challenge);
       throw new UnauthenticatedException('Personal access token is missing');
     }
-    const caller =
-      await this.workspace.personalAccessTokens.authenticate(secret);
+    const caller = await this.workspace.personalAccessTokens
+      .authenticate(secret)
+      .catch((error: unknown) => {
+        res.setHeader('WWW-Authenticate', this.#challenge);
+        throw error;
+      });
     req.auth = toAuthInfo(secret, caller);
 
     // Nest has already parsed the JSON body, so it is passed on as is.

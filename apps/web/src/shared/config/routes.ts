@@ -20,6 +20,8 @@ export const ROUTES = {
   signIn: '/auth/sign-in',
   signUp: '/auth/sign-up',
   invitations: '/invitations',
+  /** OAuth's consent step for MCP clients; the server names this address in its metadata. */
+  oauthAuthorize: '/oauth/authorize',
   workspace: `${WORKSPACE_BASE}/:${ROUTE_PARAMS.workspaceSlug}`,
   /** The Platform Admin's section. */
   platform: PLATFORM_BASE,
