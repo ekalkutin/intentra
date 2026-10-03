@@ -364,16 +364,12 @@ describe('KnowledgeService Links and Needs Review', () => {
         });
 
       // Act
-      const byContributor = assign(bob);
-      const intoDraft = assign(ada);
+      const byContributor = await assign(bob).catch((error: unknown) => error);
+      const intoDraft = await assign(ada).catch((error: unknown) => error);
 
       // Assert
-      await expect(byContributor).rejects.toBeInstanceOf(
-        FeatureAssignmentForbiddenException,
-      );
-      await expect(intoDraft).rejects.toBeInstanceOf(
-        DependenciesNotApprovedException,
-      );
+      expect(byContributor).toBeInstanceOf(FeatureAssignmentForbiddenException);
+      expect(intoDraft).toBeInstanceOf(DependenciesNotApprovedException);
     });
 
     describe('in a Context Pack', () => {
