@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   errorRedirectUrl,
   readAuthorizationRequest,
+  requestedWorkspaceSlug,
   requestProblem,
 } from './authorization-request';
 
@@ -61,6 +62,36 @@ describe('requestProblem', () => {
 
     // Assert
     expect(problem).toBe('unsupported_response_type');
+  });
+});
+
+describe('requestedWorkspaceSlug', () => {
+  it("reads the slug from a Workspace's own MCP address", () => {
+    // Act
+    const slug = requestedWorkspaceSlug(
+      request({ resource: 'https://intentra.example.com/api/mcp/acme' }),
+    );
+
+    // Assert
+    expect(slug).toBe('acme');
+  });
+
+  it('finds none in the common MCP address', () => {
+    // Act
+    const slug = requestedWorkspaceSlug(
+      request({ resource: 'https://intentra.example.com/api/mcp' }),
+    );
+
+    // Assert
+    expect(slug).toBeNull();
+  });
+
+  it('finds none when the client names no resource', () => {
+    // Act
+    const slug = requestedWorkspaceSlug(request());
+
+    // Assert
+    expect(slug).toBeNull();
   });
 });
 

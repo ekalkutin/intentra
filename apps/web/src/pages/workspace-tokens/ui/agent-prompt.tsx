@@ -5,20 +5,28 @@ import { useTranslation } from 'react-i18next';
 import { cn, useCopy } from '@/shared/lib';
 import { Button } from '@/shared/ui';
 
-import { maskSecret, mcpUrl } from '../model/mcp';
+import { maskSecret, mcpConnection, mcpUrl } from '../model/mcp';
 
 /**
  * A ready prompt that connects Claude Code or Codex to Intentra with the new
  * token: its first lines fading out, the rest on demand. The preview hides
  * most of the secret; the copy carries it whole.
  */
-export function AgentPrompt({ secret }: { readonly secret: string }) {
+export function AgentPrompt({
+  workspaceSlug,
+  secret,
+}: {
+  readonly workspaceSlug: string;
+  readonly secret: string;
+}) {
   const { t } = useTranslation();
   const id = useId();
   const { copied, copy } = useCopy();
   const [expanded, setExpanded] = useState(false);
-  const url = mcpUrl();
-  const prompt = (token: string) => t('tokens.prompt', { url, token });
+  const url = mcpUrl(workspaceSlug);
+  const connection = mcpConnection(workspaceSlug);
+  const prompt = (token: string) =>
+    t('tokens.prompt', { url, token, ...connection });
 
   return (
     <section className='flex flex-col gap-3 border-t border-border pt-5'>

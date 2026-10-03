@@ -2,7 +2,13 @@ import type {
   OAuthMetadata,
   OAuthProtectedResourceMetadata,
 } from '@modelcontextprotocol/server';
-import { Controller, Get, Inject, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Inject,
+  NotFoundException,
+  Param,
+} from '@nestjs/common';
 
 import {
   OAUTH_OPTIONS,
@@ -33,6 +39,20 @@ export class OAuthDiscoveryController {
       authorization_servers: [urls.issuer],
       bearer_methods_supported: ['header'],
       resource_name: 'Intentra',
+    };
+  }
+
+  /**
+   * A Workspace's own MCP address is a resource of its own, so that a client
+   * asks for a token for that Workspace and keeps it apart from the others.
+   */
+  @Get('oauth-protected-resource/api/mcp/:workspaceSlug')
+  public workspaceProtectedResource(
+    @Param('workspaceSlug') workspaceSlug: string,
+  ): OAuthProtectedResourceMetadata {
+    return {
+      ...this.protectedResource(),
+      resource: `${this.#enabled().resource}/${encodeURIComponent(workspaceSlug)}`,
     };
   }
 

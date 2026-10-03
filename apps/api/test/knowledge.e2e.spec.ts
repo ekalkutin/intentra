@@ -291,7 +291,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
 
     // Assert
     expect(response.status).toBe(HttpStatus.OK);
-    expect(response.body.kinds).toHaveLength(11);
+    expect(response.body.kinds).toHaveLength(12);
     expect(
       response.body.kinds.find(
         (entry: { kind: string }) => entry.kind === 'requirement',

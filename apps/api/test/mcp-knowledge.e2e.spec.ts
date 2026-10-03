@@ -123,6 +123,7 @@ describe('Knowledge tools over MCP', () => {
 
     // Assert
     expect(result.structuredContent).toEqual({
+      workspace: { name: 'Acme', slug: 'acme' },
       projects: [
         {
           id: projectId,
@@ -173,7 +174,7 @@ describe('Knowledge tools over MCP', () => {
       ],
       total: 1,
     });
-    expect(withDrafts.structuredContent?.canRecord).toHaveLength(11);
+    expect(withDrafts.structuredContent?.canRecord).toHaveLength(12);
   });
 
   it('counts the knowledge by Kind and status in one call', async () => {
@@ -188,7 +189,7 @@ describe('Knowledge tools over MCP', () => {
     const kinds = (result.structuredContent?.kinds ?? []) as {
       kind: string;
     }[];
-    expect(kinds).toHaveLength(11);
+    expect(kinds).toHaveLength(12);
     expect(kinds.find(entry => entry.kind === 'requirement')).toEqual({
       kind: 'requirement',
       draft: 1,
@@ -198,7 +199,7 @@ describe('Knowledge tools over MCP', () => {
       needsReview: 0,
     });
     expect(result.structuredContent?.gaps).toBe(3);
-    expect(result.structuredContent?.canRecord).toHaveLength(11);
+    expect(result.structuredContent?.canRecord).toHaveLength(12);
   });
 
   it('lists the Gaps with what each one misses', async () => {

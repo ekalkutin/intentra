@@ -58,7 +58,10 @@ export function WorkspaceTokensPage() {
       />
       <div className='flex max-w-lg flex-col gap-2'>
         <p className='text-sm font-medium'>{t('tokens.endpoint')}</p>
-        <CopyField value={mcpUrl()} label={t('tokens.endpoint')} />
+        <CopyField
+          value={mcpUrl(workspace.slug)}
+          label={t('tokens.endpoint')}
+        />
       </div>
       <PageSection
         title={

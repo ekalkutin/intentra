@@ -132,6 +132,29 @@ describe('OAuth for MCP clients', () => {
     );
   });
 
+  it("points a client of a Workspace's own address to that address's metadata", async () => {
+    // Act
+    const response = await app
+      .request()
+      .post(`${MCP_PATH}/acme`)
+      .set('Accept', 'application/json, text/event-stream')
+      .send({ jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} });
+    const resource = await app
+      .request()
+      .get('/.well-known/oauth-protected-resource/api/mcp/acme');
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+    expect(response.headers['www-authenticate']).toBe(
+      `Bearer resource_metadata="${PUBLIC_URL}/.well-known/oauth-protected-resource/api/mcp/acme"`,
+    );
+    expect(resource.status).toBe(HttpStatus.OK);
+    expect(resource.body).toMatchObject({
+      resource: `${PUBLIC_URL}/api/mcp/acme`,
+      authorization_servers: [PUBLIC_URL],
+    });
+  });
+
   it('describes the protected resource and the authorization server', async () => {
     // Act
     const resource = await app

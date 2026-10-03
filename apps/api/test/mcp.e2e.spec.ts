@@ -18,10 +18,15 @@ describe('POST /api/mcp', () => {
   let app: TestingApp;
   let secret: string;
 
-  const call = (method: string, params: object, token = secret) =>
+  const call = (
+    method: string,
+    params: object,
+    token = secret,
+    path = MCP_PATH,
+  ) =>
     app
       .request()
-      .post(MCP_PATH)
+      .post(path)
       .set('Accept', 'application/json, text/event-stream')
       .set('Authorization', `Bearer ${token}`)
       .send({ jsonrpc: '2.0', id: 1, method, params });
@@ -92,6 +97,37 @@ describe('POST /api/mcp', () => {
     // Assert
     expect(response.status).toBe(HttpStatus.OK);
     expect(response.text).toContain('"name":"intentra"');
+  });
+
+  it('tells the agent which Workspace it is connected to', async () => {
+    // Act
+    const response = await call('initialize', {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'e2e', version: '1.0.0' },
+    });
+
+    // Assert
+    expect(response.text).toContain(
+      'You are connected to the Workspace \\"Acme\\" (acme)',
+    );
+  });
+
+  it("accepts the Workspace's token at the Workspace's own address", async () => {
+    // Act
+    const response = await call('tools/list', {}, secret, `${MCP_PATH}/acme`);
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.OK);
+  });
+
+  it("rejects the token at another Workspace's address", async () => {
+    // Act
+    const response = await call('tools/list', {}, secret, `${MCP_PATH}/beta`);
+
+    // Assert
+    expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+    expect(response.headers['www-authenticate']).toBe('Bearer');
   });
 
   it('calls the echo tool', async () => {

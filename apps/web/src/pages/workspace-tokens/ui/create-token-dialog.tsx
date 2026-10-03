@@ -131,7 +131,7 @@ export function CreateTokenDialog({
               </DialogDescription>
             </DialogHeader>
             <CopyField value={secret} label={t('tokens.secretTitle')} />
-            <AgentPrompt secret={secret} />
+            <AgentPrompt workspaceSlug={workspace.slug} secret={secret} />
             <DialogFooter>
               <DialogClose render={<Button />}>
                 {t('tokens.secretDone')}

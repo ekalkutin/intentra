@@ -167,6 +167,8 @@ export class PersonalAccessTokensService implements PersonalAccessTokensApi {
           isPlatformAdmin: false,
         },
         workspaceId: token.workspaceId.value,
+        workspaceName: workspace.name.value,
+        workspaceSlug: workspace.slug.value,
         level: token.level.value as ProjectRoleDto,
       };
     });

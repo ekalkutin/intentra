@@ -183,6 +183,8 @@ describe('PersonalAccessTokensService integration', () => {
       expect(caller).toEqual({
         actor: bob,
         workspaceId,
+        workspaceName: 'Acme',
+        workspaceSlug: 'acme',
         level: 'contributor',
       });
       const [token] = await app

@@ -6,6 +6,8 @@ export type AuthorizationRequest = {
   readonly codeChallenge: string | null;
   readonly codeChallengeMethod: string | null;
   readonly state: string | null;
+  /** RFC 8707: the MCP address the client asks a token for. */
+  readonly resource: string | null;
 };
 
 /** Null without a client or a redirect URI: then there is nowhere to send even an error. */
@@ -25,7 +27,29 @@ export function readAuthorizationRequest(
     codeChallenge: params.get('code_challenge'),
     codeChallengeMethod: params.get('code_challenge_method'),
     state: params.get('state'),
+    resource: params.get('resource'),
   };
+}
+
+/** A Workspace's own MCP address ends with its slug: `/api/mcp/<slug>`. */
+const WORKSPACE_RESOURCE_PATH = /^\/api\/mcp\/([^/]+)\/?$/;
+
+/**
+ * The slug of the Workspace the client connects to, when it asks for a token
+ * for a Workspace's own MCP address; null for the common address, where the
+ * person picks the Workspace.
+ */
+export function requestedWorkspaceSlug(
+  request: AuthorizationRequest,
+): string | null {
+  if (!request.resource || !URL.canParse(request.resource)) {
+    return null;
+  }
+  const slug = WORKSPACE_RESOURCE_PATH.exec(
+    new URL(request.resource).pathname,
+  )?.[1];
+
+  return slug === undefined ? null : decodeURIComponent(slug);
 }
 
 /** What is wrong with a request from a known client, as an OAuth error code, or null. */

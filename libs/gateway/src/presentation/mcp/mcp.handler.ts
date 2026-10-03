@@ -9,8 +9,8 @@ import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { Inject, Injectable } from '@nestjs/common';
 
 import {
-  MCP_INSTRUCTIONS,
   MCP_TOOLS,
+  mcpInstructions,
   type ToolApis,
 } from '@intentra/agent-toolkit';
 import {
@@ -26,6 +26,7 @@ import { registerMcpTools } from './mcp-tools.js';
  * Stateless MCP over Streamable HTTP: a fresh McpServer for every request,
  * offered the MCP tools with the published sub-APIs, the caller (an agent working
  * for the token's Member) and the token's Workspace in their request context.
+ * The instructions name that Workspace, so the agent knows where it works.
  */
 @Injectable()
 export class McpHandler {
@@ -53,10 +54,20 @@ export class McpHandler {
             },
           } satisfies CallerDto);
           requestContext.set('workspaceId', caller.workspaceId);
+          requestContext.set('workspace', {
+            id: caller.workspaceId,
+            name: caller.workspaceName,
+            slug: caller.workspaceSlug,
+          });
         }
         const server = new McpServer(
           { name: 'intentra', version: '1.0.0' },
-          { instructions: MCP_INSTRUCTIONS },
+          caller && {
+            instructions: mcpInstructions({
+              name: caller.workspaceName,
+              slug: caller.workspaceSlug,
+            }),
+          },
         );
         registerMcpTools(server, MCP_TOOLS, requestContext);
         return server;

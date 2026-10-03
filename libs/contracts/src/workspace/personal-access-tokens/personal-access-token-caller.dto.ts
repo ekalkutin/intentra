@@ -5,6 +5,9 @@ import type { ProjectRoleDto } from '../project-roles/member-project-role.dto.js
 export type PersonalAccessTokenCallerDto = {
   readonly actor: Actor;
   readonly workspaceId: string;
+  readonly workspaceName: string;
+  /** Names the Workspace in its own MCP address, `/api/mcp/<slug>`. */
+  readonly workspaceSlug: string;
   /** The token's level; in each Project the agent gets the lower of it and the Member's Project Role. */
   readonly level: ProjectRoleDto;
 };

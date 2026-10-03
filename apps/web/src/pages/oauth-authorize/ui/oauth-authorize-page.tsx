@@ -40,6 +40,7 @@ import {
 import {
   errorRedirectUrl,
   readAuthorizationRequest,
+  requestedWorkspaceSlug,
   requestProblem,
   type AuthorizationRequest,
 } from '../model/authorization-request';
@@ -56,8 +57,10 @@ const LIFETIMES = [
 /**
  * OAuth's consent step for MCP clients such as ChatGPT: the person picks a
  * Workspace, a level and a lifetime, and the client gets a Personal Access
- * Token of theirs. Nothing is sent back to the client until the server has
- * confirmed the redirect URI is one the client registered.
+ * Token of theirs. A client that connects to a Workspace's own MCP address
+ * gets that Workspace, with nothing to pick. Nothing is sent back to the
+ * client until the server has confirmed the redirect URI is one the client
+ * registered.
  */
 export function OAuthAuthorizePage() {
   const { t } = useTranslation();
@@ -128,7 +131,21 @@ function Consent({
     value: workspace.id,
     label: workspace.name,
   }));
-  const chosenWorkspace = workspaceId ?? workspaceItems[0]?.value ?? null;
+  const requestedSlug = requestedWorkspaceSlug(request);
+  const requestedWorkspace =
+    requestedSlug === null
+      ? null
+      : (workspaces.data?.find(workspace => workspace.slug === requestedSlug) ??
+        null);
+  // With several Workspaces nothing is chosen for the person: the token must
+  // not land in the first one by a hasty click.
+  const chosenWorkspace =
+    requestedSlug === null
+      ? (workspaceId ??
+        (workspaceItems.length === 1
+          ? (workspaceItems[0]?.value ?? null)
+          : null))
+      : (requestedWorkspace?.id ?? null);
   const levels = ProjectRoleDtoSchema.options.map(value => ({
     value,
     label: t(`projectRoles.${value}`),
@@ -191,14 +208,21 @@ function Consent({
             <FieldDescription>
               {t('oauthAuthorize.noWorkspaces')}
             </FieldDescription>
+          ) : requestedSlug !== null && !requestedWorkspace ? (
+            <FieldDescription>
+              {t('oauthAuthorize.notInWorkspace', { slug: requestedSlug })}
+            </FieldDescription>
           ) : (
             <Select
               items={workspaceItems}
               value={chosenWorkspace}
+              disabled={requestedSlug !== null}
               onValueChange={value => value && setWorkspaceId(value)}
             >
               <SelectTrigger className='w-full'>
-                <SelectValue />
+                <SelectValue
+                  placeholder={t('oauthAuthorize.chooseWorkspace')}
+                />
               </SelectTrigger>
               <SelectContent>
                 {workspaceItems.map(workspace => (
@@ -208,6 +232,11 @@ function Consent({
                 ))}
               </SelectContent>
             </Select>
+          )}
+          {requestedWorkspace && (
+            <FieldDescription>
+              {t('oauthAuthorize.workspaceFromAddress')}
+            </FieldDescription>
           )}
         </Field>
         <Field>

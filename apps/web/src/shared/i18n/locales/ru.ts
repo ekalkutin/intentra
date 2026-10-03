@@ -290,22 +290,27 @@ export const ru = {
 Токен: {{token}}
 
 Если ты Claude Code, выполни:
-claude mcp add --transport http intentra {{url}} --header "Authorization: Bearer {{token}}" --scope user
+claude mcp add --transport http {{name}} {{url}} --header "Authorization: Bearer {{token}}" --scope user
 
 Если ты Codex, добавь в ~/.codex/config.toml:
-[mcp_servers.intentra]
+[mcp_servers.{{name}}]
 url = "{{url}}"
-bearer_token_env_var = "INTENTRA_TOKEN"
-и сохрани токен в переменной окружения INTENTRA_TOKEN в профиле оболочки.
+bearer_token_env_var = "{{tokenVariable}}"
+и сохрани токен в переменной окружения {{tokenVariable}} в профиле оболочки.
 
-Потом проверь, что инструменты intentra доступны, и коротко скажи, что подключено.`,
+Потом проверь, что инструменты {{name}} доступны, и коротко скажи, к какому пространству подключено.`,
   },
   oauthAuthorize: {
     title: '{{client}} просит доступ к Intentra',
     description:
       'Агент будет работать от вашего имени по токену доступа. После разрешения вы вернётесь на {{host}}.',
     workspace: 'Пространство',
+    chooseWorkspace: 'Выберите пространство',
     noWorkspaces: 'У вас пока нет пространств.',
+    workspaceFromAddress:
+      'Агент подключается по адресу этого пространства, поэтому выбрать другое нельзя.',
+    notInWorkspace:
+      'Агент подключается к пространству «{{slug}}», а вы в нём не состоите. Проверьте адрес MCP в агенте.',
     tokenHint:
       'Токен появится в списке токенов пространства, отозвать его можно в любой момент.',
     allow: 'Разрешить',

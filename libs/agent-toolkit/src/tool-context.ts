@@ -45,3 +45,15 @@ export const toolContextSchema = z.object({
   ]) satisfies z.ZodType<CallerDto>,
   workspaceId: z.string(),
 });
+
+/**
+ * What the tools offered only over MCP read as well: the Workspace the
+ * agent's token works in, so that the agent can tell the person where it is.
+ */
+export const mcpToolContextSchema = toolContextSchema.extend({
+  workspace: z.object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string(),
+  }),
+});

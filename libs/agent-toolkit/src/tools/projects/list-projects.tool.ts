@@ -3,14 +3,17 @@ import { z } from 'zod';
 
 import { ProjectRoleDtoSchema } from '@intentra/contracts/workspace';
 
-import { toolContextSchema } from '../../tool-context.js';
+import { mcpToolContextSchema } from '../../tool-context.js';
 
 export const listProjectsTool = createTool({
   id: 'list_projects',
   description:
-    "Lists the Projects of the Workspace with their ids, which every other tool takes. Match the name the person uses to a Project here. In each Project you may do what the lower of your token's level and the person's Project Role allows.",
+    "Lists the Projects of the Workspace you are connected to, with their ids, which every other tool takes. Match the name the person uses to a Project here. In each Project you may do what the lower of your token's level and the person's Project Role allows.",
   inputSchema: z.object({}),
   outputSchema: z.object({
+    workspace: z
+      .object({ name: z.string(), slug: z.string() })
+      .describe('The Workspace you are connected to; these are its Projects.'),
     projects: z.array(
       z.object({
         id: z.string(),
@@ -23,7 +26,7 @@ export const listProjectsTool = createTool({
       'The level of the token you work with.',
     ),
   }),
-  requestContextSchema: toolContextSchema,
+  requestContextSchema: mcpToolContextSchema,
   mcp: { annotations: { readOnlyHint: true } },
   execute: async (_, { requestContext }) => {
     const apis = requestContext.get('apis');
@@ -34,10 +37,12 @@ export const listProjectsTool = createTool({
       );
     }
     const workspaceId = requestContext.get('workspaceId');
+    const workspace = requestContext.get('workspace');
     const projects = await apis.projects.list(caller.actor, workspaceId);
     const access = await apis.access.get(caller.actor, workspaceId);
 
     return {
+      workspace: { name: workspace.name, slug: workspace.slug },
       projects: projects.map(project => ({
         ...project,
         role:
