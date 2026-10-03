@@ -23,6 +23,8 @@ import { KnowledgeItem } from './knowledge-item.aggregate.js';
 const REQ_12 = KnowledgeKey.parse('REQ-12');
 const REQ_31 = KnowledgeKey.parse('REQ-31');
 const TERM_3 = KnowledgeKey.parse('TERM-3');
+const FEAT_2 = KnowledgeKey.parse('FEAT-2');
+const FEAT_5 = KnowledgeKey.parse('FEAT-5');
 
 function dependsOn(key: KnowledgeKey): KnowledgeLink {
   return new KnowledgeLink(KnowledgeLinkType.DependsOn, key);
@@ -53,6 +55,10 @@ function recordRequirement(links: readonly KnowledgeLink[]): KnowledgeItem {
   });
 }
 
+function partOf(key: KnowledgeKey): KnowledgeLink {
+  return new KnowledgeLink(KnowledgeLinkType.PartOf, key);
+}
+
 function concerns(key: KnowledgeKey): KnowledgeLink {
   return new KnowledgeLink(KnowledgeLinkType.Concerns, key);
 }
@@ -80,6 +86,7 @@ describe('KnowledgeItem Links', () => {
     ['to itself', [dependsOn(KnowledgeKey.parse('REQ-7'))]],
     ['twice', [dependsOn(REQ_12), dependsOn(REQ_12)]],
     ['of concerns from anything but an Open Question', [concerns(REQ_12)]],
+    ['part of two Features', [partOf(FEAT_2), partOf(FEAT_5)]],
   ])('refuses a Link %s', (_case, links) => {
     // Act
     const recording = () => recordRequirement(links);
@@ -108,6 +115,23 @@ describe('KnowledgeItem Links', () => {
 
     // Assert
     expect(editing).toThrow(InvalidLinkException);
+  });
+
+  it('rests on the Feature it is part of, which must be Approved first', () => {
+    // Act
+    const item = recordRequirement([dependsOn(REQ_12), partOf(FEAT_2)]);
+
+    // Assert
+    expect(item.feature).toEqual(FEAT_2);
+    expect(item.dependencies()).toEqual([REQ_12, FEAT_2]);
+  });
+
+  it('refuses part of from an Open Question', () => {
+    // Act
+    const recording = () => recordOpenQuestion([partOf(FEAT_2)]);
+
+    // Assert
+    expect(recording).toThrow(InvalidLinkException);
   });
 
   it('keeps the same target under two types', () => {

@@ -132,6 +132,11 @@ describe('createKnowledgeContent', () => {
       'A bookkeeper',
     ],
     [
+      KnowledgeKind.Feature,
+      { capability: 'Pay an invoice online', outOfScope: ['Refunds'] },
+      'Pay an invoice online',
+    ],
+    [
       KnowledgeKind.Scenario,
       { expectedResult: 'The invoice is paid', steps: ['Open it', 'Pay'] },
       'The invoice is paid',
@@ -229,6 +234,7 @@ describe('createKnowledgeContent', () => {
       },
     ],
     [KnowledgeKind.OpenQuestion, { question: ' ' }],
+    [KnowledgeKind.Feature, { capability: 'Pay online', outOfScope: [''] }],
   ])('rejects fields that do not fit %o', (kind, fields) => {
     // Act
     const creating = () => createKnowledgeContent(kind, fields);

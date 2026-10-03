@@ -30,6 +30,7 @@ export const RecordKnowledgeItemDtoSchema = z.discriminatedUnion('kind', [
   recording('product-overview'),
   recording('goal'),
   recording('persona'),
+  recording('feature'),
   recording('scenario'),
   recording('requirement'),
   recording('constraint'),

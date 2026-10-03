@@ -18,6 +18,7 @@
     --color-kind-product-overview: var(--kind-product-overview);
     --color-kind-goal: var(--kind-goal);
     --color-kind-persona: var(--kind-persona);
+    --color-kind-feature: var(--kind-feature);
     --color-kind-scenario: var(--kind-scenario);
     --color-kind-requirement: var(--kind-requirement);
     --color-kind-constraint: var(--kind-constraint);
@@ -98,6 +99,7 @@
     --kind-product-overview: oklch(0.58 0.09 300);
     --kind-goal: oklch(0.58 0.09 175);
     --kind-persona: oklch(0.58 0.09 225);
+    --kind-feature: oklch(0.58 0.09 145);
     --kind-scenario: oklch(0.58 0.09 200);
     --kind-requirement: oklch(0.58 0.09 255);
     --kind-constraint: oklch(0.58 0.09 5);
@@ -148,6 +150,7 @@
     --kind-product-overview: oklch(0.75 0.08 300);
     --kind-goal: oklch(0.75 0.08 175);
     --kind-persona: oklch(0.75 0.08 225);
+    --kind-feature: oklch(0.75 0.08 145);
     --kind-scenario: oklch(0.75 0.08 200);
     --kind-requirement: oklch(0.75 0.08 255);
     --kind-constraint: oklch(0.75 0.08 5);

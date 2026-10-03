@@ -38,6 +38,12 @@ const KINDS = [
     about: 'a person or a system that uses the product, and what they need',
   },
   {
+    kind: 'feature',
+    noun: 'Feature',
+    about:
+      'a named capability of the product as its users see it, which Scenarios, Requirements and Business Rules belong to (part-of)',
+  },
+  {
     kind: 'scenario',
     noun: 'Scenario',
     about:

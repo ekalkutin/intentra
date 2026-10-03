@@ -12,6 +12,7 @@ const {
   'product-overview': productOverview,
   goal,
   persona,
+  feature,
   scenario,
   requirement,
   constraint,
@@ -34,6 +35,7 @@ export const knowledgeItemSchema = z.object({
       productOverview,
       goal,
       persona,
+      feature,
       scenario,
       requirement,
       constraint,
@@ -133,5 +135,5 @@ export const versionSchema = z
 export const linksSchema = z
   .array(KnowledgeLinkDtoSchema)
   .describe(
-    'Links to other items, Draft or Approved: depends-on (it holds only while the target holds: a Scenario on the Persona who performs it, a Requirement on the Scenario it serves, a Business Rule on what it governs), uses-term (a Term whose word it uses), justified-by (the Decision that is its reason, and every Decision that shapes how it must be built, such as the UI decisions for a UI requirement), answers (an Open Question it settles), concerns (only from an Open Question: what it is about), conflicts-with (it contradicts the target). Link every item to what it relates to: agents building the product read the knowledge along these Links.',
+    'Links to other items, Draft or Approved: depends-on (it holds only while the target holds: a Feature on the Goal it serves, a Scenario on the Persona who performs it, a Requirement on the Scenario it serves, a Business Rule on what it governs), uses-term (a Term whose word it uses), justified-by (the Decision that is its reason, and every Decision that shapes how it must be built, such as the UI decisions for a UI requirement), part-of (only from a Scenario, Requirement or Business Rule, at most one: the Feature it belongs to; it then serves the Goal of the Feature and needs no depends-on to the Goal), answers (an Open Question it settles), concerns (only from an Open Question: what it is about), conflicts-with (it contradicts the target). Link every item to what it relates to: agents building the product read the knowledge along these Links.',
   );

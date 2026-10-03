@@ -54,6 +54,7 @@ export const EditKnowledgeItemDtoSchema = z.discriminatedUnion('kind', [
   editing('product-overview'),
   editing('goal'),
   editing('persona'),
+  editing('feature'),
   editing('scenario'),
   editing('requirement'),
   editing('constraint'),

@@ -14,6 +14,7 @@ export const en = {
   brand: 'Intentra',
   landing: landingEn,
   kindsOne: {
+    feature: 'Feature',
     'business-rule': 'Business rule',
     scenario: 'Scenario',
     requirement: 'Requirement',

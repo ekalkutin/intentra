@@ -84,8 +84,8 @@ describe('startersOf', () => {
     // Assert
     expect(starters.map(starter => starter.kind)).toEqual([
       'persona',
+      'feature',
       'scenario',
-      'requirement',
     ]);
   });
 
@@ -121,7 +121,7 @@ describe('startersOf', () => {
     expect(starters).toEqual([
       { reason: STARTER_REASONS.gaps, kind: null, count: 4 },
       { reason: STARTER_REASONS.empty, kind: 'goal', count: 0 },
-      { reason: STARTER_REASONS.empty, kind: 'scenario', count: 0 },
+      { reason: STARTER_REASONS.empty, kind: 'feature', count: 0 },
     ]);
   });
 

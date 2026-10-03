@@ -233,11 +233,26 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     return this.#reviewCauses.length > 0;
   }
 
-  /** The targets of its `depends on` Links, which must be Approved before it is. */
+  /**
+   * The targets of its `depends on` Links and the Feature it is part of,
+   * which must be Approved before it is.
+   */
   public dependencies(): readonly KnowledgeKey[] {
     return this.#links
-      .filter(link => link.type.equals(KnowledgeLinkType.DependsOn))
+      .filter(
+        link =>
+          link.type.equals(KnowledgeLinkType.DependsOn) ||
+          link.type.equals(KnowledgeLinkType.PartOf),
+      )
       .map(link => link.target);
+  }
+
+  /** The Feature it is part of, if any. */
+  get feature(): KnowledgeKey | null {
+    return (
+      this.#links.find(link => link.type.equals(KnowledgeLinkType.PartOf))
+        ?.target ?? null
+    );
   }
 
   /** The Open Questions it settles: the targets of its `answers` Links. */
@@ -569,7 +584,7 @@ function toKey(value: string | null): KnowledgeKey | null {
 
 /**
  * A Link is of a type its item's Kind may hold, leads to another item, and is
- * there once.
+ * there once; an item is part of one Feature at most.
  */
 function ensureValidLinks(
   key: KnowledgeKey,
@@ -581,7 +596,10 @@ function ensureValidLinks(
       !link.target.equals(key) &&
       links.findIndex(other => other.equals(link)) === index,
   );
-  if (!valid) {
+  const features = links.filter(link =>
+    link.type.equals(KnowledgeLinkType.PartOf),
+  );
+  if (!valid || features.length > 1) {
     throw new InvalidLinkException();
   }
 }

@@ -8,6 +8,7 @@ export class KnowledgeKind {
   );
   public static readonly Goal = new KnowledgeKind('goal', 'GOAL');
   public static readonly Persona = new KnowledgeKind('persona', 'PER');
+  public static readonly Feature = new KnowledgeKind('feature', 'FEAT');
   public static readonly Scenario = new KnowledgeKind('scenario', 'SC');
   public static readonly Requirement = new KnowledgeKind('requirement', 'REQ');
   public static readonly Constraint = new KnowledgeKind('constraint', 'CON');
@@ -27,6 +28,7 @@ export class KnowledgeKind {
     KnowledgeKind.ProductOverview,
     KnowledgeKind.Goal,
     KnowledgeKind.Persona,
+    KnowledgeKind.Feature,
     KnowledgeKind.Scenario,
     KnowledgeKind.Requirement,
     KnowledgeKind.Constraint,

@@ -4,6 +4,7 @@ export { ConstraintOrigin } from './constraint-origin.vo.js';
 export { ContextPackRole } from './context-pack-role.vo.js';
 export { DecisionArea } from './decision-area.vo.js';
 export { DecisionContent } from './decision-content.vo.js';
+export { FeatureContent } from './feature-content.vo.js';
 export { GoalContent } from './goal-content.vo.js';
 export { IntegrationContent } from './integration-content.vo.js';
 export { IntegrationDirection } from './integration-direction.vo.js';

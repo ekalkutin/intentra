@@ -105,6 +105,7 @@ export const ru = {
     'product-overview': 'Обзор продукта',
     goal: 'Цели',
     persona: 'Персоны',
+    feature: 'Фичи',
     scenario: 'Сценарии',
     requirement: 'Требования',
     constraint: 'Ограничения',
@@ -487,6 +488,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     'product-overview': 'Обзор продукта',
     goal: 'Цель',
     persona: 'Персона',
+    feature: 'Фича',
     scenario: 'Сценарий',
     requirement: 'Требование',
     constraint: 'Ограничение',
@@ -502,6 +504,8 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     goal: 'Чего проект хочет достичь и как понять, что достиг.',
     persona:
       'Кто пользуется продуктом или взаимодействует с ним: человек или система.',
+    feature:
+      'Возможность продукта, какой её видят пользователи. В неё входят сценарии, требования и правила.',
     scenario:
       'Что делает исполнитель и что получает в конце. Исполнитель — персона, связанная через «зависит от».',
     requirement: 'Что система делает или каким качеством обладает.',
@@ -519,6 +523,10 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     needs_few: '{{count}} потребности',
     needs_many: '{{count}} потребностей',
     needs_other: '{{count}} потребности',
+    outOfScope_one: '{{count}} пункт вне рамок',
+    outOfScope_few: '{{count}} пункта вне рамок',
+    outOfScope_many: '{{count}} пунктов вне рамок',
+    outOfScope_other: '{{count}} пункта вне рамок',
     steps_one: '{{count}} шаг',
     steps_few: '{{count}} шага',
     steps_many: '{{count}} шагов',
@@ -555,6 +563,10 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       profile: 'Кто это',
       type: 'Человек или система',
       needs: 'Потребности',
+    },
+    feature: {
+      capability: 'Что умеет',
+      outOfScope: 'Чего не делает',
     },
     scenario: {
       expectedResult: 'Ожидаемый результат',
@@ -604,6 +616,10 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     persona: {
       profile: 'Кто пользуется продуктом или взаимодействует с ним.',
       needs: 'По одной потребности в строке.',
+    },
+    feature: {
+      capability: 'Что пользователи могут с ней делать и что получают.',
+      outOfScope: 'Что фича намеренно не делает, по одному в строке.',
     },
     scenario: {
       expectedResult: 'Что исполнитель получает в конце.',
@@ -690,6 +706,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     'uses-term': 'Использует термин',
     'justified-by': 'Обосновано решением',
     answers: 'Отвечает на',
+    'part-of': 'Входит в фичу',
     concerns: 'Касается',
     'conflicts-with': 'Противоречит',
   },
@@ -698,6 +715,7 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     'uses-term': 'Используют этот термин',
     'justified-by': 'Обоснованы этим решением',
     answers: 'Отвечают на этот вопрос',
+    'part-of': 'Части фичи',
     concerns: 'Открытые вопросы об этой записи',
     'conflicts-with': 'Противоречат этой записи',
   },

@@ -21,6 +21,16 @@ export class KnowledgeLinkType {
     null,
     KnowledgeKind.Decision,
   );
+  /** A Scenario, Requirement or Business Rule belongs to a Feature. */
+  public static readonly PartOf = new KnowledgeLinkType(
+    'part-of',
+    [
+      KnowledgeKind.Scenario,
+      KnowledgeKind.Requirement,
+      KnowledgeKind.BusinessRule,
+    ],
+    KnowledgeKind.Feature,
+  );
   /** It settles an Open Question. */
   public static readonly Answers = new KnowledgeLinkType(
     'answers',
@@ -30,7 +40,7 @@ export class KnowledgeLinkType {
   /** An Open Question is about the target. */
   public static readonly Concerns = new KnowledgeLinkType(
     'concerns',
-    KnowledgeKind.OpenQuestion,
+    [KnowledgeKind.OpenQuestion],
     null,
   );
   public static readonly ConflictsWith = new KnowledgeLinkType(
@@ -43,6 +53,7 @@ export class KnowledgeLinkType {
     KnowledgeLinkType.DependsOn,
     KnowledgeLinkType.UsesTerm,
     KnowledgeLinkType.JustifiedBy,
+    KnowledgeLinkType.PartOf,
     KnowledgeLinkType.Answers,
     KnowledgeLinkType.Concerns,
     KnowledgeLinkType.ConflictsWith,
@@ -55,16 +66,16 @@ export class KnowledgeLinkType {
   ];
 
   readonly #value: string;
-  readonly #sourceKind: KnowledgeKind | null;
+  readonly #sourceKinds: readonly KnowledgeKind[] | null;
   readonly #targetKind: KnowledgeKind | null;
 
   private constructor(
     value: string,
-    sourceKind: KnowledgeKind | null,
+    sourceKinds: readonly KnowledgeKind[] | null,
     targetKind: KnowledgeKind | null,
   ) {
     this.#value = value;
-    this.#sourceKind = sourceKind;
+    this.#sourceKinds = sourceKinds;
     this.#targetKind = targetKind;
   }
 
@@ -84,7 +95,10 @@ export class KnowledgeLinkType {
   }
 
   public allowsSource(kind: KnowledgeKind): boolean {
-    return this.#sourceKind === null || this.#sourceKind.equals(kind);
+    return (
+      this.#sourceKinds === null ||
+      this.#sourceKinds.some(sourceKind => sourceKind.equals(kind))
+    );
   }
 
   public allowsTarget(kind: KnowledgeKind): boolean {

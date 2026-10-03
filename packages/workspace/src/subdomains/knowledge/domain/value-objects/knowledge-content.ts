@@ -7,6 +7,7 @@ import {
   type ConstraintFields,
 } from './constraint-content.vo.js';
 import { DecisionContent, type DecisionFields } from './decision-content.vo.js';
+import { FeatureContent, type FeatureFields } from './feature-content.vo.js';
 import { GoalContent, type GoalFields } from './goal-content.vo.js';
 import {
   IntegrationContent,
@@ -34,6 +35,7 @@ export type KnowledgeContent =
   | ProductOverviewContent
   | GoalContent
   | PersonaContent
+  | FeatureContent
   | ScenarioContent
   | RequirementContent
   | ConstraintContent
@@ -48,6 +50,7 @@ export type KnowledgeFields =
   | ProductOverviewFields
   | GoalFields
   | PersonaFields
+  | FeatureFields
   | ScenarioFields
   | RequirementFields
   | ConstraintFields
@@ -74,6 +77,10 @@ const CONTENT_OF_KIND: ReadonlyMap<
   [
     KnowledgeKind.Persona,
     (fields: PersonaFields) => new PersonaContent(fields),
+  ],
+  [
+    KnowledgeKind.Feature,
+    (fields: FeatureFields) => new FeatureContent(fields),
   ],
   [
     KnowledgeKind.Scenario,

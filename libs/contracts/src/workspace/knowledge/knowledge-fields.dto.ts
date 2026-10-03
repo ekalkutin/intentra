@@ -125,6 +125,20 @@ export const PersonaFieldsDtoSchema = z.object({
 
 export type PersonaFieldsDto = z.infer<typeof PersonaFieldsDtoSchema>;
 
+export const FeatureFieldsDtoSchema = z.object({
+  capability: z
+    .string()
+    .describe(
+      'The main field: what users can do with this capability of the product and what they get.',
+    ),
+  outOfScope: z
+    .array(z.string())
+    .default([])
+    .describe('What the Feature deliberately does not do, one per entry.'),
+});
+
+export type FeatureFieldsDto = z.infer<typeof FeatureFieldsDtoSchema>;
+
 export const ScenarioFieldsDtoSchema = z.object({
   expectedResult: z
     .string()
@@ -191,6 +205,7 @@ export const KNOWLEDGE_FIELDS_DTO_SCHEMAS = {
   'product-overview': ProductOverviewFieldsDtoSchema,
   goal: GoalFieldsDtoSchema,
   persona: PersonaFieldsDtoSchema,
+  feature: FeatureFieldsDtoSchema,
   scenario: ScenarioFieldsDtoSchema,
   requirement: RequirementFieldsDtoSchema,
   constraint: ConstraintFieldsDtoSchema,

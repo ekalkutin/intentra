@@ -92,6 +92,10 @@ export const KIND_FIELDS: { readonly [K in KnowledgeKindDto]: KindFields<K> } =
         list('needs'),
       ],
     },
+    feature: {
+      main: 'capability',
+      fields: [longText('capability'), list('outOfScope')],
+    },
     scenario: {
       main: 'expectedResult',
       fields: [longText('expectedResult'), list('steps', { ordered: true })],

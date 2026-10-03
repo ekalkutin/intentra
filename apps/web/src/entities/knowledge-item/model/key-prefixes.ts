@@ -5,6 +5,7 @@ export const KIND_KEY_PREFIXES = {
   'product-overview': 'PO',
   goal: 'GOAL',
   persona: 'PER',
+  feature: 'FEAT',
   scenario: 'SC',
   requirement: 'REQ',
   constraint: 'CON',

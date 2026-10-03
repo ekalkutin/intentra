@@ -14,6 +14,8 @@ describe('KnowledgeLinkType', () => {
     [KnowledgeLinkType.DependsOn, KnowledgeKind.Persona, true],
     [KnowledgeLinkType.ConflictsWith, KnowledgeKind.Goal, true],
     [KnowledgeLinkType.Concerns, KnowledgeKind.Requirement, true],
+    [KnowledgeLinkType.PartOf, KnowledgeKind.Feature, true],
+    [KnowledgeLinkType.PartOf, KnowledgeKind.Goal, false],
   ])('%o allows a target of %o: %s', (type, kind, allowed) => {
     // Act
     const verdict = type.allowsTarget(kind);
@@ -27,6 +29,9 @@ describe('KnowledgeLinkType', () => {
     [KnowledgeLinkType.Concerns, KnowledgeKind.Requirement, false],
     [KnowledgeLinkType.DependsOn, KnowledgeKind.OpenQuestion, true],
     [KnowledgeLinkType.Answers, KnowledgeKind.Decision, true],
+    [KnowledgeLinkType.PartOf, KnowledgeKind.Scenario, true],
+    [KnowledgeLinkType.PartOf, KnowledgeKind.BusinessRule, true],
+    [KnowledgeLinkType.PartOf, KnowledgeKind.Decision, false],
   ])('%o allows a source of %o: %s', (type, kind, allowed) => {
     // Act
     const verdict = type.allowsSource(kind);
@@ -41,6 +46,7 @@ describe('KnowledgeLinkType', () => {
       KnowledgeLinkType.DependsOn,
       KnowledgeLinkType.UsesTerm,
       KnowledgeLinkType.JustifiedBy,
+      KnowledgeLinkType.PartOf,
       KnowledgeLinkType.Answers,
       KnowledgeLinkType.Concerns,
       KnowledgeLinkType.ConflictsWith,

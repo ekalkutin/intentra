@@ -4,6 +4,7 @@ export const KnowledgeKindDtoSchema = z.enum([
   'product-overview',
   'goal',
   'persona',
+  'feature',
   'scenario',
   'requirement',
   'constraint',
