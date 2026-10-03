@@ -1,4 +1,4 @@
-import { BookOpen, MessageSquare, RotateCcw } from 'lucide-react';
+import { BookOpen, MessageSquare } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,7 +7,7 @@ import {
   KnowledgeStatusBadge,
   NeedsReviewBadge,
 } from '@/entities/knowledge-item';
-import { Button, IntentraButton } from '@/shared/ui';
+import { IntentraButton } from '@/shared/ui';
 
 /** An illustrative relationship model, using the same records as the interview. */
 export function KnowledgeScene({ paused }: { readonly paused: boolean }) {
@@ -130,6 +130,19 @@ export function KnowledgeScene({ paused }: { readonly paused: boolean }) {
                   : 'landing.knowledge.historyBefore',
               )}
             </p>
+            <div className='landing-rule-action'>
+              <IntentraButton
+                size='default'
+                onClick={replace}
+                disabled={changed}
+              >
+                {t(
+                  changed
+                    ? 'landing.knowledge.changed'
+                    : 'landing.knowledge.change',
+                )}
+              </IntentraButton>
+            </div>
           </article>
           <div className='landing-model-dependents'>
             <article className='landing-linked-record' data-review={phase >= 2}>
@@ -163,37 +176,6 @@ export function KnowledgeScene({ paused }: { readonly paused: boolean }) {
               </div>
             </article>
           </div>
-        </div>
-        <div className='landing-knowledge-caption'>
-          <div className='landing-knowledge-controls'>
-            <IntentraButton size='default' onClick={replace} disabled={changed}>
-              {t(
-                changed
-                  ? 'landing.knowledge.changed'
-                  : 'landing.knowledge.change',
-              )}
-            </IntentraButton>
-            {changed && (
-              <Button
-                variant='ghost'
-                size='icon'
-                aria-label={t('landing.knowledge.reset')}
-                onClick={() => {
-                  clear();
-                  setPhase(0);
-                }}
-              >
-                <RotateCcw />
-              </Button>
-            )}
-          </div>
-          <p role='status'>
-            {t(
-              phase === 3
-                ? 'landing.knowledge.result'
-                : 'landing.knowledge.hint',
-            )}
-          </p>
         </div>
       </div>
     </section>

@@ -20,6 +20,7 @@ export function useSheetMotion(scope: RefObject<HTMLElement | null>) {
       const media = gsap.matchMedia();
 
       media.add('(prefers-reduced-motion: no-preference)', () => {
+        const lead = SplitText.create('.landing-hero-lead', { type: 'chars' });
         gsap
           .timeline({ defaults: { ease: EASE } })
           .from(
@@ -34,64 +35,97 @@ export function useSheetMotion(scope: RefObject<HTMLElement | null>) {
           )
           .from('.landing-header > *', { autoAlpha: 0, duration: 0.8 }, 0.1)
           .from(
-            '.landing-hero h1 .landing-mask > span',
-            { yPercent: 115, duration: 1.1, stagger: 0.12 },
+            lead.chars,
+            {
+              yPercent: 110,
+              autoAlpha: 0,
+              filter: 'blur(10px)',
+              duration: 0.9,
+              stagger: 0.035,
+            },
             0.15,
           )
           .from(
-            '.landing-hero-accent',
-            { '--slnt': 0, fontWeight: 600, duration: 1.4, ease: 'power3.out' },
-            0.45,
+            '.landing-rotator',
+            {
+              yPercent: 115,
+              '--slnt': 0,
+              fontWeight: 600,
+              duration: 1.3,
+              ease: 'power3.out',
+            },
+            0.5,
           )
           .from(
             '.landing-hero-copy > p, .landing-hero-actions',
             { autoAlpha: 0, y: 16, duration: 0.9, stagger: 0.08 },
-            0.55,
-          )
-          .from(
-            '.landing-divider-lead .landing-rule',
-            { scaleX: 0, transformOrigin: 'left center', duration: 1.2 },
-            0.5,
-          )
-          .from(
-            '.landing-divider-lead .landing-cross',
-            { scale: 0, rotate: 90, duration: 0.7, stagger: 0.25 },
-            0.7,
-          )
-          .from(
-            '.landing-product',
-            {
-              clipPath: 'inset(0 0 100% 0)',
-              y: 32,
-              duration: 1.2,
-              clearProps: 'clipPath,transform',
-            },
             0.6,
-          );
+          )
+          .from('.landing-flow', { autoAlpha: 0, y: 28, duration: 1.2 }, 0.75);
 
-        gsap.utils
-          .toArray<HTMLElement>('.landing-divider:not(.landing-divider-lead)')
-          .forEach(divider => {
-            gsap.from(divider.querySelector('.landing-rule'), {
-              scaleX: 0,
-              transformOrigin: 'left center',
-              ease: 'none',
-              scrollTrigger: {
-                trigger: divider,
-                start: 'top 100%',
-                end: 'top 72%',
-                scrub: 0.6,
+        // The second line keeps naming what the intent turns into.
+        const phrases = gsap.utils.toArray<HTMLElement>(
+          '.landing-rotator > span',
+        );
+        const rotation = gsap.timeline({
+          repeat: -1,
+          delay: 1.6,
+          scrollTrigger: {
+            trigger: '.landing-hero',
+            start: 'top bottom',
+            end: 'bottom top',
+            toggleActions: 'play pause resume pause',
+          },
+        });
+        phrases.forEach((phrase, index) => {
+          rotation
+            .to(
+              phrase,
+              {
+                yPercent: -110,
+                autoAlpha: 0,
+                filter: 'blur(8px)',
+                duration: 0.6,
+                ease: 'power3.in',
               },
-            });
-            gsap.from(divider.querySelectorAll('.landing-cross'), {
-              scale: 0,
-              rotate: 90,
-              duration: 0.7,
-              ease: EASE,
-              stagger: 0.25,
-              scrollTrigger: { trigger: divider, start: 'top 90%', once: true },
-            });
+              '+=2.6',
+            )
+            .fromTo(
+              phrases[(index + 1) % phrases.length]!,
+              { yPercent: 110, autoAlpha: 0, filter: 'blur(8px)' },
+              {
+                yPercent: 0,
+                autoAlpha: 1,
+                filter: 'blur(0px)',
+                duration: 0.9,
+                ease: EASE,
+                immediateRender: false,
+              },
+              '>-0.1',
+            );
+        });
+
+        gsap.utils.toArray<HTMLElement>('.landing-divider').forEach(divider => {
+          gsap.from(divider.querySelector('.landing-rule'), {
+            scaleX: 0,
+            transformOrigin: 'left center',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: divider,
+              start: 'top 100%',
+              end: 'top 72%',
+              scrub: 0.6,
+            },
           });
+          gsap.from(divider.querySelectorAll('.landing-cross'), {
+            scale: 0,
+            rotate: 90,
+            duration: 0.7,
+            ease: EASE,
+            stagger: 0.25,
+            scrollTrigger: { trigger: divider, start: 'top 90%', once: true },
+          });
+        });
 
         SplitText.create('.landing-knowledge-heading h2', {
           type: 'lines',
@@ -202,46 +236,6 @@ export function useSheetMotion(scope: RefObject<HTMLElement | null>) {
           },
         });
       });
-
-      // A drafting crosshair with a coordinate readout, over the claim only.
-      media.add(
-        '(prefers-reduced-motion: no-preference) and (pointer: fine) and (min-width: 761px)',
-        () => {
-          const hero =
-            scope.current?.querySelector<HTMLElement>('.landing-hero');
-          const cross = hero?.querySelector<HTMLElement>('.landing-crosshair');
-          if (!hero || !cross) return;
-          const [vertical, horizontal] = cross.querySelectorAll('i');
-          const readout = cross.querySelector('code');
-          if (!vertical || !horizontal || !readout) return;
-          const follow = { duration: 0.35, ease: 'power3.out' };
-          const lineX = gsap.quickTo(vertical, 'x', follow);
-          const lineY = gsap.quickTo(horizontal, 'y', follow);
-          const readX = gsap.quickTo(readout, 'x', follow);
-          const readY = gsap.quickTo(readout, 'y', follow);
-          const figure = (value: number) =>
-            String(Math.round(value)).padStart(4, '0');
-          const move = (event: PointerEvent) => {
-            const bounds = hero.getBoundingClientRect();
-            const x = event.clientX - bounds.left;
-            const y = event.clientY - bounds.top;
-            lineX(x);
-            lineY(y);
-            readX(x);
-            readY(y);
-            readout.textContent = `X ${figure(x)}  Y ${figure(y)}`;
-            gsap.to(cross, { autoAlpha: 1, duration: 0.3, overwrite: true });
-          };
-          const leave = () =>
-            gsap.to(cross, { autoAlpha: 0, duration: 0.4, overwrite: true });
-          hero.addEventListener('pointermove', move);
-          hero.addEventListener('pointerleave', leave);
-          return () => {
-            hero.removeEventListener('pointermove', move);
-            hero.removeEventListener('pointerleave', leave);
-          };
-        },
-      );
     },
     { scope },
   );

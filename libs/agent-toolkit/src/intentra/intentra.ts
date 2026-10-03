@@ -6,7 +6,8 @@ import { createSkill } from '@mastra/core/skills';
 import { ProjectRoleDtoSchema } from '@intentra/contracts/workspace';
 
 import { agentToolsOf } from '../agent-tools.js';
-import { isReadOnlyTool } from '../catalog.js';
+import { cachedInstructions } from '../cached-instructions.js';
+import { AGENT_TOOLS, isReadOnlyTool } from '../catalog.js';
 import { offerChoicesTool } from '../tools/index.js';
 
 import type { AgentDefinition } from './agent-definition.js';
@@ -31,9 +32,10 @@ export type IntentraOptions = {
  * call as Mastra sub-agents, each shown to it as a tool with the Specialist's
  * name and description. They work with one Member in one Project, both
  * taken from the request context, and do what the lower of their level there
- * and the Member's Project Role allows. Past tool calls are kept in memory
- * but not sent to the model again: Intentra reads the knowledge
- * afresh instead.
+ * and the Member's Project Role allows. What it read in past turns is kept
+ * in memory but not sent to the model again: Intentra reads the knowledge
+ * afresh instead. What it did stays: the Drafts it wrote, the choices it
+ * offered, what its Specialists answered.
  */
 export function createIntentra({
   intentra,
@@ -52,11 +54,20 @@ export function createIntentra({
   return createAgent(intentra, onUnexpectedError, {
     memory,
     agents,
-    inputProcessors: [new ToolCallFilter()],
+    inputProcessors: [new ToolCallFilter({ exclude: PAST_READS })],
   });
 }
 
 export type Intentra = ReturnType<typeof createIntentra>;
+
+/**
+ * The tools whose past calls the model is not sent: those that only read.
+ * Offering choices changes nothing either, but the Member's next message
+ * answers them.
+ */
+const PAST_READS = Object.values(AGENT_TOOLS)
+  .filter(tool => isReadOnlyTool(tool) && tool.id !== offerChoicesTool.id)
+  .map(tool => tool.id);
 
 type AgentConfig = ConstructorParameters<
   typeof Agent<string, ToolsInput, undefined, IntentraContext>
@@ -106,7 +117,12 @@ function createAgent(
     name: definition.name,
     description: definition.description,
     instructions: ({ requestContext }) =>
-      frameInstructions(requestContext.get('project'), definition.instructions),
+      cachedInstructions(
+        frameInstructions(
+          requestContext.get('project'),
+          definition.instructions,
+        ),
+      ),
     model: definition.model,
     // No edited text can make an Agent write for a Viewer.
     tools: ({ requestContext }) =>

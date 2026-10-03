@@ -56,7 +56,7 @@ import {
   type DemoPhase,
 } from '../model/demo-interview';
 
-const AUTOPLAY_DELAY = 1800;
+const AUTOPLAY_DELAY = 500;
 
 /** A finite, local interview rehearsal using the product's actual card choreography. */
 export function ProductDemo({
@@ -106,7 +106,7 @@ export function ProductDemo({
     };
   }, []);
 
-  // In the first viewport the rehearsal begins on its own, after the page has drawn itself.
+  // In the first viewport the rehearsal begins on its own, once enough of it is in view.
   useEffect(() => {
     if (!autoPlay || started || paused || !root.current) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -120,7 +120,7 @@ export function ProductDemo({
           setPlaying(true);
         }, AUTOPLAY_DELAY);
       },
-      { threshold: 0.05 },
+      { threshold: 0.35 },
     );
     observer.observe(root.current);
     return () => {

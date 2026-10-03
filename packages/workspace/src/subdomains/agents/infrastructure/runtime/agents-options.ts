@@ -13,7 +13,13 @@ export type AgentsOptions = {
   readonly maxSteps: number;
   /** The longest one answer may run, in milliseconds. */
   readonly timeoutMs: number;
-  /** How much of a Conversation's history the model sees, in tokens; older messages are left out. */
+  /** How many of a Conversation's last messages the model sees; older ones are left out. */
+  readonly historyMessages: number;
+  /**
+   * A cap on those messages, in tokens, against a few very long ones. It counts
+   * past reads too, which the model is not sent, so it sits well above what
+   * the model sees.
+   */
   readonly historyTokens: number;
   /** The most steps (tool calls or text) in one Analysis Run. */
   readonly auditMaxSteps: number;
@@ -32,7 +38,8 @@ export const DEFAULT_AGENTS_OPTIONS: AgentsOptions = {
   providerKeyEncryptionKey: null,
   maxSteps: 25,
   timeoutMs: 3 * 60 * 1000,
-  historyTokens: 64_000,
+  historyMessages: 40,
+  historyTokens: 300_000,
   auditMaxSteps: 40,
   auditTimeoutMs: 10 * 60 * 1000,
   analysisScheduleHourUtc: null,

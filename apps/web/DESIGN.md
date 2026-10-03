@@ -17,17 +17,21 @@ colors:
   success: 'oklch(0.56 0.14 155)'
   warning: 'oklch(0.66 0.15 65)'
   destructive: 'oklch(0.577 0.215 27)'
-  landing-canvas: '#0e0f11'
-  landing-panel: '#151619'
-  landing-inset: '#1b1c20'
-  landing-raised: '#222327'
-  landing-ink: '#f0f0f2'
-  landing-subtle: '#a3a4ad'
+  landing-canvas: '#0c0d0f'
+  landing-panel: '#111216'
+  landing-inset: '#17181d'
+  landing-raised: '#202127'
+  landing-ink: '#e9eaee'
+  landing-subtle: '#9a9ca8'
   landing-accent: '#dedee3'
-  landing-bright: '#eeeeF0'
-  landing-line: '#303136'
+  landing-bright: '#f6f6f8'
+  landing-display-quiet: '#a9abb8'
+  landing-line: '#2a2b32'
+  landing-frame: '#3d3e49'
+  landing-grid: 'rgb(233 234 238 / 0.08)'
   landing-brand: 'oklch(0.72 0.11 278)'
-  landing-action-fill: 'oklch(0.72 0.11 278 / 0.1)'
+  landing-brand-hover: 'oklch(0.8 0.1 278)'
+  landing-approved: 'oklch(0.75 0.14 155)'
 typography:
   headline:
     fontFamily: 'Geist Variable, sans-serif'
@@ -62,23 +66,49 @@ typography:
     lineHeight: '1.25rem'
     fontFeature: 'tnum'
   landing-display:
-    fontFamily: 'Onest, sans-serif'
-    fontSize: 'clamp(50px, 5.7vw, 82px)'
-    fontWeight: 700
-    lineHeight: 1.06
-    letterSpacing: '-0.04em'
-  landing-headline:
-    fontFamily: 'Onest, sans-serif'
-    fontSize: 'clamp(32px, 3.6vw, 52px)'
-    fontWeight: 700
-    lineHeight: 1.12
+    fontFamily: 'Geologica Variable, Geist Variable, sans-serif'
+    fontSize: 'clamp(40px, 5.4vw, 78px)'
+    fontWeight: 600
+    lineHeight: 1.04
     letterSpacing: '-0.035em'
+  landing-display-accent:
+    fontFamily: 'Geologica Variable, Geist Variable, sans-serif'
+    fontSize: 'clamp(40px, 5.4vw, 78px)'
+    fontWeight: 300
+    lineHeight: 1.04
+    letterSpacing: '-0.035em'
+    fontVariation: "'slnt' -10"
+  landing-claim:
+    fontFamily: 'Geologica Variable, Geist Variable, sans-serif'
+    fontSize: 'clamp(40px, 5.2vw, 76px)'
+    fontWeight: 600
+    lineHeight: 1.04
+    letterSpacing: '-0.035em'
+  landing-headline:
+    fontFamily: 'Geologica Variable, Geist Variable, sans-serif'
+    fontSize: 'clamp(32px, 3.8vw, 56px)'
+    fontWeight: 600
+    lineHeight: 1.08
+    letterSpacing: '-0.03em'
+  landing-figure:
+    fontFamily: 'Geologica Variable, Geist Variable, sans-serif'
+    fontSize: '104px'
+    fontWeight: 500
+    lineHeight: 1.1
+    letterSpacing: '-0.04em'
+    fontFeature: 'tnum'
+  landing-record-title:
+    fontFamily: 'Geologica Variable, Geist Variable, sans-serif'
+    fontSize: '24px'
+    fontWeight: 500
+    lineHeight: 1.2
+    letterSpacing: '-0.02em'
   landing-title:
-    fontFamily: 'Onest, sans-serif'
-    fontSize: '31px'
-    fontWeight: 700
-    lineHeight: 1.18
-    letterSpacing: '-0.025em'
+    fontFamily: 'Geologica Variable, Geist Variable, sans-serif'
+    fontSize: '19px'
+    fontWeight: 600
+    lineHeight: 1.25
+    letterSpacing: '-0.02em'
   landing-body:
     fontFamily: 'Geist Variable, sans-serif'
     fontSize: '16px'
@@ -88,14 +118,20 @@ typography:
     fontFamily: 'Geist Variable, sans-serif'
     fontSize: '17px'
     fontWeight: 400
-    lineHeight: 1.7
+    lineHeight: 1.6
+  landing-mono:
+    fontFamily: 'Geist Mono Variable, ui-monospace, monospace'
+    fontSize: '13.5px'
+    fontWeight: 400
+    lineHeight: 1.9
+    fontFeature: 'tnum'
 rounded:
   md: '0.4rem'
   lg: '0.5rem'
   xl: '0.7rem'
   full: '9999px'
-  landing-control: '6px'
-  landing-panel: '12px'
+  landing-control: '0px'
+  landing-panel: '0px'
 spacing:
   xs: '0.25rem'
   sm: '0.5rem'
@@ -105,9 +141,11 @@ spacing:
   2xl: '4rem'
   landing-section: 'clamp(88px, 10vw, 144px)'
   landing-group: 'clamp(40px, 5vw, 64px)'
-  landing-gutter: '56px'
-  landing-gutter-tablet: '36px'
-  landing-gutter-mobile: '20px'
+  landing-gutter: '40px'
+  landing-gutter-tablet: '28px'
+  landing-gutter-mobile: '16px'
+  landing-sheet-margin: '56px'
+  landing-header: '64px'
 components:
   button-primary:
     backgroundColor: '{colors.ink}'
@@ -172,21 +210,36 @@ components:
     rounded: '{rounded.md}'
     size: '2rem'
   landing-button-primary:
-    backgroundColor: '{colors.landing-action-fill}'
-    textColor: '{colors.landing-brand}'
+    backgroundColor: '{colors.landing-brand}'
+    textColor: '{colors.landing-canvas}'
     rounded: '{rounded.landing-control}'
-    padding: '0 22px'
-  landing-button-closing:
-    backgroundColor: '{colors.landing-action-fill}'
-    textColor: '{colors.landing-brand}'
-    rounded: '{rounded.landing-control}'
-    padding: '0 22px'
+    height: '52px'
+    padding: '0 24px'
+  landing-button-primary-hover:
+    backgroundColor: '{colors.landing-brand-hover}'
+  landing-language-switch:
+    textColor: '{colors.landing-subtle}'
+    padding: '10px 7px'
+  landing-language-switch-active:
+    textColor: '{colors.landing-bright}'
+  landing-draft-card:
+    backgroundColor: '{colors.landing-raised}'
+    textColor: '{colors.landing-bright}'
+    typography: '{typography.landing-record-title}'
+    rounded: '{rounded.landing-panel}'
+    padding: '24px 26px'
+  landing-rule-sheet:
+    backgroundColor: '{colors.landing-panel}'
+    rounded: '{rounded.landing-panel}'
+    padding: '30px 34px'
   landing-demo:
     backgroundColor: '{colors.landing-panel}'
     rounded: '{rounded.landing-panel}'
   landing-terminal:
-    backgroundColor: '{colors.landing-inset}'
+    backgroundColor: '{colors.landing-panel}'
+    typography: '{typography.landing-mono}'
     rounded: '{rounded.landing-panel}'
+    padding: '36px 32px'
 ---
 
 # Design System: Intentra
@@ -214,7 +267,18 @@ The interface is composed from shadcn primitives (base-nova style on Base UI). T
 
 ### Public landing — scoped overview
 
-The public landing uses a kinetic pixel identity on monochrome graphite surfaces, with silver foregrounds, substantial Onest headings and Geist body typography. Open compositions and thin structural lines connect the current pixel wordmark with a canvas assembly; the team’s AI analyst and the coding agent’s context receive equal visual weight. Product examples explain actual capabilities and explicitly identify the synthetic demonstration.
+The public landing is one drawing sheet of the product. A graphite sheet sits inside a ruled frame; six construction columns and a dashed centre axis run its whole height, every section is closed by a rule that ends in registration crosses on the frame, and every panel is square and flush to those lines. The product is not illustrated beside the claim but inscribed into the sheet: a hero loop in which what the team says becomes a Draft, a person approves it and a coding agent receives it; the working interview; a rule with what depends on it; a terminal. The page refuses the split hero with decorative art and the stack of marketing cards.
+
+Type carries the voice: Geologica for claims, with a light, slanted second headline line that keeps renaming what the intent becomes; Geist for everything read; Geist Mono for keys, commands and the terminal. One indigo is spent on Intentra's own actions; Kind tones and status colours appear only inside product examples. The pixel wordmark closes the page at full width above a compact responsibility block (Предлагает / Проверяет / Утверждает). The landing ships in Russian and English, and its examples are a fictional project, labelled as such.
+
+**Key characteristics (landing):**
+
+- A framed sheet with six construction columns, a dashed centre axis and registration crosses on section rules.
+- Square controls and panels; separation by rules and graphite steps, not by cards.
+- Geologica claims with a light slanted rotating second line; Geist body; Geist Mono for machine text.
+- A solid indigo invitation; indigo otherwise only where Intentra acts or an agent reads.
+- The product shown working: hero loop, interview, linked knowledge, terminal.
+- Motion draws the sheet (GSAP); everything is present and still under reduced motion.
 
 ## Colors
 
@@ -260,9 +324,19 @@ A cool neutral ramp (hue 286, near-zero chroma) with one muted indigo accent and
 
 ### Public landing — palette
 
-The scoped `landing-*` colors mirror `--lp-canvas`, `--lp-panel`, `--lp-inset`, `--lp-raised`, `--lp-ink`, `--lp-subtle`, `--lp-accent`, `--lp-bright` and `--lp-line`. Graphite canvas, panel and inset values create quiet tonal separation. Silver ink carries content; subtle ink carries supporting text; bright silver supports high-emphasis content. Native Intentra actions retain the product indigo (`landing-brand`), its translucent fill and shimmer; KindIcon, KindBadge and KnowledgeStatusBadge retain their existing domain tones and meanings. The hero’s second line uses muted silver (`#b4b5bd`). The marketing surface always uses `color-scheme: dark`, independently of the authenticated app’s theme preference.
+The `landing-*` colors mirror the `--lp-*` custom properties declared on `.landing` (`--lp-canvas`, `--lp-panel`, `--lp-inset`, `--lp-raised`, `--lp-ink`, `--lp-subtle`, `--lp-accent`, `--lp-bright`, `--lp-line`, `--lp-frame`, `--lp-grid`) and the scoped `--brand`. The surface always runs `color-scheme: dark`, whatever the authenticated app's theme.
 
-**The Landing Boundary Rule.** Marketing color and Onest typography belong inside `.landing`; preserve the authenticated app’s own tokens and theme behavior.
+- **Graphite steps** (`landing-canvas`, `landing-panel`, `landing-inset`, `landing-raised`): the sheet; panels inscribed in it (the demo, the rule sheet, the terminal half, agent cells); inset fills (the person's answer, the active scenario); and the one lifted object, the Draft card on the review desk. Each step is a small tonal move, never a contrast jump.
+- **Sheet ink** (`landing-ink`, `landing-bright`, `landing-subtle`): body ink; bright ink for headings, the logotype and whatever is active; subtle ink for supporting copy, keys and inactive items. `landing-display-quiet` is the cooler grey of the slanted second headline line and nothing else.
+- **Drawing lines** (`landing-line`, `landing-frame`, `landing-grid`): section rules, panel borders and the dashed centre axis; the stronger frame on the sheet's sides and around the responsibility block; the faint construction columns. Registration crosses are drawn in subtle ink.
+- **Silver accent** (`landing-accent`): the small approve chip inside the hero's Draft card, and the scoped `--primary` that shadcn primitives pick up.
+- **Product indigo** (`landing-brand`, hover `landing-brand-hover`): the solid invitation, the travelling beams, an agent cell's border as context arrives, `get_context` and tool-call lines, the current-language underline, focus outlines, the caret and the selection tint (32%).
+- **Approval green** (`landing-approved`): the frame of an approved Draft card and its ring, the check on a delivered `get_context` line, the drawn check in the responsibility block. Always beside the word or the row that says what was approved.
+- Native KindIcon, KindBadge, KnowledgeStatusBadge and NeedsReviewBadge keep their product tones and meanings inside examples; terminal warnings take an amber prefix mark only.
+
+**The Landing Boundary Rule.** The graphite palette, Geologica and the sheet's lines belong inside `.landing`; the authenticated app keeps its own tokens and theme behaviour.
+
+**The Indigo Is Intentra Rule.** On the landing indigo marks Intentra acting or an agent reading: the invitation, a beam, a tool call, the current language, focus. It is solid only on the invitation and never colours a heading or a body link.
 
 ## Typography
 
@@ -287,9 +361,19 @@ The scoped `landing-*` colors mirror `--lp-canvas`, `--lp-panel`, `--lp-inset`, 
 
 ### Public landing — typography
 
-Onest is self-hosted from `/fonts/onest-regular.ttf` and `/fonts/onest-bold.ttf`, with `font-display: swap` and the bundled license. The authored faces are regular and bold; CSS maps them across 400–600 and 700–900 respectively. Onest sets marketing headings; Geist Variable sets body copy and product examples, including the 21px demo knowledge title (20px mobile). The `landing-display`, `landing-headline`, `landing-title`, `landing-body` and `landing-lead` tokens record the main desktop roles. Knowledge Keys retain the existing mono family.
+**Display Font:** Geologica Variable (from `@fontsource-variable/geologica`, the `slnt` axis file; falls back to Geist Variable)
+**Body Font:** Geist Variable
+**Mono Font:** Geist Mono Variable, tabular figures on
 
-The hero changes to `clamp(44px, 5.7vw, 64px)` at ≤1100px, `clamp(39px, 8.5vw, 62px)` with 1.08 leading at ≤760px, 36px at ≤380px, and 90px at ≥1600px. Mobile section headings use `clamp(30px, 7.5vw, 44px)` before component-specific overrides. Supporting copy ranges from 13–17px; small demo metadata is an ancillary detail, not a scale for new main content.
+Geologica sets every `h1`, `h2` and `h3` default, the logotype (21px, 600), the Draft card's title, the rule's figure, and names in the reader strip and the responsibility block. The hero is two lines at `landing-display`: the first upright at 600, the second at `landing-display-accent` (weight 300, slant −10, in the quiet display grey), rotating through three phrases. The linked-knowledge heading and the closing claim use `landing-claim`; other section headings use `landing-headline`. Headings are balanced and break where the copy breaks (`pre-line`).
+
+Geist carries everything read: the lead under the headline (`landing-lead`), section paragraphs (`landing-body`), the analyst's question (19px, 17px mobile), FAQ questions (17px, 500) and answers (15px), navigation (14px), and the titles of records inside examples (21px and 19px at 500), which stay in the product's own face. Supporting text runs 12–15px in subtle ink. Geist Mono sets Knowledge Keys (12–13px), the `get_context` line, counts, and the whole terminal (`landing-mono`; 12px at ≤1100px).
+
+Responsive: the hero is `clamp(30px, 8.6vw, 52px)` at 1.08 leading at ≤760px; section headings `clamp(30px, 8vw, 44px)`; the knowledge heading `clamp(36px, 9.5vw, 52px)`; the closing claim `clamp(34px, 9vw, 48px)`; the rule's figure 80px at ≤1100px.
+
+**The Slanted Second Line Rule.** The hero's second line is the only light, slanted display text on the page; emphasis elsewhere is weight or bright ink.
+
+**The Machine Text Rule.** Geist Mono is for what a machine wrote or reads: keys, commands, counts, the terminal transcript. Claims, names and prose never take it. The two language codes are the only uppercase text, and no label sits above a heading.
 
 ## Layout
 
@@ -329,9 +413,22 @@ These sets are closed. New work reuses a step; it does not add one.
 
 ### Public landing — layout and motion
 
-The container is at most 1328px with 56px side gutters, reduced to 36px at ≤1100px and 20px at ≤760px. Main section spacing uses `--lp-section-space: clamp(88px, 10vw, 144px)`; heading-to-content groups use `--lp-group-space: clamp(40px, 5vw, 64px)`. Section-specific spacing stays in the stylesheet. Desktop uses an asymmetric hero and paired explanation/example columns. The hero has `min-height: 80svh` at every breakpoint and grows with its content on mobile; its art is `min(64svh, 680px)` tall with a 470px minimum, then 420px on mobile (360px at ≤380px). At ≤760px these become one column, the demo stacks conversation above knowledge, and navigation becomes an inline expanding menu. The existing pixel wordmark spans the footer.
+**The sheet.** One column at most 1328px wide, `landing-sheet-margin` from each viewport edge, with a 1px frame line on each side. Behind the content, six equal construction columns run the full height; the line on the centre axis is dashed. Content sits `landing-gutter` inside the frame. Every section ends in a 1px rule with an 11px registration cross where it meets the frame on each side. At ≤1100px the margin is 24px and the gutter `landing-gutter-tablet`; at ≤760px the margin is 8px, the gutter `landing-gutter-mobile`, the header 60px, and the construction columns are not drawn.
 
-The canvas assembles 1,300 mark particles with 160 surrounding satellites. Depth projection, local pointer repulsion with eased return, and native scroll convergence keep the mark spatial and responsive. A pause control stops ambient animation; reduced motion shows a fully assembled still mark. Drawing stops offscreen and in hidden tabs; touch input does not trigger pointer forces. The hero enters once over 900ms with the existing ease-out-expo curve; supported view timelines move the terminal by 30px and settle section introductions by 18px. Ambient fragments drift over 8s and the terminal cursor blinks over 1s. The shared Brand performs its 12s wordmark reassembly; IntentraButton retains its native 7s resting AgentSpark cadence and 1.1s hover sheen. Each draft recorded during explicit interview playback runs shared RecordWave for 1000ms, then transferCard for 900ms along a 48px arc, then a 600ms settling ring. The Interview adapter reuses those same shared implementations. Paused/reduced-motion demo creation settles without the flight. Reduced motion removes animation and transitions. The landing uses native scrolling, with smooth anchor behavior only when reduced motion is not requested.
+**Order.** Sticky header (`landing-header` tall, on the canvas, a rule under it: logotype left, navigation centred, RU | EN and sign-in right; at ≤760px the navigation folds into an inline menu under the header) → hero → interview demo → reader strip → linked knowledge → agents and terminal → FAQ → closing claim → wordmark and responsibility block. Section intros put the heading left and one paragraph (40ch) right on a shared baseline, with `landing-section` above and `landing-group` below; they stack on mobile.
+
+**Hero.** Centred claim, lead (56ch) and actions, then the loop across the full sheet in three columns (1fr / 1.25fr / 1fr, at least 400px tall): team quotes left, the review desk on the centre axis, coding agents right, with one small line under it naming the fictional project. It fits 1440×900 whole. At ≤760px the three stack and show one quote and one agent at a time.
+
+**Sections on the grid.** The demo splits into two equal halves on the centre axis (transcript 540px tall, Drafts on the canvas beside a rule; stacked with a 620px transcript on mobile). The reader strip is one row of cells (2fr + four of 1fr, 128px). The linked-knowledge map uses the six columns directly: Passport index and open question in column 1, the rule sheet across columns 3–4, two dependents in columns 5–6, joined by 1px wires; on mobile the wires go and the order is rule sheet, dependents side by side, then index and question. Agents: story left of the axis, the terminal filling the whole right half behind a rule. FAQ: heading in the left third, ruled rows across the right two thirds. The closing claim is centred. The footer is the wordmark at full sheet width, then a meta column beside the responsibility block.
+
+**Motion.** GSAP with ScrollTrigger, SplitText and DrawSVG; expo ease-out is the house curve. All of it is registered only when reduced motion is not requested.
+
+- *Load, once:* the construction columns wipe in from the top (1.8s); the first headline line arrives letter by letter from below and out of a 10px blur (0.9s, 35ms apart); the second line rises (1.3s) while easing from upright 600 to its light slant; lead, actions and the loop follow.
+- *Rotating line:* each phrase holds 2.6s, leaves upward into an 8px blur (0.6s) and the next rises (0.9s); it runs only while the hero is in view.
+- *Hero loop:* three records, one entering every 2.5s, each turn 6.9s. The quote lights; a beam runs its wire to the desk; the Draft card flies in from the quote, turning in depth; a cursor arrives and clicks approve; the dashed frame turns to an approval frame with a ring (0.8s) and the status flips; a beam runs to the agent and the card flies on; the agent's cell lights in indigo and shows its `get_context` line, then rests. Wires are permanent; beams travel. The desk breathes 7px. Three planes sit at −40px, 90px and −10px of depth under a 1100px perspective, and with a fine pointer above 760px the scene leans up to 6° sideways and 4.5° vertically toward it (0.9s follow). The loop pauses offscreen.
+- *On scroll:* section rules draw from the left on scrub and their crosses turn in (0.7s); the knowledge heading rises line by line behind a mask; the rule sheet wipes down, the wires wipe left to right, the index and dependents fade in; the terminal half wipes in from the right (1.2s); FAQ rows settle 12px, 60ms apart; the closing claim gains weight from 250 to 600 on scrub; the wordmark is uncovered from below on scrub; the approval check is drawn (0.8s).
+- *Examples:* the interview starts itself once 35% of it is in view and keeps the shared RecordWave and transferCard flight for each Draft; approving the rule traces two indigo signals along the wires (650ms, the second 500ms later) with needs-review badges at 500ms and 1000ms; terminal lines type at 22ms a character (650–1800ms), tool calls take 620ms, other lines 380ms, 160ms between rows, a finished scenario holds 5s; the caret blinks at 1s. Examples stop offscreen and in hidden tabs.
+- *Reduced motion:* nothing moves and no transition runs. The hero rests on its last record, approved and delivered; the knowledge scene settles straight to its result; the terminal shows the selected scenario complete. Anchor scrolling is smooth only when motion is allowed. There is no global pause control.
 
 ## Elevation & Depth
 
@@ -350,7 +447,9 @@ Content is flat. Depth comes from the tonal step between the frame and the canva
 
 ### Public landing — depth
 
-Marketing sections and examples are flat. Subtle graphite tone changes, whitespace and 1px structural rules create separation; the product-native IntentraButton alone retains its subtle indigo action shadow; no landing panel shadow or blur is introduced. The canvas suggests assembly through position, scale and opacity, without turning the page into a floating dashboard.
+The sheet is flat. Separation comes from 1px rules and the graphite steps; nothing is frosted, and panels carry no shadow. Depth is spent once, in the hero loop: three planes at different distances that lean toward the pointer, a desk that sits nearest with two receding ghost sheets under it, and the Draft card, which alone casts a shadow (`0 36px 60px -32px rgb(0 0 0 / 0.85)`, straight down, soft) because it is the one object that is picked up and moved. Blur appears only in passing, on headline letters as they arrive. Native IntentraButtons inside the examples keep the product's own faint indigo shadow; the solid invitation has none.
+
+**The One Lifted Object Rule.** Only the Draft card in flight casts a landing shadow. A panel that needs separating gets a rule or a graphite step.
 
 ## Shapes
 
@@ -358,7 +457,9 @@ One base radius (0.5rem) scaled by multiplier, four steps only: controls, list b
 
 ### Public landing — shapes
 
-Controls have a 6px radius; the demo, central knowledge rule and terminal use 12px. Smaller inset content uses 7–8px corners, while the canvas and wordmark keep their native square pixel geometry. These radii belong to the marketing extension and do not enlarge application controls.
+Everything the landing draws is square (`landing-control`, `landing-panel`): buttons, the demo, answers, Draft records, the rule sheet, agent cells, the terminal, scenario selectors, FAQ rows. Panels are flush to the sheet's lines rather than floating inside padding. Lines are 1px; a dashed line means provisional (the centre axis, a Draft that is not yet approved, the empty Drafts area), a solid one means settled. Wires are thin curves in the hero and right-angled runs in the knowledge map. Registration crosses are 11px. Product-native badges (status, Kind, needs review) keep their own pill shape inside examples, and the pixel wordmark keeps its pixel geometry.
+
+**The Square Sheet Rule.** The landing adds no radius of its own. Rounded corners appear only on product badges quoted inside an example.
 
 ## Components
 
@@ -460,12 +561,17 @@ A conversation that visibly turns into knowledge, in the app's own materials: no
 
 ### Public landing — components
 
-- **Invitation:** custom LandingAction composes the existing IntentraButton and router Link, retaining the native indigo border, translucent fill, sheen and AgentSpark. Marketing sizing is 52px minimum height, 22px horizontal padding and 14px text (48px, 16px and 13px on mobile), with a 6px radius. No decorative arrow follows the label; keyboard focus uses a 3px current-color outline offset by 5px. The closing invitation uses the same treatment. Existing sessions enter the workspace; new visitors enter registration.
-- **Product demonstration:** ProductDemo rehearses a finite four-question Orbit interview (refund rule, cancellation scenario, notification requirement, unresolved organiser cancellation). It composes shadcn Card, MessageScroller, Message, Bubble, Accordion and Empty with native KindIcon, KindBadge, KnowledgeStatusBadge and IntentraButton. A mock opening message establishes context; explicit playback reveals questions, typing feedback and answers, then runs the shared RecordWave/transferCard arrival for each draft. The transcript accumulates and follows through MessageScroller; four compact draft disclosures accumulate beside it (below on mobile). Opening one pauses playback for review and individual approval. Playback supports pause/resume, manual advance and restart, stops offscreen or in a hidden tab, and drops spatial motion under reduced motion. The fixed transcript is 624px tall on desktop and 510px on mobile. This is labeled illustrative state, never backend data.
-- **Navigation and FAQ:** existing shadcn controls provide the menu toggle and accordion behavior. Desktop navigation uses 13px text; mobile expands inline with 16px links. FAQ triggers have 16px text (14px mobile), generous vertical padding and 8px gaps without row dividers.
-- **Linked knowledge scene:** One open asymmetric composition joins the Passport index and unresolved OQ-05 at left, the prominent cancellation rule at centre, and dependent SC-08 and REQ-24 at right. Desktop uses 24% / 40% / 26% columns with 5% gaps. The native IntentraButton explicitly approves a 48-hour replacement of the 24-hour rule: BR-13 replaces BR-12, with the source and preserved history visible. Two meaningful relationship paths trace for 650ms, the second delayed 500ms; native needs-review badges arrive at 500ms and 1000ms. Pause/reduced motion at activation settles directly to the completed state. Reset restores the example. At ≤760px, wires disappear and visual order becomes rule → approval controls and result → two-column dependents → Passport/open question. Keeping controls and result directly below the rule prevents their separation on small screens. This is a local demonstration, with no project writes.
-- **Context example:** McpShowcase balances the section with four plain-text shadcn Tabs selectors in the left story column and a compact monospace terminal on the right. The scenarios cover implementation from approved context, conflicting constraints/missing criteria, draft proposal plus explicit human approval through MCP, and a suggested implementation task based on settled knowledge while an exception stays unresolved. The terminal uses text rows and protocol prefixes, not knowledge-card components; the Context Pack is three compact lines. Desktop columns stretch together; the terminal has a 510px minimum height, growing with its scenario text. Mobile stacks the columns and retains that minimum. Invisible full-text measuring spans reserve each line’s geometry during typing. Typed prompt, human-consent and answer lines take 22ms per character, clamped to 650–1800ms; tool calls take 620ms and other received lines 380ms, with 160ms between rows except after an answer. These local sequences hold the completed result for 5 seconds, then advance to the next scenario and loop. Selecting a scenario restarts its sequence; keyboard focus holds the completed example. Offscreen/hidden/global pause stops playback. Reduced motion shows the selected scenario fully, with manual scenario selection. No local pause/replay controls or synthetic-data caption (user request); no network calls or product writes.
-- **Brand assembly:** the actual shared Brand component supplies the SVG wordmark and its native reassembly; the existing avatar is reused; the enlarged hero mark is drawn in canvas, with floating context labels composed from shadcn Badge. No generated raster ships with this surface, so no raster provenance record is required.
+- **Invitation:** LandingAction composes the product's IntentraButton and a router Link, restyled as `landing-button-primary`: a solid indigo block with canvas-coloured 15px 600 text, the AgentSpark mark (19px) before the label, no border, no shadow; 48px tall with 18px padding at ≤760px. Hover and focus lighten the fill (`landing-button-primary-hover`). The hero and the closing claim use the same button; a signed-in visitor gets the workspace instead of registration. Beside it in the hero sits a plain 14px ink link to the demo that underlines on hover.
+- **Focus:** every link and button takes a 2px indigo outline offset 3px.
+- **Header and language control:** logotype in Geologica; navigation in 14px subtle ink that brightens on hover; sign-in as a plain link. The language control shows both codes side by side, RU | EN, in 13px 500 uppercase with a 1px divider between them; the current one is bright with a 1px indigo underline, and a click on the other switches. The mobile menu toggle is a 40px ghost icon button.
+- **Section rule:** a 1px line across the sheet with an 11px cross on each frame line; it closes every section and opens the footer.
+- **Hero loop:** quotes are small bordered cells (role in 12px subtle ink, the words in 14px) that brighten and take a raised fill while spoken. The Draft card (`landing-draft-card`) carries its key in mono and the native status badge on top, the title in Geologica, the native Kind badge and a small silver approve chip below; its frame is dashed as a Draft and solid green once approved. A pointer cursor performs the approval. Agent cells are panel-coloured bordered cells with a terminal icon and name, an idle line, and on delivery `get_context → KEY` in mono with a green check. The whole scene is one image to assistive technology, with a text label.
+- **Interview demo:** a square panel across the sheet with a title bar, a transcript half and a Drafts half. The finite four-question Orbit interview composes shadcn Card, MessageScroller, Message, Bubble, Accordion and Empty with native Kind and status badges. The analyst's question is plain 19px text; the person's answer sits on an inset fill. A native IntentraButton plays, pauses, resumes and restarts; a ghost button steps manually. Each Draft arrives by the shared RecordWave and transferCard flight into a bordered record that opens for individual approval, its border turning green when approved. Local illustrative state only.
+- **Reader strip:** one row of ruled cells naming who reads the sheet: the team in the web interface and three coding agents over MCP, names in `landing-title`.
+- **Linked-knowledge scene:** the rule sheet (`landing-rule-sheet`) holds the key and status, Kind badge, the rule's name, a large figure (`landing-figure`) with its unit, source, version line and, inside the sheet, a native IntentraButton that approves the replacement once (BR-12 at 24 hours becomes BR-13 at 48) and then stays disabled with the new label. Two dependents at the right flip from approved to needs review as the signal reaches them. There is no reset and no explanatory caption.
+- **MCP showcase:** left of the axis, the heading, one paragraph, three agent names, four scenario selectors (shadcn Tabs as plain 14px rows; the active one bright on an inset fill, no arrows or dividers) and a text link. The terminal (`landing-terminal`) fills the right half from rule to rule: a header row (`orbit / intentra`, `MCP`), vertically centred lines with one-character prefixes, indigo tool calls, an amber mark on warnings, a status line and transport label in the footer. Hidden full-text spans reserve each line's space while it types, so nothing shifts. Keyboard focus holds a finished scenario.
+- **FAQ:** shadcn Accordion as ruled rows: a rule above the first and under each, 17px 500 questions with 22px of vertical padding, answers at 68ch in subtle ink.
+- **Closing and footer:** a centred claim, one line and the invitation. Below the last rule the shared Brand wordmark spans the sheet and links to the top. The responsibility block is a small ruled table framed on its top and left: three rows (Предлагает — AI-аналитик, Проверяет — Команда, Утверждает — Человек) with a narrow last cell that holds a drawn green check on the approving row, and beside them the name and tagline. No raster asset ships with the landing, so no raster provenance is owed.
 
 ## Do's and Don'ts
 
@@ -497,14 +603,19 @@ A conversation that visibly turns into knowledge, in the app's own materials: no
 
 ### Public landing — quieter composition
 
-Links and marketing actions have no decorative arrow suffixes; functional disclosure, chat controls and terminal protocol notation remain. Whitespace separates the header, partners, FAQ items and closing/footer. Preserve product panel frames, draft cards and meaningful dependency connectors. Section spacing is 88–144px and intro-to-content spacing 40–64px. MCP selectors use a restrained active fill without arrows or row dividers. The public flow is hero → four-question interview → one asymmetric linked-knowledge scene → four MCP scenarios → FAQ → closing. Standalone problem, feature-stack, human-control manifesto and audience-role sections were removed at the user’s request because they repeated these demonstrations. This composition applies only to the landing.
+The sheet explains itself by showing the product at work, so explanatory furniture stays out: no decorative arrow suffixes on links or actions, no captions that narrate an example, no reset controls, no global pause, no coordinates, sheet numbers or drafting-standard abbreviations. Functional notation stays: disclosure chevrons, chat controls, terminal prefixes and the arrow inside a `get_context` line. Each example carries exactly one label saying it is a fictional project. The flow is hero loop → interview → reader strip → linked knowledge → agents → FAQ → closing; standalone problem, feature-stack, manifesto and audience sections stay removed. This composition applies only to the landing.
 
 ### Public landing — scoped guardrails
 
-- Do keep marketing overrides inside `.landing` and preserve the Operate application’s design.
-- Do give the AI analyst and coding-agent context equal weight, with human approval visible in examples.
-- Do reuse shadcn primitives, localized copy, the existing SVG brand and the licensed self-hosted Onest faces.
-- Do keep the canvas pausable, reduced-motion compatible and subordinate to readable content.
-- Don't carry the landing palette, display sizes or ambient motion into authenticated app screens.
-- Don't invent customer logos, testimonials, metrics, pricing or capabilities; identify synthetic demonstrations.
-- Don't promote tiny ancillary metadata or existing app rule conflicts into new global design tokens.
+- Do keep every landing override inside `.landing`, and leave the Operate application's tokens, theme and density alone.
+- Do align new landing content to the frame, the six columns or the centre axis, and close each section with a rule and its crosses.
+- Do keep landing panels and controls square and flush to the lines; separate with rules and graphite steps.
+- Do show the product working with its native badges, keys and actions, with a person's approval visible in every example.
+- Do take all copy from i18n in both Russian and English, and let headings break where the copy breaks.
+- Do make every motion optional: the page is complete and still under reduced motion, and loops stop offscreen.
+- Don't carry the graphite palette, Geologica, display sizes or the sheet's motion into authenticated app screens.
+- Don't add landing shadows, glows, frosted surfaces or rounded cards; the Draft card in flight is the only lifted object.
+- Don't use indigo for headings, body links or decoration, or Kind and status colours outside a product example.
+- Don't set claims, names or prose in mono, and don't put a label above a heading.
+- Don't invent customer logos, testimonials, metrics, pricing or capabilities; label synthetic demonstrations.
+- Don't promote one-off line greys or sub-12px terminal sizes into tokens.

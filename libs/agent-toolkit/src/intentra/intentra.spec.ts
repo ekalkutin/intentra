@@ -149,6 +149,19 @@ describe('Intentra', () => {
     expect(system).toContain('They are a Maintainer');
   });
 
+  it('marks its instructions for the provider to cache', async () => {
+    // Act
+    const { calls } = await converse(() => Promise.reject(new Error('x')));
+
+    // Assert
+    expect(calls[0]?.prompt[0]).toMatchObject({
+      role: 'system',
+      providerOptions: {
+        openrouter: { cacheControl: { type: 'ephemeral' } },
+      },
+    });
+  });
+
   it('sees an expected failure with its code', async () => {
     // Arrange
     const failure = Object.assign(new Error('Knowledge item has changed'), {
@@ -183,9 +196,44 @@ describe('Intentra', () => {
     expect(onUnexpectedError).toHaveBeenCalledWith(failure);
   });
 
-  it('sends past tool calls to the model no more, only what was said', async () => {
+  it('sends past reads to the model no more, but what it did', async () => {
     // Arrange
-    const model = recordingModel();
+    const turns = [
+      streamOf([
+        {
+          type: 'tool-call',
+          toolCallId: 'call-0',
+          toolName: 'list_knowledge',
+          input: JSON.stringify({ projectId: 'project-1' }),
+        },
+        { type: 'finish', finishReason: 'tool-calls', usage },
+      ]),
+      streamOf([
+        {
+          type: 'tool-call',
+          toolCallId: 'call-1',
+          toolName: 'record_goal',
+          input: JSON.stringify({
+            projectId: 'project-1',
+            title: 'Fewer late invoices',
+            rationale: 'Ada: "we chase invoices by hand"',
+            fields: { outcome: 'Halve late invoices' },
+          }),
+        },
+        { type: 'finish', finishReason: 'tool-calls', usage },
+      ]),
+    ];
+    let turn = 0;
+    const model = new MastraLanguageModelV2Mock({
+      doStream: async () =>
+        turns[turn++] ??
+        streamOf([
+          { type: 'text-start', id: 'text-1' },
+          { type: 'text-delta', id: 'text-1', delta: 'Done.' },
+          { type: 'text-end', id: 'text-1' },
+          { type: 'finish', finishReason: 'stop', usage },
+        ]),
+    });
     const intentra = createIntentra({
       intentra: definition(model),
       specialists: [],
@@ -210,10 +258,11 @@ describe('Intentra', () => {
     await second.consumeStream();
 
     // Assert
-    const prompt = JSON.stringify(model.doStreamCalls[2]?.prompt);
+    const prompt = JSON.stringify(model.doStreamCalls.at(-1)?.prompt);
     expect(prompt).toContain('We want fewer late invoices');
     expect(prompt).toContain('Done.');
-    expect(prompt).not.toContain('record_goal');
+    expect(prompt).toContain('record_goal');
+    expect(prompt).not.toContain('list_knowledge');
   });
 
   it('ends its turn with the choices it offers', async () => {

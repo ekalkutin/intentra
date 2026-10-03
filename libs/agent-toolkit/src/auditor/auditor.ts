@@ -1,6 +1,7 @@
 import { Agent, type ToolsInput } from '@mastra/core/agent';
 
 import { agentToolsOf } from '../agent-tools.js';
+import { cachedInstructions } from '../cached-instructions.js';
 import type { AgentDefinition } from '../intentra/agent-definition.js';
 import type { UnexpectedErrorListener } from '../intentra/reporting-failures.js';
 
@@ -44,9 +45,11 @@ export function createAuditor({ auditor, onUnexpectedError }: AuditorOptions) {
     name: auditor.name,
     description: auditor.description,
     instructions: ({ requestContext }) =>
-      frameAuditorInstructions(
-        requestContext.get('project'),
-        auditor.instructions,
+      cachedInstructions(
+        frameAuditorInstructions(
+          requestContext.get('project'),
+          auditor.instructions,
+        ),
       ),
     model: auditor.model,
     tools: agentToolsOf(auditor.toolIds, onUnexpectedError),

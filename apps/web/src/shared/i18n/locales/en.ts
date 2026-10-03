@@ -1,3 +1,4 @@
+import { landingEn } from './landing-en';
 import type { ru } from './ru';
 
 /** A locale that may leave texts out; i18next falls back to Russian for them. */
@@ -11,6 +12,15 @@ type PartialTexts<T> = {
  */
 export const en = {
   brand: 'Intentra',
+  landing: landingEn,
+  kindsOne: {
+    'business-rule': 'Business rule',
+    scenario: 'Scenario',
+    requirement: 'Requirement',
+    'open-question': 'Open question',
+  },
+  statuses: { draft: 'draft', approved: 'approved' },
+  knowledge: { needsReview: 'needs review' },
   fields: {
     email: 'Email',
     password: 'Password',

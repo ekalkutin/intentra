@@ -1,11 +1,10 @@
-import { Menu, Pause, Play, Users, X } from 'lucide-react';
+import { Menu, Users, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 import { useHasSession } from '@/entities/session';
 import { ROUTES } from '@/shared/config';
-import { cn } from '@/shared/lib';
 import {
   Accordion,
   AccordionContent,
@@ -17,8 +16,10 @@ import {
 
 import { useSheetMotion } from '../lib/use-sheet-motion';
 
+import { HeroFlow } from './hero-flow';
 import { KnowledgeScene } from './knowledge-scene';
 import { LandingAction } from './landing-action';
+import { LandingLanguage } from './landing-language';
 import { McpShowcase } from './mcp-showcase';
 import { ProductDemo } from './product-demo';
 
@@ -26,6 +27,7 @@ const navigation = ['product', 'benefits', 'agents', 'faq'] as const;
 const faqs = ['1', '2', '3', '4', '5', '6'] as const;
 const agents = ['claude', 'codex', 'cursor'] as const;
 const signatures = ['drafted', 'checked', 'approved'] as const;
+const phrases = ['line2', 'line2b', 'line2c'] as const;
 
 function StartLink({ closing = false }: { readonly closing?: boolean }) {
   const { t } = useTranslation();
@@ -44,12 +46,9 @@ function StartLink({ closing = false }: { readonly closing?: boolean }) {
 }
 
 /** A section rule of the sheet, with registration crosses where it meets the frame. */
-function SheetRule({ lead = false }: { readonly lead?: boolean }) {
+function SheetRule() {
   return (
-    <div
-      className={cn('landing-divider', lead && 'landing-divider-lead')}
-      aria-hidden='true'
-    >
+    <div className='landing-divider' aria-hidden='true'>
       <span className='landing-rule' />
       <i className='landing-cross' />
       <i className='landing-cross' />
@@ -60,7 +59,6 @@ function SheetRule({ lead = false }: { readonly lead?: boolean }) {
 export function LandingPage() {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [paused, setPaused] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   useSheetMotion(root);
   useEffect(() => {
@@ -88,11 +86,7 @@ export function LandingPage() {
   }, [menuOpen]);
 
   return (
-    <div
-      ref={root}
-      className={cn('landing dark', paused && 'landing-paused')}
-      id='top'
-    >
+    <div ref={root} className='landing dark' id='top'>
       <a className='landing-skip' href='#main'>
         {t('landing.skip')}
       </a>
@@ -120,18 +114,7 @@ export function LandingPage() {
             ))}
           </nav>
           <div className='landing-header-actions'>
-            <Button
-              className='landing-motion-toggle'
-              variant='ghost'
-              size='icon'
-              aria-label={t(
-                paused ? 'landing.hero.play' : 'landing.hero.pause',
-              )}
-              aria-pressed={paused}
-              onClick={() => setPaused(!paused)}
-            >
-              {paused ? <Play /> : <Pause />}
-            </Button>
+            <LandingLanguage />
             <Link to={ROUTES.signIn} className='landing-login'>
               {t('landing.signIn')}
             </Link>
@@ -170,41 +153,41 @@ export function LandingPage() {
         )}
         <main id='main'>
           <section className='landing-hero' aria-labelledby='hero-title'>
-            <div className='landing-crosshair' aria-hidden='true'>
-              <i />
-              <i />
-              <code />
-            </div>
             <div className='landing-hero-copy'>
-              <h1 id='hero-title'>
-                <span className='landing-mask'>
-                  <span>{t('landing.hero.line1')}</span>
+              <h1
+                id='hero-title'
+                aria-label={`${t('landing.hero.line1')} ${t('landing.hero.line2')}`}
+              >
+                <span className='landing-mask' aria-hidden='true'>
+                  <span className='landing-hero-lead'>
+                    {t('landing.hero.line1')}
+                  </span>
                 </span>
-                <span className='landing-mask'>
-                  <span className='landing-hero-accent'>
-                    {t('landing.hero.line2')}
+                <span className='landing-mask' aria-hidden='true'>
+                  <span className='landing-hero-accent landing-rotator'>
+                    {phrases.map(phrase => (
+                      <span key={phrase}>{t(`landing.hero.${phrase}`)}</span>
+                    ))}
                   </span>
                 </span>
               </h1>
               <p>{t('landing.hero.text')}</p>
               <div className='landing-hero-actions'>
                 <StartLink />
-                <a href='#agents' className='landing-demo-link'>
+                <a href='#product' className='landing-demo-link'>
                   {t('landing.demo')}
                 </a>
               </div>
             </div>
+            <HeroFlow />
           </section>
-          <SheetRule lead />
-          <section
-            id='product'
-            className='landing-product'
-            aria-labelledby='product-title'
-          >
-            <h2 id='product-title' className='sr-only'>
-              {t('landing.demoSection.title')}
-            </h2>
-            <ProductDemo paused={paused} autoPlay />
+          <SheetRule />
+          <section id='product' className='landing-product'>
+            <div className='landing-section-intro'>
+              <h2>{t('landing.demoSection.title')}</h2>
+              <p>{t('landing.demoSection.text')}</p>
+            </div>
+            <ProductDemo paused={false} autoPlay />
           </section>
           <SheetRule />
           <div className='landing-partners'>
@@ -224,10 +207,10 @@ export function LandingPage() {
             ))}
           </div>
           <SheetRule />
-          <KnowledgeScene paused={paused} />
+          <KnowledgeScene paused={false} />
           <SheetRule />
           <section id='agents' className='landing-agents'>
-            <McpShowcase paused={paused} />
+            <McpShowcase paused={false} />
           </section>
           <SheetRule />
           <section id='faq' className='landing-faq'>
@@ -303,12 +286,6 @@ export function LandingPage() {
               <div className='landing-title-name'>
                 <strong>{t('brand')}</strong>
                 <span>{t('landing.footer.tagline')}</span>
-              </div>
-              <div className='landing-title-count'>
-                {t('landing.footer.sheet.number')}
-              </div>
-              <div className='landing-title-count'>
-                {t('landing.footer.sheet.total')}
               </div>
             </div>
           </div>

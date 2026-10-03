@@ -45,6 +45,7 @@ export const MEMORY_PROVIDER: Provider = {
         },
       }),
       options: {
+        lastMessages: options.historyMessages,
         messageHistory: { maxTokens: options.historyTokens },
         // The title comes after the answer, in the background: the answer
         // never waits for it, and the web app asks for it again.
