@@ -33,6 +33,13 @@ export const EnvironmentSchema = z
       .min(0)
       .max(23)
       .default(0),
+    /** Where Qdrant listens, such as http://qdrant:6333; without it the Similar Items' index is kept in memory and rebuilt after a restart. */
+    QDRANT_URL: z.url({ protocol: /^https?$/ }).optional(),
+    /** The OpenRouter embedding model that reads the meaning of Knowledge Items; changing it rebuilds the index. */
+    EMBEDDING_MODEL: z
+      .string()
+      .regex(/^[a-z0-9._-]+\/[A-Za-z0-9._:-]+$/)
+      .optional(),
     /** Comma-separated hostnames the MCP endpoint answers to; localhost only when unset. */
     MCP_ALLOWED_HOSTS: z
       .string()
@@ -89,6 +96,12 @@ export const EnvironmentSchema = z
       agents: {
         providerKeyEncryptionKey: env.PROVIDER_KEY_ENCRYPTION_KEY,
         analysisScheduleHourUtc: env.ANALYSIS_SCHEDULE_HOUR_UTC,
+      },
+      knowledge: {
+        qdrantUrl: env.QDRANT_URL ?? null,
+        ...(env.EMBEDDING_MODEL
+          ? { embeddingModelId: env.EMBEDDING_MODEL }
+          : {}),
       },
     },
   }));

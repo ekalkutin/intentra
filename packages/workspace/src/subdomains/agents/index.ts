@@ -14,6 +14,7 @@ export {
   AnalysisRunRepository,
   AnalysisScheduleRepository,
   ConversationStore,
+  ProviderKeyCipher,
   ProviderKeyRepository,
 } from './application/ports/outbound/index.js';
 export { DatabaseModule as AgentsDatabaseModule } from './infrastructure/database/index.js';

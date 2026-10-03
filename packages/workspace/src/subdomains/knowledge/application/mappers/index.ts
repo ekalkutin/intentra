@@ -19,3 +19,8 @@ export {
 export { toKnowledgeGapDto } from './knowledge-gap.mapper.js';
 export { toKnowledgeSource } from './knowledge-source.mapper.js';
 export { toKnowledgeSummaryDto } from './knowledge-summary.mapper.js';
+export {
+  toSimilarityFingerprint,
+  toSimilarityText,
+  toSimilarKnowledgeItemDto,
+} from './similar-items.mapper.js';

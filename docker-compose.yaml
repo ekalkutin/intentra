@@ -29,6 +29,15 @@ services:
       interval: 10s
       retries: 5
 
+  # Similar Items' index: derived from Mongo and rebuilt from it, so losing it loses no knowledge.
+  qdrant:
+    image: qdrant/qdrant:v1.19.1
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant-data:/qdrant/storage
+
   api:
     image: ekalkutin/intentra-api:latest
     restart: always
@@ -38,9 +47,12 @@ services:
     environment:
       # Inside the network Mongo is `mongo`, not the host's localhost.
       DB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/intentra?authSource=admin&replicaSet=rs0&directConnection=true
+      QDRANT_URL: http://qdrant:6333
     depends_on:
       mongo:
         condition: service_healthy
+      qdrant:
+        condition: service_started
 
   web:
     image: ekalkutin/intentra-web:latest
@@ -52,3 +64,4 @@ services:
 
 volumes:
   mongo-data:
+  qdrant-data:

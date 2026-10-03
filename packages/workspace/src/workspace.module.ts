@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { WorkspaceApi } from '@intentra/contracts/workspace';
 
 import { CleanupAdapter } from './cleanup.adapter.js';
+import { KnowledgeEmbedderAdapter } from './knowledge-embedder.adapter.js';
 import { PlatformWorkspacesService } from './platform-workspaces.service.js';
 import {
   AGENTS_OPTIONS,
@@ -12,8 +13,12 @@ import {
   type AgentsOptions,
 } from './subdomains/agents/index.js';
 import {
+  DEFAULT_KNOWLEDGE_OPTIONS,
+  KNOWLEDGE_OPTIONS,
   KNOWLEDGE_PROVIDERS,
   KnowledgeDatabaseModule,
+  KnowledgeEmbedder,
+  type KnowledgeOptions,
 } from './subdomains/knowledge/index.js';
 import {
   Cleanup,
@@ -46,6 +51,17 @@ import {
         ...agents,
       }),
     },
+    {
+      provide: KNOWLEDGE_OPTIONS,
+      inject: [WORKSPACE_OPTIONS],
+      useFactory: ({
+        knowledge,
+      }: WorkspaceModuleOptions): KnowledgeOptions => ({
+        ...DEFAULT_KNOWLEDGE_OPTIONS,
+        ...knowledge,
+      }),
+    },
+    { provide: KnowledgeEmbedder, useClass: KnowledgeEmbedderAdapter },
     PlatformWorkspacesService,
     WorkspaceApiService,
     { provide: WorkspaceApi, useExisting: WorkspaceApiService },

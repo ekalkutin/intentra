@@ -139,6 +139,12 @@ export {
 } from './knowledge/knowledge-kind.dto.js';
 export { KnowledgeApi } from './knowledge/knowledge.api.js';
 export {
+  FindSimilarKnowledgeItemsDtoSchema,
+  type FindSimilarKnowledgeItemsDto,
+  type SimilarKnowledgeItemDto,
+  type SimilarKnowledgeItemsDto,
+} from './knowledge/similar-knowledge-items.dto.js';
+export {
   GetKnowledgeChangesDtoSchema,
   type GetKnowledgeChangesDto,
   type KnowledgeChangesDto,

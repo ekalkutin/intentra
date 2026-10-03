@@ -34,6 +34,8 @@
     "@mastra/mongodb": "catalog:",
     "@nestjs/common": "catalog:nestjs12",
     "@nestjs/mongoose": "catalog:nestjs12",
+    "@openrouter/ai-sdk-provider": "^3.1.0",
+    "@qdrant/js-client-rest": "^1.19.0",
     "ai": "catalog:",
     "mongoose": "catalog:"
   },

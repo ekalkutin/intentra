@@ -11,6 +11,7 @@ import {
 import {
   KnowledgeItemRepository,
   KnowledgeKeyCounter,
+  SimilarItemsIndex,
 } from './subdomains/knowledge/index.js';
 import {
   InvitationRepository,
@@ -26,7 +27,9 @@ import {
  * The one place that knows what lies under a Workspace, a Project or a Member,
  * in every subdomain. Runs inside the caller's transaction; Conversations are
  * kept by the Agents' runtime outside it, so a rolled-back deletion still
- * loses them (Agents ADR 0002).
+ * loses them (Agents ADR 0002). Similar Items' index is outside it too; a
+ * rolled-back deletion only makes the next search read the meaning anew
+ * (Knowledge ADR 0003).
  */
 @Injectable()
 export class CleanupAdapter implements Cleanup {
@@ -38,6 +41,7 @@ export class CleanupAdapter implements Cleanup {
     private readonly personalAccessTokenRepository: PersonalAccessTokenRepository,
     private readonly knowledgeItemRepository: KnowledgeItemRepository,
     private readonly knowledgeKeyCounter: KnowledgeKeyCounter,
+    private readonly similarItemsIndex: SimilarItemsIndex,
     private readonly conversationStore: ConversationStore,
     private readonly providerKeyRepository: ProviderKeyRepository,
     private readonly analysisRunRepository: AnalysisRunRepository,
@@ -51,6 +55,7 @@ export class CleanupAdapter implements Cleanup {
     await this.analysisScheduleRepository.deleteMany({ workspaceId });
     await this.knowledgeItemRepository.deleteMany({ workspaceId });
     await this.knowledgeKeyCounter.deleteMany({ workspaceId });
+    await this.similarItemsIndex.deleteMany({ workspaceId });
     await this.personalAccessTokenRepository.deleteMany({ workspaceId });
     await this.projectRoleAssignmentRepository.deleteMany({ workspaceId });
     await this.projectRepository.deleteMany({ workspaceId });
@@ -64,6 +69,7 @@ export class CleanupAdapter implements Cleanup {
     await this.analysisScheduleRepository.deleteMany({ projectId });
     await this.knowledgeItemRepository.deleteMany({ projectId });
     await this.knowledgeKeyCounter.deleteMany({ projectId });
+    await this.similarItemsIndex.deleteMany({ projectId });
     await this.projectRoleAssignmentRepository.deleteMany({ projectId });
   }
 

@@ -11,4 +11,6 @@ Knowledge finds Similar Items, the items closest in meaning to a given one wheth
 ## Consequences
 
 - Docker Compose gains a Qdrant service.
-- Knowledge needs the Provider Key, which so far only Agents read; since Agents already depend on Knowledge, the key moves where both read it rather than Knowledge calling into Agents.
+- Knowledge needs the Provider Key, which Agents keep, while Agents already depend on Knowledge. So Knowledge only declares what it needs, reading meaning for a Workspace, and the Workspace context wires it to the Agents' key at its root, as it does for cleanup: Knowledge never reaches into Agents and the key stays where it is.
+- Nothing is indexed when knowledge is written: every search first brings the Project's index in step (what changed is read anew, what left is dropped), so a write never waits for the model and a Workspace that adds a key later is indexed on its first search.
+- Without `QDRANT_URL` the index lives in the server's memory: enough for tests and a single dev run, rebuilt after a restart.

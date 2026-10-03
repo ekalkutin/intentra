@@ -9,6 +9,7 @@ import {
   type ConfirmKnowledgeItemDto,
   type DeleteKnowledgeItemDto,
   type EditKnowledgeItemDto,
+  type FindSimilarKnowledgeItemsDto,
   type GetKnowledgeChangesDto,
   type GetKnowledgeContextDto,
   type KnowledgeApi,
@@ -26,6 +27,7 @@ import {
   type RecordKnowledgeItemDto,
   type RejectKnowledgeItemDto,
   type RetireKnowledgeItemDto,
+  type SimilarKnowledgeItemsDto,
 } from '@intentra/contracts/workspace';
 import { ProjectId, UnitOfWork, WorkspaceId } from '@intentra/shared-kernel';
 
@@ -80,12 +82,15 @@ import {
   toKnowledgeItemDto,
   toKnowledgeSource,
   toKnowledgeSummaryDto,
+  toSimilarKnowledgeItemDto,
 } from '../mappers/index.js';
 import {
   KNOWLEDGE_ITEM_ORDERS,
   KnowledgeItemRepository,
   KnowledgeKeyCounter,
 } from '../ports/outbound/index.js';
+
+import { SimilarItemsService } from './similar-items.service.js';
 
 /** What a list shows unless asked for a status: Rejected and Obsolete are not part of the knowledge. */
 const LISTED_BY_DEFAULT: readonly KnowledgeStatus[] = [
@@ -137,6 +142,7 @@ export class KnowledgeService implements KnowledgeApi {
     private readonly accessResolver: AccessResolver,
     private readonly knowledgeItemRepository: KnowledgeItemRepository,
     private readonly knowledgeKeyCounter: KnowledgeKeyCounter,
+    private readonly similarItemsService: SimilarItemsService,
   ) {}
 
   public async record(
@@ -336,6 +342,32 @@ export class KnowledgeService implements KnowledgeApi {
         from: from.value,
         to: to.value,
       })),
+    };
+  }
+
+  public async similar(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    key: string,
+    query: FindSimilarKnowledgeItemsDto,
+  ): Promise<SimilarKnowledgeItemsDto> {
+    const { project, projectRole } = await this.resolve(
+      caller,
+      workspaceId,
+      projectId,
+    );
+    const item = await this.getItem(project.id, key);
+    const similar = await this.similarItemsService.find(item, query.take);
+    if (!similar) {
+      return { items: [], available: false };
+    }
+
+    return {
+      items: similar.map(({ item: found, similarity }) =>
+        toSimilarKnowledgeItemDto(found, projectRole, similarity),
+      ),
+      available: true,
     };
   }
 

@@ -28,6 +28,10 @@ import type {
 } from './knowledge-item.dto.js';
 import type { ListKnowledgeItemsDto } from './list-knowledge-items.dto.js';
 import type { RecordKnowledgeItemDto } from './record-knowledge-item.dto.js';
+import type {
+  FindSimilarKnowledgeItemsDto,
+  SimilarKnowledgeItemsDto,
+} from './similar-knowledge-items.dto.js';
 
 /**
  * A Project's knowledge. Contributors and Maintainers record, edit and delete
@@ -117,6 +121,20 @@ export abstract class KnowledgeApi {
     projectId: string,
     key: string,
   ): Promise<KnowledgeDependenciesDto>;
+
+  /**
+   * The item's Similar Items: the Drafts and Approved items of the Project
+   * closest to it in meaning, linked or not. The item may be in any status.
+   * Every Member reads them, and Intentra itself; reading the meaning runs on
+   * the Workspace's Provider Key.
+   */
+  abstract similar(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    key: string,
+    query: FindSimilarKnowledgeItemsDto,
+  ): Promise<SimilarKnowledgeItemsDto>;
 
   /**
    * The Context Pack for a task: the Approved knowledge gathered from its
