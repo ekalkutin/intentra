@@ -66,6 +66,8 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   #retiredBy: MemberId | null;
   #retiredAt: Temporal.Instant | null;
   #retirementReason: RetirementReason | null;
+  #featureAssignedBy: MemberId | null;
+  #featureAssignedAt: Temporal.Instant | null;
   #links: readonly KnowledgeLink[];
   #reviewCauses: readonly KnowledgeKey[];
   #version: KnowledgeItemVersion;
@@ -96,6 +98,8 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     this.#retiredBy = state.retiredBy;
     this.#retiredAt = state.retiredAt;
     this.#retirementReason = state.retirementReason;
+    this.#featureAssignedBy = state.featureAssignedBy;
+    this.#featureAssignedAt = state.featureAssignedAt;
     this.#links = state.links;
     this.#reviewCauses = state.reviewCauses;
     this.#version = state.version;
@@ -209,6 +213,16 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   /** Null unless retired. */
   get retiredAt(): Temporal.Instant | null {
     return this.#retiredAt;
+  }
+
+  /** Null unless put into a Feature, moved or taken out once Approved: who did it last. */
+  get featureAssignedBy(): MemberId | null {
+    return this.#featureAssignedBy;
+  }
+
+  /** Null unless put into a Feature, moved or taken out once Approved. */
+  get featureAssignedAt(): Temporal.Instant | null {
+    return this.#featureAssignedAt;
   }
 
   /** Null unless retired with a reason. */
@@ -342,6 +356,8 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
       retiredBy: null,
       retiredAt: null,
       retirementReason: null,
+      featureAssignedBy: null,
+      featureAssignedAt: null,
       links: props.links,
       reviewCauses: [],
       version: KnowledgeItemVersion.First,
@@ -380,6 +396,8 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
       retiredBy: toMemberId(props.retiredBy),
       retiredAt: props.retiredAt,
       retirementReason: RetirementReason.optional(props.retirementReason),
+      featureAssignedBy: toMemberId(props.featureAssignedBy),
+      featureAssignedAt: props.featureAssignedAt,
       links: props.links.map(link => KnowledgeLink.from(link)),
       reviewCauses: props.reviewCauses.map(cause => KnowledgeKey.parse(cause)),
       version: new KnowledgeItemVersion(props.version),
@@ -492,6 +510,43 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   }
 
   /**
+   * Feature Assignment: puts an Approved item into a Feature, moves it to
+   * another, or takes it out (`null`), with no Supersession, since being part
+   * of a Feature sorts knowledge without making it more or less true. A mark
+   * caused by the Feature it leaves is cleared. A Draft is put into a Feature
+   * by editing its Links instead.
+   */
+  public assignToFeature(
+    assignerId: MemberId,
+    seenVersion: KnowledgeItemVersion,
+    feature: KnowledgeKey | null,
+  ): void {
+    if (!this.isApproved()) {
+      throw new KnowledgeItemNotApprovedException();
+    }
+    this.#ensureSeen(seenVersion);
+    const links = [
+      ...this.#links.filter(
+        link => !link.type.equals(KnowledgeLinkType.PartOf),
+      ),
+      ...(feature
+        ? [new KnowledgeLink(KnowledgeLinkType.PartOf, feature)]
+        : []),
+    ];
+    ensureValidLinks(this.#key, links);
+    if (feature && !KnowledgeLinkType.PartOf.allowsTarget(feature.kind)) {
+      throw new InvalidLinkException();
+    }
+    this.#links = links;
+    this.#reviewCauses = this.#reviewCauses.filter(cause =>
+      this.restsOn(cause),
+    );
+    this.#featureAssignedBy = assignerId;
+    this.#featureAssignedAt = Temporal.Now.instant();
+    this.#version = this.#version.next();
+  }
+
+  /**
    * Something it depends on, is justified by or is part of was rejected,
    * superseded or retired. Only a Draft or an Approved item is marked; Rejected and Obsolete
    * ones are no longer part of the knowledge.
@@ -508,8 +563,8 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   /**
    * What it rests on was replaced by an item that says the same and only adds
    * Links: its Links to `replaced` move onto `replacement`, with no Needs
-   * Review. Besides a confirmation, the one change an Approved item's Links
-   * ever get.
+   * Review. Besides a confirmation and Feature Assignment, the one change an
+   * Approved item's Links ever get.
    */
   public followReplacement(
     replaced: KnowledgeKey,
@@ -629,6 +684,8 @@ type KnowledgeItemState = {
   readonly retiredBy: MemberId | null;
   readonly retiredAt: Temporal.Instant | null;
   readonly retirementReason: RetirementReason | null;
+  readonly featureAssignedBy: MemberId | null;
+  readonly featureAssignedAt: Temporal.Instant | null;
   readonly links: readonly KnowledgeLink[];
   readonly reviewCauses: readonly KnowledgeKey[];
   readonly version: KnowledgeItemVersion;
@@ -675,6 +732,8 @@ type KnowledgeItemRestoreProps = {
   readonly retiredBy: string | null;
   readonly retiredAt: Temporal.Instant | null;
   readonly retirementReason: string | null;
+  readonly featureAssignedBy: string | null;
+  readonly featureAssignedAt: Temporal.Instant | null;
   readonly links: readonly KnowledgeLinkProps[];
   readonly reviewCauses: readonly string[];
   readonly version: number;

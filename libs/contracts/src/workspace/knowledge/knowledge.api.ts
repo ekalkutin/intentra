@@ -14,6 +14,7 @@ import type { KnowledgeGapsDto } from './knowledge-gap.dto.js';
 import type {
   ApproveKnowledgeItemDto,
   ApproveKnowledgeItemsDto,
+  AssignToFeatureDto,
   ConfirmKnowledgeItemDto,
   DeleteKnowledgeItemDto,
   RejectKnowledgeItemDto,
@@ -37,8 +38,8 @@ import type { RecordKnowledgeItemDto } from './record-knowledge-item.dto.js';
  * `REQ-12`. Every change but a recording or a retirement applies only to a
  * Draft (409 `KNOWLEDGE_ITEM_NOT_DRAFT`), and every one only to the version
  * the client saw (409 `KNOWLEDGE_ITEM_CHANGED`). An Approved item changes only
- * by Supersession (approving a Draft recorded with `supersedes`) or
- * Retirement.
+ * by Supersession (approving a Draft recorded with `supersedes`), Retirement
+ * or Feature Assignment.
  */
 export abstract class KnowledgeApi {
   abstract record(
@@ -176,6 +177,22 @@ export abstract class KnowledgeApi {
     workspaceId: string,
     projectId: string,
     data: ApproveKnowledgeItemsDto,
+  ): Promise<KnowledgeItemDto[]>;
+
+  /**
+   * Feature Assignment: puts Approved Scenarios, Requirements and Business
+   * Rules into an Approved Feature, moves them there from another, or takes
+   * them out of theirs (`feature` null), all or nothing, keeping their
+   * Knowledge Keys. Maintainers only (403 `FEATURE_ASSIGNMENT_FORBIDDEN`); an
+   * item must be Approved (409 `KNOWLEDGE_ITEM_NOT_APPROVED`; a Draft is put
+   * into a Feature by `edit`), and so must the Feature (409
+   * `DEPENDENCIES_NOT_APPROVED`).
+   */
+  abstract assignToFeature(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    data: AssignToFeatureDto,
   ): Promise<KnowledgeItemDto[]>;
 
   /**

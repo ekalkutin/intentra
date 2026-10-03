@@ -80,6 +80,8 @@ export const knowledgeItemSchema = z.object({
   retiredBy: z.string().nullable(),
   retiredAt: z.string().nullable(),
   retirementReason: z.string().nullable(),
+  featureAssignedBy: z.string().nullable(),
+  featureAssignedAt: z.string().nullable(),
   links: z.array(KnowledgeLinkDtoSchema),
   answeredBy: z
     .array(z.string())
@@ -112,6 +114,7 @@ export const knowledgeItemSchema = z.object({
       canRecordReplacement: z.boolean(),
       canRetire: z.boolean(),
       canConfirm: z.boolean(),
+      canAssignToFeature: z.boolean(),
     })
     .describe('What you may do with it right now.'),
 });

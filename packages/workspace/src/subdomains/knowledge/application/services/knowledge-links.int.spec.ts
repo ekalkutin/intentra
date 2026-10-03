@@ -31,6 +31,7 @@ import {
 } from '../../../tenancy/index.js';
 import {
   DependenciesNotApprovedException,
+  FeatureAssignmentForbiddenException,
   InvalidLinkException,
   KnowledgeConfirmationForbiddenException,
   KnowledgeItemLinkedException,
@@ -310,6 +311,69 @@ describe('KnowledgeService Links and Needs Review', () => {
         needsReview: false,
         links: [{ type: 'part-of', key: 'FEAT-2' }],
       });
+    });
+
+    it('puts an Approved item into a Feature, keeping its Key, and moves it to another', async () => {
+      // Arrange
+      const { record, approve, knowledge, ada, workspaceId, projectId } =
+        await setUp();
+      await record(feature('Pay invoices online'));
+      await record(feature('Send invoices'));
+      await approve('FEAT-1');
+      await approve('FEAT-2');
+      await record(requirement('Pay by card'));
+      await approve('REQ-1');
+      const knowledgeService = app.get(KnowledgeService);
+
+      // Act
+      await knowledgeService.assignToFeature(ada, workspaceId, projectId, {
+        feature: 'FEAT-1',
+        items: [{ key: 'REQ-1', version: 2 }],
+      });
+      const [moved] = await knowledgeService.assignToFeature(
+        ada,
+        workspaceId,
+        projectId,
+        { feature: 'FEAT-2', items: [{ key: 'REQ-1', version: 3 }] },
+      );
+
+      // Assert
+      expect(moved).toMatchObject({
+        key: 'REQ-1',
+        status: 'approved',
+        links: [{ type: 'part-of', key: 'FEAT-2' }],
+      });
+      expect(await knowledge('get', 'REQ-1')).toMatchObject({
+        featureAssignedBy: expect.any(String),
+        featureAssignedAt: expect.any(String),
+      });
+    });
+
+    it('refuses Feature Assignment to a Contributor and into a Draft Feature', async () => {
+      // Arrange
+      const { record, approve, ada, bob, workspaceId, projectId } =
+        await setUp();
+      await record(feature('Pay invoices online'));
+      await record(requirement('Pay by card'));
+      await approve('REQ-1');
+      const knowledgeService = app.get(KnowledgeService);
+      const assign = (caller: CallerDto) =>
+        knowledgeService.assignToFeature(caller, workspaceId, projectId, {
+          feature: 'FEAT-1',
+          items: [{ key: 'REQ-1', version: 2 }],
+        });
+
+      // Act
+      const byContributor = assign(bob);
+      const intoDraft = assign(ada);
+
+      // Assert
+      await expect(byContributor).rejects.toBeInstanceOf(
+        FeatureAssignmentForbiddenException,
+      );
+      await expect(intoDraft).rejects.toBeInstanceOf(
+        DependenciesNotApprovedException,
+      );
     });
 
     it('marks the parts of a retired Feature', async () => {

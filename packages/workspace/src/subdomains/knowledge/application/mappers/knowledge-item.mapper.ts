@@ -54,6 +54,9 @@ export function toKnowledgeItemDto(
     retiredBy: item.retiredBy?.value ?? null,
     retiredAt: item.retiredAt && toIsoString(item.retiredAt),
     retirementReason: item.retirementReason?.value ?? null,
+    featureAssignedBy: item.featureAssignedBy?.value ?? null,
+    featureAssignedAt:
+      item.featureAssignedAt && toIsoString(item.featureAssignedAt),
     links: item.links.map(link => link.toProps() as KnowledgeLinkDto),
     answeredBy: [...(findings.answeredBy ?? [])],
     needsReview: item.needsReview(),

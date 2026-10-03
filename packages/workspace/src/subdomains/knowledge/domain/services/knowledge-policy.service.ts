@@ -1,6 +1,6 @@
 import { ProjectRole } from '../../../tenancy/index.js';
 import { KnowledgeItem } from '../entities/index.js';
-import { KnowledgeKind } from '../value-objects/index.js';
+import { KnowledgeKind, KnowledgeLinkType } from '../value-objects/index.js';
 
 /**
  * What a Member may do with a Project's knowledge, on top of Tenancy's
@@ -52,6 +52,20 @@ export class KnowledgePolicyService {
 
   public canRetire(projectRole: ProjectRole, _item: KnowledgeItem): boolean {
     return projectRole.equals(ProjectRole.Maintainer);
+  }
+
+  /**
+   * Feature Assignment of an Approved item, a Member's act like approving:
+   * only for a Kind that can be part of a Feature.
+   */
+  public canAssignToFeature(
+    projectRole: ProjectRole,
+    item: KnowledgeItem,
+  ): boolean {
+    return (
+      projectRole.equals(ProjectRole.Maintainer) &&
+      KnowledgeLinkType.PartOf.allowsSource(item.kind)
+    );
   }
 
   /**

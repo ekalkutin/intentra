@@ -4,6 +4,7 @@ import {
   KnowledgeListOrderDtoSchema,
   type ApproveKnowledgeItemDto,
   type ApproveKnowledgeItemsDto,
+  type AssignToFeatureDto,
   type CallerDto,
   type ConfirmKnowledgeItemDto,
   type DeleteKnowledgeItemDto,
@@ -44,6 +45,7 @@ import {
   DraftDeletionService,
   DraftEditingService,
   DraftRejectionService,
+  FeatureAssignmentService,
   KnowledgeConfirmationService,
   KnowledgeGapService,
   KnowledgeRecordingService,
@@ -51,6 +53,7 @@ import {
   ReviewMarkingService,
   type ContextPackCandidate,
   type SeenDraft,
+  type SeenKnowledgeItem,
 } from '../../domain/services/index.js';
 import {
   ContextPackRole,
@@ -123,6 +126,7 @@ export class KnowledgeService implements KnowledgeApi {
   readonly #draftRejectionService = new DraftRejectionService();
   readonly #knowledgeRetirementService = new KnowledgeRetirementService();
   readonly #knowledgeConfirmationService = new KnowledgeConfirmationService();
+  readonly #featureAssignmentService = new FeatureAssignmentService();
   readonly #reviewMarkingService = new ReviewMarkingService();
   readonly #contextPackAssemblyService = new ContextPackAssemblyService();
   readonly #knowledgeGapService = new KnowledgeGapService();
@@ -633,6 +637,43 @@ export class KnowledgeService implements KnowledgeApi {
       await this.knowledgeItemRepository.save(item);
 
       return toKnowledgeItemDto(item, projectRole);
+    });
+  }
+
+  public async assignToFeature(
+    caller: CallerDto,
+    workspaceId: string,
+    projectId: string,
+    data: AssignToFeatureDto,
+  ): Promise<KnowledgeItemDto[]> {
+    return this.unitOfWork.run(async () => {
+      const { member, project, projectRole } = await this.resolveForChange(
+        caller,
+        workspaceId,
+        projectId,
+      );
+      const feature =
+        data.feature === null
+          ? null
+          : await this.getItem(project.id, data.feature);
+      // One by one: a transaction takes no parallel operations.
+      const items: SeenKnowledgeItem[] = [];
+      for (const { key, version } of data.items) {
+        items.push({
+          item: await this.getItem(project.id, key),
+          seenVersion: new KnowledgeItemVersion(version),
+        });
+      }
+
+      this.#featureAssignmentService.assign(
+        member,
+        projectRole,
+        items,
+        feature,
+      );
+      await this.saveAll(items.map(({ item }) => item));
+
+      return items.map(({ item }) => toKnowledgeItemDto(item, projectRole));
     });
   }
 

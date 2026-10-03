@@ -38,6 +38,8 @@ export function toKnowledgeItemAccessDto(
     canConfirm:
       item.needsReview() &&
       knowledgePolicyService.canConfirm(projectRole, item),
+    canAssignToFeature:
+      approved && knowledgePolicyService.canAssignToFeature(projectRole, item),
   };
 }
 

@@ -1,4 +1,5 @@
 export { approveKnowledgeItemsTool } from './approve-knowledge-items.tool.js';
+export { assignToFeatureTool } from './assign-to-feature.tool.js';
 export { confirmKnowledgeItemTool } from './confirm-knowledge-item.tool.js';
 export { deleteKnowledgeDraftTool } from './delete-knowledge-draft.tool.js';
 export { getContextTool } from './get-context.tool.js';

@@ -253,6 +253,8 @@ describe('KnowledgeService integration', () => {
         retiredBy: null,
         retiredAt: null,
         retirementReason: null,
+        featureAssignedBy: null,
+        featureAssignedAt: null,
         links: [],
         answeredBy: [],
         needsReview: false,
@@ -267,6 +269,7 @@ describe('KnowledgeService integration', () => {
           canRecordReplacement: false,
           canRetire: false,
           canConfirm: false,
+          canAssignToFeature: false,
         },
       });
     });
@@ -442,6 +445,7 @@ describe('KnowledgeService integration', () => {
           canRecordReplacement: false,
           canRetire: false,
           canConfirm: false,
+          canAssignToFeature: false,
         },
       });
     });

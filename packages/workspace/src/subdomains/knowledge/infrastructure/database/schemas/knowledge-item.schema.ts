@@ -92,6 +92,12 @@ export class KnowledgeItemModel {
   @Prop({ type: String, default: null })
   readonly retirementReason: string | null;
 
+  @Prop({ type: SchemaTypes.UUID, default: null })
+  readonly featureAssignedBy: Types.UUID | null;
+
+  @Prop({ type: Date, default: null })
+  readonly featureAssignedAt: Date | null;
+
   @Prop({
     type: [{ _id: false, type: { type: String }, key: { type: String } }],
     default: [],

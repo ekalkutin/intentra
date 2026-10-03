@@ -33,20 +33,35 @@ export type RetireKnowledgeItemDto = z.infer<
   typeof RetireKnowledgeItemDtoSchema
 >;
 
+/** Several items, each Knowledge Key once, with the version the client saw. */
+const seenItems = z
+  .array(z.object({ key: z.string(), version }))
+  .min(1)
+  .refine(items => new Set(items.map(({ key }) => key)).size === items.length, {
+    message: 'Each Knowledge Key may appear once',
+  });
+
 export const ApproveKnowledgeItemsDtoSchema = z.object({
-  /** Approved together, all or nothing; each Knowledge Key with the version the client saw. */
-  items: z
-    .array(z.object({ key: z.string(), version }))
-    .min(1)
-    .refine(
-      items => new Set(items.map(({ key }) => key)).size === items.length,
-      { message: 'Each Knowledge Key may appear once' },
-    ),
+  /** Approved together, all or nothing. */
+  items: seenItems,
 });
 
 export type ApproveKnowledgeItemsDto = z.infer<
   typeof ApproveKnowledgeItemsDtoSchema
 >;
+
+export const AssignToFeatureDtoSchema = z.object({
+  feature: z
+    .string()
+    .nullable()
+    .describe(
+      'The Knowledge Key of the Approved Feature to put the items into, such as FEAT-2; null takes them out of their Feature.',
+    ),
+  /** Approved Scenarios, Requirements and Business Rules, assigned together, all or nothing. */
+  items: seenItems,
+});
+
+export type AssignToFeatureDto = z.infer<typeof AssignToFeatureDtoSchema>;
 
 export const ConfirmKnowledgeItemDtoSchema = z.object({ version });
 

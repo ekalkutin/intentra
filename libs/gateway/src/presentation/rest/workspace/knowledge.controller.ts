@@ -16,6 +16,7 @@ import {
 import {
   ApproveKnowledgeItemDtoSchema,
   ApproveKnowledgeItemsDtoSchema,
+  AssignToFeatureDtoSchema,
   ConfirmKnowledgeItemDtoSchema,
   DeleteKnowledgeItemDtoSchema,
   EditKnowledgeItemDtoSchema,
@@ -27,6 +28,7 @@ import {
   WorkspaceApi,
   type ApproveKnowledgeItemDto,
   type ApproveKnowledgeItemsDto,
+  type AssignToFeatureDto,
   type CallerDto,
   type ConfirmKnowledgeItemDto,
   type DeleteKnowledgeItemDto,
@@ -133,6 +135,23 @@ export class KnowledgeController {
     data: ApproveKnowledgeItemsDto,
   ): Promise<KnowledgeItemDto[]> {
     return this.workspace.knowledge.approveTogether(
+      caller,
+      workspaceId,
+      projectId,
+      data,
+    );
+  }
+
+  @Post('assign-to-feature')
+  @HttpCode(HttpStatus.OK)
+  public async assignToFeature(
+    @CurrentCaller() caller: CallerDto,
+    @Param('workspaceId') workspaceId: string,
+    @Param('projectId') projectId: string,
+    @Body({ schema: AssignToFeatureDtoSchema })
+    data: AssignToFeatureDto,
+  ): Promise<KnowledgeItemDto[]> {
+    return this.workspace.knowledge.assignToFeature(
       caller,
       workspaceId,
       projectId,

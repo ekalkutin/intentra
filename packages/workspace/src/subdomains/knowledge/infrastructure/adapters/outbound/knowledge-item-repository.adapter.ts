@@ -61,6 +61,9 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
           retiredBy: item.retiredBy?.value ?? null,
           retiredAt: item.retiredAt && toDate(item.retiredAt),
           retirementReason: item.retirementReason?.value ?? null,
+          featureAssignedBy: item.featureAssignedBy?.value ?? null,
+          featureAssignedAt:
+            item.featureAssignedAt && toDate(item.featureAssignedAt),
           links: item.links.map(link => link.toProps()),
           reviewCauses: item.reviewCauses.map(cause => cause.value),
           version: item.version.value,
@@ -245,6 +248,9 @@ export class KnowledgeItemRepositoryAdapter extends KnowledgeItemRepository {
       retiredBy: document.retiredBy?.toHexString() ?? null,
       retiredAt: document.retiredAt && toInstant(document.retiredAt),
       retirementReason: document.retirementReason,
+      featureAssignedBy: document.featureAssignedBy?.toHexString() ?? null,
+      featureAssignedAt:
+        document.featureAssignedAt && toInstant(document.featureAssignedAt),
       links: document.links,
       reviewCauses: document.reviewCauses,
       version: document.version,

@@ -6,6 +6,7 @@ import { MemberId } from '../../../tenancy/index.js';
 import {
   InvalidLinkException,
   KnowledgeItemNeedsReviewException,
+  KnowledgeItemNotApprovedException,
   KnowledgeItemNotMarkedException,
 } from '../exceptions/index.js';
 import {
@@ -144,6 +145,71 @@ describe('KnowledgeItem Links', () => {
     // Assert
     expect(item.links).toHaveLength(2);
     expect(item.dependencies()).toEqual([REQ_12]);
+  });
+
+  describe('Feature Assignment', () => {
+    /** REQ-7, Approved, with the given Links. */
+    function approvedRequirement(
+      links: readonly KnowledgeLink[],
+    ): KnowledgeItem {
+      const item = recordRequirement(links);
+      item.approve(new MemberId(), item.version);
+
+      return item;
+    }
+
+    it('moves an Approved item to another Feature, keeping its other Links and its Key', () => {
+      // Arrange
+      const item = approvedRequirement([dependsOn(REQ_12), partOf(FEAT_2)]);
+      const assigner = new MemberId();
+
+      // Act
+      item.assignToFeature(assigner, item.version, FEAT_5);
+
+      // Assert
+      expect(item.key.value).toBe('REQ-7');
+      expect(item.links).toEqual([dependsOn(REQ_12), partOf(FEAT_5)]);
+      expect(item.featureAssignedBy).toEqual(assigner);
+      expect(item.featureAssignedAt).not.toBeNull();
+    });
+
+    it('takes an Approved item out of its Feature, clearing the mark the Feature caused', () => {
+      // Arrange
+      const item = approvedRequirement([dependsOn(REQ_12), partOf(FEAT_2)]);
+      item.markForReview(FEAT_2);
+      item.markForReview(REQ_12);
+
+      // Act
+      item.assignToFeature(new MemberId(), item.version, null);
+
+      // Assert
+      expect(item.feature).toBeNull();
+      expect(item.reviewCauses).toEqual([REQ_12]);
+    });
+
+    it('refuses a Draft, which is put into a Feature by editing its Links', () => {
+      // Arrange
+      const item = recordRequirement([]);
+
+      // Act
+      const assigning = () =>
+        item.assignToFeature(new MemberId(), item.version, FEAT_2);
+
+      // Assert
+      expect(assigning).toThrow(KnowledgeItemNotApprovedException);
+    });
+
+    it('refuses a target that is not a Feature', () => {
+      // Arrange
+      const item = approvedRequirement([]);
+
+      // Act
+      const assigning = () =>
+        item.assignToFeature(new MemberId(), item.version, REQ_31);
+
+      // Assert
+      expect(assigning).toThrow(InvalidLinkException);
+    });
   });
 
   describe('Needs Review', () => {

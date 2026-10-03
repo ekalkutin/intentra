@@ -5,6 +5,7 @@ export { DraftApprovalForbiddenException } from './draft-approval-forbidden.exce
 export { DraftDeletionForbiddenException } from './draft-deletion-forbidden.exception.js';
 export { DraftEditingForbiddenException } from './draft-editing-forbidden.exception.js';
 export { DraftRejectionForbiddenException } from './draft-rejection-forbidden.exception.js';
+export { FeatureAssignmentForbiddenException } from './feature-assignment-forbidden.exception.js';
 export { InvalidKnowledgeFieldsException } from './invalid-knowledge-fields.exception.js';
 export { InvalidKnowledgeItemVersionException } from './invalid-knowledge-item-version.exception.js';
 export { InvalidKnowledgeKeyException } from './invalid-knowledge-key.exception.js';

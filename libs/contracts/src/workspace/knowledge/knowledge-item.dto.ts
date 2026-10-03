@@ -17,6 +17,8 @@ export type KnowledgeItemAccessDto = {
   readonly canRetire: boolean;
   /** May confirm, while it is marked Needs Review, that it still holds. */
   readonly canConfirm: boolean;
+  /** May put this Approved item into a Feature, move it or take it out (Feature Assignment). */
+  readonly canAssignToFeature: boolean;
 };
 
 /** What the calling Member may do with a Project's knowledge as a whole. */
@@ -67,6 +69,10 @@ type KnowledgeItemFrameDto = {
   readonly retiredAt: string | null;
   /** Null unless retired with a reason. */
   readonly retirementReason: string | null;
+  /** Null unless put into a Feature, moved or taken out once Approved: who did it last. */
+  readonly featureAssignedBy: string | null;
+  /** ISO 8601, or null unless put into a Feature, moved or taken out once Approved. */
+  readonly featureAssignedAt: string | null;
   readonly links: KnowledgeLinkDto[];
   /** For an Open Question: the Approved items that answer it; empty while it is open. */
   readonly answeredBy: string[];

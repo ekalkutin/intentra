@@ -2,6 +2,7 @@ import type { ToolsInput } from '@mastra/core/agent';
 
 import {
   approveKnowledgeItemsTool,
+  assignToFeatureTool,
   confirmKnowledgeItemTool,
   deleteKnowledgeDraftTool,
   echoTool,
@@ -36,6 +37,7 @@ export const MCP_TOOLS = Object.fromEntries(
     getKnowledgeDependenciesTool,
     ...KIND_TOOLS,
     approveKnowledgeItemsTool,
+    assignToFeatureTool,
     confirmKnowledgeItemTool,
     rejectKnowledgeItemTool,
     retireKnowledgeItemTool,
