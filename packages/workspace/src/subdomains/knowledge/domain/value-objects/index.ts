@@ -9,6 +9,7 @@ export { IntegrationContent } from './integration-content.vo.js';
 export { IntegrationDirection } from './integration-direction.vo.js';
 export {
   createKnowledgeContent,
+  sameKnowledgeContent,
   type KnowledgeContent,
   type KnowledgeFields,
 } from './knowledge-content.js';

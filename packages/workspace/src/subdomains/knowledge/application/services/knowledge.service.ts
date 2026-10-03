@@ -423,7 +423,7 @@ export class KnowledgeService implements KnowledgeApi {
         {
           title: data.title,
           rationale: data.rationale,
-          content: toChangedKnowledgeContent(data),
+          content: toChangedKnowledgeContent(data, item.content),
           links,
         },
         linkTargets,
@@ -994,8 +994,9 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   /**
-   * Marks the current items that rest on the changed ones. An item already in
-   * hand is marked as that same object, so that no copy overwrites it.
+   * Marks the current items that rest on the changed ones, or moves them onto
+   * a replacement in hand that only adds Links. An item already in hand is
+   * marked as that same object, so that no copy overwrites it.
    */
   private async markSourcesOf(
     projectId: ProjectId,
@@ -1014,7 +1015,11 @@ export class KnowledgeService implements KnowledgeApi {
       source => inHand.find(item => item.key.equals(source.key)) ?? source,
     );
     for (const item of changed) {
-      this.#reviewMarkingService.markSources(item, marked);
+      this.#reviewMarkingService.markSources(
+        item,
+        marked,
+        inHand.find(other => other.supersedes?.equals(item.key)) ?? null,
+      );
     }
 
     return marked;

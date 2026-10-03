@@ -46,9 +46,9 @@ export const MEMORY_PROVIDER: Provider = {
       }),
       options: {
         messageHistory: { maxTokens: options.historyTokens },
-        // The answer waits for the title and streams it (`data-thread-title`),
-        // so the title is kept before anything else may change the Conversation.
-        generateTitle: { emitEvent: true, instructions: TITLE_INSTRUCTIONS },
+        // The title comes after the answer, in the background: the answer
+        // never waits for it, and the web app asks for it again.
+        generateTitle: { instructions: TITLE_INSTRUCTIONS },
       },
     }),
 };

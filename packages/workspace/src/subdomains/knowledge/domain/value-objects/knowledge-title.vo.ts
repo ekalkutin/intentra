@@ -16,4 +16,8 @@ export class KnowledgeTitle {
   public get value(): string {
     return this.#value;
   }
+
+  public equals(other: KnowledgeTitle): boolean {
+    return other.value === this.#value;
+  }
 }

@@ -216,6 +216,55 @@ describe('Intentra', () => {
     expect(prompt).not.toContain('record_goal');
   });
 
+  it('ends its turn with the choices it offers', async () => {
+    // Arrange
+    const turns = [
+      streamOf([
+        {
+          type: 'tool-call',
+          toolCallId: 'call-1',
+          toolName: 'offer_choices',
+          input: JSON.stringify({
+            question: 'Which priority?',
+            options: [{ label: 'Must' }, { label: 'Could' }],
+          }),
+        },
+        { type: 'finish', finishReason: 'tool-calls', usage },
+      ]),
+      streamOf([
+        { type: 'text-start', id: 'text-1' },
+        { type: 'text-delta', id: 'text-1', delta: 'I have asked.' },
+        { type: 'text-end', id: 'text-1' },
+        { type: 'finish', finishReason: 'stop', usage },
+      ]),
+    ];
+    let turn = 0;
+    const model = new MastraLanguageModelV2Mock({
+      doStream: async () => turns[turn++] ?? streamOf([]),
+    });
+    const intentra = createIntentra({
+      intentra: definition(model, { toolIds: ['offer_choices'] }),
+      specialists: [],
+      memory: new MockMemory(),
+      onUnexpectedError: vi.fn(),
+    });
+
+    // Act
+    const output = await intentra.stream(
+      [{ role: 'user', content: 'Ask me' }],
+      {
+        requestContext: requestContextWith(() =>
+          Promise.reject(new Error('x')),
+        ),
+        maxSteps: 5,
+      },
+    );
+    await output.consumeStream();
+
+    // Assert
+    expect(model.doStreamCalls).toHaveLength(1);
+  });
+
   it('gives a Viewer only the tools that read, whatever the definition says', async () => {
     // Arrange
     const model = answeringModel('Hello.');

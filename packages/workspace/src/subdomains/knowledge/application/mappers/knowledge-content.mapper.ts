@@ -15,12 +15,19 @@ export function toKnowledgeContent(
   return createKnowledgeContent(KnowledgeKind.from(data.kind), data.fields);
 }
 
-/** The new content of an edited Draft, or undefined when its fields stay. */
+/**
+ * The new content of an edited Draft: its `current` content with the fields
+ * given changed, or undefined when none are given.
+ */
 export function toChangedKnowledgeContent(
   data: EditKnowledgeItemDto,
+  current: KnowledgeContent,
 ): KnowledgeContent | undefined {
   return (
     data.fields &&
-    createKnowledgeContent(KnowledgeKind.from(data.kind), data.fields)
+    createKnowledgeContent(KnowledgeKind.from(data.kind), {
+      ...current.toFields(),
+      ...data.fields,
+    })
   );
 }

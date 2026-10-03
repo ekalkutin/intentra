@@ -15,8 +15,9 @@ import type { SendMessageDto } from './send-message.dto.js';
  * A Member's Conversations with Intentra in a Project. Only the
  * Member whose Conversation it is reaches it; to anyone else it does not exist
  * (404 `CONVERSATION_NOT_FOUND`). While Intentra answers in a
- * Conversation (its title included), nothing else may change it: another
- * message, an edit or a deletion is refused (409 `CONVERSATION_BUSY`).
+ * Conversation, nothing else may change it: another message, an edit or a
+ * deletion is refused (409 `CONVERSATION_BUSY`). A new Conversation gets a
+ * suggested title shortly after its first answer, in the background.
  */
 export abstract class ConversationsApi {
   /** The Member's own Conversations, shown or hidden ones. */

@@ -13,17 +13,41 @@ const frame = {
   links: z.array(KnowledgeLinkDtoSchema).optional(),
 };
 
+/**
+ * A Kind's fields, each one optional and with no default: a field left out
+ * stays as it is, null clears it.
+ */
+export function fieldChanges<S extends z.ZodObject>(
+  schema: S,
+): z.ZodType<Partial<z.output<S>>, Partial<z.input<S>>> {
+  return z.object(
+    Object.fromEntries(
+      Object.entries(schema.shape).map(([name, field]) => {
+        const changed = (
+          field instanceof z.ZodDefault ? field.unwrap() : field
+        ).optional();
+
+        return [
+          name,
+          field.description ? changed.describe(field.description) : changed,
+        ];
+      }),
+    ),
+  ) as never;
+}
+
 function editing<K extends keyof typeof KNOWLEDGE_FIELDS_DTO_SCHEMAS>(kind: K) {
   return z.object({
     kind: z.literal(kind),
     ...frame,
-    fields: KNOWLEDGE_FIELDS_DTO_SCHEMAS[kind].optional(),
+    fields: fieldChanges(KNOWLEDGE_FIELDS_DTO_SCHEMAS[kind]).optional(),
   });
 }
 
 /**
- * Changes a Draft; what is left out stays as it is, and `fields` or `links`
- * replace all of theirs. `kind` must be the Draft's own Kind, which never changes
+ * Changes a Draft; what is left out stays as it is. Of its fields, only those
+ * given change, and null clears one; `links` replace all of its Links.
+ * `kind` must be the Draft's own Kind, which never changes
  * (400 `KNOWLEDGE_KIND_MISMATCH`).
  */
 export const EditKnowledgeItemDtoSchema = z.discriminatedUnion('kind', [

@@ -39,12 +39,19 @@ import {
 } from '../api/conversation-api';
 import { CONVERSATION_ERROR_CODES } from '../model/error-codes';
 import { capturedKeys } from '../model/message-parts';
+import { useRefetchWhile } from '../model/use-refetch-while';
 
 import { CapturedPanel } from './captured-panel';
 import { Chat } from './chat';
 import { ConversationList } from './conversation-list';
 
 const NO_MESSAGES: readonly UIMessage[] = [];
+
+/** How often a page that waits on the server asks again. */
+const REFETCH_MS = 2000;
+
+/** A title is suggested shortly after the first answer; asked for this many times at most. */
+const TITLE_ATTEMPTS = 5;
 
 /**
  * A Project's interview: the Member's Conversations on the left, the open one
@@ -84,11 +91,21 @@ export function ProjectInterviewPage() {
       refetchOnMountOrArgChange: true,
     },
   );
-  const { data: list } = useConversationsQuery(
+  const { data: list, refetch: refetchList } = useConversationsQuery(
     { ...scope, hidden: false },
     { skip: !workspace || !project },
   );
   const loadError = toApiError(loaded.error);
+  const listed = list?.items.find(conversation => conversation.id === chatId);
+  // A Conversation gets its title from the agent shortly after the first answer.
+  useRefetchWhile(listed !== undefined && listed.title === null, refetchList, {
+    intervalMs: REFETCH_MS,
+    attempts: TITLE_ATTEMPTS,
+  });
+  // Opened while an answer runs (a reload mid-answer): it shows once it ends.
+  const answering =
+    paramId !== null && !startedHere && loaded.currentData?.answering === true;
+  useRefetchWhile(answering, loaded.refetch, { intervalMs: REFETCH_MS });
 
   // Left a Conversation for `…/interview`: a new one starts under a new id.
   useEffect(() => {
@@ -115,8 +132,6 @@ export function ProjectInterviewPage() {
     itemPath: (key: string) =>
       knowledgeItemPath(workspace.slug, project.slug, key),
   };
-  const listed = list?.items.find(conversation => conversation.id === chatId);
-  // A Conversation gets its title from the agent after the first answer.
   const title = listed
     ? (listed.title ?? t('interview.untitled'))
     : startedHere || paramId === null
@@ -166,7 +181,8 @@ export function ProjectInterviewPage() {
 
     return (
       <Chat
-        key={chatId}
+        // Starts afresh with the answer once the one running elsewhere ends.
+        key={answering ? `${chatId}-answering` : chatId}
         workspaceId={workspace.id}
         projectId={project.id}
         conversationId={chatId}
@@ -175,6 +191,7 @@ export function ProjectInterviewPage() {
             ? (loaded.currentData?.messages ?? NO_MESSAGES)
             : NO_MESSAGES
         }
+        answering={answering}
         projectName={project.name}
         notice={viewer ? t('interview.viewer') : undefined}
         opening={opening}

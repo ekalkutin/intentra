@@ -164,7 +164,7 @@ export {
   TableHeader,
   TableRow,
 } from './primitives/table';
-export { Tabs, TabsList, TabsTrigger } from './primitives/tabs';
+export { Tabs, TabsContent, TabsList, TabsTrigger } from './primitives/tabs';
 export {
   Empty,
   EmptyContent,
@@ -242,3 +242,7 @@ export {
   AccordionItem,
   AccordionTrigger,
 } from './primitives/accordion';
+
+export { MATERIALISE, transferCard } from './components/card-transfer';
+
+export { RecordWave } from './components/record-wave';

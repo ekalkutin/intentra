@@ -457,6 +457,44 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
       .expect(HttpStatus.NOT_FOUND);
   });
 
+  it('changes only the fields given, and clears one given as null', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send({
+        ...requirement,
+        fields: {
+          statement: 'Export a report to PDF',
+          type: 'functional',
+          priority: 'must',
+        },
+      })
+      .expect(HttpStatus.CREATED);
+
+    // Act
+    const edited = await app
+      .request()
+      .patch(`${path}/REQ-1`)
+      .set('Authorization', ada)
+      .send({
+        kind: 'requirement',
+        version: 1,
+        fields: { acceptanceCriteria: ['A PDF downloads'], priority: null },
+      });
+
+    // Assert
+    expect(edited.status).toBe(HttpStatus.OK);
+    expect(edited.body.fields).toEqual({
+      statement: 'Export a report to PDF',
+      type: 'functional',
+      priority: null,
+      acceptanceCriteria: ['A PDF downloads'],
+    });
+  });
+
   it('approves a Draft on the version the Maintainer saw', async () => {
     // Arrange
     const { ada, path } = await setUp();
@@ -720,6 +758,69 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
       .send({ version: marked.body.version })
       .expect(HttpStatus.OK);
     expect(confirmed.body).toMatchObject({
+      needsReview: false,
+      links: [{ type: 'depends-on', key: 'REQ-3' }],
+    });
+  });
+
+  it('moves what rests on a replaced item onto a replacement that only adds a Link', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    for (const body of [
+      requirement,
+      {
+        ...requirement,
+        title: 'Export button',
+        fields: { statement: 'A button exports the report' },
+        links: [{ type: 'depends-on', key: 'REQ-1' }],
+      },
+      {
+        kind: 'goal',
+        title: 'Fewer reports by hand',
+        fields: { outcome: 'Halve the reports made by hand' },
+      },
+    ]) {
+      await app
+        .request()
+        .post(path)
+        .set('Authorization', ada)
+        .send(body)
+        .expect(HttpStatus.CREATED);
+    }
+    await app
+      .request()
+      .post(`${path}/approve`)
+      .set('Authorization', ada)
+      .send({
+        items: ['REQ-1', 'REQ-2', 'GOAL-1'].map(key => ({ key, version: 1 })),
+      })
+      .expect(HttpStatus.OK);
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send({
+        ...requirement,
+        supersedes: 'REQ-1',
+        links: [{ type: 'depends-on', key: 'GOAL-1' }],
+      })
+      .expect(HttpStatus.CREATED);
+
+    // Act
+    await app
+      .request()
+      .post(`${path}/REQ-3/approve`)
+      .set('Authorization', ada)
+      .send({ version: 1 })
+      .expect(HttpStatus.OK);
+
+    // Assert
+    const dependent = await app
+      .request()
+      .get(`${path}/REQ-2`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(dependent.body).toMatchObject({
       needsReview: false,
       links: [{ type: 'depends-on', key: 'REQ-3' }],
     });

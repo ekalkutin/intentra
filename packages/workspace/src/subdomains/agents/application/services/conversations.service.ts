@@ -45,8 +45,8 @@ import {
 } from '../ports/outbound/index.js';
 
 /**
- * A Member's Conversations with Intentra. While an answer runs (its
- * title included), nothing else changes the Conversation, tracked in this
+ * A Member's Conversations with Intentra. While an answer runs, nothing
+ * else changes the Conversation, tracked in this
  * process: it holds while the API runs as one instance
  * (`docs/notes/agents-open-questions.md`).
  */
@@ -100,7 +100,11 @@ export class ConversationsService implements ConversationsApi {
     );
     const messages = await this.conversationStore.findMessages(conversation.id);
 
-    return toConversationWithMessagesDto(conversation, messages);
+    return toConversationWithMessagesDto(
+      conversation,
+      messages,
+      this.#answering.has(conversation.id.value),
+    );
   }
 
   public async edit(

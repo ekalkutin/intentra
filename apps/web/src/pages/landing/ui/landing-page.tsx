@@ -1,25 +1,5 @@
-import {
-  ArrowDown,
-  ArrowDownRight,
-  ArrowRight,
-  ArrowUpRight,
-  BookOpen,
-  Check,
-  CheckCheck,
-  ChevronRight,
-  Code2,
-  FileText,
-  GitBranch,
-  Menu,
-  MessageSquare,
-  Pause,
-  Play,
-  RotateCcw,
-  ScanLine,
-  Users,
-  X,
-} from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Menu, Pause, Play, Users, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -31,37 +11,27 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  Badge,
+  Brand,
   Button,
-  buttonVariants,
 } from '@/shared/ui';
 
-import { ContextSculpture } from './context-sculpture';
+import { useSheetMotion } from '../lib/use-sheet-motion';
+
+import { KnowledgeScene } from './knowledge-scene';
+import { LandingAction } from './landing-action';
+import { McpShowcase } from './mcp-showcase';
+import { ProductDemo } from './product-demo';
 
 const navigation = ['product', 'benefits', 'agents', 'faq'] as const;
 const faqs = ['1', '2', '3', '4', '5', '6'] as const;
-
-function Wordmark({ inverse = false }: { readonly inverse?: boolean }) {
-  const { t } = useTranslation();
-  return (
-    <img
-      className={cn('landing-wordmark', !inverse && 'landing-wordmark-dark')}
-      src='/intentra-wordmark-inverse.svg'
-      alt={t('brand')}
-      width={854}
-      height={173}
-    />
-  );
-}
+const agents = ['claude', 'codex', 'cursor'] as const;
+const signatures = ['drafted', 'checked', 'approved'] as const;
 
 function StartLink({ closing = false }: { readonly closing?: boolean }) {
   const { t } = useTranslation();
   const signedIn = useHasSession();
   return (
-    <Link
-      to={signedIn ? ROUTES.home : ROUTES.signUp}
-      className={cn(buttonVariants({ size: 'lg' }), 'landing-cta')}
-    >
+    <LandingAction to={signedIn ? ROUTES.home : ROUTES.signUp}>
       {t(
         signedIn
           ? 'landing.workspace'
@@ -69,97 +39,20 @@ function StartLink({ closing = false }: { readonly closing?: boolean }) {
             ? 'landing.closing.action'
             : 'landing.start',
       )}
-      <ArrowUpRight data-icon='inline-end' />
-    </Link>
+    </LandingAction>
   );
 }
 
-function ProductDemo() {
-  const { t } = useTranslation();
-  const [approved, setApproved] = useState(false);
+/** A section rule of the sheet, with registration crosses where it meets the frame. */
+function SheetRule({ lead = false }: { readonly lead?: boolean }) {
   return (
-    <div className='landing-demo'>
-      <div className='landing-demo-bar'>
-        <span>
-          <span className='landing-demo-dot' />
-          {t('landing.demoSection.project')}
-        </span>
-        <span>{t('landing.demoSection.label')}</span>
-      </div>
-      <div className='landing-demo-body'>
-        <div className='landing-conversation'>
-          <div className='landing-speaker'>
-            <img src='/intentra-avatar.svg' width={28} height={28} alt='' />
-            <span>{t('landing.demoSection.analyst')}</span>
-          </div>
-          <p className='landing-utterance'>
-            {t('landing.demoSection.question')}
-          </p>
-          <p className='landing-analyst-question'>
-            {t('landing.demoSection.reply')}
-          </p>
-          <div className='landing-answer'>
-            <span>{t('landing.demoSection.user')}</span>
-            <p>{t('landing.demoSection.answer')}</p>
-          </div>
-          <p className='landing-demo-result'>
-            <GitBranch size={16} aria-hidden='true' />
-            {t('landing.demoSection.result')}
-          </p>
-        </div>
-        <div className={cn('landing-knowledge', approved && 'is-approved')}>
-          <div className='landing-knowledge-top'>
-            <code>BR-12</code>
-            <Badge variant='secondary'>
-              {approved && <Check data-icon='inline-start' />}
-              {t(
-                approved
-                  ? 'landing.demoSection.approved'
-                  : 'landing.demoSection.draft',
-              )}
-            </Badge>
-          </div>
-          <p className='landing-knowledge-kind'>
-            {t('landing.demoSection.kind')}
-          </p>
-          <h3>{t('landing.demoSection.ruleTitle')}</h3>
-          <p>{t('landing.demoSection.ruleText')}</p>
-          <div className='landing-knowledge-source'>
-            <MessageSquare size={14} aria-hidden='true' />
-            {t('landing.demoSection.source')}
-            <br />
-            <GitBranch size={14} aria-hidden='true' />
-            {t('landing.demoSection.link')}
-          </div>
-          <div className='landing-demo-action' aria-live='polite'>
-            {approved && (
-              <p className='landing-approved-note'>
-                <CheckCheck size={18} aria-hidden='true' />
-                {t('landing.demoSection.ready')}
-              </p>
-            )}
-            <Button
-              variant={approved ? 'outline' : 'default'}
-              onClick={() => setApproved(!approved)}
-            >
-              {approved ? (
-                <RotateCcw data-icon='inline-start' />
-              ) : (
-                <Check data-icon='inline-start' />
-              )}
-              {t(
-                approved
-                  ? 'landing.demoSection.reset'
-                  : 'landing.demoSection.approve',
-              )}
-            </Button>
-          </div>
-        </div>
-      </div>
-      <div className='landing-demo-footer'>
-        {t('landing.demoSection.footnote')}
-        <CheckCheck size={18} aria-hidden='true' />
-      </div>
+    <div
+      className={cn('landing-divider', lead && 'landing-divider-lead')}
+      aria-hidden='true'
+    >
+      <span className='landing-rule' />
+      <i className='landing-cross' />
+      <i className='landing-cross' />
     </div>
   );
 }
@@ -168,6 +61,8 @@ export function LandingPage() {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [paused, setPaused] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  useSheetMotion(root);
   useEffect(() => {
     const previous = document.title;
     document.title = t('landing.title');
@@ -193,14 +88,26 @@ export function LandingPage() {
   }, [menuOpen]);
 
   return (
-    <div className={cn('landing', paused && 'landing-paused')} id='top'>
+    <div
+      ref={root}
+      className={cn('landing dark', paused && 'landing-paused')}
+      id='top'
+    >
       <a className='landing-skip' href='#main'>
         {t('landing.skip')}
       </a>
-      <div className='landing-blue'>
-        <header className='landing-header landing-wrap'>
-          <a href='#top' aria-label={t('brand')}>
-            <Wordmark inverse />
+      <div className='landing-sheet'>
+        <div className='landing-grid' aria-hidden='true'>
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+        </div>
+        <header className='landing-header'>
+          <a href='#top' className='landing-logotype'>
+            {t('brand')}
           </a>
           <nav
             className='landing-desktop-nav'
@@ -213,9 +120,20 @@ export function LandingPage() {
             ))}
           </nav>
           <div className='landing-header-actions'>
+            <Button
+              className='landing-motion-toggle'
+              variant='ghost'
+              size='icon'
+              aria-label={t(
+                paused ? 'landing.hero.play' : 'landing.hero.pause',
+              )}
+              aria-pressed={paused}
+              onClick={() => setPaused(!paused)}
+            >
+              {paused ? <Play /> : <Pause />}
+            </Button>
             <Link to={ROUTES.signIn} className='landing-login'>
               {t('landing.signIn')}
-              <ArrowUpRight size={15} aria-hidden='true' />
             </Link>
             <Button
               id='landing-menu-toggle'
@@ -246,267 +164,74 @@ export function LandingPage() {
                 onClick={() => setMenuOpen(false)}
               >
                 {t(`landing.nav.${item}`)}
-                <ArrowUpRight size={18} />
               </a>
             ))}
           </nav>
         )}
         <main id='main'>
-          <section
-            className='landing-hero landing-wrap'
-            aria-labelledby='hero-title'
-          >
+          <section className='landing-hero' aria-labelledby='hero-title'>
+            <div className='landing-crosshair' aria-hidden='true'>
+              <i />
+              <i />
+              <code />
+            </div>
             <div className='landing-hero-copy'>
               <h1 id='hero-title'>
-                <span>{t('landing.hero.line1')}</span>
-                <span>{t('landing.hero.line2')}</span>
+                <span className='landing-mask'>
+                  <span>{t('landing.hero.line1')}</span>
+                </span>
+                <span className='landing-mask'>
+                  <span className='landing-hero-accent'>
+                    {t('landing.hero.line2')}
+                  </span>
+                </span>
               </h1>
               <p>{t('landing.hero.text')}</p>
               <div className='landing-hero-actions'>
                 <StartLink />
-                <a href='#product' className='landing-demo-link'>
-                  <Play size={15} aria-hidden='true' />
+                <a href='#agents' className='landing-demo-link'>
                   {t('landing.demo')}
                 </a>
               </div>
-              <p className='landing-hero-note'>{t('landing.hero.note')}</p>
             </div>
-            <div className='landing-hero-art'>
-              <ContextSculpture paused={paused} />
-              <span className='landing-fragment fragment-one'>
-                {t('landing.hero.fragment1')}
-              </span>
-              <span className='landing-fragment fragment-two'>
-                {t('landing.hero.fragment2')}
-              </span>
-              <span className='landing-fragment fragment-three'>
-                {t('landing.hero.fragment3')}
-              </span>
-              <div className='landing-art-caption'>
-                <span>{t('landing.hero.center')}</span>
-                <span>{t('landing.hero.caption')}</span>
-              </div>
-              <Button
-                className='landing-motion-toggle'
-                variant='ghost'
-                size='icon'
-                aria-label={t(
-                  paused ? 'landing.hero.play' : 'landing.hero.pause',
-                )}
-                aria-pressed={paused}
-                onClick={() => setPaused(!paused)}
-              >
-                {paused ? <Play /> : <Pause />}
-              </Button>
-            </div>
-            <a className='landing-scroll' href='#product'>
-              <ArrowDown size={17} aria-hidden='true' />
-              {t('landing.hero.scroll')}
-            </a>
           </section>
-          <div className='landing-partners landing-wrap'>
+          <SheetRule lead />
+          <section
+            id='product'
+            className='landing-product'
+            aria-labelledby='product-title'
+          >
+            <h2 id='product-title' className='sr-only'>
+              {t('landing.demoSection.title')}
+            </h2>
+            <ProductDemo paused={paused} autoPlay />
+          </section>
+          <SheetRule />
+          <div className='landing-partners'>
             <p>{t('landing.strip.text')}</p>
             <div>
-              <span>
-                <Users size={19} aria-hidden='true' />
+              <strong>
+                <Users size={18} aria-hidden='true' />
                 {t('landing.strip.team')}
-              </span>
-              <span>{t('landing.strip.claude')}</span>
-              <span>{t('landing.strip.codex')}</span>
-              <span>{t('landing.strip.cursor')}</span>
-              <small>{t('landing.strip.protocol')}</small>
+              </strong>
+              <small>{t('landing.strip.web')}</small>
             </div>
+            {agents.map(agent => (
+              <div key={agent}>
+                <strong>{t(`landing.strip.${agent}`)}</strong>
+                <small>{t('landing.strip.protocol')}</small>
+              </div>
+            ))}
           </div>
-          <section id='product' className='landing-product landing-light'>
-            <div className='landing-wrap'>
-              <div className='landing-section-intro'>
-                <h2>{t('landing.demoSection.title')}</h2>
-                <p>{t('landing.demoSection.text')}</p>
-              </div>
-              <ProductDemo />
-              <ol className='landing-steps'>
-                {(['step1', 'step2', 'step3'] as const).map((step, index) => (
-                  <li key={step}>
-                    <span>{index + 1}</span>
-                    {t(`landing.demoSection.${step}`)}
-                    {index < 2 && <ArrowRight size={20} aria-hidden='true' />}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </section>
-          <section className='landing-problem landing-wrap'>
-            <div>
-              <h2>{t('landing.problem.title')}</h2>
-              <p>{t('landing.problem.text')}</p>
-            </div>
-            <div className='landing-problem-quote'>
-              <MessageSquare size={32} strokeWidth={1.3} aria-hidden='true' />
-              <blockquote>{t('landing.problem.quote')}</blockquote>
-              <p>{t('landing.problem.after')}</p>
-            </div>
-          </section>
-          <section id='benefits' className='landing-features landing-light'>
-            <div className='landing-wrap'>
-              <div className='landing-section-intro'>
-                <h2>{t('landing.features.title')}</h2>
-                <p>{t('landing.features.text')}</p>
-              </div>
-              <div className='landing-feature-primary'>
-                <div className='landing-feature-copy'>
-                  <GitBranch size={28} strokeWidth={1.4} aria-hidden='true' />
-                  <h3>{t('landing.features.review.title')}</h3>
-                  <p>{t('landing.features.review.text')}</p>
-                </div>
-                <div className='landing-dependencies'>
-                  <div className='landing-dependency-root'>
-                    <Check size={18} />
-                    <span>
-                      <code>BR-12</code>
-                      {t('landing.features.review.original')}
-                    </span>
-                  </div>
-                  <div className='landing-dependency-children'>
-                    {(['dependent', 'affected'] as const).map((item, index) => (
-                      <div key={item}>
-                        <div>
-                          <code>{index === 0 ? 'SC-08' : 'REQ-24'}</code>
-                          <span>{t(`landing.features.review.${item}`)}</span>
-                        </div>
-                        <span className='landing-review-status'>
-                          <ScanLine size={13} />
-                          {t('landing.features.review.status')}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className='landing-feature-pair'>
-                <article>
-                  <BookOpen size={27} strokeWidth={1.4} aria-hidden='true' />
-                  <h3>{t('landing.features.passport.title')}</h3>
-                  <p>{t('landing.features.passport.text')}</p>
-                  <div className='landing-passport'>
-                    <div>
-                      <BookOpen size={16} />
-                      <strong>{t('landing.features.passport.name')}</strong>
-                    </div>
-                    {(
-                      ['chapter1', 'chapter2', 'chapter3', 'chapter4'] as const
-                    ).map(item => (
-                      <div key={item}>
-                        <span>{t(`landing.features.passport.${item}`)}</span>
-                        <ChevronRight size={14} />
-                      </div>
-                    ))}
-                  </div>
-                </article>
-                <article>
-                  <ScanLine size={27} strokeWidth={1.4} aria-hidden='true' />
-                  <h3>{t('landing.features.analysis.title')}</h3>
-                  <p>{t('landing.features.analysis.text')}</p>
-                  <div className='landing-open-question'>
-                    <span>{t('landing.features.analysis.questionLabel')}</span>
-                    <p>{t('landing.features.analysis.question')}</p>
-                    <code>OQ-04</code>
-                  </div>
-                </article>
-              </div>
-            </div>
-          </section>
+          <SheetRule />
+          <KnowledgeScene paused={paused} />
+          <SheetRule />
           <section id='agents' className='landing-agents'>
-            <div className='landing-wrap landing-agents-grid'>
-              <div>
-                <h2>{t('landing.agents.title')}</h2>
-                <p>{t('landing.agents.text')}</p>
-                <div className='landing-agent-names'>
-                  <span>{t('landing.strip.claude')}</span>
-                  <span>{t('landing.strip.codex')}</span>
-                  <span>{t('landing.strip.cursor')}</span>
-                </div>
-                <Link to={ROUTES.signUp} className='landing-agent-link'>
-                  {t('landing.agents.link')}
-                  <ArrowUpRight size={20} />
-                </Link>
-                <p className='landing-agent-note'>{t('landing.agents.note')}</p>
-              </div>
-              <div className='landing-terminal'>
-                <div className='landing-terminal-header'>
-                  <Code2 size={18} />
-                  <span>{t('landing.agents.terminalTitle')}</span>
-                  <code>MCP</code>
-                </div>
-                <p className='landing-terminal-prompt'>
-                  <ChevronRight size={18} />
-                  {t('landing.agents.request')}
-                </p>
-                <div className='landing-terminal-response'>
-                  <div className='landing-terminal-tool'>
-                    <img
-                      src='/intentra-avatar.svg'
-                      width={25}
-                      height={25}
-                      alt=''
-                    />
-                    {t('landing.agents.tool')}
-                    <Check size={17} />
-                  </div>
-                  {(['item1', 'item2', 'item3'] as const).map(item => (
-                    <div key={item} className='landing-context-row'>
-                      <FileText size={15} />
-                      <span>{t(`landing.agents.${item}`)}</span>
-                      <Check size={14} />
-                    </div>
-                  ))}
-                  <p>{t('landing.agents.result')}</p>
-                </div>
-                <span className='landing-terminal-cursor' aria-hidden='true' />
-              </div>
-            </div>
+            <McpShowcase paused={paused} />
           </section>
-          <section className='landing-control landing-light'>
-            <div className='landing-wrap'>
-              <h2>{t('landing.control.title')}</h2>
-              <p>{t('landing.control.text')}</p>
-              <div className='landing-approval-flow'>
-                <span>
-                  <MessageSquare />
-                  {t('landing.control.draft')}
-                </span>
-                <ArrowRight aria-hidden='true' />
-                <span>
-                  <CheckCheck />
-                  {t('landing.control.review')}
-                </span>
-                <ArrowRight aria-hidden='true' />
-                <span>
-                  <GitBranch />
-                  {t('landing.control.knowledge')}
-                </span>
-              </div>
-            </div>
-          </section>
-          <section className='landing-roles landing-light'>
-            <div className='landing-wrap'>
-              <h2>{t('landing.roles.title')}</h2>
-              <div className='landing-role-list'>
-                {(['product', 'lead', 'dev'] as const).map(role => (
-                  <article key={role}>
-                    <h3>{t(`landing.roles.${role}`)}</h3>
-                    <p>{t(`landing.roles.${role}Text`)}</p>
-                    <ArrowDownRight
-                      size={24}
-                      strokeWidth={1.4}
-                      aria-hidden='true'
-                    />
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-          <section id='faq' className='landing-faq landing-light'>
-            <div className='landing-wrap landing-faq-grid'>
+          <SheetRule />
+          <section id='faq' className='landing-faq'>
+            <div className='landing-faq-grid'>
               <h2>{t('landing.faq.title')}</h2>
               <Accordion>
                 {faqs.map(n => (
@@ -522,37 +247,70 @@ export function LandingPage() {
               </Accordion>
             </div>
           </section>
+          <SheetRule />
           <section className='landing-closing'>
-            <div className='landing-wrap'>
-              <img src='/intentra-avatar.svg' width={64} height={64} alt='' />
-              <h2>{t('landing.closing.title')}</h2>
-              <p>{t('landing.closing.text')}</p>
-              <StartLink closing />
-            </div>
+            <h2>{t('landing.closing.title')}</h2>
+            <p>{t('landing.closing.text')}</p>
+            <StartLink closing />
           </section>
         </main>
-        <footer className='landing-footer landing-wrap'>
-          <div className='landing-footer-top'>
-            <p>{t('landing.footer.tagline')}</p>
-            <a href='#top'>
-              {t('landing.footer.top')}
-              <ArrowUpRight size={18} />
-            </a>
-          </div>
+        <footer className='landing-footer'>
+          <SheetRule />
           <a
             href='#top'
             className='landing-footer-brand'
             aria-label={t('brand')}
           >
-            <Wordmark inverse />
+            <Brand className='landing-wordmark' />
           </a>
-          <div className='landing-footer-bottom'>
-            <span>
-              {t('landing.footer.copyright', {
-                year: new Date().getFullYear(),
-              })}
-            </span>
-            <span>{t('landing.footer.note')}</span>
+          <div className='landing-footer-row'>
+            <div className='landing-footer-meta'>
+              <p>{t('landing.footer.note')}</p>
+              <p>{t('landing.demoSection.label')}</p>
+              <p>
+                <span>
+                  {t('landing.footer.copyright', {
+                    year: new Date().getFullYear(),
+                  })}
+                </span>
+                <a href='#top'>{t('landing.footer.top')}</a>
+              </p>
+            </div>
+            <div
+              className='landing-title-block'
+              role='group'
+              aria-label={t('landing.footer.sheet.label')}
+            >
+              <div className='landing-title-roles'>
+                {signatures.map(role => (
+                  <div key={role}>
+                    <span>{t(`landing.footer.sheet.${role}`)}</span>
+                    <span>{t(`landing.footer.sheet.${role}By`)}</span>
+                    <span>
+                      {role === 'approved' && (
+                        <svg
+                          className='landing-sign'
+                          viewBox='0 0 24 24'
+                          aria-hidden='true'
+                        >
+                          <path d='M4 12.5 9.5 18 20 6.5' />
+                        </svg>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className='landing-title-name'>
+                <strong>{t('brand')}</strong>
+                <span>{t('landing.footer.tagline')}</span>
+              </div>
+              <div className='landing-title-count'>
+                {t('landing.footer.sheet.number')}
+              </div>
+              <div className='landing-title-count'>
+                {t('landing.footer.sheet.total')}
+              </div>
+            </div>
           </div>
         </footer>
       </div>

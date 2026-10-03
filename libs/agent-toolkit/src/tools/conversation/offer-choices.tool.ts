@@ -11,7 +11,7 @@ import { ChoicesDtoSchema } from '@intentra/contracts/workspace';
 export const offerChoicesTool = createTool({
   id: 'offer_choices',
   description:
-    'Ask the person a question whose answers are clear-cut (such as a priority, a type, yes or no, or two or three concrete alternatives): they see the options as cards to click, and may type their own answer if allowCustom. Call it as the last thing in your turn, write nothing after it, and wait for their reply. Do not use it for open questions.',
+    'Ask the person a question whose answers are clear-cut (such as a priority, a type, yes or no, or two or three concrete alternatives): they see the options as cards to click, and may type their own answer if allowCustom. Your turn ends with it: write what you need to say before calling it, then wait for their reply. Do not use it for open questions.',
   inputSchema: ChoicesDtoSchema,
   outputSchema: z.object({ shown: z.literal(true) }),
   mcp: { annotations: { readOnlyHint: true } },

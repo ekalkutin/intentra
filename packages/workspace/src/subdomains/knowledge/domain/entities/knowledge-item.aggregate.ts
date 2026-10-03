@@ -28,6 +28,7 @@ import {
   RequirementContent,
   RequirementType,
   RetirementReason,
+  sameKnowledgeContent,
   type KnowledgeContent,
   type KnowledgeLinkProps,
 } from '../value-objects/index.js';
@@ -242,6 +243,18 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
     return this.#links
       .filter(link => link.type.equals(KnowledgeLinkType.Answers))
       .map(link => link.target);
+  }
+
+  /**
+   * Whether, as the replacement of `replaced`, it says the same and only adds
+   * Links: then what rested on `replaced` still holds on it.
+   */
+  public onlyAddsLinksTo(replaced: KnowledgeItem): boolean {
+    return (
+      this.#title.equals(replaced.title) &&
+      sameKnowledgeContent(this.#content, replaced.content) &&
+      replaced.links.every(link => this.#links.some(own => own.equals(link)))
+    );
   }
 
   /** Whether a change of the given item puts this one in question. */
@@ -473,9 +486,35 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
   }
 
   /**
+   * What it rests on was replaced by an item that says the same and only adds
+   * Links: its Links to `replaced` move onto `replacement`, with no Needs
+   * Review. Besides a confirmation, the one change an Approved item's Links
+   * ever get.
+   */
+  public followReplacement(
+    replaced: KnowledgeKey,
+    replacement: KnowledgeKey,
+  ): void {
+    if (!this.#links.some(link => link.target.equals(replaced))) {
+      return;
+    }
+    const links: KnowledgeLink[] = [];
+    for (const link of this.#links) {
+      const moved = link.target.equals(replaced)
+        ? link.aimedAt(replacement)
+        : link;
+      if (!links.some(kept => kept.equals(moved))) {
+        links.push(moved);
+      }
+    }
+    this.#links = links;
+    this.#version = this.#version.next();
+  }
+
+  /**
    * A person has checked that it still holds on what its changed targets
    * became: its Links to them move onto their replacements, or away if there
-   * is none. The one change an Approved item's Links ever get.
+   * is none.
    */
   public confirm(
     seenVersion: KnowledgeItemVersion,

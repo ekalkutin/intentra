@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-03T01:35:37.691132+00:00",
+  "generatedAt": "2026-10-03T03:26:17.958886+00:00",
   "title": "Design System: Intentra",
   "extensions": {
     "colorMeta": {
@@ -259,243 +259,191 @@
           "oklch(0.95 0.215 27)"
         ]
       },
-      "landing-cobalt": {
-        "role": "primary",
-        "displayName": "Cobalt (landing only)",
-        "canonical": "#2549e8",
+      "landing-canvas": {
+        "role": "neutral",
+        "displayName": "Canvas (landing only)",
+        "canonical": "#0e0f11",
+        "cssVar": "--lp-canvas",
         "scope": ".landing",
         "tonalRamp": [
-          "oklch(0.15 0.2405 266.40)",
-          "oklch(0.26 0.2405 266.40)",
-          "oklch(0.37 0.2405 266.40)",
-          "oklch(0.48 0.2405 266.40)",
-          "oklch(0.6 0.2405 266.40)",
-          "oklch(0.72 0.2405 266.40)",
-          "oklch(0.84 0.2405 266.40)",
-          "oklch(0.95 0.2405 266.40)"
+          "oklch(0.15 0.0045 264.45)",
+          "oklch(0.26 0.0045 264.45)",
+          "oklch(0.37 0.0045 264.45)",
+          "oklch(0.48 0.0045 264.45)",
+          "oklch(0.6 0.0045 264.45)",
+          "oklch(0.72 0.0045 264.45)",
+          "oklch(0.84 0.0045 264.45)",
+          "oklch(0.95 0.0045 264.45)"
         ],
         "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
       },
-      "landing-cobalt-deep": {
+      "landing-panel": {
         "role": "neutral",
-        "displayName": "Cobalt Deep (landing only)",
-        "canonical": "#1b36bd",
+        "displayName": "Panel (landing only)",
+        "canonical": "#151619",
+        "cssVar": "--lp-panel",
         "scope": ".landing",
         "tonalRamp": [
-          "oklch(0.15 0.2105 266.61)",
-          "oklch(0.26 0.2105 266.61)",
-          "oklch(0.37 0.2105 266.61)",
-          "oklch(0.48 0.2105 266.61)",
-          "oklch(0.6 0.2105 266.61)",
-          "oklch(0.72 0.2105 266.61)",
-          "oklch(0.84 0.2105 266.61)",
-          "oklch(0.95 0.2105 266.61)"
+          "oklch(0.15 0.0062 271.10)",
+          "oklch(0.26 0.0062 271.10)",
+          "oklch(0.37 0.0062 271.10)",
+          "oklch(0.48 0.0062 271.10)",
+          "oklch(0.6 0.0062 271.10)",
+          "oklch(0.72 0.0062 271.10)",
+          "oklch(0.84 0.0062 271.10)",
+          "oklch(0.95 0.0062 271.10)"
         ],
         "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
       },
-      "landing-paper": {
+      "landing-inset": {
         "role": "neutral",
-        "displayName": "Paper (landing only)",
-        "canonical": "#f7f8f4",
+        "displayName": "Inset (landing only)",
+        "canonical": "#1b1c20",
+        "cssVar": "--lp-inset",
         "scope": ".landing",
         "tonalRamp": [
-          "oklch(0.15 0.0054 117.92)",
-          "oklch(0.26 0.0054 117.92)",
-          "oklch(0.37 0.0054 117.92)",
-          "oklch(0.48 0.0054 117.92)",
-          "oklch(0.6 0.0054 117.92)",
-          "oklch(0.72 0.0054 117.92)",
-          "oklch(0.84 0.0054 117.92)",
-          "oklch(0.95 0.0054 117.92)"
+          "oklch(0.15 0.0079 274.58)",
+          "oklch(0.26 0.0079 274.58)",
+          "oklch(0.37 0.0079 274.58)",
+          "oklch(0.48 0.0079 274.58)",
+          "oklch(0.6 0.0079 274.58)",
+          "oklch(0.72 0.0079 274.58)",
+          "oklch(0.84 0.0079 274.58)",
+          "oklch(0.95 0.0079 274.58)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-raised": {
+        "role": "neutral",
+        "displayName": "Raised (landing only)",
+        "canonical": "#222327",
+        "cssVar": "--lp-raised",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0076 274.65)",
+          "oklch(0.26 0.0076 274.65)",
+          "oklch(0.37 0.0076 274.65)",
+          "oklch(0.48 0.0076 274.65)",
+          "oklch(0.6 0.0076 274.65)",
+          "oklch(0.72 0.0076 274.65)",
+          "oklch(0.84 0.0076 274.65)",
+          "oklch(0.95 0.0076 274.65)"
         ],
         "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
       },
       "landing-ink": {
         "role": "neutral",
         "displayName": "Ink (landing only)",
-        "canonical": "#192323",
+        "canonical": "#f0f0f2",
+        "cssVar": "--lp-ink",
         "scope": ".landing",
         "tonalRamp": [
-          "oklch(0.15 0.0141 196.27)",
-          "oklch(0.26 0.0141 196.27)",
-          "oklch(0.37 0.0141 196.27)",
-          "oklch(0.48 0.0141 196.27)",
-          "oklch(0.6 0.0141 196.27)",
-          "oklch(0.72 0.0141 196.27)",
-          "oklch(0.84 0.0141 196.27)",
-          "oklch(0.95 0.0141 196.27)"
+          "oklch(0.15 0.0027 286.35)",
+          "oklch(0.26 0.0027 286.35)",
+          "oklch(0.37 0.0027 286.35)",
+          "oklch(0.48 0.0027 286.35)",
+          "oklch(0.6 0.0027 286.35)",
+          "oklch(0.72 0.0027 286.35)",
+          "oklch(0.84 0.0027 286.35)",
+          "oklch(0.95 0.0027 286.35)"
         ],
         "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
       },
       "landing-subtle": {
         "role": "neutral",
         "displayName": "Subtle (landing only)",
-        "canonical": "#586160",
+        "canonical": "#a3a4ad",
+        "cssVar": "--lp-subtle",
         "scope": ".landing",
         "tonalRamp": [
-          "oklch(0.15 0.0113 188.75)",
-          "oklch(0.26 0.0113 188.75)",
-          "oklch(0.37 0.0113 188.75)",
-          "oklch(0.48 0.0113 188.75)",
-          "oklch(0.6 0.0113 188.75)",
-          "oklch(0.72 0.0113 188.75)",
-          "oklch(0.84 0.0113 188.75)",
-          "oklch(0.95 0.0113 188.75)"
+          "oklch(0.15 0.0130 280.99)",
+          "oklch(0.26 0.0130 280.99)",
+          "oklch(0.37 0.0130 280.99)",
+          "oklch(0.48 0.0130 280.99)",
+          "oklch(0.6 0.0130 280.99)",
+          "oklch(0.72 0.0130 280.99)",
+          "oklch(0.84 0.0130 280.99)",
+          "oklch(0.95 0.0130 280.99)"
         ],
         "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
       },
-      "landing-yellow": {
-        "role": "secondary",
-        "displayName": "Yellow (landing only)",
-        "canonical": "#e3fa83",
+      "landing-accent": {
+        "role": "primary",
+        "displayName": "Accent (landing only)",
+        "canonical": "#dedee3",
+        "cssVar": "--lp-accent",
         "scope": ".landing",
         "tonalRamp": [
-          "oklch(0.15 0.1467 118.32)",
-          "oklch(0.26 0.1467 118.32)",
-          "oklch(0.37 0.1467 118.32)",
-          "oklch(0.48 0.1467 118.32)",
-          "oklch(0.6 0.1467 118.32)",
-          "oklch(0.72 0.1467 118.32)",
-          "oklch(0.84 0.1467 118.32)",
-          "oklch(0.95 0.1467 118.32)"
+          "oklch(0.15 0.0068 286.26)",
+          "oklch(0.26 0.0068 286.26)",
+          "oklch(0.37 0.0068 286.26)",
+          "oklch(0.48 0.0068 286.26)",
+          "oklch(0.6 0.0068 286.26)",
+          "oklch(0.72 0.0068 286.26)",
+          "oklch(0.84 0.0068 286.26)",
+          "oklch(0.95 0.0068 286.26)"
+        ],
+        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      },
+      "landing-bright": {
+        "role": "primary",
+        "displayName": "Bright (landing only)",
+        "canonical": "#eeeeF0",
+        "cssVar": "--lp-bright",
+        "scope": ".landing",
+        "tonalRamp": [
+          "oklch(0.15 0.0027 286.35)",
+          "oklch(0.26 0.0027 286.35)",
+          "oklch(0.37 0.0027 286.35)",
+          "oklch(0.48 0.0027 286.35)",
+          "oklch(0.6 0.0027 286.35)",
+          "oklch(0.72 0.0027 286.35)",
+          "oklch(0.84 0.0027 286.35)",
+          "oklch(0.95 0.0027 286.35)"
         ],
         "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
       },
       "landing-line": {
         "role": "neutral",
         "displayName": "Line (landing only)",
-        "canonical": "#d9dfd8",
+        "canonical": "#303136",
+        "cssVar": "--lp-line",
         "scope": ".landing",
         "tonalRamp": [
-          "oklch(0.15 0.0114 141.26)",
-          "oklch(0.26 0.0114 141.26)",
-          "oklch(0.37 0.0114 141.26)",
-          "oklch(0.48 0.0114 141.26)",
-          "oklch(0.6 0.0114 141.26)",
-          "oklch(0.72 0.0114 141.26)",
-          "oklch(0.84 0.0114 141.26)",
-          "oklch(0.95 0.0114 141.26)"
+          "oklch(0.15 0.0090 276.85)",
+          "oklch(0.26 0.0090 276.85)",
+          "oklch(0.37 0.0090 276.85)",
+          "oklch(0.48 0.0090 276.85)",
+          "oklch(0.6 0.0090 276.85)",
+          "oklch(0.72 0.0090 276.85)",
+          "oklch(0.84 0.0090 276.85)",
+          "oklch(0.95 0.0090 276.85)"
         ],
         "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
       },
-      "landing-white": {
-        "role": "neutral",
-        "displayName": "White (landing only)",
-        "canonical": "#fff",
+      "landing-brand": {
+        "role": "primary",
+        "displayName": "Product indigo (landing actions only)",
+        "canonical": "oklch(0.72 0.11 278)",
+        "cssVar": "--brand",
         "scope": ".landing",
         "tonalRamp": [
-          "oklch(0.15 0.0000 89.88)",
-          "oklch(0.26 0.0000 89.88)",
-          "oklch(0.37 0.0000 89.88)",
-          "oklch(0.48 0.0000 89.88)",
-          "oklch(0.6 0.0000 89.88)",
-          "oklch(0.72 0.0000 89.88)",
-          "oklch(0.84 0.0000 89.88)",
-          "oklch(0.95 0.0000 89.88)"
+          "oklch(0.15 0.11 278)",
+          "oklch(0.26 0.11 278)",
+          "oklch(0.37 0.11 278)",
+          "oklch(0.48 0.11 278)",
+          "oklch(0.6 0.11 278)",
+          "oklch(0.72 0.11 278)",
+          "oklch(0.84 0.11 278)",
+          "oklch(0.95 0.11 278)"
         ],
-        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+        "tonalRampPurpose": "Synthesized preview, not new shipping colors."
       },
-      "landing-muted": {
-        "role": "neutral",
-        "displayName": "Muted (landing only)",
-        "canonical": "#e9ede5",
-        "scope": ".landing",
-        "tonalRamp": [
-          "oklch(0.15 0.0114 128.60)",
-          "oklch(0.26 0.0114 128.60)",
-          "oklch(0.37 0.0114 128.60)",
-          "oklch(0.48 0.0114 128.60)",
-          "oklch(0.6 0.0114 128.60)",
-          "oklch(0.72 0.0114 128.60)",
-          "oklch(0.84 0.0114 128.60)",
-          "oklch(0.95 0.0114 128.60)"
-        ],
-        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
-      },
-      "landing-blue-text": {
-        "role": "neutral",
-        "displayName": "Blue Text (landing only)",
-        "canonical": "#d2daff",
-        "scope": ".landing",
-        "tonalRamp": [
-          "oklch(0.15 0.0516 275.69)",
-          "oklch(0.26 0.0516 275.69)",
-          "oklch(0.37 0.0516 275.69)",
-          "oklch(0.48 0.0516 275.69)",
-          "oklch(0.6 0.0516 275.69)",
-          "oklch(0.72 0.0516 275.69)",
-          "oklch(0.84 0.0516 275.69)",
-          "oklch(0.95 0.0516 275.69)"
-        ],
-        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
-      },
-      "landing-feature": {
-        "role": "neutral",
-        "displayName": "Feature (landing only)",
-        "canonical": "#e9eedf",
-        "scope": ".landing",
-        "tonalRamp": [
-          "oklch(0.15 0.0206 121.85)",
-          "oklch(0.26 0.0206 121.85)",
-          "oklch(0.37 0.0206 121.85)",
-          "oklch(0.48 0.0206 121.85)",
-          "oklch(0.6 0.0206 121.85)",
-          "oklch(0.72 0.0206 121.85)",
-          "oklch(0.84 0.0206 121.85)",
-          "oklch(0.95 0.0206 121.85)"
-        ],
-        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
-      },
-      "landing-night": {
-        "role": "neutral",
-        "displayName": "Night (landing only)",
-        "canonical": "#171e2b",
-        "scope": ".landing",
-        "tonalRamp": [
-          "oklch(0.15 0.0273 262.50)",
-          "oklch(0.26 0.0273 262.50)",
-          "oklch(0.37 0.0273 262.50)",
-          "oklch(0.48 0.0273 262.50)",
-          "oklch(0.6 0.0273 262.50)",
-          "oklch(0.72 0.0273 262.50)",
-          "oklch(0.84 0.0273 262.50)",
-          "oklch(0.95 0.0273 262.50)"
-        ],
-        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
-      },
-      "landing-terminal": {
-        "role": "neutral",
-        "displayName": "Terminal (landing only)",
-        "canonical": "#1d2635",
-        "scope": ".landing",
-        "tonalRamp": [
-          "oklch(0.15 0.0310 260.45)",
-          "oklch(0.26 0.0310 260.45)",
-          "oklch(0.37 0.0310 260.45)",
-          "oklch(0.48 0.0310 260.45)",
-          "oklch(0.6 0.0310 260.45)",
-          "oklch(0.72 0.0310 260.45)",
-          "oklch(0.84 0.0310 260.45)",
-          "oklch(0.95 0.0310 260.45)"
-        ],
-        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
-      },
-      "landing-terminal-line": {
-        "role": "neutral",
-        "displayName": "Terminal Line (landing only)",
-        "canonical": "#3b4352",
-        "scope": ".landing",
-        "tonalRamp": [
-          "oklch(0.15 0.0278 262.96)",
-          "oklch(0.26 0.0278 262.96)",
-          "oklch(0.37 0.0278 262.96)",
-          "oklch(0.48 0.0278 262.96)",
-          "oklch(0.6 0.0278 262.96)",
-          "oklch(0.72 0.0278 262.96)",
-          "oklch(0.84 0.0278 262.96)",
-          "oklch(0.95 0.0278 262.96)"
-        ],
-        "tonalRampPurpose": "Synthesized panel preview; not additional shipping colors."
+      "landing-action-fill": {
+        "role": "primary",
+        "displayName": "Native action fill (landing only)",
+        "canonical": "oklch(0.72 0.11 278 / 0.1)",
+        "scope": ".landing"
       }
     },
     "typographyMeta": {
@@ -545,11 +493,6 @@
       },
       "landing-lead": {
         "displayName": "Landing Lead",
-        "purpose": "Public landing only; see DESIGN.md for responsive overrides.",
-        "scope": ".landing"
-      },
-      "landing-feature-body": {
-        "displayName": "Landing Feature Body",
         "purpose": "Public landing only; see DESIGN.md for responsive overrides.",
         "scope": ".landing"
       }
@@ -615,12 +558,6 @@
         "scope": ".landing"
       },
       {
-        "name": "landing-arrow",
-        "value": "220ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "CTA arrow translates 3px up and right.",
-        "scope": ".landing"
-      },
-      {
         "name": "landing-drift",
         "value": "8s ease-in-out infinite alternate",
         "purpose": "Ambient fragments; pause control and reduced motion stop animation.",
@@ -628,14 +565,56 @@
       },
       {
         "name": "landing-cursor",
-        "value": "1.3s step-end infinite",
+        "value": "1s step-end infinite",
         "purpose": "Terminal cursor; pause control and reduced motion stop animation.",
         "scope": ".landing"
       },
       {
         "name": "landing-approval",
-        "value": "450ms",
-        "purpose": "Demonstration knowledge background transition.",
+        "value": "380ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Received draft approval uses the shared page-settle animation; disabled under reduced motion.",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-record-wave",
+        "value": "1000ms",
+        "purpose": "Shared RecordWave; one pass for each recorded draft during explicit four-question interview playback.",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-card-flight",
+        "value": "900ms cubic-bezier(0.65, 0, 0.35, 1)",
+        "purpose": "Shared transferCard; 48px arc; skips flight when paused/reduced.",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-card-ring",
+        "value": "600ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Shared landing ring expands to 1.04 and fades.",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-native-sheen",
+        "value": "1100ms cubic-bezier(0.45, 0, 0.25, 1)",
+        "purpose": "Existing IntentraButton light pass; AgentSpark retains its 7s resting cadence.",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-wordmark",
+        "value": "12s steps(1, end) infinite",
+        "purpose": "Existing Brand reassembly; reduced motion disables it.",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-knowledge-trace",
+        "value": "650ms ease-out-expo; second path delayed 500ms",
+        "purpose": "Meaningful dependency trace after explicit human approval; needs-review badges arrive at 500ms and 1000ms. Pause/reduced motion at activation settles immediately.",
+        "scope": ".landing"
+      },
+      {
+        "name": "landing-mcp-sequence",
+        "value": "typing 22ms/character, clamped 650–1800ms; call 620ms; received 380ms; row gap 160ms; completed hold 5000ms",
+        "purpose": "Four local scenarios rotate after the completed hold; keyboard focus holds completion, offscreen/hidden/global pause stops playback, reduced motion shows the selected completed scenario.",
         "scope": ".landing"
       }
     ],
@@ -759,16 +738,25 @@
         "tokenPrefix": "landing-",
         "source": [
           "src/pages/landing/ui/landing-page.tsx",
+          "src/pages/landing/ui/landing-action.tsx",
+          "src/pages/landing/ui/product-demo.tsx",
           "src/pages/landing/ui/context-sculpture.tsx",
-          "src/app/styles/index.css (Public landing block)"
+          "src/app/styles/index.css (Public landing and Product-native details blocks)",
+          "src/shared/ui/components/card-transfer.ts",
+          "src/shared/ui/components/record-wave.tsx",
+          "src/pages/landing/ui/knowledge-scene.tsx",
+          "src/pages/landing/ui/mcp-showcase.tsx",
+          "src/pages/landing/ui/mcp-terminal.tsx",
+          "src/pages/landing/model/mcp-scenarios.ts",
+          "src/shared/i18n/locales/landing-ru.ts"
         ],
-        "inherits": "Existing shadcn primitives and mono font; local semantic color overrides.",
+        "inherits": "Shared Brand, IntentraButton/AgentSpark, domain Kind/status primitives and mono font; ProductDemo composes shadcn Card, Message, Bubble, Empty and Skeleton. Geist body with Onest display.",
         "appBoundary": "Unprefixed tokens and existing narrative describe the authenticated Operate app; this extension does not replace them.",
-        "colorScheme": "light",
-        "shadows": "No landing-specific shadow or blur.",
+        "colorScheme": "dark",
+        "shadows": "Flat panels; IntentraButton retains its native subtle indigo action shadow.",
         "narrative": {
           "northStar": "Kinetic pixel identity",
-          "overview": "The public landing uses a kinetic pixel identity: saturated cobalt stages, warm paper, pale yellow emphasis, and substantial Onest typography. Open compositions and thin structural lines connect the current pixel wordmark with a canvas assembly; the team’s AI analyst and the coding agent’s context receive equal visual weight. Product examples explain actual capabilities and explicitly identify the synthetic demonstration.",
+          "overview": "The public landing uses a kinetic pixel identity on monochrome graphite surfaces, with silver foregrounds, substantial Onest headings and Geist body typography. Open compositions and thin structural lines connect the current pixel wordmark with a canvas assembly; the team’s AI analyst and the coding agent’s context receive equal visual weight. Product examples explain actual capabilities and explicitly identify the synthetic demonstration.",
           "rules": [
             {
               "name": "The Landing Boundary Rule",
@@ -790,9 +778,16 @@
         },
         "assets": {
           "raster": "None added; no raster provenance required.",
-          "brand": "Existing SVG wordmark/avatar; procedural canvas assembly.",
+          "brand": "Shared Brand renders existing SVG and native reassembly; existing avatar and procedural canvas assembly.",
           "fonts": "Self-hosted Onest regular and bold with bundled license."
-        }
+        },
+        "hero": "min-height: 80svh at every breakpoint; mobile height grows with content.",
+        "canvas": "1,300 mark particles and 160 satellites; depth projection, pointer repulsion with eased return, native scroll convergence; hidden-tab/offscreen stop, pause control and reduced-motion assembled state.",
+        "demo": "Explicit finite four-question Orbit interview records BR-12, SC-08, REQ-24 and OQ-05 through shared RecordWave, transferCard and settling ring. Transcript and draft disclosures accumulate; opening a draft pauses for individual human approval. Pause/resume, manual advance and restart; offscreen/hidden stop and reduced-motion support. Local illustrative state only, no backend writes.",
+        "composition": "Hero (80svh minimum), four-question interview, one open linked-knowledge scene, four MCP scenarios, FAQ, closing. Repetitive problem, feature-stack, human-control manifesto and audience-role sections removed by user request. Whitespace replaces decorative divider lines and arrows; meaningful relationship connectors and terminal protocol notation remain.",
+        "knowledgeScene": "Desktop 24% / 40% / 26% columns with 5% gaps: Passport/open question, central cancellation rule, two dependents. Explicit approval replaces BR-12 (24 hours) with BR-13 (48 hours), retaining source/history and marking SC-08 and REQ-24 needs review in sequence. Native Kind/status badges and IntentraButton; reset restores the example. At ≤760px: rule, approval controls/result, two-column dependents, Passport/open question; no wires. Controls/result stay directly below the rule.",
+        "mcp": "Four plain-text Tabs scenarios: approved implementation context; conflicts/missing criteria; draft proposal then versioned human approval; suggested implementation task with unresolved questions visible. Terminal minimum height 510px, growing with text; desktop columns stretch together and mobile stacks. Full-text measuring spans reserve line geometry. Completed results hold 5 seconds before rotation. No local pause/replay controls or synthetic-data caption, as requested; no network calls or project writes.",
+        "faq": "Native Accordion with generous trigger padding and 8px gaps; no row dividers."
       }
     }
   },
@@ -881,17 +876,17 @@
       "name": "Landing primary invitation",
       "kind": "button",
       "refersTo": "landing-button-primary",
-      "description": "Public landing only. Shadcn route-link styling, captured as a standalone preview.",
-      "html": "<a class=\"ds-landing-primary\" href=\"#\">Начать с идеи<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 17 17 7M7 7h10v10\"/></svg></a>",
-      "css": ".ds-landing-primary{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:54px;padding:0 23px;border-radius:6px;text-decoration:none;font:500 14px/1.6 Onest,sans-serif;background:#e3fa83;color:#192323;}.ds-landing-primary:hover{background:color-mix(in oklch,#e3fa83 80%,transparent)}.ds-landing-primary svg{transition:transform 220ms cubic-bezier(.16,1,.3,1)}.ds-landing-primary:hover svg{transform:translate(3px,-3px)}.ds-landing-primary:focus-visible{outline:3px solid currentColor;outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-landing-primary svg{transition:none}}.ds-landing-primary:active{transform:translateY(1px)}@media(max-width:760px){.ds-landing-primary{min-height:49px;padding-inline:18px;font-size:12px;gap:18px}}"
+      "description": "LandingAction composes native IntentraButton; standalone visual preview omits the runtime AgentSpark frame sequence.",
+      "html": "<a class=\"ds-landing-button-primary\" href=\"#\"><span aria-hidden=\"true\" class=\"ds-landing-sheen\"></span><span>Начать с идеи</span></a>",
+      "css": ".ds-landing-button-primary{--ds-brand:oklch(.72 .11 278);position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:22px;min-height:52px;padding:0 22px;border:1px solid color-mix(in oklch,var(--ds-brand) 35%,transparent);border-radius:6px;background:color-mix(in oklch,var(--ds-brand) 10%,transparent);color:var(--ds-brand);font:500 14px/1.6 \"Geist Variable\",sans-serif;text-decoration:none;box-shadow:0 1px 2px oklch(.6 .13 278/.14);transition:background .2s,border-color .2s,box-shadow .2s}.ds-landing-button-primary:hover{background:color-mix(in oklch,var(--ds-brand) 16%,transparent);border-color:color-mix(in oklch,var(--ds-brand) 55%,transparent);box-shadow:0 2px 10px -2px oklch(.6 .13 278/.35)}.ds-landing-button-primary:focus-visible{outline:3px solid currentColor;outline-offset:5px}.ds-landing-button-primary:active{transform:translateY(1px)}.ds-landing-sheen{position:absolute;inset-block:0;left:0;width:66%;pointer-events:none;background:linear-gradient(90deg,transparent,oklch(.72 .11 278/.4),transparent);transform:translateX(-100%)}.ds-landing-button-primary:hover .ds-landing-sheen{animation:ds-landing-sheen 1100ms cubic-bezier(.45,0,.25,1) 1}@keyframes ds-landing-sheen{to{transform:translateX(250%)}}@media(max-width:760px){.ds-landing-button-primary{min-height:48px;padding-inline:16px;font-size:13px}}@media(prefers-reduced-motion:reduce){.ds-landing-sheen{display:none}}"
     },
     {
       "name": "Landing closing invitation",
       "kind": "button",
       "refersTo": "landing-button-closing",
-      "description": "Public landing only. Shadcn route-link styling, captured as a standalone preview.",
-      "html": "<a class=\"ds-landing-closing\" href=\"#\">Создать аккаунт<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 17 17 7M7 7h10v10\"/></svg></a>",
-      "css": ".ds-landing-closing{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:54px;padding:0 23px;border-radius:6px;text-decoration:none;font:500 14px/1.6 Onest,sans-serif;background:#192323;color:#fff;}.ds-landing-closing:hover{background:color-mix(in oklch,#192323 80%,transparent)}.ds-landing-closing svg{transition:transform 220ms cubic-bezier(.16,1,.3,1)}.ds-landing-closing:hover svg{transform:translate(3px,-3px)}.ds-landing-closing:focus-visible{outline:3px solid currentColor;outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-landing-closing svg{transition:none}}.ds-landing-closing:active{transform:translateY(1px)}@media(max-width:760px){.ds-landing-closing{min-height:49px;padding-inline:18px;font-size:12px;gap:18px}}"
+      "description": "LandingAction composes native IntentraButton; standalone visual preview omits the runtime AgentSpark frame sequence.",
+      "html": "<a class=\"ds-landing-button-closing\" href=\"#\"><span aria-hidden=\"true\" class=\"ds-landing-sheen\"></span><span>Создать аккаунт</span></a>",
+      "css": ".ds-landing-button-closing{--ds-brand:oklch(.72 .11 278);position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:22px;min-height:52px;padding:0 22px;border:1px solid color-mix(in oklch,var(--ds-brand) 35%,transparent);border-radius:6px;background:color-mix(in oklch,var(--ds-brand) 10%,transparent);color:var(--ds-brand);font:500 14px/1.6 \"Geist Variable\",sans-serif;text-decoration:none;box-shadow:0 1px 2px oklch(.6 .13 278/.14);transition:background .2s,border-color .2s,box-shadow .2s}.ds-landing-button-closing:hover{background:color-mix(in oklch,var(--ds-brand) 16%,transparent);border-color:color-mix(in oklch,var(--ds-brand) 55%,transparent);box-shadow:0 2px 10px -2px oklch(.6 .13 278/.35)}.ds-landing-button-closing:focus-visible{outline:3px solid currentColor;outline-offset:5px}.ds-landing-button-closing:active{transform:translateY(1px)}.ds-landing-sheen{position:absolute;inset-block:0;left:0;width:66%;pointer-events:none;background:linear-gradient(90deg,transparent,oklch(.72 .11 278/.4),transparent);transform:translateX(-100%)}.ds-landing-button-closing:hover .ds-landing-sheen{animation:ds-landing-sheen 1100ms cubic-bezier(.45,0,.25,1) 1}@keyframes ds-landing-sheen{to{transform:translateX(250%)}}@media(max-width:760px){.ds-landing-button-closing{min-height:48px;padding-inline:16px;font-size:13px}}@media(prefers-reduced-motion:reduce){.ds-landing-sheen{display:none}}"
     }
   ],
   "narrative": {

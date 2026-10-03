@@ -117,3 +117,11 @@ export function createKnowledgeContent(
 
   return create(fields as never);
 }
+
+/** Whether two contents say the same: the same fields with the same values. */
+export function sameKnowledgeContent(
+  a: KnowledgeContent,
+  b: KnowledgeContent,
+): boolean {
+  return JSON.stringify(a.toFields()) === JSON.stringify(b.toFields());
+}

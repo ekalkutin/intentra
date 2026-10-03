@@ -59,6 +59,7 @@ export function Chat({
   projectId,
   conversationId,
   initialMessages,
+  answering = false,
   projectName,
   notice,
   opening = null,
@@ -69,6 +70,8 @@ export function Chat({
   readonly projectId: string;
   readonly conversationId: string;
   readonly initialMessages: readonly UIMessage[];
+  /** An answer runs that this chat did not ask for, such as one begun before a reload. */
+  readonly answering?: boolean;
   readonly projectName: string;
   /** A note above the composer, such as a Viewer's. */
   readonly notice?: string;
@@ -107,11 +110,6 @@ export function Chat({
     messages: initialMessages as UIMessage[],
     transport,
     experimental_throttle: 50,
-    onData: part => {
-      if (part.type === 'data-thread-title') {
-        dispatch(baseApi.util.invalidateTags([API_TAGS.conversation]));
-      }
-    },
     onFinish: () => {
       dispatch(
         baseApi.util.invalidateTags([
@@ -121,7 +119,7 @@ export function Chat({
       );
     },
   });
-  const busy = status === STARTED || status === STREAMING;
+  const busy = answering || status === STARTED || status === STREAMING;
   const failure = toStreamApiError(error);
 
   useEffect(() => onMessages(messages), [messages, onMessages]);

@@ -168,6 +168,20 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
   /** The Platform Admin's; an access token keeps working after its Account is cleared away. */
   let admin: string;
 
+  /** The Conversation once its title, suggested in the background after an answer, has come. */
+  async function titledConversation(base: string, auth: string, id: string) {
+    return vi.waitFor(async () => {
+      const { body } = await app
+        .request()
+        .get(`${base}/conversations/${id}`)
+        .set('Authorization', auth)
+        .expect(HttpStatus.OK);
+      expect(body.title).not.toBeNull();
+
+      return body;
+    });
+  }
+
   /** Intentra with every tool, on one Model Profile, published as Agents Version 1. */
   async function publishAgents(): Promise<void> {
     const tools = await app
@@ -353,11 +367,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
       .expect(HttpStatus.OK);
 
     // Act
-    const { body: conversation } = await app
-      .request()
-      .get(`${base}/conversations/${id}`)
-      .set('Authorization', ada)
-      .expect(HttpStatus.OK);
+    const conversation = await titledConversation(base, ada, id);
 
     // Assert
     expect(conversation).toMatchObject({ id, title: TITLE, hidden: false });
@@ -372,7 +382,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
     ]);
   });
 
-  it('keeps when it started once the title comes', async () => {
+  it('answers without waiting for the title, which comes after', async () => {
     // Arrange
     const { ada, base } = await setUp();
     const id = randomUUID();
@@ -381,59 +391,27 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
       release = resolve;
     });
     turns = [answer('Hello, Ada.')];
-    // The answer waits for its title, held back here.
-    const answering = app
+    // The title is held back, yet the answer ends.
+    await app
       .request()
       .post(`${base}/conversations/${id}/messages`)
       .set('Authorization', ada)
       .send(message('Hi'))
-      .then(response => response);
-    const untitled = await vi.waitFor(async () => {
-      const response = await app
-        .request()
-        .get(`${base}/conversations/${id}`)
-        .set('Authorization', ada)
-        .expect(HttpStatus.OK);
-      return response.body;
-    });
-
-    // Act
-    release();
-    await answering;
-
-    // Assert
-    const { body: titled } = await app
+      .expect(HttpStatus.OK);
+    const { body: untitled } = await app
       .request()
       .get(`${base}/conversations/${id}`)
       .set('Authorization', ada)
       .expect(HttpStatus.OK);
+
+    // Act
+    release();
+    const titled = await titledConversation(base, ada, id);
+
+    // Assert
     expect(untitled.title).toBeNull();
     expect(titled.title).toBe(TITLE);
     expect(titled.createdAt).toBe(untitled.createdAt);
-  });
-
-  it('streams the suggested title before the answer ends', async () => {
-    // Arrange
-    const { ada, base } = await setUp();
-    const id = randomUUID();
-    turns = [answer('Hello, Ada.')];
-
-    // Act
-    const response = await app
-      .request()
-      .post(`${base}/conversations/${id}/messages`)
-      .set('Authorization', ada)
-      .send(message('Hi'));
-
-    // Assert
-    const chunks = readChunks(response.text);
-    const title = chunks.findIndex(({ type }) => type === 'data-thread-title');
-    expect(chunks[title]).toMatchObject({
-      data: { threadId: id, title: TITLE },
-    });
-    expect(title).toBeLessThan(
-      chunks.findIndex(({ type }) => type === 'finish'),
-    );
   });
 
   it("lists a Member's Conversations, the hidden ones apart", async () => {
@@ -447,6 +425,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
         .set('Authorization', ada)
         .send(message('Hi'))
         .expect(HttpStatus.OK);
+      await titledConversation(base, ada, id);
     }
     await app
       .request()
@@ -788,6 +767,54 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/conversations', () =>
       expect(response.body.code).toBe('CONVERSATION_BUSY');
     }
     expect((await running).status).toBe(HttpStatus.OK);
+  });
+
+  it('tells whether an answer runs in the Conversation', async () => {
+    // Arrange
+    const { ada, base } = await setUp();
+    const id = randomUUID();
+    await app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Hi'))
+      .expect(HttpStatus.OK);
+    let release = (): void => undefined;
+    gate = new Promise(resolve => {
+      release = resolve;
+    });
+    turns = [answer('Still here.')];
+    const running = app
+      .request()
+      .post(`${base}/conversations/${id}/messages`)
+      .set('Authorization', ada)
+      .send(message('Are you there?'))
+      .then(response => response);
+    await vi.waitFor(() => expect(turns).toHaveLength(0));
+
+    // Act
+    const { body: during } = await app
+      .request()
+      .get(`${base}/conversations/${id}`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    release();
+    await running;
+    const after = await vi.waitFor(async () => {
+      const { body } = await app
+        .request()
+        .get(`${base}/conversations/${id}`)
+        .set('Authorization', ada)
+        .expect(HttpStatus.OK);
+      expect(body.answering).toBe(false);
+
+      return body;
+    });
+
+    // Assert
+    expect(during.answering).toBe(true);
+    expect(after.answering).toBe(false);
+    expect(JSON.stringify(after.messages)).toContain('Still here.');
   });
 
   it('runs the answer to the end when nobody reads it', async () => {

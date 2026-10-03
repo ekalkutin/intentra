@@ -135,13 +135,16 @@ function SingleChoices({
                   </span>
                 )}
               </span>
-              <Kbd className='mt-px group-hover/choice:hidden group-focus-visible/choice:hidden'>
-                {index + 1}
-              </Kbd>
-              <ArrowRight
-                aria-hidden
-                className='mt-0.5 hidden size-4 text-muted-foreground group-hover/choice:block group-focus-visible/choice:block'
-              />
+              {/* One fixed slot for the number and the arrow, so the text never reflows on hover. */}
+              <span className='flex h-5 w-5 shrink-0 items-center justify-center'>
+                <Kbd className='group-hover/choice:hidden group-focus-visible/choice:hidden'>
+                  {index + 1}
+                </Kbd>
+                <ArrowRight
+                  aria-hidden
+                  className='hidden size-4 text-muted-foreground group-hover/choice:block group-focus-visible/choice:block'
+                />
+              </span>
             </Button>
           </li>
         ))}

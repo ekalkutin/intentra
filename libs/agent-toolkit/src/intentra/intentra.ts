@@ -7,6 +7,7 @@ import { ProjectRoleDtoSchema } from '@intentra/contracts/workspace';
 
 import { agentToolsOf } from '../agent-tools.js';
 import { isReadOnlyTool } from '../catalog.js';
+import { offerChoicesTool } from '../tools/index.js';
 
 import type { AgentDefinition } from './agent-definition.js';
 import {
@@ -114,6 +115,7 @@ function createAgent(
         : tools,
     skills: definition.skills.map(skill => createSkill(skill)),
     defaultOptions: {
+      stopWhen: endsWithChoices,
       modelSettings: {
         ...(definition.temperature !== null && {
           temperature: definition.temperature,
@@ -131,6 +133,22 @@ function createAgent(
     requestContextSchema: intentraContextSchema,
     ...extra,
   });
+}
+
+/**
+ * A turn ends with the choices it offers, whatever the model would do next:
+ * what the Member picks arrives as their next message.
+ */
+function endsWithChoices({
+  steps,
+}: {
+  steps: readonly { toolCalls: readonly { toolName: string }[] }[];
+}): boolean {
+  return (
+    steps
+      .at(-1)
+      ?.toolCalls.some(call => call.toolName === offerChoicesTool.id) ?? false
+  );
 }
 
 /** Names the model can call them by, such as `ux_researcher`; a repeated one gets a number. */

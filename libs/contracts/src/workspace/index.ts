@@ -70,6 +70,7 @@ export {
 export { InvitationsApi } from './invitations/invitations.api.js';
 export {
   EditKnowledgeItemDtoSchema,
+  fieldChanges,
   type EditKnowledgeItemDto,
 } from './knowledge/edit-knowledge-item.dto.js';
 export {

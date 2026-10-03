@@ -25,8 +25,9 @@ export function toConversationDto(conversation: Conversation): ConversationDto {
 export function toConversationWithMessagesDto(
   conversation: Conversation,
   messages: readonly ConversationMessage[],
+  answering: boolean,
 ): ConversationWithMessagesDto {
-  return { ...toConversationDto(conversation), messages };
+  return { ...toConversationDto(conversation), messages, answering };
 }
 
 export function toConversationPageDto({

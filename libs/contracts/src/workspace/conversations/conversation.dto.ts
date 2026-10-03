@@ -21,4 +21,6 @@ export type ConversationPageDto = {
 /** A Conversation with its messages, oldest first, in the AI SDK UI message format. */
 export type ConversationWithMessagesDto = ConversationDto & {
   readonly messages: readonly UIMessage[];
+  /** Intentra is answering in it now; its answer joins `messages` once it ends. */
+  readonly answering: boolean;
 };
