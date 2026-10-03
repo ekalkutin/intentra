@@ -9,6 +9,8 @@ Plans only (decided 2026-10-03): what is built lives in the code and the git his
 - [ ] **Auditor checks Links too.** It finds contradictions in what items say but not a far-fetched Link (a Goal "justified by" a deployment Decision); tune `docs/agents/auditor.md`.
 - [ ] **Prompt caching for Claude.** No `cacheControl` is sent: every step of an answer pays for the whole history again on Anthropic models.
 
+- [ ] **Feature.** A new Kind (`FEAT`, capability + out of scope), the `part of` Link, Feature Assignment for Approved items, a Feature as Anchor of a Context Pack, chapter 4 of the Passport by Feature, three Gaps, an interview step for Intentra, the Auditor checking parts against out of scope, a line in `MCP_INSTRUCTIONS`, the parts block on a Feature's page. Decided 2026-10-03: the Knowledge glossary, `packages/workspace/src/subdomains/knowledge/docs/adr/0002-feature-assignment-without-supersession.md`, `docs/notes/knowledge-kinds.md`, `docs/product-documentation-model.md`. Task and Planning come after it.
+
 ## Admin area (`/platform`)
 
 - [ ] **History of Agents Versions.** Number, who, when and note; publishing an earlier one again (the API exists: `versions`, `versions/:n`, `versions/:n/republish`).
@@ -23,8 +25,8 @@ Plans only (decided 2026-10-03): what is built lives in the code and the git his
 
 From `docs/product-brief.md`, `docs/product-documentation-model.md` and the deferred notes (`docs/notes/*-open-questions.md`):
 
-- **Importing documents**: an existing specification read into Drafts, with an Analysis Run over what came in.
-- **Planning**: Feature as a Kind and the natural Anchor of a Context Pack, then Feature → Task with commit / PR / test evidence.
+- **Importing documents**: done through MCP, an external agent reads the specification and records Drafts (decided 2026-10-03). What is left is a recipe for that agent: link every item, check what is already known before recording.
+- **Planning**: Feature → Task with commit / PR / test evidence, once Features are in use (Feature itself is under Now). Open: whether a Task is knowledge or work.
 - **Documents beyond the Passport**: Feature Spec, ADR, user guide, as views of the knowledge.
 - **Context for agents**: Anchors found from a task's text; a Feature as Anchor; Gaps marked inside a Context Pack; `scope` for the Project Frame once frames grow past 20–30 items; Context Packs from several Anchors in the web UI.
 - **Analysis**: a Workspace's time zone for the nightly check; a Plan and usage limits once Intentra pays for model calls; running the Auditor on the Unpublished Agents for a Platform Admin.

@@ -13,7 +13,7 @@ The short, human-readable name of a Knowledge Item within its Project, made of i
 _Avoid_: ID, Number, Ticket, Code
 
 **Kind**:
-What sort of knowledge a Knowledge Item holds, such as Term, Requirement or Decision. The Kind decides which fields the Knowledge Item has; every Kind shares the same lifecycle. For now the Kinds are Product Overview, Goal, Persona, Scenario, Requirement, Constraint, Term, Business Rule, Integration, Decision and Open Question.
+What sort of knowledge a Knowledge Item holds, such as Term, Requirement or Decision. The Kind decides which fields the Knowledge Item has; every Kind shares the same lifecycle. For now the Kinds are Product Overview, Goal, Persona, Feature, Scenario, Requirement, Constraint, Term, Business Rule, Integration, Decision and Open Question.
 _Avoid_: Type, Category
 
 **Term**:
@@ -23,6 +23,14 @@ _Avoid_: Glossary entry, Concept, Entity (as a separate Kind)
 **Scenario**:
 What a Persona does in the product to reach an outcome, step by step, and what result they get. It describes how the product behaves and stays true for as long as the product works that way; slicing it into work is Planning's job.
 _Avoid_: User story, Use case, Flow
+
+**Feature**:
+A named capability of the product as its users see it, such as "Invitations to a Workspace" or "the Product Passport", which the Scenarios, Requirements and Business Rules about it belong to. It **depends on** the Goal it serves. It is knowledge, not work: it stays true for as long as the product has that capability, and is retired when the capability is dropped. Whether it is built yet is not part of it; that belongs to Planning.
+_Avoid_: Epic, Module, Component, User story
+
+**Feature Assignment**:
+A Maintainer putting an Approved Scenario, Requirement or Business Rule into a Feature, moving it to another one, or taking it out, without a Supersession: being part of a Feature sorts knowledge but does not make it more or less true, so the item keeps its Knowledge Key. It is a Member's act like approving: an external agent may do it on a Member's behalf only when that Member's access token allows approving, and Intentra's own Agents never do it, only suggest it. It is kept in the item's history. A Draft is put into a Feature simply by editing its Links.
+_Avoid_: Tagging, Grouping, Reclassification
 
 **Decision**:
 A choice the Project has made, why, and which alternatives were turned down. A Decision has an area: architecture, product or business.
@@ -41,7 +49,7 @@ Something imposed on the Project from outside that is not up for discussion: a l
 _Avoid_: Limitation, Restriction, Non-functional requirement
 
 **Link**:
-A directed connection from one Knowledge Item to another, of one of these types: **depends on** (it holds only while the other holds), **uses term** (it uses a Term), **justified by** (a Decision is the reason for it), **answers** (it settles an Open Question), **concerns** (an Open Question is about it; only an Open Question has this Link, and it never sets Needs Review, since a question cannot become untrue) and **conflicts with** (the two contradict each other). A Link always points from what serves or rests to what it serves or rests on: a Scenario or Requirement **depends on** the Goal it serves, never a Goal on what serves it. A Link is recorded and approved together with the Knowledge Item it starts from.
+A directed connection from one Knowledge Item to another, of one of these types: **depends on** (it holds only while the other holds), **uses term** (it uses a Term), **justified by** (a Decision is the reason for it), **part of** (a Scenario, Requirement or Business Rule belongs to a Feature; only these have it, at most one each, and it points only to a Feature), **answers** (it settles an Open Question), **concerns** (an Open Question is about it; only an Open Question has this Link, and it never sets Needs Review, since a question cannot become untrue) and **conflicts with** (the two contradict each other). A Link always points from what serves or rests to what it serves or rests on: a Feature, Scenario or Requirement **depends on** the Goal it serves, never a Goal on what serves it; what is **part of** a Feature serves the Feature's Goal through it and needs no Link of its own to the Goal. A Link is recorded and approved together with the Knowledge Item it starts from.
 _Avoid_: Relation, Reference, Dependency
 
 **Source**:
@@ -53,7 +61,7 @@ A Knowledge Item that has been recorded but not yet approved. Agents, Intentra's
 _Avoid_: Proposal, Suggestion, Pending
 
 **Approved**:
-A Knowledge Item a Member has confirmed as true for the Project. Approving is always a Member's act: Intentra's own Agents never approve, and an external agent may approve on a Member's behalf only when that Member's access token allows it. Only a Maintainer of the Project may approve, reject, supersede or retire, including the author. A Knowledge Item created by hand is also first a Draft. A Knowledge Item can be approved only once everything it depends on is Approved; a person may approve it together with those Drafts in one step. A Draft Open Question it answers is approved in the same step, since answering settles it: the question and its answer enter the Project together. A Term it merely uses does not have to be Approved first. A Draft marked Needs Review cannot be approved until the mark is cleared. An Approved Knowledge Item is never edited: any change to it, even a small one, is a Supersession. Approving confirms the version the Member saw: a Draft edited since then cannot be approved until they look at it again.
+A Knowledge Item a Member has confirmed as true for the Project. Approving is always a Member's act: Intentra's own Agents never approve, and an external agent may approve on a Member's behalf only when that Member's access token allows it. Only a Maintainer of the Project may approve, reject, supersede or retire, including the author. A Knowledge Item created by hand is also first a Draft. A Knowledge Item can be approved only once everything it depends on, and the Feature it is part of, is Approved; a person may approve it together with those Drafts in one step. A Draft Open Question it answers is approved in the same step, since answering settles it: the question and its answer enter the Project together. A Term it merely uses does not have to be Approved first. A Draft marked Needs Review cannot be approved until the mark is cleared. An Approved Knowledge Item is never edited: any change to it, even a small one, is a Supersession. Approving confirms the version the Member saw: a Draft edited since then cannot be approved until they look at it again.
 _Avoid_: Accepted, Confirmed, Published
 
 **Rejected**:
@@ -77,13 +85,13 @@ A person marking an Approved Knowledge Item Obsolete with nothing to replace it,
 _Avoid_: Delete, Archive
 
 **Needs Review**:
-A mark that a Knowledge Item may no longer be true because a Knowledge Item it depends on, or a Decision it is justified by, was superseded, retired or rejected. A Term it merely uses does not mark it: terms are used widely, and marking everything on each refinement would bury the marks that matter. It does not change the status, and searches show it alongside the Knowledge Item. It is cleared by confirming the knowledge still holds, by editing a Draft's Links so that it no longer rests on what changed (other edits leave the mark), by rejecting it while it is a Draft, or by a Supersession or Retirement once it is Approved. Confirming also moves the Links that caused the mark: onto the replacement of a superseded target, or away altogether from a retired or rejected one, since the person has just checked that the knowledge holds on that basis. A replacement that says the same and only adds Links marks nothing: what rested on the replaced item moves onto the replacement at once, since nothing it rested on has changed. Likewise what uses a replaced Term moves onto its replacement at once, unmarked: a word means what its current Term says. These moves are the only changes an Approved Knowledge Item's Links ever get.
+A mark that a Knowledge Item may no longer be true because a Knowledge Item it depends on, or a Decision it is justified by, was superseded, retired or rejected, or the Feature it is part of was retired or rejected. A Term it merely uses does not mark it: terms are used widely, and marking everything on each refinement would bury the marks that matter. It does not change the status, and searches show it alongside the Knowledge Item. It is cleared by confirming the knowledge still holds, by editing a Draft's Links so that it no longer rests on what changed (other edits leave the mark), by rejecting it while it is a Draft, or by a Supersession or Retirement once it is Approved. Confirming also moves the Links that caused the mark: onto the replacement of a superseded target, or away altogether from a retired or rejected one, since the person has just checked that the knowledge holds on that basis. A replacement that says the same and only adds Links marks nothing: what rested on the replaced item moves onto the replacement at once, since nothing it rested on has changed. Likewise what uses a replaced Term moves onto its replacement at once, unmarked: a word means what its current Term says. So do the parts of a replaced Feature: rewording a capability rarely makes its parts untrue, and narrowing its scope is a contradiction for an Analysis Run to find. These moves and Feature Assignment are the only changes an Approved Knowledge Item's Links ever get.
 _Avoid_: Stale, Suspect, Outdated
 
 ### Context for agents
 
 **Context Pack**:
-The Approved knowledge an agent needs for one task, gathered from its Anchors along the Links: what they rest on, at any depth; the Business Rules that depend on any of those, which the code must keep; what rests on the Anchors, one step back; the Terms they use; what conflicts with them; and the Open Questions about them. Each Knowledge Item in it has a role (Anchor, foundation, rule, may be affected, term, conflict, unsettled), and one under Needs Review is marked as such. Drafts are never part of it, only named when linked nearby (a Draft merely using one of its Terms is not).
+The Approved knowledge an agent needs for one task, gathered from its Anchors along the Links: what they rest on, at any depth, the Feature an Anchor is part of included; the Business Rules that depend on any of those, which the code must keep; what rests on the Anchors, one step back; the Terms they use; what conflicts with them; and the Open Questions about them. A Feature as an Anchor brings in its parts, each gathered from as if it were an Anchor itself. Each Knowledge Item in it has a role (Anchor, part, foundation, rule, may be affected, term, conflict, unsettled), and one under Needs Review is marked as such. Drafts are never part of it, only named when linked nearby (a Draft merely using one of its Terms is not).
 _Avoid_: Task Context, Brief, Bundle
 
 **Anchor**:

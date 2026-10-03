@@ -11,6 +11,7 @@ There is no free-text description in the frame (decided on 2026-09-29): what a K
 | Product Overview | `PO`       | **summary**: what the product is and for whom, in a few sentences; problem, audience, value. Only one Approved per Project; changes only by Supersession |
 | Goal             | `GOAL`     | **outcome**: what the Project wants to achieve; success metric                                                                                           |
 | Persona          | `PER`      | **profile**: who they are; a person or a system; needs (list)                                                                                            |
+| Feature          | `FEAT`     | **capability**: what users can do with it and what they get; out of scope (list): what it deliberately does not do (agreed 2026-10-03)                   |
 | Scenario         | `SC`       | **expected result**: what the performer gets in the end; steps (list); performer (a `depends on` Link to a Persona, step 6)                              |
 | Requirement      | `REQ`      | **statement**: what the system does or what quality it has; functional or non-functional; priority Must / Should / Could; acceptance criteria (list)     |
 | Constraint       | `CON`      | **constraint**: what is imposed; imposed by: law, budget, deadline, customer, company, infrastructure                                                    |
