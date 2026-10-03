@@ -98,6 +98,27 @@ describe('readMessage', () => {
     ]);
   });
 
+  it('keeps a failed write the agent got past out of the transcript, not out of its work', () => {
+    // Arrange
+    const message = assistant([
+      {
+        type: 'tool-edit_goal',
+        toolCallId: 'e',
+        state: 'output-error',
+        input: { key: 'GOAL-1' },
+        errorText: 'LINK_TARGET_NOT_CURRENT: link to GOAL-2 instead',
+      },
+      { ...RECORDED, toolCallId: 'r' },
+    ]);
+
+    // Act
+    const { blocks, steps } = readMessage(message);
+
+    // Assert
+    expect(blocks).toEqual([expect.objectContaining({ error: null })]);
+    expect(steps.map(step => step.failed)).toEqual([true, false]);
+  });
+
   it('leaves out choice cards whose input is not valid', () => {
     // Arrange
     const message = assistant([

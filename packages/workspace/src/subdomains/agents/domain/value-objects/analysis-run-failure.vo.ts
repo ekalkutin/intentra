@@ -12,7 +12,11 @@ export class AnalysisRunFailure {
   public static readonly AgentsNotPublished = new AnalysisRunFailure(
     'agents-not-published',
   );
-  /** The Auditor or its model failed; the cause is in the logs. */
+  /** The model's provider did not answer, even when asked again: it may next time. */
+  public static readonly ModelUnavailable = new AnalysisRunFailure(
+    'model-unavailable',
+  );
+  /** The Auditor or its model failed otherwise; the cause is in the logs. */
   public static readonly AuditorFailed = new AnalysisRunFailure(
     'auditor-failed',
   );
@@ -21,6 +25,7 @@ export class AnalysisRunFailure {
     AnalysisRunFailure.Interrupted,
     AnalysisRunFailure.ProviderKeyMissing,
     AnalysisRunFailure.AgentsNotPublished,
+    AnalysisRunFailure.ModelUnavailable,
     AnalysisRunFailure.AuditorFailed,
   ];
 
@@ -36,7 +41,7 @@ export class AnalysisRunFailure {
     );
     if (!failure) {
       throw new InvalidAnalysisRunException(
-        'Analysis Run failure must be interrupted, provider-key-missing, agents-not-published or auditor-failed',
+        'Analysis Run failure must be interrupted, provider-key-missing, agents-not-published, model-unavailable or auditor-failed',
       );
     }
 

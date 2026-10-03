@@ -367,7 +367,7 @@ describe('Knowledge tools over MCP', () => {
     expect(read.content[0]?.text).toMatch(/^KNOWLEDGE_ITEM_NOT_FOUND: /);
   });
 
-  it('tells a connecting agent to read the frame, then a Context Pack per task', async () => {
+  it('tells a connecting agent to read the frame, then a Context Pack per task, and to link what it records', async () => {
     // Act
     const response = await app
       .request()
@@ -393,6 +393,7 @@ describe('Knowledge tools over MCP', () => {
     const result = JSON.parse(data?.slice('data: '.length) ?? response.text)
       .result as { instructions?: string };
     expect(result.instructions).toContain('get_project_frame');
+    expect(result.instructions).toContain('Link every item you record');
     expect(result.instructions).toContain('get_context');
   });
 

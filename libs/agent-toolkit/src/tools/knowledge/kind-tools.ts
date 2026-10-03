@@ -133,13 +133,12 @@ function createRecordTool(spec: KindSpec) {
 function createEditTool(spec: KindSpec) {
   return createTool({
     id: `edit_${toolName(spec.kind)}`,
-    description: `Edits a Draft ${spec.noun}. What is left out stays as it is: send only the fields that change, and null to clear one. Read it with get_knowledge_item first and send back its version. Only a Draft can be edited. Editing clears Needs Review only where it no longer links to what changed.`,
+    description: `Edits a Draft ${spec.noun}. What is left out stays as it is: send only the fields that change, and null to clear one. Read it with get_knowledge_item first and send back its version. Only a Draft can be edited. Its rationale stays as recorded: what the person said it rests on, not what you changed. Editing clears Needs Review only where it no longer links to what changed.`,
     inputSchema: z.object({
       projectId: projectIdSchema,
       key: keySchema,
       version: versionSchema,
       title: z.string().optional(),
-      rationale: z.string().optional(),
       fields: fieldChanges(KNOWLEDGE_FIELDS_DTO_SCHEMAS[spec.kind]).optional(),
       links: linksSchema.optional().describe('Replaces all of its Links.'),
     }),

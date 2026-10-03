@@ -19,6 +19,7 @@ import {
   type AuditResult,
   type AuditTask,
 } from '../../../application/ports/outbound/index.js';
+import { AnalysisRunFailure } from '../../../domain/value-objects/index.js';
 import {
   AGENTS_OPTIONS,
   toAgentDefinition,
@@ -82,6 +83,7 @@ export class AuditorAdapter implements Auditor {
         : AUDIT_TASKS.wholeProject;
       const output = await auditor.generate(task, {
         requestContext,
+        modelSettings: { maxRetries: this.options.auditMaxRetries },
         maxSteps: this.options.auditMaxSteps,
         abortSignal: AbortSignal.timeout(this.options.auditTimeoutMs),
       });
@@ -90,14 +92,20 @@ export class AuditorAdapter implements Auditor {
       }
 
       return {
-        succeeded: true,
+        failure: null,
         questionKeys,
         stepLimitReached: output.steps.length >= this.options.auditMaxSteps,
       };
     } catch (error) {
       this.#logger.error(error);
 
-      return { succeeded: false, questionKeys, stepLimitReached: false };
+      return {
+        failure: isProviderOutage(error)
+          ? AnalysisRunFailure.ModelUnavailable
+          : AnalysisRunFailure.AuditorFailed,
+        questionKeys,
+        stepLimitReached: false,
+      };
     }
   }
 }
@@ -125,3 +133,25 @@ export const AUDITOR_PROVIDER: Provider = {
   provide: Auditor,
   useClass: AuditorAdapter,
 };
+
+/** Statuses a provider answers when it cannot serve the call for now. */
+const OUTAGE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+
+/**
+ * Whether the model's provider failed for a while rather than the Auditor:
+ * the AI SDK marks such a call retryable, perhaps under Mastra's own errors.
+ */
+function isProviderOutage(error: unknown): boolean {
+  for (let cause = error; cause instanceof Error; cause = cause.cause) {
+    if (
+      ('isRetryable' in cause && cause.isRetryable === true) ||
+      ('statusCode' in cause &&
+        typeof cause.statusCode === 'number' &&
+        OUTAGE_STATUSES.has(cause.statusCode))
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}

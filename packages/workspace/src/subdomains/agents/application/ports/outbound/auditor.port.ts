@@ -1,6 +1,7 @@
 import type { Project } from '../../../../tenancy/index.js';
 import type { AgentsContent } from '../../../domain/entities/index.js';
 import type {
+  AnalysisRunFailure,
   AnalysisRunScope,
   ProviderKeySecret,
 } from '../../../domain/value-objects/index.js';
@@ -20,8 +21,8 @@ export type AuditTask = {
 };
 
 export type AuditResult = {
-  /** False when the Auditor or its model failed; the cause is logged. */
-  readonly succeeded: boolean;
+  /** Why the Auditor failed, the cause logged; null when it did not. */
+  readonly failure: AnalysisRunFailure | null;
   /** The Open Questions it recorded, by Knowledge Key, even when it failed later. */
   readonly questionKeys: readonly string[];
   /** It stopped at the most steps a run may take. */

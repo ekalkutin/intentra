@@ -826,6 +826,65 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge', () => {
     });
   });
 
+  it('moves what uses a replaced Term onto its replacement', async () => {
+    // Arrange
+    const { ada, path } = await setUp();
+    for (const body of [
+      {
+        kind: 'term',
+        title: 'Report',
+        fields: { definition: 'A monthly summary of sales' },
+      },
+      {
+        ...requirement,
+        links: [{ type: 'uses-term', key: 'TERM-1' }],
+      },
+    ]) {
+      await app
+        .request()
+        .post(path)
+        .set('Authorization', ada)
+        .send(body)
+        .expect(HttpStatus.CREATED);
+    }
+    await app
+      .request()
+      .post(`${path}/approve`)
+      .set('Authorization', ada)
+      .send({ items: ['TERM-1', 'REQ-1'].map(key => ({ key, version: 1 })) })
+      .expect(HttpStatus.OK);
+    await app
+      .request()
+      .post(path)
+      .set('Authorization', ada)
+      .send({
+        kind: 'term',
+        title: 'Report',
+        supersedes: 'TERM-1',
+        fields: { definition: 'A monthly or weekly summary of sales' },
+      })
+      .expect(HttpStatus.CREATED);
+
+    // Act
+    await app
+      .request()
+      .post(`${path}/TERM-2/approve`)
+      .set('Authorization', ada)
+      .send({ version: 1 })
+      .expect(HttpStatus.OK);
+
+    // Assert
+    const user = await app
+      .request()
+      .get(`${path}/REQ-1`)
+      .set('Authorization', ada)
+      .expect(HttpStatus.OK);
+    expect(user.body).toMatchObject({
+      needsReview: false,
+      links: [{ type: 'uses-term', key: 'TERM-2' }],
+    });
+  });
+
   it('approves an answer together with the Draft Open Question it answers', async () => {
     // Arrange
     const { ada, path } = await setUp();

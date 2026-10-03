@@ -10,6 +10,7 @@ import {
   KnowledgeLinkType,
   KnowledgeSource,
   RequirementContent,
+  TermContent,
 } from '../value-objects/index.js';
 
 import { ReviewMarkingService } from './review-marking.service.js';
@@ -50,6 +51,26 @@ function requirement(
     authorId: new MemberId().value,
     supersedes,
     links,
+  });
+}
+
+/** A Term numbered `number` meaning `definition`. */
+function term(
+  number: number,
+  definition: string,
+  supersedes: KnowledgeKey | null = null,
+): KnowledgeItem {
+  return KnowledgeItem.record({
+    workspaceId: new WorkspaceId().value,
+    projectId: new ProjectId().value,
+    source: KnowledgeSource.Manual,
+    number,
+    title: 'Collision',
+    rationale: null,
+    content: new TermContent({ definition, sort: null, synonymsToAvoid: [] }),
+    authorId: new MemberId().value,
+    supersedes,
+    links: [],
   });
 }
 
@@ -105,5 +126,31 @@ describe('ReviewMarkingService', () => {
 
     // Assert
     expect(source.needsReview()).toBe(true);
+  });
+
+  it('moves what uses a replaced Term onto its replacement, with no mark', () => {
+    // Arrange
+    const replaced = term(1, 'Two articles that contradict each other');
+    const replacement = term(
+      2,
+      'Two articles that contradict each other, or a stale one',
+      replaced.key,
+    );
+    const user = requirement(3, {
+      links: [
+        dependsOn(SC_1),
+        new KnowledgeLink(KnowledgeLinkType.UsesTerm, replaced.key),
+      ],
+    });
+
+    // Act
+    service.moveTermUsers(replaced, replacement, [user]);
+
+    // Assert
+    expect(user.needsReview()).toBe(false);
+    expect(user.links.map(link => link.target.value)).toEqual([
+      'SC-1',
+      'TERM-2',
+    ]);
   });
 });

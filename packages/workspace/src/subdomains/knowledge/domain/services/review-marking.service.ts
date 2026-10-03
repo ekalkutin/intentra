@@ -1,4 +1,5 @@
 import { KnowledgeItem } from '../entities/index.js';
+import { KnowledgeKind } from '../value-objects/index.js';
 
 export class ReviewMarkingService {
   /**
@@ -23,6 +24,23 @@ export class ReviewMarkingService {
       } else {
         source.markForReview(changed.key);
       }
+    }
+  }
+
+  /**
+   * A Term was replaced: what uses it now uses its replacement, the word's
+   * current meaning, with no Needs Review (a Term's users are never marked).
+   */
+  public moveTermUsers(
+    replaced: KnowledgeItem,
+    replacement: KnowledgeItem,
+    users: readonly KnowledgeItem[],
+  ): void {
+    if (!replaced.kind.equals(KnowledgeKind.Term)) {
+      return;
+    }
+    for (const user of users) {
+      user.followReplacement(replaced.key, replacement.key);
     }
   }
 }

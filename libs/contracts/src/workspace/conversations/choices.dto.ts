@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { KnowledgeKindDtoSchema } from '../knowledge/knowledge-kind.dto.js';
+
 /** One answer Intentra offers the Member to pick. */
 export const ChoiceOptionDtoSchema = z.object({
   label: z
@@ -38,6 +40,16 @@ export const ChoicesDtoSchema = z.object({
     .boolean()
     .default(true)
     .describe('Whether the person may type an answer of their own instead.'),
+  field: z
+    .object({
+      kind: KnowledgeKindDtoSchema,
+      name: z.string().describe("The field's name, such as priority."),
+    })
+    .nullable()
+    .default(null)
+    .describe(
+      "When the question picks the value of a field with fixed values, such as a Requirement's priority: its Kind and field. Then each label is one of the field's values exactly as the field takes it (such as must), and the person sees it with its icon and name in their language.",
+    ),
 });
 
 export type ChoicesDto = z.infer<typeof ChoicesDtoSchema>;

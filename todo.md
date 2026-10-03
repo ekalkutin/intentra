@@ -4,7 +4,10 @@ Plans only (decided 2026-10-03): what is built lives in the code and the git his
 
 ## Now
 
-- [ ] **Try the analyst on dogfooding.** On the Project "Intentra": an Analysis Run by hand over its Approved knowledge, the nightly check on, Intentra in an interview with `list_gaps` and `get_context`; note what the Auditor finds, misses and invents, then tune `docs/agents/auditor.md`.
+- [x] **Try the analyst on dogfooding.** Done on 2026-10-03 over three Projects (`intentra-03-10`, `intentra-2`, `intentra-3`), Gemini 3.8 Flash, agents up to version 10: findings, traps and what was fixed in `docs/notes/dogfood-traps.md`.
+- [ ] **Compare models on the dogfood script.** Run the `intentra-3` script (six facts, traps 1–4) on Sonnet 5.5 and Gemini 3.8 Flash: what Gemini keeps doing in spite of the prompt (records a vague statement before asking for a number, fills fields the person never gave, two questions at once, options as text, rationales that are not the person's words) — model or product. Decides the default Model Profile.
+- [ ] **Auditor checks Links too.** It finds contradictions in what items say but not a far-fetched Link (a Goal "justified by" a deployment Decision); tune `docs/agents/auditor.md`.
+- [ ] **Prompt caching for Claude.** No `cacheControl` is sent: every step of an answer pays for the whole history again on Anthropic models.
 
 ## Admin area (`/platform`)
 

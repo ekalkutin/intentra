@@ -2,6 +2,7 @@ import { ArrowRight, ArrowUp, Check, PenLine } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { ChoiceValue, useFieldTexts } from '@/entities/knowledge-item';
 import { cn } from '@/shared/lib';
 import {
   Button,
@@ -26,6 +27,31 @@ const ANSWER_MAX = 2000;
 /** One answer option, frozen in the transcript; long ones wrap. */
 const ANSWER_CHIP =
   'inline-flex max-w-full items-center gap-1.5 rounded-md px-2 py-1 text-sm leading-5';
+
+/**
+ * How the options of `choices` read and what picking one sends: the value of
+ * a field with fixed values reads, and goes back, in the Member's words, with
+ * its icon; any other label as it is.
+ */
+function useOptions(choices: ChoicesDto) {
+  const texts = useFieldTexts();
+  const { field } = choices;
+  const known = (label: string) =>
+    field !== null && texts.hasOption(field.kind, field.name, label);
+
+  return {
+    reply: (label: string) =>
+      field && known(label)
+        ? texts.option(field.kind, field.name, label)
+        : label,
+    view: (label: string) =>
+      field && known(label) ? (
+        <ChoiceValue kind={field.kind} field={field.name} value={label} />
+      ) : (
+        label
+      ),
+  };
+}
 
 /**
  * A question the agent asked with clear-cut answers. A single answer is a
@@ -90,6 +116,8 @@ function SingleChoices({
   readonly disabled: boolean;
   readonly onAnswer: (text: string) => void;
 }) {
+  const { reply, view } = useOptions(choices);
+
   // Number keys answer while the Member is not typing somewhere.
   useEffect(() => {
     if (disabled) {
@@ -108,12 +136,12 @@ function SingleChoices({
       const option = choices.options[Number(event.key) - 1];
       if (option) {
         event.preventDefault();
-        onAnswer(option.label);
+        onAnswer(reply(option.label));
       }
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [choices, disabled, onAnswer]);
+  }, [choices, disabled, onAnswer, reply]);
 
   return (
     <>
@@ -123,12 +151,12 @@ function SingleChoices({
             <Button
               variant='outline'
               disabled={disabled}
-              onClick={() => onAnswer(option.label)}
+              onClick={() => onAnswer(reply(option.label))}
               aria-keyshortcuts={String(index + 1)}
               className='group/choice h-auto w-full items-start justify-start gap-3 rounded-lg px-3 py-2.5 text-left font-normal whitespace-normal'
             >
               <span className='flex min-w-0 flex-1 flex-col gap-0.5'>
-                <span className='text-sm leading-5'>{option.label}</span>
+                <span className='text-sm leading-5'>{view(option.label)}</span>
                 {option.description && (
                   <span className='text-sm leading-5 text-muted-foreground'>
                     {option.description}
@@ -167,6 +195,7 @@ function MultipleChoices({
   readonly onAnswer: (text: string) => void;
 }) {
   const { t } = useTranslation();
+  const { reply: replyOf, view } = useOptions(choices);
   const [picked, setPicked] = useState<string[]>([]);
   const [own, setOwn] = useState('');
   const reply = [...picked, ...(own.trim() ? [own.trim()] : [])];
@@ -191,16 +220,16 @@ function MultipleChoices({
               key={option.label}
               value={option.label}
               disabled={disabled}
-              checked={picked.includes(option.label)}
+              checked={picked.includes(replyOf(option.label))}
               onChange={event =>
                 setPicked(current =>
                   event.target.checked
-                    ? [...current, option.label]
-                    : current.filter(label => label !== option.label),
+                    ? [...current, replyOf(option.label)]
+                    : current.filter(text => text !== replyOf(option.label)),
                 )
               }
             >
-              {option.label}
+              {view(option.label)}
               {option.description && (
                 <QuestionnaireChoiceDescription>
                   {option.description}
@@ -291,10 +320,11 @@ function AnsweredChoices({
   readonly answer: string;
 }) {
   const { t } = useTranslation();
+  const { reply, view } = useOptions(choices);
   const picked = new Set(answer.split(JOIN));
-  const labels = new Set(choices.options.map(option => option.label));
+  const labels = new Set(choices.options.map(option => reply(option.label)));
   // What the Member wrote in their own words, beside or instead of the options.
-  const own = choices.options.some(option => picked.has(option.label))
+  const own = choices.options.some(option => picked.has(reply(option.label)))
     ? [...picked].filter(part => !labels.has(part)).join(JOIN)
     : answer;
 
@@ -305,7 +335,7 @@ function AnsweredChoices({
       </p>
       <ul className='flex flex-wrap gap-1.5'>
         {choices.options.map(option => {
-          const chosen = picked.has(option.label);
+          const chosen = picked.has(reply(option.label));
           return (
             <li
               key={option.label}
@@ -317,7 +347,7 @@ function AnsweredChoices({
               )}
             >
               {chosen && <Check aria-hidden className='size-3.5 shrink-0' />}
-              {option.label}
+              {view(option.label)}
               {chosen && (
                 <span className='sr-only'>
                   {' '}

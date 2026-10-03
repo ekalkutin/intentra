@@ -353,10 +353,10 @@ export class AnalysisRunsService
         agents: published.content,
         providerKey: this.providerKeyCipher.decrypt(providerKey.encryptedKey),
       });
-      if (result.succeeded) {
-        run.complete(result);
+      if (result.failure) {
+        run.fail(result.failure, result.questionKeys);
       } else {
-        run.fail(AnalysisRunFailure.AuditorFailed, result.questionKeys);
+        run.complete(result);
       }
       await this.keep(run);
     } catch (error) {

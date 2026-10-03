@@ -13,6 +13,8 @@ import {
   SupersededItemNotApprovedException,
 } from '../exceptions/index.js';
 import {
+  DecisionArea,
+  DecisionContent,
   KnowledgeAuthor,
   KnowledgeItemId,
   KnowledgeItemVersion,
@@ -274,14 +276,17 @@ export class KnowledgeItem extends Aggregate<KnowledgeItemId> {
 
   /**
    * Whether it is of a Kind the Project Frame holds when Approved, whatever it
-   * links to: the Product Overview, a Constraint, a non-functional Requirement.
+   * links to: the Product Overview, a Constraint, a non-functional
+   * Requirement, an architecture Decision.
    */
   public isOfProjectFrame(): boolean {
     return (
       this.kind.equals(KnowledgeKind.ProductOverview) ||
       this.kind.equals(KnowledgeKind.Constraint) ||
       (this.#content instanceof RequirementContent &&
-        this.#content.type === RequirementType.NonFunctional)
+        this.#content.type === RequirementType.NonFunctional) ||
+      (this.#content instanceof DecisionContent &&
+        this.#content.area === DecisionArea.Architecture)
     );
   }
 

@@ -71,6 +71,12 @@ const scriptedModel = {
   // The Auditor runs with `generate`, which asks for each step whole.
   doGenerate: async () => {
     await gate;
+    if (outage) {
+      throw Object.assign(new Error('The operation was aborted'), {
+        statusCode: 504,
+        isRetryable: true,
+      });
+    }
     const parts = turns.shift() ?? answer('Nothing more.');
     const finish = parts.find(part => part.type === 'finish');
 
@@ -103,6 +109,8 @@ const scriptedModel = {
 
 /** A stand-in that always fails, as a provider refusing the key would. */
 let failing = false;
+/** The model's provider times out on every call. */
+let outage = false;
 
 const ENCRYPTION_KEY = Buffer.alloc(32, 7).toString('base64');
 
@@ -140,6 +148,8 @@ function createApp() {
                 return scriptedModel;
               },
               providerKeyEncryptionKey: ENCRYPTION_KEY,
+              // One retry after a second keeps a provider outage quick here.
+              auditMaxRetries: 1,
             },
           }),
         ],
@@ -301,6 +311,7 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
     turns = [];
     gate = null;
     failing = false;
+    outage = false;
     await app.clearDatabase();
   });
 
@@ -445,6 +456,25 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/analysis-runs', () =>
 
     // Assert
     expect(run).toMatchObject({ status: 'failed', failure: 'auditor-failed' });
+  });
+
+  it("tells a run its model's provider did not answer from one the Auditor failed", async () => {
+    // Arrange
+    const { ada, base } = await setUp();
+    outage = true;
+
+    // Act
+    const started = await app
+      .request()
+      .post(`${base}/analysis-runs`)
+      .set('Authorization', ada);
+    const run = await finished(base, ada, started.body.id);
+
+    // Assert
+    expect(run).toMatchObject({
+      status: 'failed',
+      failure: 'model-unavailable',
+    });
   });
 
   it('lets a Viewer read the runs but not start one', async () => {

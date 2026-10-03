@@ -11,11 +11,12 @@ describe('offer_choices', () => {
     const input = {
       question: 'How much does it matter?',
       options: [
-        { label: 'Must', description: null },
-        { label: 'Should', description: null },
+        { label: 'must', description: null },
+        { label: 'should', description: null },
       ],
       multiple: false,
       allowCustom: true,
+      field: { kind: 'requirement' as const, name: 'priority' },
     };
 
     // Act

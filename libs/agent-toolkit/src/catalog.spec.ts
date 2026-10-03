@@ -51,3 +51,18 @@ describe.each(Object.values(MCP_TOOLS))('MCP tool $id', tool => {
     );
   });
 });
+
+describe.each(
+  Object.values(MCP_TOOLS).filter(tool => tool.id.startsWith('edit_')),
+)('MCP tool $id', tool => {
+  // The rationale is what the person said the item rests on, set when recorded.
+  it('leaves the rationale as recorded', () => {
+    // Act
+    const input = tool.inputSchema?.['~standard'].jsonSchema.input({
+      target: 'draft-2020-12',
+    });
+
+    // Assert
+    expect(input?.properties).not.toHaveProperty('rationale');
+  });
+});

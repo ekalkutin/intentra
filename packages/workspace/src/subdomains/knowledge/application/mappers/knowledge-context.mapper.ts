@@ -114,6 +114,7 @@ const FRAME_SECTIONS: readonly {
   { kind: 'product-overview', heading: 'Product' },
   { kind: 'constraint', heading: 'Constraints' },
   { kind: 'requirement', heading: 'Quality requirements' },
+  { kind: 'decision', heading: 'Architecture decisions' },
 ];
 
 /** The Project Frame as an agent reads it. */
@@ -123,7 +124,7 @@ export function drawProjectFrame(
   const lines = [
     '# Project frame',
     '',
-    'What holds for every task in this Project, whatever it links to: the product, the constraints imposed on it and the qualities it must have.',
+    'What holds for every task in this Project, whatever it links to: the product, the constraints imposed on it, the qualities it must have and how it is built.',
   ];
   if (items.length === 0) {
     lines.push('', 'Nothing of it is approved yet.');

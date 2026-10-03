@@ -358,10 +358,38 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge/context', (
     expect(response.body.message).toContain('REQ-99');
   });
 
-  it('gives the Project Frame: the overview, the constraints and the qualities', async () => {
+  it('gives the Project Frame: the overview, the constraints, the qualities and the architecture', async () => {
     // Arrange
     const { ada, bob, path } = await setUp();
     await givenProject(ada, path);
+    for (const body of [
+      {
+        kind: 'decision',
+        title: 'One database per tenant',
+        fields: {
+          decision: 'Each tenant has its own database',
+          area: 'architecture',
+        },
+      },
+      {
+        kind: 'decision',
+        title: 'Monthly plans only',
+        fields: { decision: 'Plans are billed monthly', area: 'business' },
+      },
+    ]) {
+      await app
+        .request()
+        .post(path)
+        .set('Authorization', ada)
+        .send(body)
+        .expect(HttpStatus.CREATED);
+    }
+    await app
+      .request()
+      .post(`${path}/approve`)
+      .set('Authorization', ada)
+      .send({ items: ['DEC-3', 'DEC-4'].map(key => ({ key, version: 1 })) })
+      .expect(HttpStatus.OK);
 
     // Act
     const response = await app
@@ -375,7 +403,9 @@ describe('/api/workspaces/:workspaceId/projects/:projectId/knowledge/context', (
       'PO-1',
       'CON-1',
       'REQ-3',
+      'DEC-3',
     ]);
     expect(response.body.markdown).toContain('## Quality requirements');
+    expect(response.body.markdown).toContain('## Architecture decisions');
   });
 });

@@ -414,6 +414,8 @@ bearer_token_env_var = "INTENTRA_TOKEN"
         'Нет ключа провайдера: его может добавить владелец пространства в настройках.',
       'agents-not-published':
         'Агенты Intentra ещё не опубликованы. Обратитесь к администратору платформы.',
+      'model-unavailable':
+        'Модель не ответила: сбой у её провайдера, даже после повторов. Запустите проверку ещё раз.',
       'auditor-failed':
         'Intentra не смогла довести проверку до конца. Попробуйте ещё раз позже.',
     },
@@ -1409,9 +1411,9 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     steps: {
       thinking: 'Шаг',
       reasoning: 'Размышление',
-      reading: 'Прочитал знания',
-      writing: 'Записал',
-      specialist: 'Спросил {{name}}',
+      reading: 'Прочитала знания',
+      writing: 'Записала',
+      specialist: 'Спросила {{name}}',
       answering: 'Ответ',
     },
     stepFailed: 'не удалось',
@@ -1435,9 +1437,9 @@ bearer_token_env_var = "INTENTRA_TOKEN"
     captured: 'Записано в разговоре',
     capturedEmpty: 'Пока ничего.',
     capturedMissing: 'Удалён',
-    failed: 'Агент не ответил',
+    failed: 'Intentra не ответила',
     retry: 'Повторить',
-    busy: 'Агент ещё отвечает в этом разговоре. Подождите и повторите.',
+    busy: 'Intentra ещё отвечает в этом разговоре. Подождите и повторите.',
     missing: 'Такого разговора нет',
     missingHint: 'Возможно, его удалили. Выберите другой или начните новый.',
   },

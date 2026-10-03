@@ -25,6 +25,12 @@ export type AgentsOptions = {
   readonly auditMaxSteps: number;
   /** The longest one Analysis Run may run, in milliseconds. */
   readonly auditTimeoutMs: number;
+  /**
+   * How many times an Analysis Run retries a model call its provider failed
+   * for a while (a timeout, an overload): no one waits on it, so it tries
+   * harder than an answer does.
+   */
+  readonly auditMaxRetries: number;
   /** The hour, in UTC, when the nightly Analysis Runs start; null for none (tests). */
   readonly analysisScheduleHourUtc: number | null;
 };
@@ -42,6 +48,7 @@ export const DEFAULT_AGENTS_OPTIONS: AgentsOptions = {
   historyTokens: 300_000,
   auditMaxSteps: 40,
   auditTimeoutMs: 10 * 60 * 1000,
+  auditMaxRetries: 5,
   analysisScheduleHourUtc: null,
 };
 

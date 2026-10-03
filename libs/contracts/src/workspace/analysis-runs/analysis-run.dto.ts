@@ -21,13 +21,16 @@ export type AnalysisRunScopeDto = z.infer<typeof AnalysisRunScopeDtoSchema>;
 /**
  * Why it failed: `interrupted`, the API stopped while it ran;
  * `provider-key-missing`, the Workspace has no Provider Key;
- * `agents-not-published`, no Agents are published yet; `auditor-failed`,
- * the Auditor or its model failed (the cause stays in the logs).
+ * `agents-not-published`, no Agents are published yet; `model-unavailable`,
+ * the model's provider did not answer even when asked again (it may next
+ * time); `auditor-failed`, the Auditor or its model failed otherwise (the
+ * cause stays in the logs).
  */
 export const AnalysisRunFailureDtoSchema = z.enum([
   'interrupted',
   'provider-key-missing',
   'agents-not-published',
+  'model-unavailable',
   'auditor-failed',
 ]);
 

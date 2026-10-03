@@ -203,7 +203,22 @@ export function readMessage(message: UIMessage): {
     }
   });
 
-  return { blocks, steps };
+  return { blocks: withoutRecoveredFailures(blocks), steps };
+}
+
+/**
+ * A failed write the agent got past (another write worked after it) is only
+ * a step of its work: the transcript shows what it did, not its retries.
+ */
+function withoutRecoveredFailures(blocks: readonly Block[]): Block[] {
+  return blocks.filter(
+    (block, index) =>
+      block.type !== 'write' ||
+      block.error === null ||
+      !blocks
+        .slice(index + 1)
+        .some(later => later.type === 'write' && later.error === null),
+  );
 }
 
 /** What the agent is doing right now, for the live status line. */

@@ -533,13 +533,15 @@ export class KnowledgeService implements KnowledgeApi {
         },
       );
       const approved = drafts.map(({ item }) => item);
-      const marked = await this.markSourcesOf(project.id, superseded, [
-        ...superseded,
-        ...approved,
+      const inHand = [...superseded, ...approved];
+      const marked = await this.markSourcesOf(project.id, superseded, inHand);
+      const termUsers = await this.moveTermUsers(project.id, superseded, [
+        ...inHand,
+        ...marked,
       ]);
       // The replaced items first: a Project's one-Approved rules are unique
       // indexes, checked write by write even inside the transaction.
-      await this.saveAll([...superseded, ...approved, ...marked]);
+      await this.saveAll([...superseded, ...approved, ...marked, ...termUsers]);
 
       return approved.map(item => toKnowledgeItemDto(item, projectRole));
     });
@@ -924,8 +926,8 @@ export class KnowledgeService implements KnowledgeApi {
   }
 
   /**
-   * The Project Frame: the Approved Product Overview, Constraints and
-   * non-functional Requirements, in that order.
+   * The Project Frame: the Approved Product Overview, Constraints,
+   * non-functional Requirements and architecture Decisions, in that order.
    */
   private async findFrame(projectId: ProjectId): Promise<KnowledgeItem[]> {
     const approved = (kind: KnowledgeKind) =>
@@ -935,11 +937,13 @@ export class KnowledgeService implements KnowledgeApi {
         statuses: [KnowledgeStatus.Approved],
       });
     const requirements = await approved(KnowledgeKind.Requirement);
+    const decisions = await approved(KnowledgeKind.Decision);
 
     return [
       ...(await approved(KnowledgeKind.ProductOverview)),
       ...(await approved(KnowledgeKind.Constraint)),
       ...requirements.filter(item => item.isOfProjectFrame()),
+      ...decisions.filter(item => item.isOfProjectFrame()),
     ];
   }
 
@@ -1023,6 +1027,41 @@ export class KnowledgeService implements KnowledgeApi {
     }
 
     return marked;
+  }
+
+  /**
+   * Moves what uses a replaced Term onto its replacement. An item already in
+   * hand is moved as that same object, so that no copy overwrites it.
+   */
+  private async moveTermUsers(
+    projectId: ProjectId,
+    replaced: readonly KnowledgeItem[],
+    inHand: readonly KnowledgeItem[],
+  ): Promise<KnowledgeItem[]> {
+    const terms = replaced.filter(item => item.kind.equals(KnowledgeKind.Term));
+    if (terms.length === 0) {
+      return [];
+    }
+    const users = (
+      await this.knowledgeItemRepository.findMany({
+        projectId,
+        linkingTo: {
+          keys: terms.map(term => term.key),
+          types: [KnowledgeLinkType.UsesTerm],
+        },
+        statuses: CURRENT,
+      })
+    ).map(user => inHand.find(item => item.key.equals(user.key)) ?? user);
+    for (const term of terms) {
+      const replacement = inHand.find(item =>
+        item.supersedes?.equals(term.key),
+      );
+      if (replacement) {
+        this.#reviewMarkingService.moveTermUsers(term, replacement, users);
+      }
+    }
+
+    return users;
   }
 
   /** Saves each item once, in the given order. */

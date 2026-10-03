@@ -138,7 +138,7 @@ describe('AnalysisRunsService integration', () => {
         .get(UnitOfWork)
         .run(() => app.get(AgentsVersionRepository).save(version));
       vi.spyOn(app.get(Auditor), 'audit').mockResolvedValue({
-        succeeded: true,
+        failure: null,
         questionKeys: [],
         stepLimitReached: false,
       });

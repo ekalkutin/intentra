@@ -13,6 +13,12 @@ export type FieldTexts = {
     field: string,
     value: string,
   ) => string;
+  /** Whether `value` is one of the field's choices, with a text of its own. */
+  readonly hasOption: (
+    kind: KnowledgeKindDto,
+    field: string,
+    value: string,
+  ) => boolean;
 };
 
 /**
@@ -34,6 +40,8 @@ export function useFieldTexts(): FieldTexts {
       },
       option: (kind, field, value) =>
         text(`knowledgeOptions.${kind}.${field}.${value}`),
+      hasOption: (kind, field, value) =>
+        i18n.exists(`knowledgeOptions.${kind}.${field}.${value}`),
     };
   }, [i18n]);
 }

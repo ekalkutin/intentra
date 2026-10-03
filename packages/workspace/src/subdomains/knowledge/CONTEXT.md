@@ -77,7 +77,7 @@ A person marking an Approved Knowledge Item Obsolete with nothing to replace it,
 _Avoid_: Delete, Archive
 
 **Needs Review**:
-A mark that a Knowledge Item may no longer be true because a Knowledge Item it depends on, or a Decision it is justified by, was superseded, retired or rejected. A Term it merely uses does not mark it: terms are used widely, and marking everything on each refinement would bury the marks that matter. It does not change the status, and searches show it alongside the Knowledge Item. It is cleared by confirming the knowledge still holds, by editing a Draft's Links so that it no longer rests on what changed (other edits leave the mark), by rejecting it while it is a Draft, or by a Supersession or Retirement once it is Approved. Confirming also moves the Links that caused the mark: onto the replacement of a superseded target, or away altogether from a retired or rejected one, since the person has just checked that the knowledge holds on that basis. A replacement that says the same and only adds Links marks nothing: what rested on the replaced item moves onto the replacement at once, since nothing it rested on has changed. These two moves are the only changes an Approved Knowledge Item's Links ever get.
+A mark that a Knowledge Item may no longer be true because a Knowledge Item it depends on, or a Decision it is justified by, was superseded, retired or rejected. A Term it merely uses does not mark it: terms are used widely, and marking everything on each refinement would bury the marks that matter. It does not change the status, and searches show it alongside the Knowledge Item. It is cleared by confirming the knowledge still holds, by editing a Draft's Links so that it no longer rests on what changed (other edits leave the mark), by rejecting it while it is a Draft, or by a Supersession or Retirement once it is Approved. Confirming also moves the Links that caused the mark: onto the replacement of a superseded target, or away altogether from a retired or rejected one, since the person has just checked that the knowledge holds on that basis. A replacement that says the same and only adds Links marks nothing: what rested on the replaced item moves onto the replacement at once, since nothing it rested on has changed. Likewise what uses a replaced Term moves onto its replacement at once, unmarked: a word means what its current Term says. These moves are the only changes an Approved Knowledge Item's Links ever get.
 _Avoid_: Stale, Suspect, Outdated
 
 ### Context for agents
@@ -91,7 +91,7 @@ An Approved Knowledge Item an agent picks as the subject of its task, from which
 _Avoid_: Root, Seed, Entry point
 
 **Project Frame**:
-The knowledge that holds for every task in a Project, whatever it links to: the Product Overview, every Approved Constraint and every Approved non-functional Requirement. An agent reads it once per session, alongside the Context Packs of its tasks.
+The knowledge that holds for every task in a Project, whatever it links to: the Product Overview, every Approved Constraint, every Approved non-functional Requirement and every Approved Decision about architecture. An agent reads it once per session, alongside the Context Packs of its tasks.
 _Avoid_: Project Context (that is a document), Global context
 
 ### Analysis
