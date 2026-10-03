@@ -44,10 +44,10 @@ First of all an AI analyst (decided 2026-10-02): a companion in describing requi
   - The Product Passport (8 chapters), the Interview (Conversations with Intentra), Analysis (Gaps, Analysis Runs, the nightly check).
   - MCP: reading (summary, Gaps, list, item, Context Pack, Project Frame) and recording every Kind, approving per token level.
   - The admin area: Agents, Skills, Model Profiles, changes and publishing, Open Sign-up and Open Workspace Creation.
-- Planned: Usage, the admin area's history of Agents Versions and its Workspaces and Accounts, importing documents, planning (Feature → Task), document views beyond the Passport (Feature Spec, ADR, user guide). See `todo.md`.
+- Planned: first the pilot with outside teams that already have a product (decided 2026-10-03): Similar Items and an Auditor that checks every item, Drafts included; bringing existing documents in through an external agent from an empty Project; a "Needs attention" block; English. Then Usage, the admin area's history of Agents Versions and its Workspaces and Accounts, planning (Feature → Task), document views beyond the Passport (Feature Spec, ADR, user guide). See `todo.md`.
 - Stack (existing): `apps/web` is a Vite + React 19 SPA with a Feature-Sliced Design structure (enforced by steiger), RTK Query, react-router, react-hook-form + zod, Tailwind v4, and i18next (`docs/adr/0003-web-ui-is-an-fsd-spa-on-rtk-query.md`).
 - Components (binding): use shadcn primitives (style `base-nova`, on Base UI) wherever they fit. Primitives are added through the shadcn CLI into `src/shared/ui/primitives` and are never hand-edited. Anything shadcn does not provide is our own component in `src/shared/ui/components`, built by composing those primitives.
-- Language: the UI is Russian now, and English will come later. Every string goes through i18n with no hardcoded copy, and layouts must fit longer English and Russian strings alike.
+- Language: the UI is Russian now; English comes with the pilot (decided 2026-10-03). Intentra talks in the person's language, while a Project's knowledge is written in its Project Language. Every string goes through i18n with no hardcoded copy, and layouts must fit longer English and Russian strings alike.
 - Light and dark themes are both supported (a theme switch already exists).
 - MVP stage: go for the simplest working thing, with no enterprise hardening. Data-loss risks are the exception and are always handled.
 

@@ -35,6 +35,10 @@ The container for one software product's context inside a Workspace. For now eve
 A short, human-readable handle of a Project, unique within its Workspace and never changed after the Project is created. Together with the Workspace Slug it names a Project, e.g. `acme-corp/billing-service`.
 _Avoid_: Project key, Handle
 
+**Project Language**:
+The language a Project's knowledge is written in, such as Russian or English, chosen when the Project is created and never changed after. Everything recorded in the Project is in it, whoever records it: Intentra in a Conversation, the Auditor in an Analysis Run, an external agent over MCP. A Conversation itself is held in the language of the person talking, which can differ.
+_Avoid_: Locale, Content language
+
 **Owner**:
 The Role of a Member who owns a Workspace and manages it: its settings, its Members, its Projects and its deletion. A Workspace can have several Owners but always has at least one. The Account that creates a Workspace becomes its first Owner. The last Owner can neither leave nor be removed.
 _Avoid_: Admin
