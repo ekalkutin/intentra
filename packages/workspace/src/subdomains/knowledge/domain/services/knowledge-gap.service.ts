@@ -98,6 +98,31 @@ export class KnowledgeGapService {
           dependents(scenario, [KnowledgeKind.Requirement]).length === 0,
       ),
     );
+    const goals = ofKind(KnowledgeKind.Goal);
+    const features = ofKind(KnowledgeKind.Feature);
+    add(
+      KnowledgeGapRule.FeatureWithoutGoal,
+      features.filter(
+        feature =>
+          !feature
+            .dependencies()
+            .some(key => goals.some(goal => goal.key.equals(key))),
+      ),
+    );
+    add(
+      KnowledgeGapRule.FeatureWithoutParts,
+      features.filter(
+        feature => !items.some(item => item.feature?.equals(feature.key)),
+      ),
+    );
+    add(
+      KnowledgeGapRule.ScenarioWithoutFeature,
+      features.length === 0
+        ? []
+        : ofKind(KnowledgeKind.Scenario).filter(
+            scenario => scenario.feature === null,
+          ),
+    );
     add(
       KnowledgeGapRule.IntegrationWithoutUse,
       ofKind(KnowledgeKind.Integration).filter(
@@ -118,7 +143,8 @@ export class KnowledgeGapService {
 /**
  * The Approved items no Context Pack could reach but as its own Anchor: no
  * Link of their own, none from another Approved item, and not of the Project
- * Frame, which agents read whatever it links to.
+ * Frame, which agents read whatever it links to. A Feature is left out: one
+ * with no Goal or no parts has Gaps of its own that say what it misses.
  */
 function findUnlinked(items: readonly KnowledgeItem[]): KnowledgeItem[] {
   const approved = items.filter(item => item.isApproved());
@@ -129,6 +155,7 @@ function findUnlinked(items: readonly KnowledgeItem[]): KnowledgeItem[] {
   return approved.filter(
     item =>
       !item.isOfProjectFrame() &&
+      !item.kind.equals(KnowledgeKind.Feature) &&
       item.links.length === 0 &&
       !targets.has(item.key.value),
   );

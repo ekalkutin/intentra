@@ -11,7 +11,7 @@ export class ContextPackRole {
   public static readonly Conflict = new ContextPackRole('conflict', true);
   /** An Open Question about an item of the pack, not answered yet. */
   public static readonly Unsettled = new ContextPackRole('unsettled', true);
-  /** A Business Rule on an Anchor or on what they rest on: the code must keep it. */
+  /** A Business Rule on an Anchor or on what they rest on, or of their Feature: the code must keep it. */
   public static readonly Rule = new ContextPackRole('rule', true);
   /** What the Anchors rest on, at any depth, the Feature an Anchor is part of included. */
   public static readonly Foundation = new ContextPackRole('foundation', false);

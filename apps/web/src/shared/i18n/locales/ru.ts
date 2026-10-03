@@ -791,6 +791,9 @@ bearer_token_env_var = "INTENTRA_TOKEN"
       'scenario-without-persona': 'Сценарии без исполнителя',
       'persona-without-scenario': 'Персоны без сценариев',
       'scenario-without-requirement': 'Сценарии без требований',
+      'feature-without-goal': 'Фичи без цели',
+      'feature-without-parts': 'Пустые фичи',
+      'scenario-without-feature': 'Сценарии вне фич',
       'integration-without-use': 'Интеграции, на которые ничто не опирается',
       unlinked: 'Без связей',
     },
@@ -811,6 +814,12 @@ bearer_token_env_var = "INTENTRA_TOKEN"
         'Персона не выполняет ни одного сценария: что она делает в продукте?',
       'scenario-without-requirement':
         'Ни одно требование не говорит, что делает система в этом сценарии.',
+      'feature-without-goal':
+        'Фича не связана с целью, которой служит: зачем она продукту?',
+      'feature-without-parts':
+        'В фичу не входит ни один сценарий, требование или правило.',
+      'scenario-without-feature':
+        'Сценарий не входит ни в одну фичу: к какой возможности продукта он относится? Если к двум — возможно, его стоит разделить.',
       'integration-without-use':
         'Ни одно требование или бизнес-правило не опирается на интеграцию: зачем она?',
       unlinked:

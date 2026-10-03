@@ -33,6 +33,12 @@ const MISSING: { readonly [R in KnowledgeGapRuleDto]: string } = {
     'A Persona performs no Scenario: what they do with the product.',
   'scenario-without-requirement':
     'No Requirement says what the system does in this Scenario.',
+  'feature-without-goal':
+    'A Feature serves no Goal (a depends-on Link to one): why the product has it.',
+  'feature-without-parts':
+    'Nothing is part of this Feature: which Scenarios, Requirements and Business Rules it holds.',
+  'scenario-without-feature':
+    'A Scenario is part of no Feature: which capability of the product it belongs to (a part-of Link), or whether it should be split.',
   'integration-without-use':
     'No Requirement or Business Rule rests on this Integration: what it is used for.',
   unlinked:

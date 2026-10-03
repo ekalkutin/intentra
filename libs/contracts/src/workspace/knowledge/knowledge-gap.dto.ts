@@ -12,9 +12,12 @@ import type {
  * Must), `goal-without-success-metric`, `decision-without-rejected-alternatives`,
  * `scenario-without-persona` (no `depends-on` to one). Of coverage:
  * `persona-without-scenario` (a person, not a system, no Scenario depends on),
- * `scenario-without-requirement`, `integration-without-use` (no Requirement or
+ * `scenario-without-requirement`, `feature-without-goal` (no `depends-on` to
+ * one), `feature-without-parts`, `scenario-without-feature` (only once the
+ * Project has a Feature), `integration-without-use` (no Requirement or
  * Business Rule depends on it). `unlinked`: an Approved item outside the
- * Project Frame with no Link either way with another Approved item. A Draft
+ * Project Frame, and not a Feature, with no Link either way with another
+ * Approved item. A Draft
  * closes a Gap as an Approved item does.
  */
 export const KnowledgeGapRuleDtoSchema = z.enum([
@@ -27,6 +30,9 @@ export const KnowledgeGapRuleDtoSchema = z.enum([
   'scenario-without-persona',
   'persona-without-scenario',
   'scenario-without-requirement',
+  'feature-without-goal',
+  'feature-without-parts',
+  'scenario-without-feature',
   'integration-without-use',
   'unlinked',
 ]);

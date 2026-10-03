@@ -784,7 +784,8 @@ export class KnowledgeService implements KnowledgeApi {
    * Every Approved item a Context Pack takes, for each reason it is found:
    * the Anchors, and the parts of a Feature among them, gathered from as if
    * they were Anchors; what they rest on, level by level, each once, so that
-   * cycles end; the Business Rules that depend on any of those; what links to an
+   * cycles end; the Business Rules that depend on any of those or are part
+   * of a Feature among them; what links to an
    * Anchor; the Terms used; what conflicts with any of
    * them; and the Open Questions about any of them not answered yet.
    */
@@ -862,7 +863,7 @@ export class KnowledgeService implements KnowledgeApi {
       kind: KnowledgeKind.BusinessRule,
       linkingTo: {
         keys: grounds.map(item => item.key),
-        types: [KnowledgeLinkType.DependsOn],
+        types: [KnowledgeLinkType.DependsOn, KnowledgeLinkType.PartOf],
       },
       statuses: [KnowledgeStatus.Approved],
     });

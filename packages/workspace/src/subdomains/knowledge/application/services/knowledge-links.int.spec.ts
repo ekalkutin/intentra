@@ -443,7 +443,7 @@ describe('KnowledgeService Links and Needs Review', () => {
         });
       });
 
-      it('takes the Feature of an Anchor, and its Goal, as foundation', async () => {
+      it('takes the Feature of an Anchor, its Goal, and the rules of the Feature', async () => {
         // Arrange
         const setup = await setUp();
         await givenFeature(setup);
@@ -463,8 +463,8 @@ describe('KnowledgeService Links and Needs Review', () => {
           'FEAT-1': 'foundation',
           'GOAL-1': 'foundation',
           'DEC-1': 'foundation',
+          'BR-1': 'rule',
         });
-        expect(roles['BR-1']).toBeUndefined();
       });
     });
 

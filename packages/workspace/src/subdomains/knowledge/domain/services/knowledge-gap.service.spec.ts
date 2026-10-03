@@ -8,6 +8,7 @@ import {
   BusinessRuleContent,
   ConstraintContent,
   DecisionContent,
+  FeatureContent,
   GoalContent,
   IntegrationContent,
   KnowledgeKey,
@@ -90,6 +91,15 @@ function requirement(
     priority: props.priority ?? null,
     acceptanceCriteria: props.acceptanceCriteria ?? [],
   });
+}
+
+const feature = new FeatureContent({
+  capability: 'Pay online',
+  outOfScope: [],
+});
+
+function partOf(key: string): KnowledgeLink {
+  return new KnowledgeLink(KnowledgeLinkType.PartOf, KnowledgeKey.parse(key));
 }
 
 function describeGaps(gaps: readonly KnowledgeGap[]): string[] {
@@ -213,6 +223,39 @@ describe('KnowledgeGapService', () => {
       'unlinked SC-3',
       'unlinked INT-1',
       'unlinked INT-2',
+    ]);
+  });
+
+  it('asks for no Feature until the Project has one', () => {
+    // Arrange
+    const items = [...complete(), approved(2, scenario, [dependsOn('PER-1')])];
+
+    // Act
+    const gaps = new KnowledgeGapService().findGaps(items);
+
+    // Assert
+    expect(describeGaps(gaps)).toEqual(['scenario-without-requirement SC-2']);
+  });
+
+  it('finds Features without a Goal or parts, and Scenarios outside every Feature', () => {
+    // Arrange
+    const items = [
+      ...complete(),
+      approved(1, feature, [dependsOn('GOAL-1')]),
+      draft(2, feature),
+      approved(3, feature, [dependsOn('GOAL-1')]),
+      draft(2, scenario, [dependsOn('PER-1'), partOf('FEAT-1')]),
+      draft(2, requirement(), [dependsOn('SC-2'), partOf('FEAT-2')]),
+    ];
+
+    // Act
+    const gaps = new KnowledgeGapService().findGaps(items);
+
+    // Assert
+    expect(describeGaps(gaps)).toEqual([
+      'feature-without-goal FEAT-2',
+      'feature-without-parts FEAT-3',
+      'scenario-without-feature SC-1',
     ]);
   });
 

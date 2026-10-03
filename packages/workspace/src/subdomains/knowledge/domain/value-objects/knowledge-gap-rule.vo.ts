@@ -35,6 +35,21 @@ export class KnowledgeGapRule {
     'scenario-without-requirement',
     false,
   );
+  /** A Feature serves no Goal: no `depends on` to one. */
+  public static readonly FeatureWithoutGoal = new KnowledgeGapRule(
+    'feature-without-goal',
+    false,
+  );
+  /** Nothing is part of a Feature. */
+  public static readonly FeatureWithoutParts = new KnowledgeGapRule(
+    'feature-without-parts',
+    false,
+  );
+  /** A Scenario is part of no Feature, once the Project has one. */
+  public static readonly ScenarioWithoutFeature = new KnowledgeGapRule(
+    'scenario-without-feature',
+    false,
+  );
   /** No Requirement or Business Rule rests on an Integration. */
   public static readonly IntegrationWithoutUse = new KnowledgeGapRule(
     'integration-without-use',
@@ -53,6 +68,9 @@ export class KnowledgeGapRule {
     KnowledgeGapRule.ScenarioWithoutPersona,
     KnowledgeGapRule.PersonaWithoutScenario,
     KnowledgeGapRule.ScenarioWithoutRequirement,
+    KnowledgeGapRule.FeatureWithoutGoal,
+    KnowledgeGapRule.FeatureWithoutParts,
+    KnowledgeGapRule.ScenarioWithoutFeature,
     KnowledgeGapRule.IntegrationWithoutUse,
     KnowledgeGapRule.Unlinked,
   ];

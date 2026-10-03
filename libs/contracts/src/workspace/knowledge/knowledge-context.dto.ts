@@ -30,7 +30,7 @@ export type GetKnowledgeContextDto = z.infer<
  * `part`, part of a Feature that is an Anchor, gathered from as if it were an
  * Anchor itself; `foundation`, what the Anchors rest on (`depends-on`,
  * `justified-by`, `part-of`, at any depth); `rule`, a Business Rule that depends on an Anchor or on the
- * foundation, which the code must keep; `may-be-affected`, what links to an
+ * foundation, or is part of a Feature among them, which the code must keep; `may-be-affected`, what links to an
  * Anchor; `term`, a Term used;
  * `conflict`, what contradicts an item of the pack; `unsettled`, an Open
  * Question about one, not answered yet.
