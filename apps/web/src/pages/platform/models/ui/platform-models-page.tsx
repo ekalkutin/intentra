@@ -68,10 +68,14 @@ export function PlatformModelsPage() {
         actions={createAction}
       />
       {error ? (
-        <LoadError
-          text={describeError(error).text}
-          onRetry={() => void unpublished.refetch()}
-        />
+        <List>
+          <ListEmpty>
+            <LoadError
+              text={describeError(error).text}
+              onRetry={() => void unpublished.refetch()}
+            />
+          </ListEmpty>
+        </List>
       ) : (
         <List aria-busy={!content}>
           {!content ? (

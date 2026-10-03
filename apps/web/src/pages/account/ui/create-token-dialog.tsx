@@ -5,6 +5,8 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
 
+import { useCreatePersonalAccessTokenMutation } from '@/entities/personal-access-token';
+import { onlyWorkspaceId, WorkspaceSelect } from '@/entities/workspace';
 import { toApiError } from '@/shared/api';
 import { useDescribeError } from '@/shared/i18n';
 import {
@@ -39,9 +41,7 @@ import {
   type WorkspaceDto,
 } from '@intentra/contracts/workspace';
 
-import { useCreatePersonalAccessTokenMutation } from '../api/personal-access-token-api';
-
-import { AgentPrompt } from './agent-prompt';
+import { AgentConnect } from './agent-connect';
 
 type FormInput = z.input<typeof CreatePersonalAccessTokenDtoSchema>;
 type FormOutput = z.output<typeof CreatePersonalAccessTokenDtoSchema>;
@@ -60,19 +60,26 @@ const LIFETIMES = [
 ] as const satisfies readonly { value: Lifetime; labelKey: string }[];
 
 /**
- * Creates a Personal Access Token, then shows its secret once, with a way
- * to copy it; closing the dialog forgets the secret.
+ * Creates a Personal Access Token in one of the person's Workspaces, then
+ * shows its secret once, with a way to copy it; closing the dialog forgets
+ * the secret.
  */
 export function CreateTokenDialog({
-  workspace,
+  workspaces,
 }: {
-  readonly workspace: WorkspaceDto;
+  readonly workspaces: readonly WorkspaceDto[];
 }) {
   const { t } = useTranslation();
   const id = useId();
   const describeError = useDescribeError();
   const [open, setOpen] = useState(false);
-  const [secret, setSecret] = useState<string | null>(null);
+  const [picked, setPicked] = useState<string | null>(null);
+  const [created, setCreated] = useState<{
+    readonly workspaceSlug: string;
+    readonly secret: string;
+  } | null>(null);
+  const workspaceId = picked ?? onlyWorkspaceId(workspaces);
+  const workspace = workspaces.find(candidate => candidate.id === workspaceId);
   const [create] = useCreatePersonalAccessTokenMutation();
   const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(CreatePersonalAccessTokenDtoSchema),
@@ -95,12 +102,16 @@ export function CreateTokenDialog({
   const onOpenChange = (next: boolean) => {
     setOpen(next);
     if (!next) {
-      setSecret(null);
+      setCreated(null);
+      setPicked(null);
       form.reset();
     }
   };
 
   const submit = form.handleSubmit(async body => {
+    if (!workspace) {
+      return;
+    }
     const result = await create({ workspaceId: workspace.id, body });
     const error = toApiError(result.error);
     if (error) {
@@ -108,7 +119,11 @@ export function CreateTokenDialog({
       form.setError(field ?? 'root', { message: text });
       return;
     }
-    setSecret(result.data?.secret ?? null);
+    setCreated(
+      result.data
+        ? { workspaceSlug: workspace.slug, secret: result.data.secret }
+        : null,
+    );
   });
 
   return (
@@ -121,8 +136,8 @@ export function CreateTokenDialog({
           </Button>
         }
       />
-      <DialogContent className={secret ? 'sm:max-w-2xl' : 'sm:max-w-md'}>
-        {secret ? (
+      <DialogContent className={created ? 'sm:max-w-2xl' : 'sm:max-w-md'}>
+        {created ? (
           <>
             <DialogHeader>
               <DialogTitle>{t('tokens.secretTitle')}</DialogTitle>
@@ -130,8 +145,11 @@ export function CreateTokenDialog({
                 {t('tokens.secretDescription')}
               </DialogDescription>
             </DialogHeader>
-            <CopyField value={secret} label={t('tokens.secretTitle')} />
-            <AgentPrompt workspaceSlug={workspace.slug} secret={secret} />
+            <CopyField value={created.secret} label={t('tokens.secretTitle')} />
+            <AgentConnect
+              workspaceSlug={created.workspaceSlug}
+              secret={created.secret}
+            />
             <DialogFooter>
               <DialogClose render={<Button />}>
                 {t('tokens.secretDone')}
@@ -148,6 +166,14 @@ export function CreateTokenDialog({
             </DialogHeader>
             <form onSubmit={submit} noValidate>
               <FieldGroup>
+                <Field>
+                  <FieldLabel>{t('tokens.workspace')}</FieldLabel>
+                  <WorkspaceSelect
+                    workspaces={workspaces}
+                    value={workspaceId}
+                    onValueChange={setPicked}
+                  />
+                </Field>
                 <Field data-invalid={Boolean(errors.name)}>
                   <FieldLabel htmlFor={`${id}-name`}>
                     {t('tokens.name')}
@@ -228,7 +254,7 @@ export function CreateTokenDialog({
                   <DialogClose render={<Button variant='ghost' />}>
                     {t('common.cancel')}
                   </DialogClose>
-                  <Button type='submit' disabled={isSubmitting}>
+                  <Button type='submit' disabled={isSubmitting || !workspace}>
                     {isSubmitting && <Spinner />}
                     {t('tokens.submit')}
                   </Button>

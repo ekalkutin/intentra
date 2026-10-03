@@ -109,10 +109,14 @@ export function PlatformAgentsPage() {
         actions={createAction}
       />
       {error ? (
-        <LoadError
-          text={describeError(error).text}
-          onRetry={() => void unpublished.refetch()}
-        />
+        <List>
+          <ListEmpty>
+            <LoadError
+              text={describeError(error).text}
+              onRetry={() => void unpublished.refetch()}
+            />
+          </ListEmpty>
+        </List>
       ) : (
         <List aria-busy={!content}>
           {!content ? (
@@ -142,6 +146,7 @@ export function PlatformAgentsPage() {
           ) : (
             inOrder(content.agents).map(agent => {
               const kind = kinds.get(agent.id);
+              const role = t(`platform.roles.${agent.role}`);
               return (
                 <ListRow
                   key={agent.id}
@@ -169,9 +174,12 @@ export function PlatformAgentsPage() {
                     >
                       {agent.name}
                     </Link>
-                    <span className='text-xs text-muted-foreground'>
-                      {t(`platform.roles.${agent.role}`)}
-                    </span>
+                    {/* Intentra and the Auditor are usually named after their role. */}
+                    {role !== agent.name && (
+                      <span className='text-xs text-muted-foreground'>
+                        {role}
+                      </span>
+                    )}
                   </p>
                   <p className='mt-0.5 line-clamp-1 text-sm text-muted-foreground'>
                     {agent.description}

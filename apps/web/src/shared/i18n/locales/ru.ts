@@ -154,6 +154,7 @@ export const ru = {
       settings: 'Настройки',
     },
     account: 'Аккаунт',
+    accountSettings: 'Настройки аккаунта',
     receivedInvitations: 'Приглашения',
     search: 'Поиск',
     searchPlaceholder: 'Поиск',
@@ -244,12 +245,27 @@ export const ru = {
     revoked: 'отозвано',
     expired: 'истекло',
   },
+  account: {
+    title: 'Настройки аккаунта',
+    nameDescription: 'Так вас видят другие участники.',
+  },
+  workspaceSelect: {
+    placeholder: 'Выберите пространство',
+  },
   tokens: {
     title: 'Токены доступа',
     description:
-      'Токен даёт внешнему агенту (Claude Code, Codex, Cursor) доступ к пространству от вашего имени через MCP.',
+      'Токен даёт внешнему агенту доступ к одному пространству от вашего имени.',
+    workspaceDescription:
+      'Токены, по которым внешние агенты работают в этом пространстве. Свои токены участники создают в настройках аккаунта.',
+    workspace: 'Пространство',
+    workspaceEmpty: 'В этом пространстве токенов пока нет.',
+    noWorkspaces: 'Токен создаётся в пространстве, а у вас их пока нет.',
+    copyEndpoint: 'Скопировать адрес MCP',
     mcp: 'MCP',
     endpoint: 'Адрес MCP',
+    endpointDescription:
+      'Адрес этого пространства: токены других пространств по нему не работают.',
     create: 'Новый токен',
     createTitle: 'Новый токен',
     createDescription:
@@ -278,34 +294,37 @@ export const ru = {
     secretDone: 'Готово',
     connectTitle: 'Подключите агента',
     connectDescription:
-      'Вставьте промпт в Claude Code или Codex: агент подключится сам.',
+      'Вставьте промпт агенту или выполните команду сами. Токен уже внутри.',
+    clients: {
+      'claude-code': 'Claude Code',
+      codex: 'Codex',
+      cursor: 'Cursor',
+      other: 'Другой агент',
+    },
     copyPrompt: 'Скопировать промпт',
-    promptCopied: 'Промпт скопирован',
-    promptLabel: 'Промпт для агента',
-    promptExpand: 'Показать целиком',
-    promptCollapse: 'Свернуть',
-    prompt: `Подключи MCP-сервер Intentra: там знания о нашем продукте — требования, решения, термины.
-
-Адрес: {{url}}
-Токен: {{token}}
-
-Если ты Claude Code, выполни:
-claude mcp add --transport http {{name}} {{url}} --header "Authorization: Bearer {{token}}" --scope user
-
-Если ты Codex, добавь в ~/.codex/config.toml:
-[mcp_servers.{{name}}]
-url = "{{url}}"
-bearer_token_env_var = "{{tokenVariable}}"
-и сохрани токен в переменной окружения {{tokenVariable}} в профиле оболочки.
-
-Потом проверь, что инструменты {{name}} доступны, и коротко скажи, к какому пространству подключено.`,
+    copyCommand: 'Скопировать команду',
+    copyConfig: 'Скопировать конфигурацию',
+    copyDetails: 'Скопировать адрес и заголовок',
+    prompts: {
+      'claude-code': `Подключи Intentra по MCP: выполни
+{{setup}}`,
+      codex: `Подключи Intentra по MCP: выполни
+{{setup}}`,
+      cursor: `Подключи Intentra по MCP: добавь сервер в ~/.cursor/mcp.json (создай файл, если его нет; другие серверы не трогай)
+{{setup}}`,
+      other: `Подключи Intentra по MCP (Streamable HTTP) под именем {{name}}, адрес и заголовок:
+{{setup}}`,
+    },
+    promptAfter:
+      'Сервер заработает после перезапуска сессии: попроси меня перезапустить её. Потом вызови list_projects и назови пространство, к которому подключён.',
   },
   oauthAuthorize: {
     title: '{{client}} просит доступ к Intentra',
     description:
       'Агент будет работать от вашего имени по токену доступа. После разрешения вы вернётесь на {{host}}.',
+    descriptionAs:
+      'Агент будет работать от имени {{email}} по токену доступа. После разрешения вы вернётесь на {{host}}.',
     workspace: 'Пространство',
-    chooseWorkspace: 'Выберите пространство',
     noWorkspaces: 'У вас пока нет пространств.',
     workspaceFromAddress:
       'Агент подключается по адресу этого пространства, поэтому выбрать другое нельзя.',

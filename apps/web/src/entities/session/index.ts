@@ -1,5 +1,6 @@
 export {
   sessionApi,
+  useEditMeMutation,
   useMeQuery,
   useSignInMutation,
   useSignUpMutation,

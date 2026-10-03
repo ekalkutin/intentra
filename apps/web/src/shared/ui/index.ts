@@ -1,10 +1,12 @@
 // Primitives are shadcn's, written by its CLI only; our own components build on them.
 export { BackLink } from './components/back-link';
 export { AgentSpark } from './components/agent-spark';
+export { InitialTile } from './components/initial-tile';
 export { IntentraButton } from './components/intentra-button';
 export { Brand } from './components/brand';
 export { ConfirmBySlugDialog } from './components/confirm-by-slug-dialog';
 export { ConfirmDialog } from './components/confirm-dialog';
+export { CopyButton } from './components/copy-button';
 export { CopyField } from './components/copy-field';
 export {
   LIST_ROW_LINK_CLASS,

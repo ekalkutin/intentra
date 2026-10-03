@@ -59,10 +59,7 @@ export function AppShell() {
         isPlatformAdmin={me?.isPlatformAdmin ?? false}
       />
       <SidebarInset className='min-w-0 overflow-hidden md:shadow-(--canvas-shadow) md:ring-1 md:ring-border'>
-        <AppHeader
-          workspaceSlug={current.workspace?.slug}
-          onSearch={() => setSearching(true)}
-        />
+        <AppHeader onSearch={() => setSearching(true)} />
         <div
           ref={canvas}
           className='min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto'

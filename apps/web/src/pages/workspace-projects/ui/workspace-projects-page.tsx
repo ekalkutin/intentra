@@ -11,6 +11,7 @@ import { useDescribeError } from '@/shared/i18n';
 import {
   Button,
   List,
+  LIST_ROW_LINK_CLASS,
   ListEmpty,
   ListRow,
   ListSkeleton,
@@ -79,7 +80,7 @@ export function WorkspaceProjectsPage() {
             <ListRow key={project.id} lead={project.slug} interactive>
               <Link
                 to={projectPath(workspace.slug, project.slug)}
-                className='block text-sm font-medium outline-none after:absolute after:inset-0 after:content-[""] focus-visible:after:ring-2 focus-visible:after:ring-ring/50 focus-visible:after:ring-inset'
+                className={`block text-sm font-medium ${LIST_ROW_LINK_CLASS}`}
               >
                 {project.name}
               </Link>

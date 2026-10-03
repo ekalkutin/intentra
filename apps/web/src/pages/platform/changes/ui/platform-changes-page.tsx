@@ -116,13 +116,17 @@ export function PlatformChangesPage() {
         </Alert>
       )}
       {error ? (
-        <LoadError
-          text={describeError(error).text}
-          onRetry={() => {
-            void unpublished.refetch();
-            void changes.refetch();
-          }}
-        />
+        <List>
+          <ListEmpty>
+            <LoadError
+              text={describeError(error).text}
+              onRetry={() => {
+                void unpublished.refetch();
+                void changes.refetch();
+              }}
+            />
+          </ListEmpty>
+        </List>
       ) : !changeList || !content ? (
         <List aria-busy>
           <ListSkeleton />
@@ -238,7 +242,7 @@ function ChangeRow({
       : open(change.id);
 
   return (
-    <ListRow actions={<ChangeBadge kind={change.kind} />}>
+    <ListRow meta={<ChangeBadge kind={change.kind} />}>
       <p className='text-sm font-medium'>
         {to ? (
           <Link to={to} className='underline-offset-[0.2em] hover:underline'>

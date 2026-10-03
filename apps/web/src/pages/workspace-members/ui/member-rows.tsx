@@ -120,8 +120,9 @@ function MemberRow({
 
   return (
     <ListRow
+      meta={access.canManageMembers ? undefined : roleLabel(member.role)}
       actions={
-        access.canManageMembers ? (
+        access.canManageMembers && (
           <>
             {changing && <Spinner className='text-muted-foreground' />}
             <Select
@@ -166,17 +167,14 @@ function MemberRow({
               />
             )}
           </>
-        ) : (
-          <span className='text-sm text-muted-foreground'>
-            {roleLabel(member.role)}
-          </span>
         )
       }
     >
       <p className='flex min-w-0 items-center gap-2 text-sm font-medium'>
-        <span className='truncate'>{member.email}</span>
+        <span className='truncate'>{member.name}</span>
         {isYou && <Badge variant='secondary'>{t('common.you')}</Badge>}
       </p>
+      <p className='truncate text-xs text-muted-foreground'>{member.email}</p>
       {failure && (
         <p role='alert' className='text-xs text-destructive'>
           {failure}

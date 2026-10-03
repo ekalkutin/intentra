@@ -18,6 +18,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
+  InitialTile,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSkeleton,
@@ -28,7 +29,6 @@ import type {
   WorkspaceDto,
 } from '@intentra/contracts/workspace';
 
-import { InitialTile } from './initial-tile';
 import { LeaveWorkspaceDialog } from './leave-workspace-dialog';
 
 /**

@@ -1,8 +1,14 @@
+import { Lock } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 
-import { useWorkspacesQuery } from '@/entities/workspace';
+import { useMeQuery } from '@/entities/session';
+import {
+  onlyWorkspaceId,
+  useWorkspacesQuery,
+  WorkspaceSelect,
+} from '@/entities/workspace';
 import { toApiError } from '@/shared/api';
 import { useDescribeError } from '@/shared/i18n';
 import {
@@ -13,6 +19,7 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
+  InitialTile,
   LoadError,
   Page,
   PageHeader,
@@ -116,6 +123,7 @@ function Consent({
 }) {
   const { t } = useTranslation();
   const describeError = useDescribeError();
+  const { data: me } = useMeQuery();
   const workspaces = useWorkspacesQuery();
   const workspacesError = toApiError(workspaces.error);
   const [authorize, { isLoading }] = useAuthorizeOAuthClientMutation();
@@ -127,24 +135,15 @@ function Consent({
   const [failure, setFailure] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
 
-  const workspaceItems = (workspaces.data ?? []).map(workspace => ({
-    value: workspace.id,
-    label: workspace.name,
-  }));
   const requestedSlug = requestedWorkspaceSlug(request);
   const requestedWorkspace =
     requestedSlug === null
       ? null
       : (workspaces.data?.find(workspace => workspace.slug === requestedSlug) ??
         null);
-  // With several Workspaces nothing is chosen for the person: the token must
-  // not land in the first one by a hasty click.
   const chosenWorkspace =
     requestedSlug === null
-      ? (workspaceId ??
-        (workspaceItems.length === 1
-          ? (workspaceItems[0]?.value ?? null)
-          : null))
+      ? (workspaceId ?? onlyWorkspaceId(workspaces.data))
       : (requestedWorkspace?.id ?? null);
   const levels = ProjectRoleDtoSchema.options.map(value => ({
     value,
@@ -190,9 +189,14 @@ function Consent({
     <Page className='max-w-md pt-[12vh]'>
       <PageHeader
         title={t('oauthAuthorize.title', { client: client.name })}
-        description={t('oauthAuthorize.description', {
-          host: client.redirectHost,
-        })}
+        description={
+          me
+            ? t('oauthAuthorize.descriptionAs', {
+                host: client.redirectHost,
+                email: me.email,
+              })
+            : t('oauthAuthorize.description', { host: client.redirectHost })
+        }
       />
       <FieldGroup>
         <Field>
@@ -204,7 +208,7 @@ function Consent({
               text={describeError(workspacesError).text}
               onRetry={() => void workspaces.refetch()}
             />
-          ) : workspaceItems.length === 0 ? (
+          ) : workspaces.data?.length === 0 ? (
             <FieldDescription>
               {t('oauthAuthorize.noWorkspaces')}
             </FieldDescription>
@@ -212,26 +216,21 @@ function Consent({
             <FieldDescription>
               {t('oauthAuthorize.notInWorkspace', { slug: requestedSlug })}
             </FieldDescription>
+          ) : requestedWorkspace ? (
+            // Named by the address the agent connects to: shown, not offered.
+            <p className='flex h-8 items-center gap-2 rounded-lg border border-input bg-muted/50 pr-2.5 pl-2 text-sm'>
+              <InitialTile name={requestedWorkspace.name} />
+              <span className='min-w-0 flex-1 truncate'>
+                {requestedWorkspace.name}
+              </span>
+              <Lock aria-hidden className='size-3.5 text-muted-foreground' />
+            </p>
           ) : (
-            <Select
-              items={workspaceItems}
+            <WorkspaceSelect
+              workspaces={workspaces.data ?? []}
               value={chosenWorkspace}
-              disabled={requestedSlug !== null}
-              onValueChange={value => value && setWorkspaceId(value)}
-            >
-              <SelectTrigger className='w-full'>
-                <SelectValue
-                  placeholder={t('oauthAuthorize.chooseWorkspace')}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {workspaceItems.map(workspace => (
-                  <SelectItem key={workspace.value} value={workspace.value}>
-                    {workspace.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onValueChange={setWorkspaceId}
+            />
           )}
           {requestedWorkspace && (
             <FieldDescription>

@@ -97,7 +97,9 @@ export function ListEmpty({
 }) {
   return (
     <li className='flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-6'>
-      <p className='text-sm text-pretty text-muted-foreground'>{children}</p>
+      <div className='text-sm text-pretty text-muted-foreground'>
+        {children}
+      </div>
       {action}
     </li>
   );

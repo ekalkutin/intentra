@@ -1,5 +1,6 @@
 import { createBrowserRouter, redirect } from 'react-router';
 
+import { AccountPage } from '@/pages/account';
 import { SignInPage, SignUpPage } from '@/pages/auth';
 import { InvitationsPage } from '@/pages/invitations';
 import { KnowledgeEditorPage } from '@/pages/knowledge-editor';
@@ -43,9 +44,16 @@ export const router = createBrowserRouter([
     children: [
       { path: ROUTES.home, loader: requireSession, Component: StartPage },
       {
+        path: ROUTES.account,
+        loader: requireSession,
+        Component: AppShell,
+        children: [{ index: true, Component: AccountPage }],
+      },
+      {
         path: ROUTES.invitations,
         loader: requireSession,
-        Component: InvitationsPage,
+        Component: AppShell,
+        children: [{ index: true, Component: InvitationsPage }],
       },
       {
         path: ROUTES.oauthAuthorize,

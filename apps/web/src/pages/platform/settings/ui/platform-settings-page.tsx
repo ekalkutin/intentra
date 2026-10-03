@@ -5,6 +5,7 @@ import { toApiError } from '@/shared/api';
 import { useDescribeError } from '@/shared/i18n';
 import {
   List,
+  ListEmpty,
   ListRow,
   ListSkeleton,
   LoadError,
@@ -32,20 +33,28 @@ export function PlatformSettingsPage() {
   const loadError = toApiError(signUp.error ?? creation.error);
 
   return (
-    <Page className='max-w-3xl'>
+    <Page>
       <PageHeader
         title={t('platformSettings.title')}
         description={t('platformSettings.description')}
       />
-      <PageSection title={t('platformSettings.access')}>
+      <PageSection
+        title={t('platformSettings.access')}
+        // A switch stays within reach of what it switches.
+        className='max-w-3xl'
+      >
         {loadError ? (
-          <LoadError
-            text={describeError(loadError).text}
-            onRetry={() => {
-              void signUp.refetch();
-              void creation.refetch();
-            }}
-          />
+          <List>
+            <ListEmpty>
+              <LoadError
+                text={describeError(loadError).text}
+                onRetry={() => {
+                  void signUp.refetch();
+                  void creation.refetch();
+                }}
+              />
+            </ListEmpty>
+          </List>
         ) : (
           <List>
             {!signUp.data || !creation.data ? (

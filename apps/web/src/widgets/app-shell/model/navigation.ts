@@ -3,6 +3,7 @@ import {
   Bot,
   Cpu,
   GitCompareArrows,
+  KeyRound,
   LayoutList,
   Library,
   MessagesSquare,
@@ -39,6 +40,7 @@ type Entry<Page> = {
 export const WORKSPACE_NAVIGATION = [
   { page: undefined, icon: Library, labelKey: 'projects' },
   { page: WORKSPACE_PAGES.members, icon: Users, labelKey: 'members' },
+  { page: WORKSPACE_PAGES.tokens, icon: KeyRound, labelKey: 'tokens' },
   { page: WORKSPACE_PAGES.settings, icon: Settings, labelKey: 'settings' },
 ] as const satisfies readonly Entry<WorkspacePage>[];
 
@@ -60,15 +62,24 @@ export const PROJECT_NAVIGATION = [
 /**
  * The Workspace's pages this person may open. Its settings hold the Provider
  * Key and deleting it, so they show only to whoever may manage one of those
- * (the server's verdicts). A Member's own tokens are in the account menu.
+ * (the server's verdicts). Its tokens page is the Owner's view of everyone's
+ * tokens, so it shows to whoever may see them all; a Member's own tokens are
+ * in their account settings.
  */
 export function workspaceNavigation(access: WorkspaceAccessDto | undefined) {
-  return WORKSPACE_NAVIGATION.filter(
-    entry =>
-      entry.page !== WORKSPACE_PAGES.settings ||
-      access?.canManageProviderKey === true ||
-      access?.canDeleteWorkspace === true,
-  );
+  return WORKSPACE_NAVIGATION.filter(entry => {
+    switch (entry.page) {
+      case WORKSPACE_PAGES.settings:
+        return (
+          access?.canManageProviderKey === true ||
+          access?.canDeleteWorkspace === true
+        );
+      case WORKSPACE_PAGES.tokens:
+        return access?.canSeeAllPersonalAccessTokens === true;
+      default:
+        return true;
+    }
+  });
 }
 
 /**

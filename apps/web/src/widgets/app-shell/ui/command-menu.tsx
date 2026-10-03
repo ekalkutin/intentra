@@ -12,6 +12,7 @@ import {
   CommandItem,
   CommandList,
   CommandShortcut,
+  InitialTile,
 } from '@/shared/ui';
 import type {
   ProjectAccessDto,
@@ -25,8 +26,6 @@ import {
   projectNavigation,
   workspaceNavigation,
 } from '../model/navigation';
-
-import { InitialTile } from './initial-tile';
 
 const OPEN_KEY = 'k';
 

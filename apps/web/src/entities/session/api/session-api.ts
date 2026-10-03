@@ -1,5 +1,6 @@
 import { baseApi, sessionTokens } from '@/shared/api';
 import type {
+  EditMeDto,
   MeDto,
   RegisterAccountDto,
   SignInDto,
@@ -22,7 +23,19 @@ export const sessionApi = baseApi.injectEndpoints({
     me: build.query<MeDto, void>({
       query: () => '/iam/me',
     }),
+    editMe: build.mutation<MeDto, EditMeDto>({
+      query: body => ({ url: '/iam/me', method: 'PATCH', body }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        dispatch(sessionApi.util.upsertQueryData('me', undefined, data));
+      },
+    }),
   }),
 });
 
-export const { useSignUpMutation, useSignInMutation, useMeQuery } = sessionApi;
+export const {
+  useSignUpMutation,
+  useSignInMutation,
+  useMeQuery,
+  useEditMeMutation,
+} = sessionApi;
